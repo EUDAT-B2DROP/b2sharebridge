@@ -10,8 +10,8 @@
  */
 
 
-\OCP\App::addNavigationEntry(array(
-    // the string under which your app will be referenced in owncloud
+\OCP\APP::register(array(
+	// the string under which your app will be referenced in owncloud
     'id' => 'eudat',
 
     // sorting weight for the navigation. The higher the number, the higher
@@ -21,9 +21,7 @@
     // the title of your application. This will be used in the
     // navigation or on the settings page of your app
     'name' => \OC_L10N::get('eudat')->t('Eudat')
-
 ));
-
 OCP\Util::addscript('eudat','b2sharebridge');
 OCP\Util::addStyle( 'eudat','style');
 ?>

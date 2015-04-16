@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<info>
+    <id>eudat</id>
+    <name>Eudat</name>
+    <description>Integration from B2DROP with B2SHARE</description>
+    <licence>AGPL</licence>
+    <author>EUDAT</author>
+    <version>0.0.1</version>
+    <requiremin>7</requiremin>
+    <category>other</category>
+</info>

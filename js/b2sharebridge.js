@@ -68,8 +68,10 @@ OC.Eudat={
     showDropDown:function(fileid, appendTo) {
       OC.Eudat.loadCounter(fileid);
         var html = '<div id="eudatdropdown" class="eudatdropdown" data-item="'+fileid+'">';
-        html += '<a href="https://b2share.eudat.eu" target="_blank">B2SHARE</a>';
+        html += '<a>Token:</a>';
+        html += '<input autofocus id="b2sharetoken" type="text" value="" />';//autofocus is parameter in html5
         $(html).appendTo(appendTo);
+        window.onload = document.getElementById('b2sharetoken').focus();
     },
     hideDropDown:function(callback) {
         $('#eudatdropdown').hide('blind', function() {

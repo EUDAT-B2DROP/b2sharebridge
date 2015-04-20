@@ -15,7 +15,7 @@
 
     <p>
         <input type="checkbox" name="b2share_bridge_enabled" id="b2share_bridge_enabled"
-               value="1" <?php if ($_['incomingServer2serverShareEnabled']) print_unescaped('checked="checked"'); ?> />
+               value="1" <?php if ($_['b2share_bridge_enabled']) print_unescaped('checked="checked"'); ?> />
         <label for="b2share_bridge_enabled">
             <?php p($l->t('Publishing to B2SHARE enabled'));?>
         </label><br/>

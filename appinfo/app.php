@@ -10,7 +10,9 @@
  */
 
 
-\OCP\APP::register(array(
+OCP\App::registerAdmin('eudat', 'settings');
+
+OCP\APP::register(array(
 	// the string under which your app will be referenced in owncloud
     'id' => 'eudat',
 

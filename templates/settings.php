@@ -2,7 +2,7 @@
 /** @var OC_L10N $l */
 /** @var array $_ */
 ?>
-<div id="eudat_b2share" action="#" method="post">
+<div id="eudat_b2share">
     <h3><?php p($l->t('EUDAT B2SHARE Bridge'));?></h3>
 
     <p>

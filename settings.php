@@ -14,7 +14,7 @@ if($_POST) {
 	}
 }
 OCP\IConfig::setAppValue('eudat', 'b2share_endpoint_url', 'foo');
-OCP\IConfig::setAppValue('eudat', 'b2share_bridge_enabled', '1');
+OCP\IConfig::setAppValue('eudat', 'b2share_endpoint_url', 'foo');
 // fill template
 $tmpl = new OCP\Template( 'eudat', 'settings');
 $tmpl->assign('b2share_endpoint_url', OCP\IConfig::getAppValue('eudat', 'b2share_endpoint_url', 'asd'));

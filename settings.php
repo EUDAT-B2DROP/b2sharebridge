@@ -2,8 +2,6 @@
 
 OC_Util::checkAdminUser();
 
-OCP\Util::addScript('eudat', 'settings');
-
 $params = array('b2share_endpoint_url', 'b2share_bridge_enabled');
   
 if($_POST) {

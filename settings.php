@@ -15,7 +15,7 @@ if($_POST) {
 }
 
 // fill template
-$tmpl = new OCP\Template( 'eudat_b2share', 'settings-admin');
+$tmpl = new OCP\Template( 'eudat_b2share', 'settings');
 $tmpl->assign('b2share_endpoint_url', OCP\Config::getAppValue('eudat_b2share', 'b2share_endpoint_url', ''));
 $tmpl->assign('b2share_bridge_enabled', OCP\Config::getAppValue('eudat_b2share', 'b2share_bridge_enabled', '0'));
 

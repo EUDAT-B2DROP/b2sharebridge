@@ -11,11 +11,10 @@ $(document).ready(function() {
     });
 
     $('#b2shareUrl').change(function() {
-        var value = $(this).val()
-        var expression = '/^(http[s]?:\/\/(www\.)?|ftp:\/\/(www\.)?|www\.){1}([0-9A-Za-z-\.@:%_\+~#=]+)+((‌​\.[a-zA-Z]{2,3})+)(\/(.)*)?(\?(.)*)?/';
-        var regex = new RegExp(expression, 'i');
-        if (regex.test(value))
-        {
+        var regex = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/i;
+        var value = $(this).val();
+
+        if (regex.exec(value) !== null) {
             OC.AppConfig.setValue('eudat', $(this).attr('name'), value)
         }
     });

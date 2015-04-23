@@ -4,7 +4,12 @@ $(document).ready(function() {
         var value = $(this).val();
 
         if (regex.exec(value) !== null) {
+            document.getElementById("regexstatusSuccess").style.visibility = "visible";
+            document.getElementById("regexstatusError").style.visibility = "hidden";
             OC.AppConfig.setValue('eudat', $(this).attr('name'), value)
+        } else {
+            document.getElementById("regexstatusSuccess").style.visibility = "hidden";
+            document.getElementById("regexstatusError").style.visibility = "visible";
         }
     });
 });

@@ -11,11 +11,8 @@ $(document).ready(function() {
     });
 
     $('#b2shareUrl').change(function(content) {
-        var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
-        var regex = new RegExp(expression);
-        if (content.match(regex))
-        {
-            OC.AppConfig.setValue('eudat', $(this).attr('name'), content);
-        }
+        /*var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
+        var regex = new RegExp(expression);*/
+        OC.AppConfig.setValue('eudat', $(this).attr('name'), content)
     });
 });

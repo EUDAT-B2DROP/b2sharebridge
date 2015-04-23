@@ -12,9 +12,8 @@ $(document).ready(function() {
 
     $('#b2shareUrl').change(function() {
         var value = $(this).val()
-        var expression = '/^(http[s]?:\/\/(www\.)?|ftp:\/\/(www\.)?|www\.){1}([0-9A-Za-z-\.@:%_\+~#=]+)+((‌​\.[a-zA-Z]{2,3})+)(\/(.)*)?(\?(.)*)?/g';
-        var regex = new RegExp(expression, 'i');
-        if (value.match(regex))
+        var match = /^(http[s]?:\/\/(www\.)?|ftp:\/\/(www\.)?|www\.){1}([0-9A-Za-z-\.@:%_\+~#=]+)+((‌​\.[a-zA-Z]{2,3})+)(\/(.)*)?(\?(.)*)?/.test(value);
+        if (match)
         {
             OC.AppConfig.setValue('eudat', $(this).attr('name'), value)
         }

@@ -12,7 +12,7 @@ $(document).ready(function() {
 
     $('#b2shareUrl').change(function() {
         var value = $(this).val()
-        var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
+        var expression = /^(http[s]?:\/\/(www\.)?|ftp:\/\/(www\.)?|www\.){1}([0-9A-Za-z-\.@:%_\+~#=]+)+((‌​\.[a-zA-Z]{2,3})+)(\/(.)*)?(\?(.)*)?/g;
         var regex = new RegExp(expression);
         if (value.match(regex))
         {

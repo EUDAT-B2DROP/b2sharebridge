@@ -25,4 +25,5 @@ OCP\APP::register(array(
     'name' => \OC_L10N::get('eudat')->t('Eudat')
 ));
 OCP\Util::addscript('eudat','b2sharebridge');
+OCP\Util::addscript('eudat','settings');
 OCP\Util::addStyle( 'eudat','style');

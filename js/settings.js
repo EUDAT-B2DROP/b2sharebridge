@@ -7,6 +7,6 @@ $(document).ready(function() {
         } else {
             $('#b2share_url_field').addClass('hidden');
         }
-        OC.AppConfig.setValue('eudat', $(this).attr('name'), value);
+/*        OC.AppConfig.setValue('eudat', $(this).attr('name'), value); */
     });
 });

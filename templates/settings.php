@@ -5,8 +5,8 @@
 <div class="section" id="eudat_b2share">
     <h2><?php p($l->t('EUDAT B2SHARE Bridge'));?></h2>
     <p>
-        <input type="checkbox" name="b2share_enabled" id="b2share_enabled"
-               value="1" <?php if ($_['b2share_bridge_enabled'] === 'yes') print_unescaped('checked="checked"'); ?> />
+        <input type="checkbox" name="b2share_enabled" id="b2share_enabled" value="1"
+            <?php if ($_['b2share_bridge_enabled'] === 'yes') print_unescaped('checked="checked"'); ?> />
         <label for="b2share_enabled"><?php p($l->t('Publishing to B2SHARE enabled'));?></label><br/>
     </p>
     <p name="b2share_url_field" id="b2share_url_field">

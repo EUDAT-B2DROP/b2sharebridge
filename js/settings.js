@@ -10,9 +10,9 @@ $(document).ready(function() {
         OC.AppConfig.setValue('eudat', $(this).attr('name'), value);
     });
 
-    $('#b2shareUrl').change(function(content) {
+    $('#b2shareUrl').change(function() {
         /*var expression = /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
         var regex = new RegExp(expression);*/
-        OC.AppConfig.setValue('eudat', $(this).attr('name'), content)
+        OC.AppConfig.setValue('eudat', $(this).attr('name'), $(this).val())
     });
 });

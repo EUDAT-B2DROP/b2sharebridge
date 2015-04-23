@@ -10,7 +10,7 @@
         <label for="b2share_enabled"><?php p($l->t('Publishing to B2SHARE enabled'));?></label><br/>
     </p>
     <p name="b2share_url_field" id="b2shareUrlField" <?php if ($_['b2share_bridge_enabled'] === 'no') print_unescaped('class="hidden"'); ?>>
-        <input type="text" name="b2share_url" id="b2shareUrl" placeholder="https://b2share.eudat.eu"
+        <input type="text" name="b2share_url" id="b2shareUrl" placeholder="https://b2share.eudat.eu" style="width: 400px"
                value="<?php p($_['b2share_endpoint_url']); ?>" />
         <br />
         <em><?php p($l->t('External B2SHARE API endpoint')); ?></em>

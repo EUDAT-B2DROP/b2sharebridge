@@ -4,12 +4,12 @@ $(document).ready(function() {
         var value = $(this).val();
 
         if (regex.exec(value) !== null) {
-            document.getElementsByName('regexstatus_success').style.visibility = 'visible';
-            document.getElementsByName('regexstatus_error').style.visibility = 'hidden';
+            /*document.getElementById('regexstatusSuccess').style.visibility = 'visible';
+            document.getElementById('regexstatusError').style.visibility = 'hidden';*/
             OC.AppConfig.setValue('eudat', $(this).attr('name'), value)
-        } else {
-            document.getElementsByName('regexstatus_success').style.visibility = 'hidden';
-            document.getElementsByName('regexstatus_error').style.visibility = 'visible';
-        }
+        } /*else {
+            document.getElementById('regexstatusSuccess').style.visibility = 'hidden';
+            document.getElementById('regexstatusError').style.visibility = 'visible';
+        }*/
     });
 });

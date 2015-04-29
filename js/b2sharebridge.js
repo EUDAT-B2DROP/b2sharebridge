@@ -1,5 +1,4 @@
 $(document).ready(function(){
-
     if ($('#isPublic').val()){
         // no versions actions in public mode
         // beware of https://github.com/owncloud/core/issues/4545
@@ -9,9 +8,10 @@ $(document).ready(function(){
 
     if (OCA.Files) {
         // Add versions button to 'files/index.php'
-        OCA.Files.fileActions.register('file', 'B2SHARE', t('eudat', 'B2SHARE'), OC.PERMISSION_READ,
+        OCA.Files.fileActions.register('file', 'B2SHARE', OC.PERMISSION_READ,
             function() {
-            }, function(filename, context){
+            },
+            function(filename, context){
                 // Action to perform when clicked
                 if (scanFiles.scanning){return;}//workaround to prevent additional http request block scanning feedback
 
@@ -31,7 +31,7 @@ $(document).ready(function(){
                     showDropDown(filename, file, context.fileList);
                 }
             }
-        );
+        ), t('eudat', 'B2SHARE');
     }
 });
 

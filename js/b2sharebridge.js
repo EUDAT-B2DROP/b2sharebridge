@@ -9,7 +9,7 @@ $(document).ready(function(){
 
     if (OCA.Files) {
         // Add versions button to 'files/index.php'
-        OCA.Files.fileActions.register('file', 'b2drop', OC.PERMISSION_READ,
+        OCA.Files.fileActions.register('file', 'B2SHARE', t('eudat', 'B2SHARE'), OC.PERMISSION_READ,
             function() {
             }, function(filename, context){
                 // Action to perform when clicked
@@ -28,33 +28,29 @@ $(document).ready(function(){
                 }
 
                 if(createDropDown === true) {
-                    OC.Eudat.showDropDown(filename, file, context.fileList);
+                    showDropDown(filename, file, context.fileList);
                 }
-            }, t('eudat', 'b2drop')
+            }
         );
     }
 });
 
+function showDropDown(filename, files, fileList) {
+    var html = '<div id="dropdown" class="drop drop-b2drop" data-item="'+escapeHTML(files)+'">';
+    html += '<form action="transfer.php">';
+    html += '<a>Token:</a>';
+    html += '<input autofocus id="b2shareToken" type="text" value="" />';//autofocus is parameter in html5
+    html += '<input id="b2shareSubmit" type="submit" value="publish" />';
+    html += '</form>';
 
-
-OC.Eudat={
-    showDropDown:function(filename, files, fileList) {
-        var html = '<div id="dropdown" class="drop drop-b2drop" data-item="'+escapeHTML(files)+'">';
-        html += '<form action="transfer.php">';
-        html += '<a>Token:</a>';
-        html += '<input autofocus id="b2shareToken" type="text" value="" />';//autofocus is parameter in html5
-        html += '<input id="b2shareSubmit" type="submit" value="publish" />';
-        html += '</form>';
-
-        if (filename) {
-            fileEl = fileList.findFileEl(filename);
-            fileEl.addClass('mouseOver');
-            $(html).appendTo(fileEl.find('td.filename'));
-        } else {
-            $(html).appendTo($('thead .share'));
-        }
-        $('#dropdown').slideDown(1000);
+    if (filename) {
+        fileEl = fileList.findFileEl(filename);
+        fileEl.addClass('mouseOver');
+        $(html).appendTo(fileEl.find('td.filename'));
+    } else {
+        $(html).appendTo($('thead .share'));
     }
+    $('#dropdown').slideDown(1000);
 };
 
 $(this).click(

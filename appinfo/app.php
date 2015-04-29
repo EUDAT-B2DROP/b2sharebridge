@@ -22,9 +22,7 @@ OCP\APP::register(array(
     
     // the title of your application. This will be used in the
     // navigation or on the settings page of your app
-    'name' => \OC_L10N::get('eudat')->t('Eudat')
+    'name' => \OC_L10N::get('eudat')->t('EUDAT B2SHARE integration')
 ));
-OCP\Util::addscript('eudat','b2sharebridge');
-OCP\Util::addscript('eudat','settings');
+OCP\Util::addScript('eudat','b2sharebridge');
 OCP\Util::addStyle( 'eudat','style');
-OCP\Util::addStyle( 'eudat','settings');

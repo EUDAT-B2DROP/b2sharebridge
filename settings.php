@@ -2,6 +2,9 @@
 
 OC_Util::checkAdminUser();
 
+OCP\Util::addScript('eudat', 'settings');
+OCP\Util::addStyle('eudat', 'settings');
+
 $config = \OC::$server->getConfig();
 
 $tmpl = new OCP\Template( 'eudat', 'settings');

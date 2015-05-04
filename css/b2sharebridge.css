@@ -1,3 +1,9 @@
 #b2shareToken {
-    width: 120px;
+    width: 70%;
+    cursor: default;
+    height: 56px;
+    float: left;
+}
+#b2shareSubmit {
+
 }

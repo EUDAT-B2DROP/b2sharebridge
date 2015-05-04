@@ -42,13 +42,13 @@ function showDropDown(filename, files, fileList) {
     html += '<input id="b2share_submit" type="submit" value="publish" />';
     //html += '</form>';
 
-    /*if (filename) {
+    if (filename) {
         fileEl = fileList.findFileEl(filename);
         fileEl.addClass('mouseOver');
         $(html).appendTo(fileEl.find('td.filename'));
     } else {
         $(html).appendTo($('thead .share'));
-    }*/
+    }
     $('#dropdown').slideDown(1000);
 };
 

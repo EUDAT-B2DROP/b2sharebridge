@@ -8,7 +8,7 @@ $(document).ready(function(){
 
     if (OCA.Files) {
         // Add versions button to 'files/index.php'
-        OCA.Files.fileActions.register('file', 'B2SHARE', OC.PERMISSION_READ,
+        OCA.Files.fileActions.register('file', t('eudat', 'B2SHARE'), OC.PERMISSION_READ,
             function() {
             },
             function(filename, context){
@@ -18,12 +18,12 @@ $(document).ready(function(){
                 var file = context.dir.replace(/(?!<=\/)$|\/$/, '/' + filename);
                 var createDropDown = true;
                 // Check if drop down is already visible for a different file
-                if (($('#dropdown').length > 0) ) {
-                    if ( $('#dropdown').hasClass('drop-b2drop') && file == $('#dropdown').data('file')) {
+                if (($('#b2dropdropdown').length > 0) ) {
+                    if ( $('#b2dropdropdown').hasClass('drop-b2drop') && file == $('#b2dropdropdown').data('file')) {
                         createDropDown = false;
                     }
-                    $('#dropdown').slideUp(OC.menuSpeed);
-                    $('#dropdown').remove();
+                    $('#b2dropdropdown').slideUp(OC.menuSpeed);
+                    $('#b2dropdropdown').remove();
                     $('tr').removeClass('mouseOver');
                 }
 
@@ -31,7 +31,7 @@ $(document).ready(function(){
                     showDropDown(filename, file, context.fileList);
                 }
             }
-        ), t('eudat', 'B2SHARE');
+        );
     }
 });
 
@@ -50,14 +50,14 @@ function showDropDown(filename, files, fileList) {
     } else {
         $(html).appendTo($('thead .share'));
     }
-    $('#dropdown').slideDown(1000);
+    $('#b2dropdropdown').slideDown(1000);
 };
 
 $(this).click(
     function(event) {
-        if ($('#dropdown').has(event.target).length === 0 && $('#dropdown').hasClass('drop-b2drop')) {
-            $('#dropdown').slideUp(OC.menuSpeed, function() {
-                $('#dropdown').remove();
+        if ($('#b2dropdropdown').has(event.target).length === 0 && $('#b2dropdropdown').hasClass('drop-b2drop')) {
+            $('#b2dropdropdown').slideUp(OC.menuSpeed, function() {
+                $('#b2dropdropdown').remove();
                 $('tr').removeClass('mouseOver');
             });
         }

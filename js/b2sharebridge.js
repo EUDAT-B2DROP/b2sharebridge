@@ -36,7 +36,7 @@ $(document).ready(function(){
 });
 
 function showDropDown(filename, files, fileList) {
-    var html = '<div id="dropdown" class="drop-b2drop" data-item="'+escapeHTML(files)+'">';
+    var html = '<div id="b2dropdropdown" class="drop-b2drop" data-item="'+escapeHTML(files)+'">';
     //html += '<form action="transfer.php">';
     html += '<a href="https://b2share.eudat.eu">token:</a>';
     html += '<input id="b2share_token" type="text" value="" autofocus />';

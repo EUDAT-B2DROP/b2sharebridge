@@ -20,20 +20,22 @@ $(document).ready(function(){
                 }
             }
         );
-        $(this).click(function(event) {
-            if ( $(event.target).is('.drop-b2drop') && $('#dropdown').has(event.target).length === 0) {
-                $('#dropdown').slideUp(OC.menuSpeed);
-                $('#dropdown').remove();
+        $(this).click(
+            function(event) {
+                if ($('#dropdown').has(event.target).length === 0 && $('#dropdown').hasClass('drop-b2drop')) {
+                    $('#dropdown').slideUp(OC.menuSpeed);
+                    $('#dropdown').remove();
+                }
             }
-        });
+        );
     }
 });
 
 function showDropDown(filename, fileList) {
     var html = '<div id="dropdown" class="drop-b2drop" data-item="' + escapeHTML(filename) + '">';
-    html += '<a href="https://b2share.eudat.eu">token:</a>';
-    html += '<input id="b2share_token" class="b2shareToken" type="text" value="" autofocus />';
-    html += '<input id="b2share_submit" class="b2shareSubmit" type="submit" value="publish" />';
+    html += '<a href="https://b2share.eudat.eu/account/settings/applications/" class="b2shareLink" target="_blank">Token:</a>';
+    html += '<input id="b2share_token" type="text" value="" autofocus />';
+    html += '<input id="b2share_submit" type="submit" value="publish" />';
 
     if (filename) {
         fileEl = fileList.findFileEl(filename);

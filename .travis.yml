@@ -40,10 +40,10 @@ install:
   - phpenv config-add owncloud/apps/eudat/tests/travis/php.ini
   - cd owncloud
   - ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --database-pass --admin-user admin --admin-pass admin --database $DB
-  - ./occ app:enable myapp
+  - ./occ app:enable eudat
 
 before_script:
-  - cd apps/myapp
+  - cd apps/eudat
 
 script:
   - phpunit -c phpunit.xml

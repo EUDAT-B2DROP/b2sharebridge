@@ -1,0 +1,20 @@
+.eudat h1 {
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 1.1;
+  color: inherit;
+}
+
+.eudat h1 small {
+  color: gray;
+}
+
+.eudat table{
+	margin-top: 20px;
+	width: 100%;
+}
+
+.eudat .publish-queue-list th {
+	/*text-align: left;*/
+}

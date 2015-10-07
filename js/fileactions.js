@@ -11,8 +11,8 @@
         attach: function(fileList) {
             var fileActions = fileList.fileActions;
             fileActions.registerAction({
-                name: "Publish",
-                displayName: t('files', 'Publish'),
+                name: "B2SHARE",
+                displayName: t('files', 'B2SHARE'),
                 mime: 'all',
                 permissions: OC.PERMISSION_READ,
                 icon: function () {

@@ -1,7 +1,7 @@
 $(document).ready(function(){
     if (OCA.Files) {
         // Add b2share button to 'files/index.php'
-        OCA.Files.fileActions.register('file', t('eudat', 'B2SHARE'), OC.PERMISSION_READ,
+        OCA.Files.fileActions.register('file', t('eudat', 'B2SHARE_old'), OC.PERMISSION_READ,
             function() {
             },
             function(filename, context){

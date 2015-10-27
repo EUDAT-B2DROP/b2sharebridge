@@ -33,6 +33,4 @@ $container->query('OCP\INavigationManager')->add(function () use ($container) {
 
 \OCP\App::registerAdmin('eudat', 'settings');
 Util::addScript('eudat', 'fileactions');
-Util::addScript('eudat','b2sharebridge');
-Util::addStyle( 'eudat','b2sharebridge');
 

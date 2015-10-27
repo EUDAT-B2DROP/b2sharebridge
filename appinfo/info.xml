@@ -6,7 +6,7 @@
     <licence>AGPL</licence>
     <author>EUDAT</author>
     <version>0.0.1</version>
-    <requiremin>7</requiremin>
+    <requiremin>8</requiremin>
     <rememberlogin>false</rememberlogin>
-    <category>other</category>
+    <category>publishing</category>
 </info>

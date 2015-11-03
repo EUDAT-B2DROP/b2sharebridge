@@ -11,26 +11,27 @@
 
 namespace OCA\Eudat\AppInfo;
 
-use OCP\AppFramework\App;
+use OCP\App;
 use OCP\Util;
 
-$app = new App('eudat');
-$container = $app->getContainer();
-$container->query('OCP\INavigationManager')->add(function () use ($container) {
-    $urlGenerator = $container->query('OCP\IURLGenerator');
-    $l10n = $container->query('OCP\IL10N');
+$app = new Application();
+$c = $app->getContainer();
+
+$navigationEntry = function () use ($c) {
     return [
-        'id' => 'eudat',
+        'id' => $c->getAppName(),
         'order' => 100,
-        'href' => $urlGenerator->linkToRoute('eudat.page.index'),
-        'icon' => $urlGenerator->imagePath('eudat', 'app.svg'),
-        'name' => $l10n->t('B2SHARE'),
+        'name' => $c->query('EudatL10N')->t('B2SHARE'),
+        'href' => $c->getServer()->getURLGenerator()->linkToRoute('eudat.page.index'),
+        'icon' => $c->getServer()->getURLGenerator()->imagePath('eudat', 'app.svg'),
     ];
-});
+};
+
+$c->getServer()->getNavigationManager()->add($navigationEntry);
 
 // register classes
-\OC::$CLASSPATH['OCA\Eudat\Transfer'] = 'eudat/lib/transfer.php';
+\OC::$CLASSPATH['OCA\Eudat\TransferHandler'] = 'eudat/lib/job/transferhandler.php';
+\OC::$CLASSPATH['OCA\Eudat\Controller'] = 'eudat/lib/controller/pagecontroller.php';
 
-\OCP\App::registerAdmin('eudat', 'settings');
+App::registerAdmin('eudat', 'settings');
 Util::addScript('eudat', 'fileactions');
-

@@ -22,12 +22,6 @@
 				<length>4</length>
 			</field>
 			<field>
-				<name>jobid</name>
-				<type>integer</type>
-				<notnull>true</notnull>
-				<length>4</length>
-			</field>
-			<field>
 				<name>status</name>
 				<type>text</type>
 				<notnull>true</notnull>
@@ -35,11 +29,11 @@
 			</field>
 			<field>
 				<name>created_at</name>
-				<type>datetime</type>
+				<type>integer</type>
 			</field>
 			<field>
 				<name>updated_at</name>
-				<type>datetime</type>
+				<type>integer</type>
 			</field>
 		</declaration>
 	</table>

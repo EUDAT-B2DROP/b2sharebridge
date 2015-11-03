@@ -18,8 +18,7 @@ class FilecacheStatusMapper extends Mapper {
      * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
      */
     public function find($id) {
-        $sql = 'SELECT * FROM `*PREFIX*eudat_filecache_status` ' .
-            'WHERE `id` = ?';
+        $sql = 'SELECT * FROM `*PREFIX*eudat_filecache_status` ' . 'WHERE `id` = ?';
         return $this->findEntity($sql, [$id]);
     }
 

@@ -2,7 +2,7 @@
 /**
  * ownCloud - eudat
  *
- * This file is licensed under the MIT License. See the COPYING file.
+ * This file is licensed under the MIT License. See the LICENSE file.
  *
  * @author Dennis Blommesteijn <dennis@blommesteijn.com>
  * @copyright Dennis Blommesteijn 2015

@@ -3,7 +3,7 @@
  * ownCloud - eudat
  *
  * This file is licensed under the Affero General Public License version 3 or
- * later. See the COPYING file.
+ * later. See the LICENSE file.
  *
  * @author EUDAT <b2drop-devel@postit.csc.fi>
  * @copyright EUDAT 2015
@@ -33,5 +33,5 @@ $c->getServer()->getNavigationManager()->add($navigationEntry);
 \OC::$CLASSPATH['OCA\Eudat\TransferHandler'] = 'eudat/lib/job/transferhandler.php';
 \OC::$CLASSPATH['OCA\Eudat\Controller'] = 'eudat/lib/controller/pagecontroller.php';
 
-App::registerAdmin('eudat', 'settings');
+App::registerAdmin('eudat', 'lib/settings');
 Util::addScript('eudat', 'fileactions');

@@ -67,21 +67,20 @@ class TransferHandler extends QueuedJob {
         #    return;
         #} else {
             #$this->forked(posix_getpid(), $args);
-            foreach ($args as &$value) {
-                Util::writeLog('transfer_array', $value, 3);
-            }
-            // get path of file
-            // TODO: make sure the user can access the file
-            $fcStatus = $this->mapper->find($args['transferId']);
+        foreach ($args as &$value) {
+            Util::writeLog('transfer_array', $value, 3);
+        }
+        // get path of file
+        // TODO: make sure the user can access the file
+        $fcStatus = $this->mapper->find($args['transferId']);
 
-            $fcStatus->setStatus("processing");
-            $this->mapper->update($fcStatus);
-            Util::writeLog('transfer', 'Publishing to'.$this->config->getAppValue('eudat', 'b2share_endpoint_url'), 3);
+        $fcStatus->setStatus("processing");
+        $this->mapper->update($fcStatus);
+        Util::writeLog('transfer', 'Publishing to'.$this->config->getAppValue('eudat', 'b2share_endpoint_url'), 3);
 
-            Filesystem::init($args['userId'], '/');
-            $path = Filesystem::getPath($args['fileId']);
-            Util::writeLog('transfer_path', $path, 3);
-            die();
+        Filesystem::init($args['userId'], '/');
+        $path = Filesystem::getPath($args['fileId']);
+        Util::writeLog('transfer_path', $path, 3);
         #}
         // TODO: we need to be carefull of zombies here!
     }

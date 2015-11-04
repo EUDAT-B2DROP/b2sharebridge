@@ -7,26 +7,31 @@ use OCA\Eudat\Db\FilecacheStatusMapper;
 
 use OC\BackgroundJob\QueuedJob;
 use OC\Files\Filesystem;
+use OCP\IConfig;
 use OCP\Util;
 
 
 class TransferHandler extends QueuedJob {
 
-    private $mapper;
+    protected $mapper;
+    protected $config;
 
-    public function __construct(FilecacheStatusMapper $mapper = null){
-        if ($mapper === null) {
+    public function __construct(FilecacheStatusMapper $mapper = null,
+                                IConfig $config = null){
+        if ($mapper === null || $config === null) {
             $this->fixTransferForCron();
+
         }
         else {
             $this->mapper = $mapper;
+            $this->config = $config;
         }
-        Util::writeLog('transfer', 'CREATE', 3);
     }
 
     protected function fixTransferForCron() {
         $application = new Application();
         $this->mapper = $application->getContainer()->query('FilecacheStatusMapper');
+        $this->config = \OC::$server->getConfig();
     }
 
     /**
@@ -35,7 +40,6 @@ class TransferHandler extends QueuedJob {
      * @return \null
      */
     public function run($args){
-        Util::writeLog('transfer', 'RUN', 3);
 
         // init assertions
         if(!function_exists('pcntl_fork')){
@@ -51,9 +55,8 @@ class TransferHandler extends QueuedJob {
             Util::writeLog('transfer', 'bad request missing `fileId` or `userId', 3);
             return;
         }
-        Util::writeLog('transfer', 'RUNNEXT', 3);
         // fork process (don't keep cron.php locked in sequence)
-        // TODO: think of a fork alternative or make it possible to not loose the database connection.
+        // TODO: think of a fork alternative or make it possible to not loose the database connection. also it is running only one job per cron run...
         #$pid = \pcntl_fork();
         #if ($pid == -1) {
         #    Util::writeLog('transfer', 'forking error', 3);
@@ -63,9 +66,7 @@ class TransferHandler extends QueuedJob {
         #    Util::writeLog('transfer', 'parent', 3);
         #    return;
         #} else {
-            Util::writeLog('transfer', 'child finished', 3);
             #$this->forked(posix_getpid(), $args);
-            Util::writeLog('transfer', 'FORKED', 3);
             foreach ($args as &$value) {
                 Util::writeLog('transfer_array', $value, 3);
             }
@@ -75,7 +76,7 @@ class TransferHandler extends QueuedJob {
 
             $fcStatus->setStatus("processing");
             $this->mapper->update($fcStatus);
-            Util::writeLog('transfer', 'FORKED2', 3);
+            Util::writeLog('transfer', 'Publishing to'.$this->config->getAppValue('eudat', 'b2share_endpoint_url'), 3);
 
             Filesystem::init($args['userId'], '/');
             $path = Filesystem::getPath($args['fileId']);

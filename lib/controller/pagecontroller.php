@@ -10,6 +10,7 @@
 
 namespace OCA\Eudat\Controller;
 
+use OCP\IConfig;
 use OCP\IRequest;
 use OCP\Util;
 use OCP\AppFramework\Controller;
@@ -27,18 +28,21 @@ class PageController extends Controller {
     /**
      * @param string $appName
      * @param IRequest $request
+     * @param IConfig $config
      * @param $userId
      * @param FilecacheStatusMapper $mapper
      */
     public function __construct($appName,
                                 IRequest $request,
+                                IConfig $config,
                                 $userId,
                                 FilecacheStatusMapper $mapper){
-        Util::writeLog('controller', 'CONSTRUCT', 3);
 
         parent::__construct($appName, $request);
         $this->userId = $userId;
         $this->mapper = $mapper;
+        $this->config = $config;
+
     }
 
     /**
@@ -52,8 +56,6 @@ class PageController extends Controller {
      * @NoCSRFRequired
      */
     public function index() {
-        Util::writeLog('controller', 'INDEX', 3);
-
         $jobs = [];
         foreach(\OC::$server->getJobList()->getAll() as $job){
             // filter on Transfers
@@ -71,7 +73,7 @@ class PageController extends Controller {
         // $status = [];
 
         $status = [];
-        foreach($this->mapper->findAll() as $file){
+        foreach($this->mapper->findAllForUser($this->userId) as $file){
             $status[] = $file;
         }
         //TODO: add filter
@@ -99,8 +101,6 @@ class PageController extends Controller {
      * @NoAdminRequired
      */
     public function publish(){
-        Util::writeLog('controller', 'PUBLISH', 3);
-
         $param = $this->request->getParams();
 
         if(!is_array($param)){
@@ -118,9 +118,10 @@ class PageController extends Controller {
             return new DataResponse(["error"=>"no `userId` present"]);
         }
         // create new publish job
-        $job = new TransferHandler($this->mapper);
+        $job = new TransferHandler($this->mapper, $this->config);
         $fcStatus = new FilecacheStatus();
         $fcStatus->setFileid($id);
+        $fcStatus->setOwner($userId);
         $fcStatus->setStatus("new");
         $fcStatus->setCreatedAt(time());
         $fcStatus->setUpdatedAt(time());

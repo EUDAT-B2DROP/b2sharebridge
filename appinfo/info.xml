@@ -5,7 +5,7 @@
     <description>Integration from B2DROP with B2SHARE</description>
     <licence>AGPL</licence>
     <author>EUDAT</author>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <requiremin>8</requiremin>
     <rememberlogin>false</rememberlogin>
     <category>publishing</category>

@@ -40,22 +40,63 @@ class TransferHandler extends QueuedJob {
      * @return \null
      */
     public function run($args){
-
-        // init assertions
-        if(!function_exists('pcntl_fork')){
-            Util::writeLog('transfer', 'no function `pcntl_fork` install `pcntl` extension', 3);
-            die("no function `pcntl_fork` install `pcntl` extension" . PHP_EOL);
-        }
-        if(!function_exists('posix_getpid')){
-            Util::writeLog('transfer', 'no function `posix_getpid`, this feature works on a posix OS only', 3);
-            die("no function `posix_getpid`, this feature works on a posix OS only" . PHP_EOL);
-        }
-        // print_r($args);
-        if(!array_key_exists('fileId', $args) || !array_key_exists('userId', $args)){
-            Util::writeLog('transfer', 'bad request missing `fileId` or `userId', 3);
+        if(!array_key_exists('transferId', $args)){
+            Util::writeLog('transfer', 'Bad request, can not handle transfer without transferId', 3);
             return;
         }
-        // fork process (don't keep cron.php locked in sequence)
+        // get the file transfer object for current job
+        $fcStatus = $this->mapper->find($args['transferId']);
+
+        $fcStatus->setStatus("processing");
+        $this->mapper->update($fcStatus);
+        $user = $fcStatus->getOwner();
+        $fileId = $fcStatus->getFileid();
+
+        Util::writeLog('transfer', 'Publishing to'.$this->config->getAppValue('eudat', 'b2share_endpoint_url'), 3);
+
+        Filesystem::init($user, '/');
+        $path = Filesystem::getPath($fileId);
+        $has_access = Filesystem::isReadable($path);
+        if ($has_access) {
+            $view = Filesystem::getView();
+            $handle = $view->fopen($path, 'rb');
+            if ($handle) {
+                $chunkSize = 8192; // 8 kB chunks
+                ob_start();
+                while (!feof($handle)) {
+                    echo fread($handle, $chunkSize);
+                    flush();
+                }
+                $content = ob_get_contents();
+                $size = $view->filesize($path);
+                #return $size;
+            }
+            #$length = Filesystem::readfile($path);
+
+            Util::writeLog('transfer_path', 'filelength:' . $size, 3);
+            Util::writeLog('transfer_path', 'filecontent:' . $content, 3);
+            $fcStatus->setStatus("published");
+            $this->mapper->update($fcStatus);
+        }
+        else {
+            $fcStatus->setStatus("error while publishing");
+            $this->mapper->update($fcStatus);
+        }
+
+
+
+
+        // init assertions
+        #if(!function_exists('pcntl_fork')){
+        #    Util::writeLog('transfer', 'no function `pcntl_fork` install `pcntl` extension', 3);
+        #    die("no function `pcntl_fork` install `pcntl` extension" . PHP_EOL);
+        #}
+        #if(!function_exists('posix_getpid')){
+        #    Util::writeLog('transfer', 'no function `posix_getpid`, this feature works on a posix OS only', 3);
+        #    die("no function `posix_getpid`, this feature works on a posix OS only" . PHP_EOL);
+        #}
+        // print_r($args);
+
         // TODO: think of a fork alternative or make it possible to not loose the database connection. also it is running only one job per cron run...
         #$pid = \pcntl_fork();
         #if ($pid == -1) {
@@ -67,20 +108,11 @@ class TransferHandler extends QueuedJob {
         #    return;
         #} else {
             #$this->forked(posix_getpid(), $args);
-        foreach ($args as &$value) {
-            Util::writeLog('transfer_array', $value, 3);
-        }
+        #foreach ($args as &$value) {
+        #    Util::writeLog('transfer_array', $value, 3);
+        #}
         // get path of file
-        // TODO: make sure the user can access the file
-        $fcStatus = $this->mapper->find($args['transferId']);
 
-        $fcStatus->setStatus("processing");
-        $this->mapper->update($fcStatus);
-        Util::writeLog('transfer', 'Publishing to'.$this->config->getAppValue('eudat', 'b2share_endpoint_url'), 3);
-
-        Filesystem::init($args['userId'], '/');
-        $path = Filesystem::getPath($args['fileId']);
-        Util::writeLog('transfer_path', $path, 3);
         #}
         // TODO: we need to be carefull of zombies here!
     }
@@ -159,17 +191,9 @@ class TransferHandler extends QueuedJob {
 
         // echo "... forked end \t" . $pid . PHP_EOL;
 
-
-        // TODO: load user from $user_name
-        // TODO: load file from $file_id
-
-        // TODO: check permissions
-        // TODO: load external config
-
         // TODO: start external session
         // TODO: start transfer
 
-        // TODO: update status table
     }
 
 }

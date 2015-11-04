@@ -129,7 +129,7 @@ class PageController extends Controller {
         //TODO: perhaps we should add a duplicate publish check here!
 
         // register transfer job
-        \OC::$server->getJobList()->add($job, ['fileId' => $id, 'transferId' => $fcStatus->getId(), 'userId' => $userId, 'requestDate' => time()]);
+        \OC::$server->getJobList()->add($job, ['transferId' => $fcStatus->getId()]);
 
         // TODO: respond with success
         return new DataResponse(["publish" => ["name" => ""]]);

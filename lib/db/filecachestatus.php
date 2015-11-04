@@ -9,12 +9,14 @@ class FilecacheStatus extends Entity {
 
     protected $fileid;
     protected $status;
+    protected $owner;
     protected $createdAt;
     protected $updatedAt;
 
     public function __construct() {
         $this->addType('fileid', 'integer');
         $this->addType('status', 'string');
+        $this->addType('owner', 'string');
         $this->addType('createdAt', 'integer');
         $this->addType('updatedAt', 'integer');
     }

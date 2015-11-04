@@ -33,6 +33,10 @@ class FilecacheStatusMapper extends Mapper {
         return $this->findEntities($sql);
     }
 
+    public function findAllForUser($user) {
+        $sql = 'SELECT * FROM `*PREFIX*eudat_filecache_status` ' . 'WHERE `owner` = ?';
+        return $this->findEntities($sql, [$user]);
+    }
 
     // public function authorNameCount($name) {
     //     $sql = 'SELECT COUNT(*) AS `count` FROM `*PREFIX*eudat_filecache_status` ' .

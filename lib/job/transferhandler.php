@@ -51,35 +51,39 @@ class TransferHandler extends QueuedJob {
         $this->mapper->update($fcStatus);
         $user = $fcStatus->getOwner();
         $fileId = $fcStatus->getFileid();
+        $b2share_url = $this->config->getAppValue('eudat', 'b2share_endpoint_url');
 
-        Util::writeLog('transfer', 'Publishing to'.$this->config->getAppValue('eudat', 'b2share_endpoint_url'), 3);
+        Util::writeLog('transfer', 'Publishing to'.$b2share_url, 3);
 
         Filesystem::init($user, '/');
         $path = Filesystem::getPath($fileId);
         $has_access = Filesystem::isReadable($path);
         if ($has_access) {
             $view = Filesystem::getView();
+            // TODO: is it good to take the owncloud fopen?
             $handle = $view->fopen($path, 'rb');
-            if ($handle) {
-                $chunkSize = 8192; // 8 kB chunks
-                ob_start();
-                while (!feof($handle)) {
-                    echo fread($handle, $chunkSize);
-                    flush();
-                }
-                $content = ob_get_contents();
-                $size = $view->filesize($path);
-                #return $size;
-            }
-            #$length = Filesystem::readfile($path);
+            $size = $view->filesize($path);
 
-            Util::writeLog('transfer_path', 'filelength:' . $size, 3);
-            Util::writeLog('transfer_path', 'filecontent:' . $content, 3);
+            $curl_client = curl_init($b2share_url.'/'.$args['transferId']);
+
+            curl_setopt($curl_client, CURLOPT_INFILE, $handle);
+            curl_setopt($curl_client, CURLOPT_INFILESIZE, $size);
+            curl_setopt($curl_client, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl_client, CURLOPT_PUT, true);
+            curl_setopt($curl_client, CURLOPT_HTTPHEADER, array('X-Auth-Token: ', 'Expect:'));
+
+            $curl_success = curl_exec($curl_client);
+            if (!$curl_success){
+                Util::writeLog('transfer_path', 'Error communicating with B2SHARE'. $curl_success, 3);
+                $fcStatus->setStatus("error while accessing b2share");
+                $this->mapper->update($fcStatus);
+            }
+            Util::writeLog('transfer_path', 'Communication to B2SHARE successfull', 0);
             $fcStatus->setStatus("published");
             $this->mapper->update($fcStatus);
         }
         else {
-            $fcStatus->setStatus("error while publishing");
+            $fcStatus->setStatus("internal error while publishing");
             $this->mapper->update($fcStatus);
         }
 

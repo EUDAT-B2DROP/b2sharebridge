@@ -53,18 +53,35 @@ class TransferHandler extends QueuedJob {
         }
         Util::writeLog('transfer', 'RUNNEXT', 3);
         // fork process (don't keep cron.php locked in sequence)
-        $pid = \pcntl_fork();
-        if ($pid == -1) {
-            Util::writeLog('transfer', 'forking error', 3);
-            die("forking error" . PHP_EOL);
-        } else if($pid) {
-            Util::writeLog('transfer', 'parent', 3);
-            return;
-        } else {
+        // TODO: think of a fork alternative or make it possible to not loose the database connection.
+        #$pid = \pcntl_fork();
+        #if ($pid == -1) {
+        #    Util::writeLog('transfer', 'forking error', 3);
+        #    die("forking error" . PHP_EOL);
+        #}
+        #else if($pid) {
+        #    Util::writeLog('transfer', 'parent', 3);
+        #    return;
+        #} else {
             Util::writeLog('transfer', 'child finished', 3);
-            $this->forked(posix_getpid(), $args);
+            #$this->forked(posix_getpid(), $args);
+            Util::writeLog('transfer', 'FORKED', 3);
+            foreach ($args as &$value) {
+                Util::writeLog('transfer_array', $value, 3);
+            }
+            // get path of file
+            // TODO: make sure the user can access the file
+            $fcStatus = $this->mapper->find($args['transferId']);
+
+            $fcStatus->setStatus("processing");
+            $this->mapper->update($fcStatus);
+            Util::writeLog('transfer', 'FORKED2', 3);
+
+            Filesystem::init($args['userId'], '/');
+            $path = Filesystem::getPath($args['fileId']);
+            Util::writeLog('transfer_path', $path, 3);
             die();
-        }
+        #}
         // TODO: we need to be carefull of zombies here!
     }
 
@@ -104,13 +121,20 @@ class TransferHandler extends QueuedJob {
      */
     public function forked($pid, $args){
         Util::writeLog('transfer', 'FORKED', 3);
+        foreach ($args as &$value) {
+            Util::writeLog('transfer_array', $value, 3);
+        }
         // get path of file
         // TODO: make sure the user can access the file
-        $fcStatus = $this->mapper->find($args['fileId']);
+        $fcStatus = $this->mapper->find($args['transferId']);
+
         $fcStatus->setStatus("processing");
         $this->mapper->update($fcStatus);
+        Util::writeLog('transfer', 'FORKED2', 3);
+
         Filesystem::init($args['userId'], '/');
         $path = Filesystem::getPath($args['fileId']);
+        Util::writeLog('transfer', 'FORKED3', 3);
         // detect failed lookups
         if (strlen($path) <= 0){
             Util::writeLog('transfer', "cannot find path for: `" . $args['userId'] . ":" . $args['fileId'] . "`", 3);

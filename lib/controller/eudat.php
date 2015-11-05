@@ -13,7 +13,6 @@ namespace OCA\Eudat\Controller;
 
 use OCP\IConfig;
 use OCP\IRequest;
-use OCP\Util;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\DataResponse;
@@ -22,7 +21,7 @@ use OCA\Eudat\Job\TransferHandler;
 use OCA\Eudat\Db\FilecacheStatusMapper;
 use OCA\Eudat\Db\FilecacheStatus;
 
-class PageController extends Controller {
+class Eudat extends Controller {
 
     private $userId;
 
@@ -36,8 +35,9 @@ class PageController extends Controller {
     public function __construct($appName,
                                 IRequest $request,
                                 IConfig $config,
-                                $userId,
-                                FilecacheStatusMapper $mapper){
+                                FilecacheStatusMapper $mapper,
+                                $userId
+                                ){
 
         parent::__construct($appName, $request);
         $this->userId = $userId;
@@ -63,31 +63,19 @@ class PageController extends Controller {
             if($job instanceof TransferHandler){
                 // filter only own requested jobs
                 if($job->isPublishingUser($this->userId))
-                    $jobs[] = $job;
+                    $id = $job->getArgument()['transferId'];
+                    $transfer = $this->mapper->find($id);
+                    $jobs[] = ['id' => $id, 'filename' => $transfer->getFilename(), 'date' => $transfer->getCreatedAt()];
                 // TODO: admin can view all publications
+                # id filename date
             }
         }
-
-        // \OC\Files\Filesystem::init($this->userId, '/');
-
-
-        // $status = [];
 
         $status = [];
         foreach($this->mapper->findAllForUser($this->userId) as $file){
             $status[] = $file;
         }
-        //TODO: add filter
 
-        // $fcStatus = new FilecacheStatus();
-        // $fcStatus->setFileid(8);
-        // $fcStatus->setStatus("new");
-        // $this->mapper->insert($fcStatus);
-        // print_r($fcStatus)
-        // $fcStatus->setFileId($id);
-        // $fcStatus->setStatus("new");
-
-        // prepare variables
         $params = [
             'user' => $this->userId,
             'jobs' => $jobs,
@@ -130,7 +118,7 @@ class PageController extends Controller {
         //TODO: perhaps we should add a duplicate publish check here!
 
         // register transfer job
-        \OC::$server->getJobList()->add($job, ['transferId' => $fcStatus->getId()]);
+        \OC::$server->getJobList()->add($job, ['transferId' => $fcStatus->getId(), 'userId' => $userId]);
 
         // TODO: respond with success
         return new DataResponse(["publish" => ["name" => ""]]);

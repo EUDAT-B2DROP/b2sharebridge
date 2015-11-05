@@ -22,7 +22,7 @@ $navigationEntry = function () use ($c) {
         'id' => $c->getAppName(),
         'order' => 100,
         'name' => $c->query('EudatL10N')->t('B2SHARE'),
-        'href' => $c->getServer()->getURLGenerator()->linkToRoute('eudat.page.index'),
+        'href' => $c->getServer()->getURLGenerator()->linkToRoute('eudat.Eudat.index'),
         'icon' => $c->getServer()->getURLGenerator()->imagePath('eudat', 'app.svg'),
     ];
 };
@@ -31,7 +31,7 @@ $c->getServer()->getNavigationManager()->add($navigationEntry);
 
 // register classes
 \OC::$CLASSPATH['OCA\Eudat\TransferHandler'] = 'eudat/lib/job/transferhandler.php';
-\OC::$CLASSPATH['OCA\Eudat\Controller'] = 'eudat/lib/controller/pagecontroller.php';
+\OC::$CLASSPATH['OCA\Eudat\Controller'] = 'eudat/lib/controller/eudat.php';
 
 App::registerAdmin('eudat', 'lib/settings');
 Util::addScript('eudat', 'fileactions');

@@ -17,7 +17,7 @@ style('files', 'files');
                 <?php if(sizeof($_['jobs']) > 0): ?>
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Transfer ID</th>
                             <th>Filename</th>
                             <th>Request Date</th>
                         </tr>
@@ -25,10 +25,10 @@ style('files', 'files');
                     <tbody>
                         <?php foreach($_['jobs'] as $job): ?>
                             <tr>
-                                <td><?php p($job->getId()) ?></td>
-                                <td><?php p($job->getFilename()) ?></td>
+                                <td><?php p($job['id']) ?></td>
+                                <td><?php p($job['filename']) ?></td>
                                 <?php // TODO: echo as user specific timedate ?>
-                                <td><?php p($job->getRequestDate()) ?> (UTC)</td>
+                                <td><?php p(date('D\, j M Y H:i:s', $job['date'])) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -46,7 +46,7 @@ style('files', 'files');
                 <?php if(sizeof($_['fileStatus']) > 0): ?>
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th>Transfer ID</th>
                             <th>Filename</th>
                             <th>Status</th>
                             <th>Publish Date</th>
@@ -60,8 +60,8 @@ style('files', 'files');
                                 <td><?php p($fileStatus->getFilename()) ?></td>
                                 <?php // TODO: echo as user specific timedate ?>
                                 <td><?php p($fileStatus->getStatus()) ?></td>
-                                <td><?php p($fileStatus->getCreatedAt()) ?></td>
-                                <td><?php p($fileStatus->getUpdatedAt()) ?></td>
+                                <td><?php p(date('D\, j M Y H:i:s', $fileStatus->getCreatedAt())) ?></td>
+                                <td><?php p(date('D\, j M Y H:i:s', $fileStatus->getUpdatedAt())) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

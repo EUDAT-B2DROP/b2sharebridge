@@ -81,20 +81,21 @@ class TransferHandler extends QueuedJob {
             curl_setopt($curl_client, CURLOPT_HTTPHEADER, array('X-Auth-Token: ', 'Expect:'));
 
             $curl_success = curl_exec($curl_client);
-            if (!$curl_success){
-                Util::writeLog('transfer_path', 'Error communicating with B2SHARE'. $curl_success, 3);
+            if (!$curl_success) {
+                Util::writeLog('transfer_path', 'Error communicating with B2SHARE'.$curl_success, 3);
                 $fcStatus->setStatus("error while accessing b2share");
-                $this->mapper->update($fcStatus);
             }
-            Util::writeLog('transfer_path', 'Communication to B2SHARE successfull', 0);
-            $fcStatus->setStatus("published");
-            $this->mapper->update($fcStatus);
+            else {
+                Util::writeLog('transfer_path', 'Communication to B2SHARE successfull:'.$curl_success, 0);
+                $fcStatus->setStatus("published");
+            }
         }
         else {
+            Util::writeLog('transfer_path', 'Internal error: file not accessible', 3);
             $fcStatus->setStatus("internal error while publishing");
-            $this->mapper->update($fcStatus);
         }
-
+        $fcStatus->setUpdatedAt(time());
+        $this->mapper->update($fcStatus);
 
 
 
@@ -137,7 +138,7 @@ class TransferHandler extends QueuedJob {
     public function isPublishingUser($userId){
         return is_array($this->argument) &&
             array_key_exists('userId', $this->argument) &&
-            $this->argument['userId'] == $userId;
+            $this->argument['userId'] === $userId;
     }
 
     /**

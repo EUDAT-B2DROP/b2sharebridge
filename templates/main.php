@@ -1,5 +1,4 @@
 <?php
-script('eudat', 'script');
 style('eudat', 'style');
 style('files', 'files');
 ?>

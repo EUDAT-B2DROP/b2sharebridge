@@ -19,15 +19,14 @@
                     return OC.imagePath('eudat', 'actions/cloud_upload');
                 },
                 actionHandler:function(filename, context) {
-                    // request publish of the selected file/ dir
-                    /*$.post(url, data).success(function(response) {
-                        console.log(response);
-
-                        // TODO: handle request here!
-                    });*/
 
                     $.post(OC.generateUrl('/apps/eudat/publish'), { id: context.$file.data('id') }, function (result) {
-                        OC.dialogs.info(t('eudat', result.message), t('eudat', 'Info'));
+                        if (result && result.status === 'success') {
+                            OC.dialogs.info(t('eudat', result.message), t('eudat', 'Info'));
+                        }
+                        else {
+                            OC.dialogs.alert(t('eudat', result.message), t('eudat', 'Error'));
+                        }
                     }
                     );
 

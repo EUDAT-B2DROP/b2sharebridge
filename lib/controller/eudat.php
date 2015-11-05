@@ -17,6 +17,7 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\Util;
 
 use OCA\Eudat\Job\TransferHandler;
 use OCA\Eudat\Db\FilecacheStatusMapper;
@@ -58,56 +59,59 @@ class Eudat extends Controller {
      * @NoCSRFRequired
      */
     public function index() {
-        $jobs = [];
-        foreach(\OC::$server->getJobList()->getAll() as $job){
+        $cron_transfers = [];
+        foreach(\OC::$server->getJobList()->getAll() as $cron_transfer){
             // filter on Transfers
-            if($job instanceof TransferHandler){
+            if($cron_transfer instanceof TransferHandler){
                 // filter only own requested jobs
-                if($job->isPublishingUser($this->userId)) {
-                    $id = $job->getArgument()['transferId'];
-                    $transfer = $this->mapper->find($id);
-                    $jobs[] = ['id' => $id, 'filename' => $transfer->getFilename(), 'date' => $transfer->getCreatedAt()];
+                if($cron_transfer->isPublishingUser($this->userId)) {
+                    $id = $cron_transfer->getArgument()['transferId'];
+                    $publication = $this->mapper->find($id);
+                    $cron_transfers[] = ['id' => $id, 'filename' => $publication->getFilename(), 'date' => $publication->getCreatedAt()];
                 }
                 // TODO: admin can view all publications
             }
         }
 
-        $transfers = [];
-        foreach(array_reverse($this->mapper->findAllForUser($this->userId)) as $transfer){
-            $transfers[] = $transfer;
+        $publications = [];
+        foreach(array_reverse($this->mapper->findAllForUser($this->userId)) as $publication){
+            $publications[] = $publication;
         }
 
         $params = [
             'user' => $this->userId,
-            'jobs' => $jobs,
-            'fileStatus' => $transfers
+            'transfers' => $cron_transfers,
+            'publications' => $publications
         ];
         return new TemplateResponse('eudat', 'main', $params);  // templates/main.php
     }
 
     /**
      * XHR request endpoint for getting publish command
-     * @return DataResponse
+     * @return JSONResponse
      * @NoAdminRequired
      */
     public function publish(){
         $param = $this->request->getParams();
 
-        if(!is_array($param)){
-            return new JSONResponse(["message"=>"expected array"], Http::STATUS_SERVICE_UNAVAILABLE);
-        }
-        if(!array_key_exists('id', $param)){
-            return new JSONResponse(["message"=>"no `id` present"], Http::STATUS_SERVICE_UNAVAILABLE);
+        $error = false;
+        if(!is_array($param) || !array_key_exists('id', $param)){
+            $error = 'Parameters gotten from UI are no array';
         }
         $id = (int) $param['id'];
         if(!is_int($id)){
-            return new JSONResponse(["message"=>"expected integer"], Http::STATUS_SERVICE_UNAVAILABLE);
+            $error = 'Problems while parsing fileid';
         }
         $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if(strlen($userId) <= 0){
-            return new JSONResponse(["message"=>"no `userId` present"], Http::STATUS_SERVICE_UNAVAILABLE);
+            $error = 'No user configured for session';
         }
-        // create new publish job
+        if (($error)) {
+            Util::writeLog('eudat', $error, 3);
+            return new JSONResponse(['message'=>'Internal server error, contact the EUDAT helpdesk', 'status' => 'error']);
+        }
+
+        // create the actual transfer job
         $job = new TransferHandler($this->mapper, $this->config);
         $fcStatus = new FilecacheStatus();
         $fcStatus->setFileid($id);
@@ -121,29 +125,6 @@ class Eudat extends Controller {
         // register transfer job
         \OC::$server->getJobList()->add($job, ['transferId' => $fcStatus->getId(), 'userId' => $userId]);
 
-        // TODO: respond with success
-        return new JSONResponse(["message" => 'Transferring file to B2SHARE in the Background'], Http::STATUS_ACCEPTED);
+        return new JSONResponse(["message" => 'Transferring file to B2SHARE in the Background', 'status' => 'success']);
     }
-    // /**
-    // * Page do view publication view
-    // * @NoAdminRequired
-    // * @NoCSRFRequired
-    // */
-    // public function publishQueue(){
-    //     $params = [];
-    //     // return new TemplateResponse('eudat', 'publishQueue', $params);
-    //     return new TemplateResponse('eudat', 'publishQueue', $params);
-    // }
-
-
-    /**
-     * Simply method that posts back the payload of the request
-     * @param \string     $echo
-     * @return DataResponse
-     * @NoAdminRequired
-     */
-    public function doEcho($echo) {
-        return new DataResponse(['echo' => $echo]);
-    }
-
 }

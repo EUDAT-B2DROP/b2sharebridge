@@ -12,9 +12,9 @@ style('files', 'files');
     <div id="app-content">
         <div id="app-content-wrapper">
 
-            <h1>Queued Jobs <small>(<?php p(sizeof($_['jobs'])) ?>)</small></h1>
+            <h1>Queued Jobs <small>(<?php p(sizeof($_['transfers'])) ?>)</small></h1>
             <table class="publish-queue-list">
-                <?php if(sizeof($_['jobs']) > 0): ?>
+                <?php if(sizeof($_['transfers']) > 0): ?>
                     <thead>
                         <tr>
                             <th>Transfer ID</th>
@@ -23,12 +23,12 @@ style('files', 'files');
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach($_['jobs'] as $job): ?>
+                        <?php foreach($_['transfers'] as $transfer): ?>
                             <tr>
-                                <td><?php p($job['id']) ?></td>
-                                <td><?php p($job['filename']) ?></td>
+                                <td><?php p($transfer['id']) ?></td>
+                                <td><?php p($transfer['filename']) ?></td>
                                 <?php // TODO: echo as user specific timedate ?>
-                                <td><?php p(date('D\, j M Y H:i:s', $job['date'])) ?></td>
+                                <td><?php p(date('D\, j M Y H:i:s', $transfer['date'])) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -41,9 +41,9 @@ style('files', 'files');
 
             <div style="margin-top: 20px;">&nbsp;</div>
 
-            <h1>Publishing History <small>(<?php p(sizeof($_['fileStatus'])) ?>)</small></h1>
+            <h1>Publishing History <small>(<?php p(sizeof($_['publications'])) ?>)</small></h1>
             <table class="publish-queue-list">
-                <?php if(sizeof($_['fileStatus']) > 0): ?>
+                <?php if(sizeof($_['publications']) > 0): ?>
                     <thead>
                         <tr>
                             <th>Transfer ID</th>
@@ -54,14 +54,14 @@ style('files', 'files');
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach($_['fileStatus'] as $fileStatus): ?>
+                        <?php foreach($_['publications'] as $publication): ?>
                             <tr>
-                                <td><?php p($fileStatus->getId()) ?></td>
-                                <td><?php p($fileStatus->getFilename()) ?></td>
+                                <td><?php p($publication->getId()) ?></td>
+                                <td><?php p($publication->getFilename()) ?></td>
                                 <?php // TODO: echo as user specific timedate ?>
-                                <td><?php p($fileStatus->getStatus()) ?></td>
-                                <td><?php p(date('D\, j M Y H:i:s', $fileStatus->getCreatedAt())) ?></td>
-                                <td><?php p(date('D\, j M Y H:i:s', $fileStatus->getUpdatedAt())) ?></td>
+                                <td><?php p($publication->getStatus()) ?></td>
+                                <td><?php p(date('D\, j M Y H:i:s', $publication->getCreatedAt())) ?></td>
+                                <td><?php p(date('D\, j M Y H:i:s', $publication->getUpdatedAt())) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

@@ -1,6 +1,4 @@
 <?php
-/** @var OC_L10N $l */
-/** @var array $_ */
 ?>
 <div class="section" id="eudat_b2share">
     <h2><?php p($l->t('EUDAT B2SHARE Bridge'));?></h2>

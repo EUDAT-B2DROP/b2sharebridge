@@ -2,10 +2,11 @@
 /**
  * ownCloud - eudat
  *
- * This file is licensed under the MIT License. See the LICENSE file.
+ * This file is licensed under the Affero General Public License version 3 or
+ * later. See the LICENSE file.
  *
- * @author Dennis Blommesteijn <dennis@blommesteijn.com>
- * @copyright Dennis Blommesteijn 2015
+ * @author EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright EUDAT 2015
  */
 
 namespace OCA\Eudat\Controller;

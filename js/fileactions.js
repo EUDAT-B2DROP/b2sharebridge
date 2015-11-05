@@ -8,26 +8,28 @@
     }
 
     OCA.Eudat.Publish = {
-        attach: function(fileList) {
+        attach:function(fileList) {
             var fileActions = fileList.fileActions;
             fileActions.registerAction({
                 name: "B2SHARE",
                 displayName: t('files', 'B2SHARE'),
                 mime: 'all',
                 permissions: OC.PERMISSION_READ,
-                icon: function () {
+                icon:function() {
                     return OC.imagePath('eudat', 'actions/cloud_upload');
                 },
-                actionHandler: function (filename, context) {
-                    var url = OC.generateUrl('/apps/eudat/publish');
-                    var data = { id: context.$file.data('id') };
+                actionHandler:function(filename, context) {
                     // request publish of the selected file/ dir
-                    $.post(url, data).success(function (response) {
+                    /*$.post(url, data).success(function(response) {
                         console.log(response);
+
                         // TODO: handle request here!
-                    });
+                    });*/
 
-
+                    $.post(OC.generateUrl('/apps/eudat/publish'), { id: context.$file.data('id') }, function (result) {
+                        OC.dialogs.info(t('eudat', result.message), t('eudat', 'Info'));
+                    }
+                    );
 
                     // var downloadFileaction = $(context.$file).find('.fileactions .action-download');
 

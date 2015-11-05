@@ -41,7 +41,7 @@ style('files', 'files');
 
             <div style="margin-top: 20px;">&nbsp;</div>
 
-            <h1>Publish History/ Status <small>(<?php p(sizeof($_['fileStatus'])) ?>)</small></h1>
+            <h1>Publishing History <small>(<?php p(sizeof($_['fileStatus'])) ?>)</small></h1>
             <table class="publish-queue-list">
                 <?php if(sizeof($_['fileStatus']) > 0): ?>
                     <thead>
@@ -70,11 +70,7 @@ style('files', 'files');
                         <td>No published files found.</td>
                     </tr>
                 <?php endif; ?>
-
             </table>
-
-
-
         </div>
     </div>
 </div>

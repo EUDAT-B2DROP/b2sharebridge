@@ -14,8 +14,9 @@ namespace OCA\Eudat\Controller;
 use OCP\IConfig;
 use OCP\IRequest;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\Http\JSONResponse;
 
 use OCA\Eudat\Job\TransferHandler;
 use OCA\Eudat\Db\FilecacheStatusMapper;
@@ -62,24 +63,24 @@ class Eudat extends Controller {
             // filter on Transfers
             if($job instanceof TransferHandler){
                 // filter only own requested jobs
-                if($job->isPublishingUser($this->userId))
+                if($job->isPublishingUser($this->userId)) {
                     $id = $job->getArgument()['transferId'];
                     $transfer = $this->mapper->find($id);
                     $jobs[] = ['id' => $id, 'filename' => $transfer->getFilename(), 'date' => $transfer->getCreatedAt()];
+                }
                 // TODO: admin can view all publications
-                # id filename date
             }
         }
 
-        $status = [];
-        foreach($this->mapper->findAllForUser($this->userId) as $file){
-            $status[] = $file;
+        $transfers = [];
+        foreach(array_reverse($this->mapper->findAllForUser($this->userId)) as $transfer){
+            $transfers[] = $transfer;
         }
 
         $params = [
             'user' => $this->userId,
             'jobs' => $jobs,
-            'fileStatus' => $status
+            'fileStatus' => $transfers
         ];
         return new TemplateResponse('eudat', 'main', $params);  // templates/main.php
     }
@@ -93,18 +94,18 @@ class Eudat extends Controller {
         $param = $this->request->getParams();
 
         if(!is_array($param)){
-            return new DataResponse(["error"=>"expected array"]);
+            return new JSONResponse(["message"=>"expected array"], Http::STATUS_SERVICE_UNAVAILABLE);
         }
         if(!array_key_exists('id', $param)){
-            return new DataResponse(["error"=>"no `id` present"]);
+            return new JSONResponse(["message"=>"no `id` present"], Http::STATUS_SERVICE_UNAVAILABLE);
         }
         $id = (int) $param['id'];
         if(!is_int($id)){
-            return new DataResponse(["error"=>"expected integer"]);
+            return new JSONResponse(["message"=>"expected integer"], Http::STATUS_SERVICE_UNAVAILABLE);
         }
         $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if(strlen($userId) <= 0){
-            return new DataResponse(["error"=>"no `userId` present"]);
+            return new JSONResponse(["message"=>"no `userId` present"], Http::STATUS_SERVICE_UNAVAILABLE);
         }
         // create new publish job
         $job = new TransferHandler($this->mapper, $this->config);
@@ -115,15 +116,14 @@ class Eudat extends Controller {
         $fcStatus->setCreatedAt(time());
         $fcStatus->setUpdatedAt(time());
         $this->mapper->insert($fcStatus);
-        //TODO: perhaps we should add a duplicate publish check here!
+        //TODO: we should add a configuration setting for admins to configure the maximum number of uploads per user
 
         // register transfer job
         \OC::$server->getJobList()->add($job, ['transferId' => $fcStatus->getId(), 'userId' => $userId]);
 
         // TODO: respond with success
-        return new DataResponse(["publish" => ["name" => ""]]);
+        return new JSONResponse(["message" => 'Transferring file to B2SHARE in the Background'], Http::STATUS_ACCEPTED);
     }
-
     // /**
     // * Page do view publication view
     // * @NoAdminRequired

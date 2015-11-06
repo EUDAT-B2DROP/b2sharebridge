@@ -31,10 +31,8 @@ class PageControllerTest extends PHPUnit_Framework_TestCase {
         );
     }
 
-#    public function testIndex() {
-#        $result = $this->controller->index();
-#        $this->assertEquals(['user' => 'john'], $result->getParams());
-#        $this->assertEquals('main', $result->getTemplateName());
-#        $this->assertTrue($result instanceof TemplateResponse);
-#    }
+    public function testIndex() {
+        $result = $this->controller->index();
+        $this->assertEquals(['user' => 'john'], $result->getParams());
+    }
 }

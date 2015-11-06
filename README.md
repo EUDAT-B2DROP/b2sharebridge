@@ -1,6 +1,8 @@
 # Eudat B2SHARE integration app
 
-Place this app in **owncloud/apps/**
+[![Build Status](https://travis-ci.org/EUDAT-B2DROP/b2share-bridge.svg?branch=master)](https://travis-ci.org/EUDAT-B2DROP/b2share-bridge)
+
+Place this app in **owncloud/apps/**, activate it using a owncloud admin account. Afterwards configure a B2SHARE endpoint using the admin menu.
 
 
 ## Running tests

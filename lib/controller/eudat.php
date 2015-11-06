@@ -120,7 +120,7 @@ class Eudat extends Controller {
         $fcStatus->setCreatedAt(time());
         $fcStatus->setUpdatedAt(time());
         $this->mapper->insert($fcStatus);
-        //TODO: we should add a configuration setting for admins to configure the maximum number of uploads per user
+        //TODO: we should add a configuration setting for admins to configure the maximum number of uploads per user and a max filesize. both to avoid DoS
 
 
         $token = '';

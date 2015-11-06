@@ -14,6 +14,7 @@ namespace OCA\Eudat\AppInfo;
 
 use OCA\Eudat\Controller\Eudat;
 use OCA\Eudat\Db\FilecacheStatusMapper;
+use OCA\Eudat\Publish;
 use OCP\AppFramework\App;
 use OCP\IContainer;
 
@@ -36,6 +37,7 @@ class Application extends App {
 
         $container->registerService('EudatController', function(IContainer $c) {
             $server = $c->query('ServerContainer');
+
             return new Eudat(
                 $c->query('AppName'),
                 $server->getRequest(),
@@ -51,6 +53,16 @@ class Application extends App {
 
             $user = $server->getUserSession()->getUser();
             return ($user) ? $user->getUID() : '';
+        });
+
+        $container->registerService('PublishBackend', function (IContainer $c) {
+            $server = $c->query('ServerContainer');
+
+            // TODO: we could inject the publish backend via config.
+            // $backend = $server->getConfig()->getAppValue('eudat', 'publish_backend');
+            $backend = 'OCA\Eudat\Publish\Swift';
+            $baseurl = $server->getConfig()->getAppValue('eudat', 'publish_baseurl');
+            return new $backend($baseurl);
         });
     }
 }

@@ -19,6 +19,6 @@ Util::addStyle('eudat', 'settings');
 $config = \OC::$server->getConfig();
 
 $tmpl = new Template( 'eudat', 'settings');
-$tmpl->assign('b2share_endpoint_url', $config->getAppValue('eudat', 'b2share_endpoint_url'));
+$tmpl->assign('publish_baseurl', $config->getAppValue('eudat', 'publish_baseurl'));
 
 return $tmpl->fetchPage();

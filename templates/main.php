@@ -49,6 +49,7 @@ style('files', 'files');
                             <th>Transfer ID</th>
                             <th>Filename</th>
                             <th>Status</th>
+                            <th>Publish URL</th>
                             <th>Publish Date</th>
                             <th>Last Update</th>
                         </tr>
@@ -60,6 +61,7 @@ style('files', 'files');
                                 <td><?php p($publication->getFilename()) ?></td>
                                 <?php // TODO: echo as user specific timedate ?>
                                 <td><?php p($publication->getStatus()) ?></td>
+                                <td><a target="_blank" href=<?php p($publication->getUrl()) ?>>URL</a></td>
                                 <td><?php p(date('D\, j M Y H:i:s', $publication->getCreatedAt())) ?></td>
                                 <td><?php p(date('D\, j M Y H:i:s', $publication->getUpdatedAt())) ?></td>
                             </tr>

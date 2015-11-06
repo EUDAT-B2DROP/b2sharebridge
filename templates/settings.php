@@ -3,8 +3,8 @@
 <div class="section" id="eudat_b2share">
     <h2><?php p($l->t('EUDAT B2SHARE Bridge'));?></h2>
     <p name="b2share_url_field" id="b2shareUrlField">
-        <input type="text" name="b2share_endpoint_url" id="b2shareUrl" placeholder="https://b2share.eudat.eu" style="width: 400px"
-               value="<?php p($_['b2share_endpoint_url']); ?>" />
+        <input type="text" name="publish_baseurl" id="b2shareUrl" placeholder="https://b2share.eudat.eu" style="width: 400px"
+               value="<?php p($_['publish_baseurl']); ?>" />
         <!--<span class="regexstatus success" id="regexstatusSuccess" style="visibility: hidden"></span>
         <span class="regexstatus error" id="regexstatusError" style="visibility: hidden"></span>-->
         <br />

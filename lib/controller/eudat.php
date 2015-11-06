@@ -111,7 +111,7 @@ class Eudat extends Controller {
             return new JSONResponse(['message'=>'Internal server error, contact the EUDAT helpdesk', 'status' => 'error']);
         }
 
-        // create the actual transfer job
+        // create the actual transfer job in the database
         $job = new TransferHandler($this->mapper, $this->config);
         $fcStatus = new FilecacheStatus();
         $fcStatus->setFileid($id);
@@ -122,8 +122,10 @@ class Eudat extends Controller {
         $this->mapper->insert($fcStatus);
         //TODO: we should add a configuration setting for admins to configure the maximum number of uploads per user
 
-        // register transfer job
-        \OC::$server->getJobList()->add($job, ['transferId' => $fcStatus->getId(), 'userId' => $userId]);
+
+        $token = '';
+        // register transfer cron
+        \OC::$server->getJobList()->add($job, ['transferId' => $fcStatus->getId(),'token' => $token, 'userId' => $userId]);
 
         return new JSONResponse(["message" => 'Transferring file to B2SHARE in the Background', 'status' => 'success']);
     }

@@ -12,6 +12,7 @@ namespace OCA\Eudat\Job;
 
 use OCA\Eudat\AppInfo\Application;
 use OCA\Eudat\Db\FilecacheStatusMapper;
+use OCA\Eudat\Publish\IPublish;
 
 use OC\BackgroundJob\QueuedJob;
 use OC\Files\Filesystem;
@@ -21,24 +22,28 @@ use OCP\Util;
 
 class TransferHandler extends QueuedJob {
 
-    protected $mapper;
-    protected $config;
+    private $mapper;
+    private $config;
+    private $publisher;
 
     public function __construct(FilecacheStatusMapper $mapper = null,
-                                IConfig $config = null){
-        if ($mapper === null || $config === null) {
+                                IConfig $config = null,
+                                IPublish $publisher = null){
+        if ($mapper === null || $config === null || $publisher === null) {
             $this->fixTransferForCron();
 
         }
         else {
             $this->mapper = $mapper;
             $this->config = $config;
+            $this->publisher = $publisher;
         }
     }
 
     protected function fixTransferForCron() {
         $application = new Application();
         $this->mapper = $application->getContainer()->query('FilecacheStatusMapper');
+        $this->publisher = $application->getContainer()->query('PublishBackend');
         $this->config = \OC::$server->getConfig();
     }
 
@@ -48,8 +53,8 @@ class TransferHandler extends QueuedJob {
      * @return \null
      */
     public function run($args){
-        if(!array_key_exists('transferId', $args)){
-            Util::writeLog('transfer', 'Bad request, can not handle transfer without transferId', 3);
+        if(!array_key_exists('transferId', $args) || !array_key_exists('token', $args)){
+            Util::writeLog('transfer', 'Bad request, can not handle transfer without transferId and/or token', 3);
             return;
         }
         // get the file transfer object for current job
@@ -59,40 +64,35 @@ class TransferHandler extends QueuedJob {
         $this->mapper->update($fcStatus);
         $user = $fcStatus->getOwner();
         $fileId = $fcStatus->getFileid();
-        $b2share_url = $this->config->getAppValue('eudat', 'b2share_endpoint_url');
-
-        Util::writeLog('transfer', 'Publishing to'.$b2share_url, 3);
 
         Filesystem::init($user, '/');
-        $path = Filesystem::getPath($fileId);
-        $has_access = Filesystem::isReadable($path);
+        $filename = Filesystem::getPath($fileId);
+        $has_access = Filesystem::isReadable($filename);
         if ($has_access) {
             $view = Filesystem::getView();
             // TODO: is it good to take the owncloud fopen?
-            $handle = $view->fopen($path, 'rb');
-            $size = $view->filesize($path);
 
-            $curl_client = curl_init($b2share_url.'/'.$args['transferId']);
+            $this->publisher->create($args['token'], $filename);
 
-            curl_setopt($curl_client, CURLOPT_INFILE, $handle);
-            curl_setopt($curl_client, CURLOPT_INFILESIZE, $size);
-            curl_setopt($curl_client, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl_client, CURLOPT_PUT, true);
-            curl_setopt($curl_client, CURLOPT_HTTPHEADER, array('X-Auth-Token: ', 'Expect:'));
+            $handle = $view->fopen($filename, 'rb');
+            $size = $view->filesize($filename);
+            $this->publisher->upload($handle, $size);
 
-            $curl_success = curl_exec($curl_client);
-            if (!$curl_success) {
-                Util::writeLog('transfer_path', 'Error communicating with B2SHARE'.$curl_success, 3);
-                $fcStatus->setStatus("error while accessing b2share");
+            $result = $this->publisher->finalize();
+
+            if ($result['status'] === 'success') {
+                Util::writeLog('transfer_path', 'Communication to B2SHARE successfull: '.$result['output'].$result['url'], 0);
+                $fcStatus->setStatus('published');
+                $fcStatus->setUrl($result['url']);
             }
             else {
-                Util::writeLog('transfer_path', 'Communication to B2SHARE successfull:'.$curl_success, 0);
-                $fcStatus->setStatus("published");
+                Util::writeLog('transfer_path', 'Error communicating with B2SHARE'.$result['output'], 3);
+                $fcStatus->setStatus('error while publishing');
             }
         }
         else {
             Util::writeLog('transfer_path', 'Internal error: file not accessible', 3);
-            $fcStatus->setStatus("internal error while publishing");
+            $fcStatus->setStatus('internal error while publishing');
         }
         $fcStatus->setUpdatedAt(time());
         $this->mapper->update($fcStatus);

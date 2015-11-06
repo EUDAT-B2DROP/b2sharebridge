@@ -23,7 +23,7 @@ $navigationEntry = function () use ($c) {
         'order' => 100,
         'name' => $c->query('EudatL10N')->t('B2SHARE'),
         'href' => $c->getServer()->getURLGenerator()->linkToRoute('eudat.Eudat.index'),
-        'icon' => $c->getServer()->getURLGenerator()->imagePath('eudat', 'app.svg'),
+        'icon' => $c->getServer()->getURLGenerator()->imagePath('eudat', 'appbrowsericon.svg'),
     ];
 };
 

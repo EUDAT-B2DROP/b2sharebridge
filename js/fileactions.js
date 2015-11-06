@@ -16,7 +16,7 @@
                 mime: 'all',
                 permissions: OC.PERMISSION_READ,
                 icon:function() {
-                    return OC.imagePath('eudat', 'actions/cloud_upload');
+                    return OC.imagePath('eudat', 'filelisticon');
                 },
                 actionHandler:function(filename, context) {
 

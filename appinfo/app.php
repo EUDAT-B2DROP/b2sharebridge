@@ -29,9 +29,5 @@ $navigationEntry = function () use ($c) {
 
 $c->getServer()->getNavigationManager()->add($navigationEntry);
 
-// register classes
-\OC::$CLASSPATH['OCA\Eudat\TransferHandler'] = 'eudat/lib/job/transferhandler.php';
-\OC::$CLASSPATH['OCA\Eudat\Controller'] = 'eudat/lib/controller/eudat.php';
-
 App::registerAdmin('eudat', 'lib/settings');
 Util::addScript('eudat', 'fileactions');

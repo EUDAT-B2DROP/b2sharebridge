@@ -87,12 +87,12 @@ class TransferHandler extends QueuedJob {
             }
             else {
                 Util::writeLog('transfer_path', 'Error communicating with B2SHARE'.$result['output'], 3);
-                $fcStatus->setStatus('error while publishing');
+                $fcStatus->setStatus('external error');
             }
         }
         else {
             Util::writeLog('transfer_path', 'Internal error: file not accessible', 3);
-            $fcStatus->setStatus('internal error while publishing');
+            $fcStatus->setStatus('internal error');
         }
         $fcStatus->setUpdatedAt(time());
         $this->mapper->update($fcStatus);

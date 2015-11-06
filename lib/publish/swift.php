@@ -48,9 +48,20 @@ class Swift implements IPublish
      */
     public function finalize()
     {
-        $this->result['output'] = curl_exec($this->curl_client);
+        $tmp = curl_exec($this->curl_client);
+        $response_code = curl_getinfo($this->curl_client)['http_code'];
+
+        if ($response_code === 201) {
+            $this->result['output'] = 'successfully transferred file';
+            $this->result['status'] = 'success';
+
+        }
+        else {
+            $this->result['output'] = 'error transferring file'.$tmp;
+            $this->result['status'] = 'error';
+
+        }
         curl_close($this->curl_client);
-        $this->result['status'] = 'success';
         return $this->result;
     }
 
@@ -64,6 +75,7 @@ class Swift implements IPublish
         curl_setopt($this->curl_client, CURLOPT_INFILESIZE, $filesize);
         curl_setopt($this->curl_client, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->curl_client, CURLOPT_PUT, true);
+        curl_setopt($this->curl_client, CURLOPT_FORBID_REUSE, 1);
     }
 
 }

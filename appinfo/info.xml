@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <info>
-    <id>eudat</id>
+    <id>b2share-bridge</id>
     <name>EUDAT B2SHARE bridge</name>
     <description>Integration from B2DROP with B2SHARE</description>
     <licence>AGPL</licence>

@@ -1,6 +1,6 @@
 <?php
 /**
- * ownCloud - eudat
+ * ownCloud - b2sharebridge
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the LICENSE file.
@@ -13,12 +13,12 @@ use OCP\Util;
 
 OC_Util::checkAdminUser();
 
-Util::addScript('eudat', 'settings');
-Util::addStyle('eudat', 'settings');
+Util::addScript('b2sharebridge', 'settings');
+Util::addStyle('b2sharebridge', 'settings');
 
 $config = \OC::$server->getConfig();
 
-$tmpl = new Template( 'eudat', 'settings');
-$tmpl->assign('publish_baseurl', $config->getAppValue('eudat', 'publish_baseurl'));
+$tmpl = new Template( 'b2sharebridge', 'settings');
+$tmpl->assign('publish_baseurl', $config->getAppValue('b2sharebridge', 'publish_baseurl'));
 
 return $tmpl->fetchPage();

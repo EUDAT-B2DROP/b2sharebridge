@@ -1,5 +1,5 @@
 <?php
-namespace OCA\Eudat\Publish;
+namespace OCA\B2shareBridge\Publish;
 
 class B2share_Client
 {

@@ -9,7 +9,7 @@
  * @copyright EUDAT 2015
  */
 
-namespace OCA\Eudat\Publish;
+namespace OCA\B2shareBridge\Publish;
 
 class Swift implements IPublish
 {

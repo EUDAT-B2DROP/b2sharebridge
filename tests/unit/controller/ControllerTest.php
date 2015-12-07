@@ -1,6 +1,6 @@
 <?php
 /**
- * ownCloud - eudat
+ * ownCloud - b2sharebridge
  *
  * This file is licensed under the MIT License. See the LICENSE file.
  *
@@ -8,7 +8,7 @@
  * @copyright Dennis Blommesteijn 2015
  */
 
-namespace OCA\Eudat\Controller;
+namespace OCA\B2shareBridge\Controller;
 
 use PHPUnit_Framework_TestCase;
 
@@ -23,7 +23,7 @@ class PageControllerTest extends PHPUnit_Framework_TestCase {
     public function setUp() {
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();
-        $mapper = $this->getMockBuilder('OCA\Eudat\Db\FilecacheStatusMapper')->getMock();
+        $mapper = $this->getMockBuilder('OCA\B2shareBridge\Db\FilecacheStatusMapper')->getMock();
 
 
         $this->controller = new Eudat(

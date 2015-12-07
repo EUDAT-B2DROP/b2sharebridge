@@ -1,6 +1,6 @@
 <?php
 /**
- * ownCloud - eudat
+ * ownCloud - b2sharebridge
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the LICENSE file.
@@ -9,7 +9,7 @@
  * @copyright EUDAT 2015
  */
 
-namespace OCA\Eudat\Controller;
+namespace OCA\B2shareBridge\Controller;
 
 use OCP\IConfig;
 use OCP\IRequest;
@@ -19,11 +19,11 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Util;
 
-use OCA\Eudat\Job\TransferHandler;
-use OCA\Eudat\Db\FilecacheStatusMapper;
-use OCA\Eudat\Db\FilecacheStatus;
+use OCA\B2shareBridge\Job\TransferHandler;
+use OCA\B2shareBridge\Db\FilecacheStatusMapper;
+use OCA\B2shareBridge\Db\FilecacheStatus;
 
-class Eudat extends Controller {
+class B2shareBridge extends Controller {
 
     private $userId;
 
@@ -83,7 +83,7 @@ class Eudat extends Controller {
             'transfers' => $cron_transfers,
             'publications' => $publications
         ];
-        return new TemplateResponse('eudat', 'main', $params);  // templates/main.php
+        return new TemplateResponse('b2sharebridge', 'main', $params);  // templates/main.php
     }
 
     /**
@@ -107,7 +107,7 @@ class Eudat extends Controller {
             $error = 'No user configured for session';
         }
         if (($error)) {
-            Util::writeLog('eudat', $error, 3);
+            Util::writeLog('b2sharebridge', $error, 3);
             return new JSONResponse(['message'=>'Internal server error, contact the EUDAT helpdesk', 'status' => 'error']);
         }
 

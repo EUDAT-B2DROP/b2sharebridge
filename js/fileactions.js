@@ -3,11 +3,11 @@
 
 (function() {
 
-    if (!OCA.Eudat) {
-        OCA.Eudat = {};
+    if (!OCA.B2shareBridge) {
+        OCA.B2shareBridge = {};
     }
 
-    OCA.Eudat.Publish = {
+    OCA.B2shareBridge.Publish = {
         attach:function(fileList) {
             var fileActions = fileList.fileActions;
             fileActions.registerAction({
@@ -16,16 +16,16 @@
                 mime: 'all',
                 permissions: OC.PERMISSION_READ,
                 icon:function() {
-                    return OC.imagePath('eudat', 'filelisticon');
+                    return OC.imagePath('b2sharebridge', 'filelisticon');
                 },
                 actionHandler:function(filename, context) {
 
-                    $.post(OC.generateUrl('/apps/eudat/publish'), { id: context.$file.data('id') }, function (result) {
+                    $.post(OC.generateUrl('/apps/b2sharebridge/publish'), { id: context.$file.data('id') }, function (result) {
                         if (result && result.status === 'success') {
-                            OC.dialogs.info(t('eudat', result.message), t('eudat', 'Info'));
+                            OC.dialogs.info(t('b2sharebridge', result.message), t('b2sharebridge', 'Info'));
                         }
                         else {
-                            OC.dialogs.alert(t('eudat', result.message), t('eudat', 'Error'));
+                            OC.dialogs.alert(t('b2sharebridge', result.message), t('b2sharebridge', 'Error'));
                         }
                     }
                     );
@@ -52,4 +52,4 @@
 
 })();
 
-OC.Plugins.register('OCA.Files.FileList', OCA.Eudat.Publish);
+OC.Plugins.register('OCA.Files.FileList', OCA.B2shareBridge.Publish);

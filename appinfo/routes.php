@@ -1,6 +1,6 @@
 <?php
 /**
- * ownCloud - eudat
+ * ownCloud - b2sharebridge
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the LICENSE file.
@@ -16,10 +16,10 @@
  * it's instantiated in there
  */
 
-namespace OCA\Eudat\AppInfo;
+namespace OCA\B2shareBridge\AppInfo;
 
 $application = new Application();
 $application->registerRoutes($this, ['routes' => [
-    ['name' => 'Eudat#index', 'url' => '/', 'verb' => 'GET'],
-    ['name' => 'Eudat#publish', 'url' => '/publish', 'verb' => 'POST'],
+    ['name' => 'B2shareBridge#index', 'url' => '/', 'verb' => 'GET'],
+    ['name' => 'B2shareBridge#publish', 'url' => '/publish', 'verb' => 'POST'],
 ]]);

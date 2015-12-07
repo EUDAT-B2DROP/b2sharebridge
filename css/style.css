@@ -1,4 +1,4 @@
-.eudat h1 {
+.b2sharebridge h1 {
   font-family: inherit;
   font-weight: 500;
   font-size: 36px;
@@ -6,15 +6,15 @@
   color: inherit;
 }
 
-.eudat h1 small {
+.b2sharebridge h1 small {
   color: gray;
 }
 
-.eudat table{
+.b2sharebridge table{
 	margin-top: 20px;
 	width: 100%;
 }
 
-.eudat .publish-queue-list th {
+.b2sharebridge .publish-queue-list th {
 	/*text-align: left;*/
 }

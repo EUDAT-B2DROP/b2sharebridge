@@ -1,9 +1,9 @@
 <?php
-style('eudat', 'style');
+style('b2sharebridge', 'style');
 style('files', 'files');
 ?>
 
-<div id="app" class="eudat">
+<div id="app" class="b2sharebridge">
     <div id="app-navigation">
         <?php print_unescaped($this->inc('part.navigation')); ?>
         <?php print_unescaped($this->inc('part.settings')); ?>

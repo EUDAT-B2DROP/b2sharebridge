@@ -1,6 +1,6 @@
 <?php
 /**
- * ownCloud - eudat
+ * ownCloud - b2sharebridge
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the LICENSE file.
@@ -9,7 +9,7 @@
  * @copyright EUDAT 2015
  */
 
-namespace OCA\Eudat\Db;
+namespace OCA\B2shareBridge\Db;
 
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\Mapper;
@@ -17,7 +17,7 @@ use OCP\AppFramework\Db\Mapper;
 class FilecacheStatusMapper extends Mapper {
 
     public function __construct(IDBConnection $db) {
-        parent::__construct($db, 'eudat_filecache_status', '\OCA\Eudat\Db\FilecacheStatus');
+        parent::__construct($db, 'eudat_filecache_status', '\OCA\B2shareBridge\Db\FilecacheStatus');
     }
 
 
@@ -26,28 +26,28 @@ class FilecacheStatusMapper extends Mapper {
      * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
      */
     public function find($id) {
-        $sql = 'SELECT * FROM `*PREFIX*eudat_filecache_status` ' . 'WHERE `id` = ?';
+        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` ' . 'WHERE `id` = ?';
         return $this->findEntity($sql, [$id]);
     }
 
 
     // public function findAll($limit=null, $offset=null) {
-    //     $sql = 'SELECT * FROM `*PREFIX*eudat_filecache_status`';
+    //     $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status`';
     //     return $this->findEntities($sql, $limit, $offset);
     // }
 
     public function findAll() {
-        $sql = 'SELECT * FROM *PREFIX*eudat_filecache_status';
+        $sql = 'SELECT * FROM *PREFIX*b2sharebridge_filecache_status';
         return $this->findEntities($sql);
     }
 
     public function findAllForUser($user) {
-        $sql = 'SELECT * FROM `*PREFIX*eudat_filecache_status` ' . 'WHERE `owner` = ?';
+        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` ' . 'WHERE `owner` = ?';
         return $this->findEntities($sql, [$user]);
     }
 
     // public function authorNameCount($name) {
-    //     $sql = 'SELECT COUNT(*) AS `count` FROM `*PREFIX*eudat_filecache_status` ' .
+    //     $sql = 'SELECT COUNT(*) AS `count` FROM `*PREFIX*b2sharebridge_filecache_status` ' .
     //         'WHERE `name` = ?';
     //     $stmt = $this->execute($sql, [$name]);
 

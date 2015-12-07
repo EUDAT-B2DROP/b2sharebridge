@@ -1,7 +1,7 @@
 <?php
 
 /**
- * ownCloud - eudat
+ * ownCloud - b2sharebridge
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the LICENSE file.
@@ -10,22 +10,23 @@
  * @copyright EUDAT 2015
  */
 
-namespace OCA\Eudat\AppInfo;
+namespace OCA\B2shareBridge\AppInfo;
 
-use OCA\Eudat\Controller\Eudat;
-use OCA\Eudat\Db\FilecacheStatusMapper;
-use OCA\Eudat\Publish;
 use OCP\AppFramework\App;
 use OCP\IContainer;
+
+use OCA\B2shareBridge\Controller\B2shareBridge;
+use OCA\B2shareBridge\Db\FilecacheStatusMapper;
+use OCA\B2shareBridge\Publish;
 
 class Application extends App {
     public function __construct (array $urlParams = array())
     {
-        parent::__construct('eudat', $urlParams);
+        parent::__construct('b2sharebridge', $urlParams);
         $container = $this->getContainer();
 
         $container->registerService('EudatL10N', function (IContainer $c) {
-            return $c->query('ServerContainer')->getL10N('eudat');
+            return $c->query('ServerContainer')->getL10N('b2sharebridge');
         });
 
         $container->registerService('FilecacheStatusMapper', function (IContainer $c) {
@@ -35,10 +36,10 @@ class Application extends App {
             );
         });
 
-        $container->registerService('EudatController', function(IContainer $c) {
+        $container->registerService('B2shareBridgeController', function(IContainer $c) {
             $server = $c->query('ServerContainer');
 
-            return new Eudat(
+            return new B2shareBridge(
                 $c->query('AppName'),
                 $server->getRequest(),
                 $server->getConfig(),
@@ -60,8 +61,8 @@ class Application extends App {
 
             // TODO: we could inject the publish backend via config.
             // $backend = $server->getConfig()->getAppValue('eudat', 'publish_backend');
-            $backend = 'OCA\Eudat\Publish\Swift';
-            $baseurl = $server->getConfig()->getAppValue('eudat', 'publish_baseurl');
+            $backend = 'OCA\B2shareBridge\Publish\Swift';
+            $baseurl = $server->getConfig()->getAppValue('b2sharebridge', 'publish_baseurl');
             return new $backend($baseurl);
         });
     }

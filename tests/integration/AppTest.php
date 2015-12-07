@@ -1,6 +1,6 @@
 <?php
 /**
- * ownCloud - eudat
+ * ownCloud - b2sharebridge
  *
  * This file is licensed under the MIT License. See the LICENSE file.
  *
@@ -23,13 +23,13 @@ class AppTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $app = new App('eudat');
+        $app = new App('b2sharebridge');
         $this->container = $app->getContainer();
     }
 
     public function testAppInstalled() {
         $appManager = $this->container->query('OCP\App\IAppManager');
-        $this->assertTrue($appManager->isInstalled('eudat'));
+        $this->assertTrue($appManager->isInstalled('b2sharebridge'));
     }
 
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * ownCloud - eudat
+ * ownCloud - b2sharebridge
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the LICENSE file.
@@ -14,7 +14,7 @@
  *
  */
 
-namespace OCA\Eudat\Publish;
+namespace OCA\B2shareBridge\Publish;
 
 interface IPublish {
 

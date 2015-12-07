@@ -1,6 +1,6 @@
 <?php
 /**
- * ownCloud - eudat
+ * ownCloud - b2sharebridge
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the LICENSE file.
@@ -8,7 +8,7 @@
  * @author EUDAT <b2drop-devel@postit.csc.fi>
  * @copyright EUDAT 2015
  */
-namespace OCA\Eudat\Db;
+namespace OCA\B2shareBridge\Db;
 
 use OC\Files\Filesystem;
 use OCP\AppFramework\Db\Entity;

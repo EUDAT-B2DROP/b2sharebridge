@@ -1,6 +1,6 @@
 <?php
 /**
- * ownCloud - eudat
+ * ownCloud - b2sharebridge
  *
  * This file is licensed under the Affero General Public License version 3 or
  * later. See the LICENSE file.
@@ -8,11 +8,11 @@
  * @author EUDAT <b2drop-devel@postit.csc.fi>
  * @copyright EUDAT 2015
  */
-namespace OCA\Eudat\Job;
+namespace OCA\B2shareBridge\Job;
 
-use OCA\Eudat\AppInfo\Application;
-use OCA\Eudat\Db\FilecacheStatusMapper;
-use OCA\Eudat\Publish\IPublish;
+use OCA\B2shareBridge\AppInfo\Application;
+use OCA\B2shareBridge\Db\FilecacheStatusMapper;
+use OCA\B2shareBridge\Publish\IPublish;
 
 use OC\BackgroundJob\QueuedJob;
 use OC\Files\Filesystem;

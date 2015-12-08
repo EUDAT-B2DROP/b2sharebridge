@@ -17,8 +17,6 @@ matrix:
   include:
     - php: 5.4
       env: DB=sqlite
-    - php: 5.4
-      env: DB=pgsql
 
 
 install:
@@ -27,8 +25,6 @@ install:
   - sudo apt-get -y install python3-jinja2 python3-setuptools
   - sudo easy_install3 requests
   - sudo easy_install3 ocdev
-  # set up postgresql
-  - createuser -U travis -s oc_autotest
   # set up mysql
   - mysql -e 'create database oc_autotest;'
   - mysql -u root -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"
@@ -44,6 +40,7 @@ install:
 
 before_script:
   - cd apps/b2sharebridge
+  - pip freeze
 
 script:
   - phpunit -c phpunit.xml

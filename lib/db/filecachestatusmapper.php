@@ -17,7 +17,7 @@ use OCP\AppFramework\Db\Mapper;
 class FilecacheStatusMapper extends Mapper {
 
     public function __construct(IDBConnection $db) {
-        parent::__construct($db, 'eudat_filecache_status', '\OCA\B2shareBridge\Db\FilecacheStatus');
+        parent::__construct($db, 'b2sharebridge_filecache_status', '\OCA\B2shareBridge\Db\FilecacheStatus');
     }
 
 

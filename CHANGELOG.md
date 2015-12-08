@@ -6,3 +6,6 @@ eudat (0.0.4)
 
 eudat (0.0.5)
 * rename of module from eudat to b2sharebridge
+
+b2sharebridge (0.0.6)
+* simplistic implementation of token passthrough to publishing api using owncloud dialogs.

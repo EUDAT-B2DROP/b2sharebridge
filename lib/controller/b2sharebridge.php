@@ -95,12 +95,14 @@ class B2shareBridge extends Controller {
         $param = $this->request->getParams();
 
         $error = false;
-        if(!is_array($param) || !array_key_exists('id', $param)){
-            $error = 'Parameters gotten from UI are no array';
+        if(!is_array($param) || !array_key_exists('id', $param) || !array_key_exists('token', $param)){
+            $error = 'Parameters gotten from UI are no array or there are some missing';
         }
         $id = (int) $param['id'];
-        if(!is_int($id)){
-            $error = 'Problems while parsing fileid';
+        $token = $param['token'];
+
+        if(!is_int($id) || !is_string($token)){
+            $error = 'Problems while parsing fileid or publishToken';
         }
         $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if(strlen($userId) <= 0){
@@ -122,8 +124,6 @@ class B2shareBridge extends Controller {
         $this->mapper->insert($fcStatus);
         //TODO: we should add a configuration setting for admins to configure the maximum number of uploads per user and a max filesize. both to avoid DoS
 
-
-        $token = '';
         // register transfer cron
         \OC::$server->getJobList()->add($job, ['transferId' => $fcStatus->getId(),'token' => $token, 'userId' => $userId]);
 

@@ -1,5 +1,14 @@
 
-
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+    }
+    return "";
+}
 
 (function() {
 
@@ -15,36 +24,40 @@
                 displayName: t('files', 'B2SHARE'),
                 mime: 'all',
                 permissions: OC.PERMISSION_READ,
-                icon:function() {
-                    return OC.imagePath('b2sharebridge', 'filelisticon');
-                },
+                icon:OC.imagePath('b2sharebridge', 'filelisticon'),
                 actionHandler:function(filename, context) {
-
-                    $.post(OC.generateUrl('/apps/b2sharebridge/publish'), { id: context.$file.data('id') }, function (result) {
-                        if (result && result.status === 'success') {
-                            OC.dialogs.info(t('b2sharebridge', result.message), t('b2sharebridge', 'Info'));
-                        }
-                        else {
-                            OC.dialogs.alert(t('b2sharebridge', result.message), t('b2sharebridge', 'Error'));
-                        }
+                    publishToken = getCookie('publishToken');
+                    if (publishToken == '') {
+                        OC.dialogs.prompt(
+                            t(
+                                'b2sharebridge',
+                                'Please provide the token for B2SHARE, we will store it in your Browser session'
+                            ),
+                            t('b2sharebridge', 'B2SHARE API auth token'),
+                            function (decision, password) {
+                                if (decision) {
+                                    document.cookie = "publishToken=" + password;
+                                    publishToken = password;
+                                }
+                                //share.password = password;
+                                //callback(result, share);
+                            },
+                            true,
+                            t('b2sharebridge', 'B2SHARE API auth token'),
+                            true
+                        ).then(this._adjustDialog);
                     }
-                    );
-
-                    // var downloadFileaction = $(context.$file).find('.fileactions .action-download');
-
-                    // // don't allow a second click on the download action
-                    // if(downloadFileaction.hasClass('disabled')) {
-                    //  return;
-                    // }
-
-                    // if (url) {
-                    //  var disableLoadingState = function() {
-                    //      context.fileList.showFileBusyState(filename, false);
-                    //  };
-
-                    //  context.fileList.showFileBusyState(downloadFileaction, true);
-                    //  OCA.Files.Files.handleDownload(url, disableLoadingState);
-                    // }
+                    if (publishToken != '') {
+                        $.post(OC.generateUrl('/apps/b2sharebridge/publish'), {id: context.$file.data('id'), token: publishToken}, function (result) {
+                            if (result && result.status === 'success') {
+                                OC.dialogs.info(t('b2sharebridge', result.message), t('b2sharebridge', 'Info'));
+                            }
+                            else {
+                                OC.dialogs.alert(t('b2sharebridge', result.message), t('b2sharebridge', 'Error'));
+                            }
+                        }
+                        );
+                    }
                 }
             });
         }

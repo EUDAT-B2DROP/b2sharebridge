@@ -26,8 +26,8 @@ class PageControllerTest extends PHPUnit_Framework_TestCase {
         $mapper = $this->getMockBuilder('OCA\B2shareBridge\Db\FilecacheStatusMapper')->getMock();
 
 
-        $this->controller = new Eudat(
-            'eudat', $request, $config, $mapper, $this->userId
+        $this->controller = new B2shareBridge(
+            'b2sharebridge', $request, $config, $mapper, $this->userId
         );
     }
 

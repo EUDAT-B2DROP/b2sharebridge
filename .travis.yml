@@ -1,22 +1,17 @@
 language: php
+
 php:
-  - 5.4
   - 5.5
   - 5.6
   - hhvm
 
 env:
-  global:
-    - BRANCH=master
-  matrix:
-    - DB=mysql
-
-matrix:
-  allow_failures:
-    - php: hhvm
-  include:
-    - php: 5.4
-      env: DB=sqlite
+  - DB=sqlite BRANCH=master
+  - DB=sqlite BRANCH=stable8.1
+  - DB=sqlite BRANCH=stable8.2
+  - DB=mysql BRANCH=master
+  - DB=mysql BRANCH=stable8.1
+  - DB=mysql BRANCH=stable8.2
 
 
 install:

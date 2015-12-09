@@ -12,9 +12,7 @@ use OCP\Template;
 
 OC_Util::checkLoggedIn();
 
-$config = \OC::$server->getConfig();
 $tmpl = new Template('b2sharebridge', 'settings-personal');
-//$tmpl->assign('publish_url', $config->getAppValue('b2sharebridge', 'publish_baseurl'));
-$tmpl->assign('publish_baseurl', $config->getAppValue('b2sharebridge', 'publish_baseurl'));
+$tmpl->assign('publish_baseurl', \OC::$server->getConfig()->getAppValue('b2sharebridge', 'publish_baseurl'));
 
 return $tmpl->fetchPage();

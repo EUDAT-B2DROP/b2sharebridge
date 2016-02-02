@@ -31,7 +31,7 @@ function getCookie(cname) {
                         OC.dialogs.prompt(
                             t(
                                 'b2sharebridge',
-                                'Please provide the token for B2SHARE, we will store it in your Browser session'
+                                'You are publishing for the first time during this browser session, please provide the token for B2SHARE and then restart the publish action.'
                             ),
                             t('b2sharebridge', 'B2SHARE API auth token'),
                             function (decision, password) {
@@ -39,13 +39,11 @@ function getCookie(cname) {
                                     document.cookie = "publishToken=" + password;
                                     publishToken = password;
                                 }
-                                //share.password = password;
-                                //callback(result, share);
                             },
                             true,
                             t('b2sharebridge', 'B2SHARE API auth token'),
                             true
-                        ).then(this._adjustDialog);
+                        );
                     }
                     if (publishToken != '') {
                         $.post(OC.generateUrl('/apps/b2sharebridge/publish'), {id: context.$file.data('id'), token: publishToken}, function (result) {

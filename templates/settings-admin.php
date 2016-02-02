@@ -1,7 +1,4 @@
 <div class="section" id="eudat_b2share">
-    <!-- TODO: if we have translations, add l10n support
-    $l = \OC::$server->getL10N('files_sharing');
-    <h2>  php p($l->t('EUDAT B2SHARE Bridge'));?>  </h2>-->
     <h2>EUDAT B2SHARE Bridge</h2>
 
     <p id="b2shareUrlField">

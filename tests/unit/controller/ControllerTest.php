@@ -23,7 +23,9 @@ class PageControllerTest extends PHPUnit_Framework_TestCase {
     public function setUp() {
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();
-        $mapper = $this->getMockBuilder('OCA\B2shareBridge\Db\FilecacheStatusMapper')->getMock();
+        $mapper = $this->getMockBuilder('OCA\B2shareBridge\Db\FilecacheStatusMapper')
+            ->disableOriginalConstructor()
+            ->getMock();
 
 
         $this->controller = new B2shareBridge(

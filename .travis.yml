@@ -24,7 +24,7 @@ matrix:
       env: DB=mysql BRANCH=stable8.1
 
 install:
-  - pyrus install pear/PHP_CodeSniffer
+  - pear install pear/PHP_CodeSniffer
   - phpenv rehash
   - sudo apt-get update
   # install ocdev

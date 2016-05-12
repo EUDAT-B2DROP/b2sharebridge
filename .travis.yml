@@ -24,6 +24,8 @@ matrix:
       env: DB=mysql BRANCH=stable8.1
 
 install:
+  - pyrus install pear/PHP_CodeSniffer
+  - phpenv rehash
   - sudo apt-get update
   # install ocdev
   - sudo apt-get -y install python3-jinja2 python3-setuptools
@@ -48,3 +50,4 @@ before_script:
 script:
   - phpunit -c phpunit.xml
   - phpunit -c phpunit.integration.xml
+  - phpcs .

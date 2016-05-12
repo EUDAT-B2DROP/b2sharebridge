@@ -1,4 +1,17 @@
 <?php
+/**
+ * OwnCloud - B2sharebridge App
+ *
+ * PHP Version 5-7
+ *
+ * @category  Owncloud
+ * @package   B2shareBridge
+ * @author    EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright 2015 EUDAT
+ * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
+ */
+
 namespace OCA\B2shareBridge\Publish;
 
 class B2share_Client
@@ -17,7 +30,7 @@ class B2share_Client
     }
 
     /**
-     * @param string $token users access token
+     * @param string $token    users access token
      * @param string $filename local filename of file that should be submitted
      */
     public static function depositPipeline($token, $filename)
@@ -47,7 +60,7 @@ class B2share_Client
 
     /**
      * @param cURL_handle $curl_client object that provides curl requests
-     * @param string $token user token
+     * @param string      $token       user token
      * @return string containing the deposit URL
      */
     private static function createDeposit($curl_client, $token)
@@ -70,9 +83,10 @@ class B2share_Client
 
     /**
      * TODO: domain, title, description and open_access should be set by user
-     * @param cURL_handle $curl_client object that provides curl requests
-     * @param string $token user token
-     * @param string $deposit_url url for the deposit
+     *
+     * @param  cURL_handle $curl_client object that provides curl requests
+     * @param  string      $token       user token
+     * @param  string      $deposit_url url for the deposit
      * @return Array php typed json object with response
      */
     private static function finalizeDeposit($curl_client, $token, $deposit_url)
@@ -80,12 +94,16 @@ class B2share_Client
         $api_url = sprintf('%s%s/commit?access_token=%s', self::$api_endpoint, $deposit_url, $token);
         curl_setopt($curl_client, CURLOPT_URL, $api_url);
         curl_setopt($curl_client, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        curl_setopt($curl_client, CURLOPT_POSTFIELDS, json_encode(array(
-            "domain" => "generic",
-            "title" => "test request",
-            "description" => "test request",
-            "open_access" => "true"
-        )));
+        curl_setopt(
+            $curl_client, CURLOPT_POSTFIELDS, json_encode(
+                array(
+                "domain" => "generic",
+                "title" => "test request",
+                "description" => "test request",
+                "open_access" => "true"
+                )
+            )
+        );
         print_r($curl_client);
         $response = self::executeRequest($curl_client);
         return $response;
@@ -93,7 +111,7 @@ class B2share_Client
 
     /**
      * @param cURL_handle $curl_client object that provides curl requests
-     * @param string $token user token
+     * @param string      $token       user token
      * @return Array php typed json object
      */
     public static function getAllObjects($curl_client, $token)
@@ -105,9 +123,9 @@ class B2share_Client
 
     /**
      * @param cURL_handle $curl_client object that provides curl requests
-     * @param string $token user token
-     * @param string $deposit_url b2share api url
-     * @param string $filename filename of the local file to upload
+     * @param string      $token       user token
+     * @param string      $deposit_url b2share api url
+     * @param string      $filename    filename of the local file to upload
      * @return Array php typed json object
      */
     private static function uploadFile($curl_client, $token, $deposit_url, $filename)
@@ -124,7 +142,7 @@ class B2share_Client
  * if we are executed directly, create objects and execute requests
  * TODO: don't use static config but user environment(token) and server config(api) instead
  */
-if ( basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"]) ) {
+if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"]) ) {
     $ini_array = parse_ini_file('../api_config.ini');
     $client = new B2share_Client($ini_array['api']);
     $client->depositPipeline($ini_array['token'], '../README.md');

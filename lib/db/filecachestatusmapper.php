@@ -1,32 +1,63 @@
 <?php
 /**
- * ownCloud - b2sharebridge
+ * OwnCloud - B2sharebridge App
  *
- * This file is licensed under the Affero General Public License version 3 or
- * later. See the LICENSE file.
+ * PHP Version 5-7
  *
- * @author EUDAT <b2drop-devel@postit.csc.fi>
- * @copyright EUDAT 2015
+ * @category  Owncloud
+ * @package   B2shareBridge
+ * @author    EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright 2015 EUDAT
+ * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
 namespace OCA\B2shareBridge\Db;
 
+use OCP\AppFramework\Db\Entity;
 use OCP\IDBConnection;
 use OCP\AppFramework\Db\Mapper;
 
-class FilecacheStatusMapper extends Mapper {
-
-    public function __construct(IDBConnection $db) {
-        parent::__construct($db, 'b2sharebridge_filecache_status', '\OCA\B2shareBridge\Db\FilecacheStatus');
-    }
-
+/**
+ * Work on a database table
+ *
+ * @category Owncloud
+ * @package  B2shareBridge
+ * @author   EUDAT <b2drop-devel@postit.csc.fi>
+ * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
+ */
+class FilecacheStatusMapper extends Mapper
+{
 
     /**
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more than one result
+     * Create the database mapper
+     *
+     * @param IDBConnection $db the database connection to use
      */
-    public function find($id) {
-        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` ' . 'WHERE `id` = ?';
+    public function __construct(IDBConnection $db)
+    {
+        parent::__construct(
+            $db,
+            'b2sharebridge_filecache_status',
+            '\OCA\B2shareBridge\Db\FilecacheStatus'
+        );
+    }
+
+    /**
+     * Find a database entry for a file id
+     *
+     * @param string $id id to find a transfer entry for
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return Entity
+     */
+    public function find($id)
+    {
+        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
+            . 'WHERE `id` = ?';
         return $this->findEntity($sql, [$id]);
     }
 
@@ -36,18 +67,41 @@ class FilecacheStatusMapper extends Mapper {
     //     return $this->findEntities($sql, $limit, $offset);
     // }
 
-    public function findAll() {
+    /**
+     * Return all file transfers
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return array(Entity)
+     */
+    public function findAll()
+    {
         $sql = 'SELECT * FROM *PREFIX*b2sharebridge_filecache_status';
         return $this->findEntities($sql);
     }
 
-    public function findAllForUser($user) {
-        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` ' . 'WHERE `owner` = ?';
+
+    /**
+     * Return all file transfers for current user
+     *
+     * @param string $user name of the user to search transfers for
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return array(Entities)
+     */
+    public function findAllForUser($user)
+    {
+        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
+            . 'WHERE `owner` = ?';
         return $this->findEntities($sql, [$user]);
     }
 
     // public function authorNameCount($name) {
-    //     $sql = 'SELECT COUNT(*) AS `count` FROM `*PREFIX*b2sharebridge_filecache_status` ' .
+    //     $sql = 'SELECT COUNT(*) AS `count`
+    //         FROM `*PREFIX*b2sharebridge_filecache_status` ' .
     //         'WHERE `name` = ?';
     //     $stmt = $this->execute($sql, [$name]);
 

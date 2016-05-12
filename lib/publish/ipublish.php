@@ -1,22 +1,25 @@
 <?php
 /**
- * ownCloud - b2sharebridge
+ * OwnCloud - B2sharebridge App
  *
- * This file is licensed under the Affero General Public License version 3 or
- * later. See the LICENSE file.
+ * PHP Version 5-7
  *
- * @author EUDAT <b2drop-devel@postit.csc.fi>
- * @copyright EUDAT 2015
+ * @category  Owncloud
+ * @package   B2shareBridge
+ * @author    EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright 2015 EUDAT
+ * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
 /**
  * Interface that needs to be implemented for every backend that could get files from b2drop
- *
  */
 
 namespace OCA\B2shareBridge\Publish;
 
-interface IPublish {
+interface IPublish
+{
 
     public function create($token, $filename);
 

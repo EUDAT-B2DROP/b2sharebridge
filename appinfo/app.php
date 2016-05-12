@@ -1,12 +1,15 @@
 <?php
 /**
- * ownCloud - b2sharebridge
+ * OwnCloud - B2sharebridge App
  *
- * This file is licensed under the Affero General Public License version 3 or
- * later. See the LICENSE file.
+ * PHP Version 5-7
  *
- * @author EUDAT <b2drop-devel@postit.csc.fi>
- * @copyright EUDAT 2015
+ * @category  Owncloud
+ * @package   B2shareBridge
+ * @author    EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright 2015 EUDAT
+ * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
 namespace OCA\B2shareBridge\AppInfo;
@@ -22,8 +25,10 @@ $navigationEntry = function () use ($c) {
         'id' => $c->getAppName(),
         'order' => 100,
         'name' => $c->query('EudatL10N')->t('B2SHARE'),
-        'href' => $c->getServer()->getURLGenerator()->linkToRoute('b2sharebridge.B2shareBridge.index'),
-        'icon' => $c->getServer()->getURLGenerator()->imagePath('b2sharebridge', 'appbrowsericon.svg'),
+        'href' => $c->getServer()->getURLGenerator()
+            ->linkToRoute('b2sharebridge.B2shareBridge.index'),
+        'icon' => $c->getServer()->getURLGenerator()
+            ->imagePath('b2sharebridge', 'appbrowsericon.svg'),
     ];
 };
 

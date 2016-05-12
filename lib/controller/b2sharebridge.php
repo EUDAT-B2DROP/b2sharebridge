@@ -1,12 +1,15 @@
 <?php
 /**
- * ownCloud - b2sharebridge
+ * OwnCloud - B2sharebridge App
  *
- * This file is licensed under the Affero General Public License version 3 or
- * later. See the LICENSE file.
+ * PHP Version 5-7
  *
- * @author EUDAT <b2drop-devel@postit.csc.fi>
- * @copyright EUDAT 2015
+ * @category  Owncloud
+ * @package   B2shareBridge
+ * @author    EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright 2015 EUDAT
+ * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
 namespace OCA\B2shareBridge\Controller;
@@ -23,26 +26,37 @@ use OCA\B2shareBridge\Job\TransferHandler;
 use OCA\B2shareBridge\Db\FilecacheStatusMapper;
 use OCA\B2shareBridge\Db\FilecacheStatus;
 
-class B2shareBridge extends Controller {
-
-    private $userId;
+/**
+ * Implement a ownCloud AppFramework Controller
+ *
+ * @category Owncloud
+ * @package  B2shareBridge
+ * @author   EUDAT <b2drop-devel@postit.csc.fi>
+ * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
+ */
+class B2shareBridge extends Controller
+{
+    private $_userId;
 
     /**
-     * @param string $appName
-     * @param IRequest $request
-     * @param IConfig $config
-     * @param $userId
-     * @param FilecacheStatusMapper $mapper
+     * Creates the AppFramwork Controller
+     *
+     * @param string                $appName name of the app
+     * @param IRequest              $request request object
+     * @param IConfig               $config  config object
+     * @param FilecacheStatusMapper $mapper  whatever
+     * @param string                $userId  userid
      */
-    public function __construct($appName,
-                                IRequest $request,
-                                IConfig $config,
-                                FilecacheStatusMapper $mapper,
-                                $userId
-                                ){
-
+    public function __construct(
+        $appName,
+        IRequest $request,
+        IConfig $config,
+        FilecacheStatusMapper $mapper,
+        $userId
+    ) {
         parent::__construct($appName, $request);
-        $this->userId = $userId;
+        $this->_userId = $userId;
         $this->mapper = $mapper;
         $this->config = $config;
 
@@ -55,78 +69,112 @@ class B2shareBridge extends Controller {
      *          basically the only required method to add this exemption, don't
      *          add it to any other method if you don't exactly know what it does
      *
+     * @return          TemplateResponse
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function index() {
+    public function index()
+    {
         $cron_transfers = [];
-        foreach(\OC::$server->getJobList()->getAll() as $cron_transfer){
+        foreach (\OC::$server->getJobList()->getAll() as $cron_transfer) {
             // filter on Transfers
-            if($cron_transfer instanceof TransferHandler){
+            if ($cron_transfer instanceof TransferHandler) {
                 // filter only own requested jobs
-                if($cron_transfer->isPublishingUser($this->userId)) {
+                if ($cron_transfer->isPublishingUser($this->_userId)) {
                     $id = $cron_transfer->getArgument()['transferId'];
                     $publication = $this->mapper->find($id);
-                    $cron_transfers[] = ['id' => $id, 'filename' => $publication->getFilename(), 'date' => $publication->getCreatedAt()];
+                    $cron_transfers[] = [
+                        'id' => $id,
+                        'filename' => $publication->getFilename(),
+                        'date' => $publication->getCreatedAt()
+                    ];
                 }
                 // TODO: admin can view all publications
             }
         }
 
         $publications = [];
-        foreach(array_reverse($this->mapper->findAllForUser($this->userId)) as $publication){
-            $publications[] = $publication;
+        foreach (
+            array_reverse(
+                $this->mapper->findAllForUser($this->_userId)
+            ) as $publication) {
+                $publications[] = $publication;
         }
 
         $params = [
-            'user' => $this->userId,
+            'user' => $this->_userId,
             'transfers' => $cron_transfers,
             'publications' => $publications
         ];
-        return new TemplateResponse('b2sharebridge', 'main', $params);  // templates/main.php
+        return new TemplateResponse('b2sharebridge', 'main', $params);
     }
 
     /**
      * XHR request endpoint for getting publish command
-     * @return JSONResponse
+     *
+     * @return          JSONResponse
      * @NoAdminRequired
      */
-    public function publish(){
+    public function publish()
+    {
         $param = $this->request->getParams();
 
         $error = false;
-        if(!is_array($param) || !array_key_exists('id', $param) || !array_key_exists('token', $param)){
-            $error = 'Parameters gotten from UI are no array or there are some missing';
+        if (!is_array($param)
+            || !array_key_exists('id', $param)
+            || !array_key_exists('token', $param)
+        ) {
+            $error = 'Parameters gotten from UI are no array or they are missing';
         }
         $id = (int) $param['id'];
         $token = $param['token'];
 
-        if(!is_int($id) || !is_string($token)){
+        if (!is_int($id) || !is_string($token)) {
             $error = 'Problems while parsing fileid or publishToken';
         }
-        $userId = \OC::$server->getUserSession()->getUser()->getUID();
-        if(strlen($userId) <= 0){
+        $_userId = \OC::$server->getUserSession()->getUser()->getUID();
+        if (strlen($_userId) <= 0) {
             $error = 'No user configured for session';
         }
         if (($error)) {
             Util::writeLog('b2sharebridge', $error, 3);
-            return new JSONResponse(['message'=>'Internal server error, contact the EUDAT helpdesk', 'status' => 'error']);
+            return new JSONResponse(
+                [
+                    'message'=>'Internal server error, contact the EUDAT helpdesk',
+                    'status' => 'error'
+                ]
+            );
         }
 
         // create the actual transfer job in the database
         $job = new TransferHandler($this->mapper, $this->config);
         $fcStatus = new FilecacheStatus();
         $fcStatus->setFileid($id);
-        $fcStatus->setOwner($userId);
+        $fcStatus->setOwner($_userId);
         $fcStatus->setStatus("new");
         $fcStatus->setCreatedAt(time());
         $fcStatus->setUpdatedAt(time());
         $this->mapper->insert($fcStatus);
-        //TODO: we should add a configuration setting for admins to configure the maximum number of uploads per user and a max filesize. both to avoid DoS
+        /* TODO: we should add a configuration setting for admins to
+         * configure the maximum number of uploads per user and a max filesize.
+         *both to avoid DoS
+         *
+         */
 
         // register transfer cron
-        \OC::$server->getJobList()->add($job, ['transferId' => $fcStatus->getId(),'token' => $token, 'userId' => $userId]);
+        \OC::$server->getJobList()->add(
+            $job, [
+                'transferId' => $fcStatus->getId(),
+                'token' => $token,
+                '_userId' => $_userId
+            ]
+        );
 
-        return new JSONResponse(["message" => 'Transferring file to B2SHARE in the Background', 'status' => 'success']);
+        return new JSONResponse(
+            [
+                "message" => 'Transferring file to B2SHARE in the Background',
+                'status' => 'success'
+            ]
+        );
     }
 }

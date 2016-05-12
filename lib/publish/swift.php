@@ -1,12 +1,15 @@
 <?php
 /**
- * ownCloud - eudat
+ * OwnCloud - B2sharebridge App
  *
- * This file is licensed under the Affero General Public License version 3 or
- * later. See the LICENSE file.
+ * PHP Version 5-7
  *
- * @author EUDAT <b2drop-devel@postit.csc.fi>
- * @copyright EUDAT 2015
+ * @category  Owncloud
+ * @package   B2shareBridge
+ * @author    EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright 2015 EUDAT
+ * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
 namespace OCA\B2shareBridge\Publish;
@@ -30,7 +33,7 @@ class Swift implements IPublish
     }
 
     /**
-     * @param string $token users access token
+     * @param string $token    users access token
      * @param string $filename local filename of file that should be submitted
      *
      * publish to purl via put, use uuid for filename. Use a token and set expect to empty just as a workaround for
@@ -67,7 +70,7 @@ class Swift implements IPublish
 
     /**
      * @param string $filehandle users access token
-     * @param string $filesize local filename of file that should be submitted
+     * @param string $filesize   local filename of file that should be submitted
      */
     public function upload($filehandle, $filesize)
     {

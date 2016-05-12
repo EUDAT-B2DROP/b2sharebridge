@@ -1,20 +1,33 @@
 <?php
 /**
- * ownCloud - b2sharebridge
+ * OwnCloud - B2sharebridge App
  *
- * This file is licensed under the Affero General Public License version 3 or
- * later. See the LICENSE file.
+ * PHP Version 5-7
  *
- * @author EUDAT <b2drop-devel@postit.csc.fi>
- * @copyright EUDAT 2015
+ * @category  Owncloud
+ * @package   B2shareBridge
+ * @author    EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright 2015 EUDAT
+ * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
+
 namespace OCA\B2shareBridge\Db;
 
 use OC\Files\Filesystem;
 use OCP\AppFramework\Db\Entity;
 
-class FilecacheStatus extends Entity {
-
+/**
+ * Creates a database entity for the file upload status
+ *
+ * @category Owncloud
+ * @package  B2shareBridge
+ * @author   EUDAT <b2drop-devel@postit.csc.fi>
+ * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
+ */
+class FilecacheStatus extends Entity
+{
     protected $fileid;
     protected $status;
     protected $owner;
@@ -22,7 +35,11 @@ class FilecacheStatus extends Entity {
     protected $updatedAt;
     protected $url;
 
-    public function __construct() {
+    /**
+     * Creates the actual database entity
+     */
+    public function __construct()
+    {
         $this->addType('fileid', 'integer');
         $this->addType('status', 'string');
         $this->addType('owner', 'string');
@@ -33,9 +50,11 @@ class FilecacheStatus extends Entity {
 
     /**
      * Get filename for fileid
+     *
      * @return \integer
      */
-    public function getFilename(){
+    public function getFilename()
+    {
         return Filesystem::getPath($this->fileid);
     }
 

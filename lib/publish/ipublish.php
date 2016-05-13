@@ -12,19 +12,44 @@
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
-/**
- * Interface that needs to be implemented for every backend that could get files from b2drop
- */
-
 namespace OCA\B2shareBridge\Publish;
 
+/**
+ * Create a interface that must be implemented by publishing backends
+ * 
+ * @category Owncloud
+ * @package  B2shareBridge
+ * @author   EUDAT <b2drop-devel@postit.csc.fi>
+ * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
+ */
 interface IPublish
 {
-
+    /**
+     * Placeholder for actually creating a deposit
+     *
+     * @param string $token    users access token
+     * @param string $filename local filename of file that should be submitted
+     *
+     * @return null
+     */
     public function create($token, $filename);
 
+    /**
+     * Placeholder for upload
+     *
+     * @param string $filehandle users access token
+     * @param string $filesize   local filename of file that should be submitted
+     *
+     * @return null
+     */
     public function upload($filehandle, $filesize);
 
+    /**
+     * Placeholder for finalizing the deposit
+     *
+     * @return null
+     */
     public function finalize();
 
 }

@@ -96,7 +96,7 @@ class Application extends App
                  * $backend = $server->getConfig()
                  *              ->getAppValue('eudat', 'publish_backend');
                  */
-                $backend = 'OCA\B2shareBridge\Publish\Swift';
+                $backend = 'OCA\B2shareBridge\Publish\B2share';
                 $baseurl = $server->getConfig()
                     ->getAppValue('b2sharebridge', 'publish_baseurl');
                 return new $backend($baseurl);

@@ -14,6 +14,9 @@
 
 namespace OCA\B2shareBridge\Publish;
 
+
+use OCP\Util;
+
 /**
  * Implement a backend that is able to move data from owncloud to B2SHARE
  *
@@ -23,9 +26,12 @@ namespace OCA\B2shareBridge\Publish;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class B2share_Client
+class B2share implements IPublish
 {
-    private static $_api_endpoint;
+    private $_api_endpoint;
+    private $_curl_client;
+    private $_result;
+    private $_file_upload_url;
 
     /**
      * Create object for actual upload
@@ -34,177 +40,145 @@ class B2share_Client
      */
     public function __construct($api_endpoint)
     {
-        self::$_api_endpoint = $api_endpoint;
+        $this->_api_endpoint = $api_endpoint;
+        $this->_curl_client = curl_init();
+        $defaults = array(
+            CURLOPT_URL => $this->_api_endpoint . '/api/records/',
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_TIMEOUT => 4,
+            CURLOPT_HEADER => 1
+        );
+        curl_setopt_array($this->_curl_client, $defaults);
     }
 
     /**
-     * Create a deposit pipeline
+     * Publish to url via put, use uuid for filename. Use a token and set expect
+     * to empty just as a workaround for local issues
      *
-     * @param string $token    users access token
-     * @param string $filename local filename of file that should be submitted
+     * @param string $token     users access token
+     * @param string $filename  local filename of file that should be submitted
+     * @param string $community id of community metadata schema, defaults to EUDAT
      *
      * @return null
      */
-    public static function depositPipeline($token, $filename)
-    {
-        $api_url = sprintf(
-            '%s/api/records?access_token=%s',
-            self::$_api_endpoint, $token
-        );
-        $curl_client = curl_init($api_url);
-        curl_setopt($curl_client, CURLOPT_RETURNTRANSFER, 1);
-        $get = self::getAllObjects($curl_client, $token);
-        if (!$get) {
-            exit(1);
-        }
+    public function create(
+        $token,
+        $filename,
+        $community = "e9b9792e-79fb-4b07-b6b4-b9c2bd06d095"
+    ) {
+        curl_setopt($this->_curl_client, CURLOPT_POST, 1);
 
-        curl_setopt($curl_client, CURLOPT_POST, 1);
-        $deposit_url = self::_createDeposit($curl_client, $token);
-        if (!$deposit_url) {
-            print_r("deposit_url: $deposit_url");
-            exit(1);
-        }
-        print_r("deposit_url: $deposit_url");
-
-        $file_upload = self::_uploadFile(
-            $curl_client,
-            $token,
-            $deposit_url,
-            $filename
-        );
-        print_r($file_upload);
-        $response = self::_finalizeDeposit($curl_client, $token, $deposit_url);
-        print_r($response);
-        curl_close($curl_client);
-    }
-
-    /**
-     * Initially create a empty deposit
-     *
-     * @param cURL_handle $curl_client object that provides curl requests
-     * @param string      $token       user token
-     *
-     * @return string containing the deposit URL
-     */
-    private static function _createDeposit($curl_client, $token)
-    {
-        $api_url = sprintf(
-            '%s/api/depositions?access_token=%s',
-            self::$_api_endpoint,
-            $token
-        );
-        curl_setopt($curl_client, CURLOPT_URL, $api_url);
-        $response = self::_executeRequest($curl_client);
-        return $response['location'];
-    }
-
-    /**
-     * Actually execute a curl request
-     *
-     * @param cURL_handle $curl_client object that provides curl requests
-     *
-     * @return Array php typed json object
-     */
-    private static function _executeRequest($curl_client)
-    {
-        $result = curl_exec($curl_client);
-        return json_decode($result, true);
-    }
-
-    /**
-     * TODO: domain, title, description and open_access should be set by user
-     *
-     * @param cURL_handle $curl_client object that provides curl requests
-     * @param string      $token       user token
-     * @param string      $deposit_url url for the deposit
-     *
-     * @return Array php typed json object with response
-     */
-    private static function _finalizeDeposit($curl_client, $token, $deposit_url)
-    {
-        $api_url = sprintf(
-            '%s%s/commit?access_token=%s',
-            self::$_api_endpoint,
-            $deposit_url,
-            $token
-        );
-        curl_setopt($curl_client, CURLOPT_URL, $api_url);
-        curl_setopt(
-            $curl_client,
-            CURLOPT_HTTPHEADER,
-            array('Content-Type: application/json')
-        );
-        curl_setopt(
-            $curl_client, CURLOPT_POSTFIELDS, json_encode(
-                array(
-                "domain" => "generic",
-                "title" => "test request",
-                "description" => "test request",
-                "open_access" => "true"
-                )
+        $data = json_encode(
+            array(
+                "community" => $community,
+                "title" => basename($filename),
+                "open_access" => true
             )
         );
-        print_r($curl_client);
-        $response = self::_executeRequest($curl_client);
-        return $response;
+        curl_setopt(
+            $this->_curl_client,
+            CURLOPT_HTTPHEADER,
+            array(
+                'Content-Type: application/json',
+                'Content-Length: ' . strlen($data))
+        );
+        curl_setopt($this->_curl_client, CURLOPT_POSTFIELDS, $data);
+
+        /* if request to open deposit was successful, extract file upload link
+         * due to b2share offering it via a "Link" key containing two values, this
+         * is  not so beautiful right now.
+         */
+        if (!$response = curl_exec($this->_curl_client)) {
+            return false;
+        } else {
+            $header_size = curl_getinfo($this->_curl_client, CURLINFO_HEADER_SIZE);
+            $headers = self::getHeadersFromCurlResponse(
+                substr(
+                    $response,
+                    0,
+                    $header_size
+                )
+            );
+            if (!$this->_file_upload_url = explode(';', $headers[0]['Link'])[0]) {
+                Util::writeLog(
+                    'b2share_bridge',
+                    'User wants to upload data but b2share did not sent a target',
+                    3
+                );
+                return false;
+            } else {
+                Util::writeLog(
+                    'b2share_bridge',
+                    'User uploading file to:' . $this->_file_upload_url,
+                    1
+                );
+                return true;
+            }
+        }
     }
 
     /**
-     * Get all records for a specific user
+     * Parse plain curl response headers to array, thanks to
+     * stackoverflow.com/questions/10589889/returning-header-as-array-using-curl
      *
-     * @param cURL_handle $curl_client object that provides curl requests
-     * @param string      $token       user token
+     * @param string $headerContent actual headers as plain text
      *
-     * @return Array php typed json object
+     * @return array containing all headers
      */
-    public static function getAllObjects($curl_client, $token)
+    static function getHeadersFromCurlResponse($headerContent)
     {
-        $api_url = sprintf(
-            '%s/api/records?access_token=%s',
-            self::$_api_endpoint,
-            $token
-        );
-        curl_setopt($curl_client, CURLOPT_URL, $api_url);
-        return self::_executeRequest($curl_client);
+        $headers = array();
+        // Split the string on every "double" new line.
+        $arrRequests = explode("\r\n\r\n", $headerContent);
+        // Loop of response headers. The "count() -1" is to
+        //avoid an empty row for the extra line break before the body of response.
+        for ($index = 0; $index < count($arrRequests) - 1; $index++) {
+            foreach (explode("\r\n", $arrRequests[$index]) as $i => $line) {
+                if ($i === 0) {
+                    $headers[$index]['http_code'] = $line;
+                } else {
+                    list ($key, $value) = explode(': ', $line);
+                    $headers[$index][$key] = $value;
+                }
+            }
+        }
+        return $headers;
     }
 
     /**
-     * Upload a file via HTTP
-     * 
-     * @param cURL_handle $curl_client object that provides curl requests
-     * @param string      $token       user token
-     * @param string      $deposit_url b2share api url
-     * @param string      $filename    filename of the local file to upload
+     * Finalize file upload by actually doing it
      *
-     * @return Array php typed json object
+     * @return null
      */
-    private static function _uploadFile(
-        $curl_client,
-        $token,
-        $deposit_url,
-        $filename
-    ) {
-        $api_url = sprintf(
-            '%s%s/files?access_token=%s',
-            self::$_api_endpoint,
-            $deposit_url,
-            $token
+    public function finalize()
+    {
+        Util::writeLog(
+            'b2share_bridge',
+            'Finalize not implemented, we do not close deposits for now:',
+            1
         );
-        curl_setopt($curl_client, CURLOPT_URL, $api_url);
-        $args['file'] = new \CURLFile($filename, 'multipart/form-data');
-        curl_setopt($curl_client, CURLOPT_POSTFIELDS, $args);
-        return self::_executeRequest($curl_client);
     }
-}
 
-/**
- * If we are executed directly, create objects and execute requests
- * TODO: don't use static config but user environment(token) and server config(api)
- */
-if (basename(__FILE__) == basename($_SERVER["SCRIPT_FILENAME"]) ) {
-    $ini_array = parse_ini_file('../api_config.ini');
-    $client = new B2share_Client($ini_array['api']);
-    $client->depositPipeline($ini_array['token'], '../README.md');
-} else {
-    echo "included/required";
+    /**
+     * Create upload object but do not the upload here
+     *
+     * @param string $filehandle users access token
+     * @param string $filesize   local filename of file that should be submitted
+     *
+     * @return null
+     */
+    public function upload($filehandle, $filesize)
+    {
+        curl_setopt($this->_curl_client, CURLOPT_URL, $this->_file_upload_url);
+        curl_setopt($this->_curl_client, CURLOPT_INFILE, $filehandle);
+        curl_setopt($this->_curl_client, CURLOPT_INFILESIZE, $filesize);
+        curl_setopt($this->_curl_client, CURLOPT_PUT, true);
+        curl_setopt($this->_curl_client, CURLOPT_FORBID_REUSE, 1);
+        $response = curl_exec($this->_curl_client);
+        Util::writeLog(
+            'b2share_bridge',
+            $response,
+            0
+        );
+    }
 }

@@ -99,7 +99,10 @@ class B2share implements IPublish
                     $header_size
                 )
             );
-            if (!$this->_file_upload_url = explode(';', $headers[0]['Link'])[0]) {
+            if (!$this->_file_upload_url = explode(
+                    ';',
+                    $headers[0]['Link'])[0].'/'.basename($filename)
+            ) {
                 Util::writeLog(
                     'b2share_bridge',
                     'User wants to upload data but b2share did not sent a target',
@@ -162,7 +165,7 @@ class B2share implements IPublish
     /**
      * Create upload object but do not the upload here
      *
-     * @param string $filehandle users access token
+     * @param string $filehandle file handle
      * @param string $filesize   local filename of file that should be submitted
      *
      * @return null
@@ -170,6 +173,11 @@ class B2share implements IPublish
     public function upload($filehandle, $filesize)
     {
         curl_setopt($this->_curl_client, CURLOPT_URL, $this->_file_upload_url);
+        curl_setopt(
+            $this->_curl_client,
+            CURLOPT_HTTPHEADER,
+            array()
+        );
         curl_setopt($this->_curl_client, CURLOPT_INFILE, $filehandle);
         curl_setopt($this->_curl_client, CURLOPT_INFILESIZE, $filesize);
         curl_setopt($this->_curl_client, CURLOPT_PUT, true);

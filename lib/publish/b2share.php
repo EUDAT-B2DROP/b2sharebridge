@@ -99,23 +99,27 @@ class B2share implements IPublish
                     $header_size
                 )
             );
-            if (!$this->_file_upload_url = explode(
-                    ';',
-                    $headers[0]['Link'])[0].'/'.basename($filename)
+            if (is_array($headers)
+                and is_array($headers[0])
+                and array_key_exists('Link', $headers[0])
             ) {
-                Util::writeLog(
-                    'b2share_bridge',
-                    'User wants to upload data but b2share did not sent a target',
-                    3
-                );
-                return false;
-            } else {
+                $this->_file_upload_url = explode(
+                    ';',
+                    $headers[0]['Link']
+                )[0].'/'.basename($filename);
                 Util::writeLog(
                     'b2share_bridge',
                     'User uploading file to:' . $this->_file_upload_url,
                     1
                 );
                 return true;
+            } else {
+                Util::writeLog(
+                    'b2share_bridge',
+                    'User wants to upload data but b2share did not sent a target',
+                    3
+                );
+                return false;
             }
         }
     }
@@ -172,21 +176,31 @@ class B2share implements IPublish
      */
     public function upload($filehandle, $filesize)
     {
-        curl_setopt($this->_curl_client, CURLOPT_URL, $this->_file_upload_url);
-        curl_setopt(
-            $this->_curl_client,
-            CURLOPT_HTTPHEADER,
-            array()
+        $tmp = curl_init();
+        $config = array(
+            CURLOPT_URL => $this->_file_upload_url,
+            CURLOPT_INFILE => $filehandle,
+            CURLOPT_INFILESIZE => $filesize,
+            CURLOPT_BINARYTRANSFER => true,
+            CURLOPT_PUT => true,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_TIMEOUT => 4,
+            CURLOPT_HEADER => true,
+            CURLINFO_HEADER_OUT => true,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: multipart/form-data',
+                'Accept: */*',
+                'Expect: 100-continue',
+            )
         );
-        curl_setopt($this->_curl_client, CURLOPT_INFILE, $filehandle);
-        curl_setopt($this->_curl_client, CURLOPT_INFILESIZE, $filesize);
-        curl_setopt($this->_curl_client, CURLOPT_PUT, true);
-        curl_setopt($this->_curl_client, CURLOPT_FORBID_REUSE, 1);
-        $response = curl_exec($this->_curl_client);
+        curl_setopt_array($tmp, $config);
+
+        $response = curl_exec($tmp);
+        $tmp2 = curl_getinfo($tmp);
         Util::writeLog(
             'b2share_bridge',
-            $response,
-            0
+            $response.'#####'.curl_getinfo($tmp,CURLINFO_HEADER_OUT),
+            3
         );
     }
 }

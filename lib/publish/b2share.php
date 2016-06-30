@@ -199,7 +199,7 @@ class B2share implements IPublish
         $tmp2 = curl_getinfo($tmp);
         Util::writeLog(
             'b2share_bridge',
-            $response.'#####'.curl_getinfo($tmp,CURLINFO_HEADER_OUT),
+            $response.'#####'.curl_getinfo($tmp, CURLINFO_HEADER_OUT),
             3
         );
     }

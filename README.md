@@ -18,7 +18,7 @@ If a user wants to publish a file, this transfer is done via the B2DROP server i
 
 ## Install
 
-1. on your B2DROP server go to the <owncloud>/core/apps directory
+1. on your B2DROP server go to the <owncloud>/apps directory
 2. git clone this repository
 3. enable the app on the B2DROP/owncloud web interface
 4. configure a B2SHARE endpoint in the B2DROP/owncloud admin menu
@@ -43,7 +43,7 @@ B2SHAREBRIDGE=<YOUR_LOCAL_REPO>
 
 ocdev setup core --dir owncloud --branch $BRANCH --no-history
 
-rsync -uvaPr --delete  --exclude “.git*” --exclude ".idea" $B2SHAREBRIDGE/ owncloud/core/apps/b2sharebridge
+rsync -uvaPr --delete  --exclude “.git*” --exclude ".idea" $B2SHAREBRIDGE/ owncloud/apps/b2sharebridge
 cd owncloud
 ./occ maintenance:install --admin-user admin --admin-pass admin
 ./occ app:enable b2sharebridge

@@ -29,9 +29,10 @@ There are no formal requirements to participate. If there are questions, feel fr
 
 ## Testing
 
-For testing your php code you need to [install PHPUnit](http://phpunit.de/getting-started.html) and run:
+For testing your php code you need to [install PHPUnit](http://phpunit.de/getting-started.html) and PHP_CodeSniffer, then run:
 
     phpunit -c phpunit.xml
+    phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
 
 Another way to directly test your code with your browser is via "ocdev". This is a tool provided by the owncloud developers, it requires python3 (virtualenv is suggested) and php. Some but not all instructions:
 

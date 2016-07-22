@@ -12,7 +12,7 @@
     <author>EUDAT</author>
     <version>0.0.6</version>
     <dependencies>
-        <owncloud min-version="8.1" max-version="9.0" />
+        <owncloud min-version="8.1" max-version="9.1" />
     </dependencies>
     <rememberlogin>false</rememberlogin>
     <category>publishing</category>

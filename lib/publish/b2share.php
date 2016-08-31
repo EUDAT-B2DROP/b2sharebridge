@@ -30,7 +30,7 @@ class B2share implements IPublish
 {
     private $_api_endpoint;
     private $_curl_client;
-    private $_result;
+    private $_deposit_url;
     private $_file_upload_url;
 
     /**
@@ -43,16 +43,17 @@ class B2share implements IPublish
         $this->_api_endpoint = $api_endpoint;
         $this->_curl_client = curl_init();
         $defaults = array(
-            CURLOPT_URL => $this->_api_endpoint . '/api/records/',
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,
-            CURLOPT_HEADER => 1
+            CURLOPT_HEADER => 1,
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_SSL_VERIFYPEER => 0
         );
         curl_setopt_array($this->_curl_client, $defaults);
     }
 
     /**
-     * Publish to url via put, use uuid for filename. Use a token and set expect
+     * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
      * @param string $token     users access token
@@ -66,104 +67,49 @@ class B2share implements IPublish
         $filename,
         $community = "e9b9792e-79fb-4b07-b6b4-b9c2bd06d095"
     ) {
-        curl_setopt($this->_curl_client, CURLOPT_POST, 1);
-
         $data = json_encode(
             array(
-                "community" => $community,
-                "title" => basename($filename),
-                "open_access" => true
+                'community'   => $community,
+                'title'       => basename($filename),
+                'open_access' => true
             )
         );
-        curl_setopt(
-            $this->_curl_client,
-            CURLOPT_HTTPHEADER,
-            array(
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($data))
-        );
-        curl_setopt($this->_curl_client, CURLOPT_POSTFIELDS, $data);
 
-        /* if request to open deposit was successful, extract file upload link
-         * due to b2share offering it via a "Link" key containing two values, this
-         * is  not so beautiful right now.
-         */
-        if (!$response = curl_exec($this->_curl_client)) {
+        $config = array(
+            CURLOPT_URL =>
+                $this->_api_endpoint.'/api/records/?access_token='.$token,
+            CURLOPT_POST => 1,
+            CURLOPT_POSTFIELDS => $data,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+                'Content-Length: '.strlen($data))
+        );
+        curl_setopt_array($this->_curl_client, $config);
+
+
+        $response = curl_exec($this->_curl_client);
+        if (!$response) {
             return false;
         } else {
             $header_size = curl_getinfo($this->_curl_client, CURLINFO_HEADER_SIZE);
-            $headers = self::getHeadersFromCurlResponse(
-                substr(
-                    $response,
-                    0,
-                    $header_size
-                )
-            );
-            if (is_array($headers)
-                and is_array($headers[0])
-                and array_key_exists('Link', $headers[0])
+            $header = substr($response, 0, $header_size);
+            $body = substr($response, $header_size);
+            $results = json_decode(utf8_encode($body));
+            if (array_key_exists('links', $results)
+                and array_key_exists('self', $results->links)
+                and array_key_exists('files', $results->links)
             ) {
-                $this->_file_upload_url = explode(
-                    ';',
-                    $headers[0]['Link']
-                )[0].'/'.basename($filename);
-                Util::writeLog(
-                    'b2share_bridge',
-                    'User uploading file to:' . $this->_file_upload_url,
-                    1
+                $this->_file_upload_url
+                    = $results->links->files.'/'.$filename.'?access_token='.$token;
+                return str_replace(
+                    'draft',
+                    'edit',
+                    str_replace('/api', '', $results->links->self)
                 );
-                return true;
             } else {
-                Util::writeLog(
-                    'b2share_bridge',
-                    'User wants to upload data but b2share did not sent a target',
-                    3
-                );
                 return false;
             }
         }
-    }
-
-    /**
-     * Parse plain curl response headers to array, thanks to
-     * stackoverflow.com/questions/10589889/returning-header-as-array-using-curl
-     *
-     * @param string $headerContent actual headers as plain text
-     *
-     * @return array containing all headers
-     */
-    static function getHeadersFromCurlResponse($headerContent)
-    {
-        $headers = array();
-        // Split the string on every "double" new line.
-        $arrRequests = explode("\r\n\r\n", $headerContent);
-        // Loop of response headers. The "count() -1" is to
-        //avoid an empty row for the extra line break before the body of response.
-        for ($index = 0; $index < count($arrRequests) - 1; $index++) {
-            foreach (explode("\r\n", $arrRequests[$index]) as $i => $line) {
-                if ($i === 0) {
-                    $headers[$index]['http_code'] = $line;
-                } else {
-                    list ($key, $value) = explode(': ', $line);
-                    $headers[$index][$key] = $value;
-                }
-            }
-        }
-        return $headers;
-    }
-
-    /**
-     * Finalize file upload by actually doing it
-     *
-     * @return null
-     */
-    public function finalize()
-    {
-        Util::writeLog(
-            'b2share_bridge',
-            'Finalize not implemented, we do not close deposits for now:',
-            1
-        );
     }
 
     /**
@@ -172,11 +118,10 @@ class B2share implements IPublish
      * @param string $filehandle file handle
      * @param string $filesize   local filename of file that should be submitted
      *
-     * @return null
+     * @return array
      */
     public function upload($filehandle, $filesize)
     {
-        $tmp = curl_init();
         $config = array(
             CURLOPT_URL => $this->_file_upload_url,
             CURLOPT_INFILE => $filehandle,
@@ -188,19 +133,16 @@ class B2share implements IPublish
             CURLOPT_HEADER => true,
             CURLINFO_HEADER_OUT => true,
             CURLOPT_HTTPHEADER => array(
-                'Content-Type: multipart/form-data',
-                'Accept: */*',
-                'Expect: 100-continue',
+                'Content-Type: application/octet-stream'
             )
         );
-        curl_setopt_array($tmp, $config);
+        curl_setopt_array($this->_curl_client, $config);
 
-        $response = curl_exec($tmp);
-        $tmp2 = curl_getinfo($tmp);
-        Util::writeLog(
-            'b2share_bridge',
-            $response.'#####'.curl_getinfo($tmp, CURLINFO_HEADER_OUT),
-            3
-        );
+        $response = curl_exec($this->_curl_client);
+        if (!$response) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

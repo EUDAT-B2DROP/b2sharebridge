@@ -28,6 +28,15 @@ interface IPublish
     /**
      * Placeholder for actually creating a deposit
      *
+     * @param string $api_endpoint url of the b2access server
+     *
+     * @return null
+     */
+    public function __construct($api_endpoint);
+
+    /**
+     * Placeholder for actually creating a deposit
+     *
      * @param string $token    users access token
      * @param string $filename local filename of file that should be submitted
      *
@@ -44,12 +53,4 @@ interface IPublish
      * @return null
      */
     public function upload($filehandle, $filesize);
-
-    /**
-     * Placeholder for finalizing the deposit
-     *
-     * @return null
-     */
-    public function finalize();
-
 }

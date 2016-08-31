@@ -110,37 +110,27 @@ class TransferHandler extends QueuedJob
             $view = Filesystem::getView();
             // TODO: is it good to take the owncloud fopen?
 
-            $this->_publisher->create($args['token'], $filename);
+            $create_result = $this->_publisher->create(
+                $args['token'],
+                basename($filename)
+            );
+            if ($create_result) {
+                $handle = $view->fopen($filename, 'rb');
+                $size = $view->filesize($filename);
+                $upload_result = $this->_publisher->upload($handle, $size);
 
-            $handle = $view->fopen($filename, 'rb');
-            $size = $view->filesize($filename);
-            $this->_publisher->upload($handle, $size);
+                if ($upload_result) {
+                    $fcStatus->setStatus('published');
+                    $fcStatus->setUrl($create_result);
+                } else {
 
-            $result = $this->_publisher->finalize();
-
-            if ($result['status'] === 'success') {
-                Util::writeLog(
-                    'transfer_path',
-                    'Communication successfull: '.$result['output'].$result['url'],
-                    0
-                );
-                $fcStatus->setStatus('published');
-                $fcStatus->setUrl($result['url']);
+                    $fcStatus->setStatus('External error: during uploading file');
+                }
             } else {
-                Util::writeLog(
-                    'transfer_path',
-                    'Error communicating with B2SHARE'.$result['output'],
-                    3
-                );
-                $fcStatus->setStatus('external error');
+                $fcStatus->setStatus('External error: during creating deposit');
             }
         } else {
-            Util::writeLog(
-                'transfer_path',
-                'Internal error: file not accessible',
-                3
-            );
-            $fcStatus->setStatus('internal error');
+            $fcStatus->setStatus('Internal error: file not accessible');
         }
         $fcStatus->setUpdatedAt(time());
         $this->_mapper->update($fcStatus);

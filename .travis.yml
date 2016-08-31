@@ -27,10 +27,10 @@ install:
   - pear install pear/PHP_CodeSniffer
   - phpenv rehash
   - sudo apt-get update
-  # install ocdev
-  - sudo apt-get -y install python3-jinja2 python3-setuptools
-  - sudo easy_install3 requests
-  - sudo easy_install3 ocdev
+  - sudo apt-get install -y python-pip
+  - pip install -Iv Jinja2==2.6
+  - pip install -Iv MarkupSafe==0.15
+  - pip install ocdev
   # set up mysql
   - mysql -e 'create database oc_autotest;'
   - mysql -u root -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"

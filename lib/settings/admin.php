@@ -15,8 +15,6 @@
 use OCP\Template;
 use OCP\Util;
 
-OC_Util::checkAdminUser();
-
 Util::addScript('b2sharebridge', 'settings');
 Util::addStyle('b2sharebridge', 'settings');
 

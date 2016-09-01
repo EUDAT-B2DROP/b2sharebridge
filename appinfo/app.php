@@ -34,6 +34,6 @@ $navigationEntry = function () use ($c) {
 
 $c->getServer()->getNavigationManager()->add($navigationEntry);
 
-App::registerAdmin('b2sharebridge', 'lib/settings-admin');
-App::registerPersonal('b2sharebridge', 'lib/settings-personal');
+App::registerAdmin('b2sharebridge', 'lib/settings/admin');
+App::registerPersonal('b2sharebridge', 'lib/settings/user');
 Util::addScript('b2sharebridge', 'fileactions');

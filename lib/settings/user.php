@@ -14,8 +14,9 @@
  */
 
 use OCP\Template;
+use OCP\User;
 
-OC_Util::checkLoggedIn();
+User::checkLoggedIn();
 
 $tmpl = new Template('b2sharebridge', 'settings-personal');
 $tmpl->assign(

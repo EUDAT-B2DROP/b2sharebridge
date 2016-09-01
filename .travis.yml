@@ -38,9 +38,11 @@ before_script:
     - mkdir data
     - ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --admin-user admin --admin-pass admin --database $DB --database-pass=''
     - ./occ app:enable b2sharebridge
-    - ./occ app:check-code b2sharebridge
 
 script:
+  # owncloud check-code
+  - ./occ app:check-code b2sharebridge
+  # php unit/lint checking
   - cd apps/b2sharebridge
   - phpunit -c phpunit.xml
   - phpunit -c phpunit.integration.xml

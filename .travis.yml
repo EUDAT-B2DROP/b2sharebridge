@@ -1,53 +1,47 @@
+sudo: false
+dist: trusty
 language: php
 
 php:
+  - 5.4
   - 5.5
   - 5.6
   - 7.0
-  - hhvm
 
 env:
   - DB=sqlite BRANCH=stable8.1
   - DB=sqlite BRANCH=stable8.2
-  - DB=mysql BRANCH=stable9
+  - DB=sqlite BRANCH=stable9
+  - DB=sqlite BRANCH=stable9.1
   - DB=mysql BRANCH=stable8.1
   - DB=mysql BRANCH=stable8.2
   - DB=mysql BRANCH=stable9
+  - DB=mysql BRANCH=stable9.1
 
-matrix:
-  allow_failures:
-    - php: hhvm
-  exclude:
-    - php: 7.0
-      env: DB=sqlite BRANCH=stable8.1
-    - php: 7.0
-      env: DB=mysql BRANCH=stable8.1
+before_install:
+  # install core
+  - cd ../
+  - git clone https://github.com/owncloud/core.git --recursive --depth 1 -b $BRANCH owncloud
+  - mv b2sharebridge owncloud/apps/
 
 install:
   - pear install pear/PHP_CodeSniffer
   - phpenv rehash
-  - sudo apt-get update
-  - sudo apt-get install -y python-pip
-  - pip install -Iv Jinja2==2.6
-  - pip install -Iv MarkupSafe==0.15
-  - pip install ocdev
-  # set up mysql
-  - mysql -e 'create database oc_autotest;'
-  - mysql -u root -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"
-  - mysql -u root -e "grant all on oc_autotest.* to 'oc_autotest'@'localhost';"
-  # install owncloud
-  - cd ..
-  - ocdev setup core --dir owncloud --branch $BRANCH --no-history
-  - mv b2sharebridge owncloud/apps/b2sharebridge
   - phpenv config-add owncloud/apps/b2sharebridge/tests/travis/php.ini
-  - cd owncloud
-  - ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --database-pass --admin-user admin --admin-pass admin --database $DB
-  - ./occ app:enable b2sharebridge
 
 before_script:
-  - cd apps/b2sharebridge
+    - if [[ "$DB" == 'mysql' ]]; then mysql -u root -e 'create database oc_autotest;'; fi
+    - if [[ "$DB" == 'mysql' ]]; then mysql -u root -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"; fi
+    - if [[ "$DB" == 'mysql' ]]; then mysql -u root -e "grant all on oc_autotest.* to 'oc_autotest'@'localhost';"; fi
+    # fill owncloud with default configs and enable news
+    - cd owncloud
+    - mkdir data
+    - ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --admin-user admin --admin-pass admin --database $DB --database-pass=''
+    - ./occ app:enable b2sharebridge
+    - ./occ app:check-code b2sharebridge
 
 script:
+  - cd apps/b2sharebridge
   - phpunit -c phpunit.xml
   - phpunit -c phpunit.integration.xml
   - phpcs --extensions=php --ignore=*/tests/*,*/templates/* .

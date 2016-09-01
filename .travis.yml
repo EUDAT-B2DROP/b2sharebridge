@@ -41,7 +41,7 @@ before_script:
 
 script:
   # owncloud check-code
-  - ./occ app:check-code b2sharebridge
+  #- ./occ app:check-code b2sharebridge
   # php unit/lint checking
   - cd apps/b2sharebridge
   - phpunit -c phpunit.xml

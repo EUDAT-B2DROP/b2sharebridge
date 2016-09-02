@@ -110,11 +110,11 @@ class FilecacheStatusMapper extends Mapper
      *
      * @return int number of active publishs per user
      */
-    public function findCountForUser($user) {
+    public function findCountForUser($user)
+    {
         $sql = 'SELECT COUNT(*) FROM `*PREFIX*b2sharebridge_filecache_status` '
             .'WHERE owner = ? AND status = ?';
 
         return $this->execute($sql, [$user, 'new'])->fetchColumn();
-     }
-
+    }
 }

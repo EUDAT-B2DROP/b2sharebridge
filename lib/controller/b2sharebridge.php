@@ -147,8 +147,16 @@ class B2shareBridge extends Controller
         }
 
 
-        $allowed_uploads = $this->config->getAppValue('b2sharebridge', 'max_uploads', 5);
-        $allowed_filesize=$this->config->getAppValue('b2sharebridge', 'max_upload_filesize', 5);
+        $allowed_uploads = $this->config->getAppValue(
+            'b2sharebridge',
+            'max_uploads',
+            5
+        );
+        $allowed_filesize=$this->config->getAppValue(
+            'b2sharebridge',
+            'max_upload_filesize',
+            5
+        );
 
         $active_uploads = $this->mapper->findCountForUser($_userId);
         if ($active_uploads < $allowed_uploads) {

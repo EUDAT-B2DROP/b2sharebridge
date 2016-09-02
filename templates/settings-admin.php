@@ -6,4 +6,15 @@
                placeholder="https://b2share.eudat.eu" style="width: 400px" value="<?php p($_['publish_baseurl']); ?>" />
         <em>External B2SHARE API endpoint</em>
     </p>
+    <p id="maxB2shareUploadsPerUser">
+        <input title="max_uploads" type="text" name="max_uploads" id="maxB2shareUploads"
+               placeholder="5" style="width: 400px" value="<?php p($_['max_uploads']); ?>" />
+        <em># of uploads per user at the same time</em>
+    </p>
+    <p id="maxB2shareUploadSizePerFile">
+        <input title="max_upload_filesize" type="text" name="max_upload_filesize" id="maxB2shareUploadFilesize"
+               placeholder="512" style="width: 400px" value="<?php p($_['max_upload_filesize']); ?>" />
+        <em>MB maximum filesize per upload</em>
+    </p>
+
 </div>

@@ -37,26 +37,22 @@ class TransferHandler extends QueuedJob
 {
 
     private $_mapper;
-    private $_config;
     private $_publisher;
 
     /**
      * Create the database mapper
      *
      * @param FilecacheStatusMapper $mapper    the database mapper for transfers
-     * @param IConfig               $config    the owncloud config
      * @param IPublish              $publisher publishing backend to use
      */
     public function __construct(
         FilecacheStatusMapper $mapper = null,
-        IConfig $config = null,
         IPublish $publisher = null
     ) {
-        if ($mapper === null || $config === null || $publisher === null) {
+        if ($mapper === null || $publisher === null) {
             $this->fixTransferForCron();
         } else {
             $this->_mapper = $mapper;
-            $this->_config = $config;
             $this->_publisher = $publisher;
         }
     }
@@ -73,7 +69,6 @@ class TransferHandler extends QueuedJob
         $this->_mapper = $application->getContainer()
             ->query('FilecacheStatusMapper');
         $this->_publisher = $application->getContainer()->query('PublishBackend');
-        $this->_config = \OC::$server->getConfig();
     }
 
     /**

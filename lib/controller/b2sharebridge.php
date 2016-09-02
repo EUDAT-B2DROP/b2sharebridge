@@ -14,10 +14,10 @@
 
 namespace OCA\B2shareBridge\Controller;
 
+use OC\Files\Filesystem;
 use OCP\IConfig;
 use OCP\IRequest;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Util;
@@ -146,15 +146,45 @@ class B2shareBridge extends Controller
             );
         }
 
+
+        $allowed_uploads = $this->config->getAppValue('b2sharebridge', 'max_uploads', 5);
+        $allowed_filesize=$this->config->getAppValue('b2sharebridge', 'max_upload_filesize', 5);
+
+        $active_uploads = $this->mapper->findCountForUser($_userId);
+        if ($active_uploads < $allowed_uploads) {
+
+            Filesystem::init($_userId, '/');
+            $view = Filesystem::getView();
+            $filesize = $view->filesize(Filesystem::getPath($id));
+            if ($filesize < $allowed_filesize*1024*1024) {
+                $job = new TransferHandler($this->mapper);
+                $fcStatus = new FilecacheStatus();
+                $fcStatus->setFileid($id);
+                $fcStatus->setOwner($_userId);
+                $fcStatus->setStatus("new");
+                $fcStatus->setCreatedAt(time());
+                $fcStatus->setUpdatedAt(time());
+                $this->mapper->insert($fcStatus);
+            } else {
+                return new JSONResponse(
+                    [
+                        'message' => 'We currently only support files smaller then '.
+                        $allowed_filesize.' MB',
+                        'status' => 'error'
+                    ]
+                );
+            }
+        } else {
+            return new JSONResponse(
+                [
+                    'message' => 'Until your '.$active_uploads.' deposits are done,
+                    you are not allowed to create further deposits.',
+                    'status' => 'error'
+                ]
+            );
+        }
         // create the actual transfer job in the database
-        $job = new TransferHandler($this->mapper, $this->config);
-        $fcStatus = new FilecacheStatus();
-        $fcStatus->setFileid($id);
-        $fcStatus->setOwner($_userId);
-        $fcStatus->setStatus("new");
-        $fcStatus->setCreatedAt(time());
-        $fcStatus->setUpdatedAt(time());
-        $this->mapper->insert($fcStatus);
+
         /* TODO: we should add a configuration setting for admins to
          * configure the maximum number of uploads per user and a max filesize.
          *both to avoid DoS

@@ -99,15 +99,22 @@ class FilecacheStatusMapper extends Mapper
         return $this->findEntities($sql, [$user]);
     }
 
-    // public function authorNameCount($name) {
-    //     $sql = 'SELECT COUNT(*) AS `count`
-    //         FROM `*PREFIX*b2sharebridge_filecache_status` ' .
-    //         'WHERE `name` = ?';
-    //     $stmt = $this->execute($sql, [$name]);
 
-    //     $row = $stmt->fetch();
-    //     $stmt->closeCursor();
-    //     return $row['count'];
-    // }
+    /**
+     * Return the number of currently queued file transfers for a given user
+     *
+     * @param string $user name of the user to search transfers for
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return int number of active publishs per user
+     */
+    public function findCountForUser($user) {
+        $sql = 'SELECT COUNT(*) FROM `*PREFIX*b2sharebridge_filecache_status` '
+            .'WHERE owner = ? AND status = ?';
+
+        return $this->execute($sql, [$user, 'new'])->fetchColumn();
+     }
 
 }

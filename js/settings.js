@@ -7,4 +7,10 @@ $(document).ready(function() {
             OC.AppConfig.setValue('b2sharebridge', $(this).attr('name'), value)
         }
     });
+    $('#maxB2shareUploads').change(function() {
+        OC.AppConfig.setValue('b2sharebridge', $(this).attr('name'), $(this).val())
+    });
+    $('#maxB2shareUploadFilesize').change(function() {
+        OC.AppConfig.setValue('b2sharebridge', $(this).attr('name'), $(this).val())
+    });
 });

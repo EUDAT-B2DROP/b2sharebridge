@@ -28,5 +28,19 @@ $tmpl->assign(
         'publish_baseurl'
     )
 );
+$tmpl->assign(
+    'max_uploads',
+    $config->getAppValue(
+        'b2sharebridge',
+        'max_uploads'
+    )
+);
+$tmpl->assign(
+    'max_upload_filesize',
+    $config->getAppValue(
+        'b2sharebridge',
+        'max_upload_filesize'
+    )
+);
 
 return $tmpl->fetchPage();

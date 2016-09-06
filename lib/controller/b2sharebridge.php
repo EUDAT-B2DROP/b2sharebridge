@@ -191,13 +191,6 @@ class B2shareBridge extends Controller
                 ]
             );
         }
-        // create the actual transfer job in the database
-
-        /* TODO: we should add a configuration setting for admins to
-         * configure the maximum number of uploads per user and a max filesize.
-         *both to avoid DoS
-         *
-         */
 
         // register transfer cron
         \OC::$server->getJobList()->add(

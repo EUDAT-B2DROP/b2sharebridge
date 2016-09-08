@@ -119,13 +119,13 @@ class TransferHandler extends QueuedJob
                     $fcStatus->setUrl($create_result);
                 } else {
 
-                    $fcStatus->setStatus('External error: during uploading file');
+                    $fcStatus->setStatus('error');/**External error: during uploading file*/
                 }
             } else {
-                $fcStatus->setStatus('External error: during creating deposit');
+                $fcStatus->setStatus('error');/**External error: during creating deposit*/
             }
         } else {
-            $fcStatus->setStatus('Internal error: file not accessible');
+            $fcStatus->setStatus('error');/**Internal error: file not accessible*/
         }
         $fcStatus->setUpdatedAt(time());
         $this->_mapper->update($fcStatus);

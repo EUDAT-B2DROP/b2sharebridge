@@ -130,8 +130,8 @@ class FilecacheStatusMapper extends Mapper
     public function findFailedForUser($user)
     {
         $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
-            . 'WHERE `status` LIKE `%error%` AND `owner` = ?';
-        return $this->findEntities($sql, [$user]);
+            . 'WHERE `status` = ? AND `owner` = ?';
+        return $this->findEntities($sql, ['error', $user]);
     }
     
     /**
@@ -147,7 +147,7 @@ class FilecacheStatusMapper extends Mapper
     public function findSuccessfulForUser($user)
     {
         $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
-            . 'WHERE `status` NOT LIKE `%error%` AND `owner` = ?';
-        return $this->findEntities($sql, [$user]);
+            . 'WHERE `status` != ? AND `owner` = ?';
+        return $this->findEntities($sql, ['error', $user]);
     }
 }

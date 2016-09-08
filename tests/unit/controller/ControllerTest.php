@@ -35,7 +35,7 @@ class PageControllerTest extends PHPUnit_Framework_TestCase {
 
     public function testIndex() {
         $result = $this->controller->index();
-        $this->assertEquals(['user' => 'john', 'transfers' => Array (), 'publications' => Array ()], $result->getParams());
+        $this->assertEquals(['user' => 'john', 'transfers' => Array (), 'publications' => Array (), 'fails' => Array ()], $result->getParams());
         $this->assertEquals('main', $result->getTemplateName());
         $this->assertTrue($result instanceof TemplateResponse);
     }

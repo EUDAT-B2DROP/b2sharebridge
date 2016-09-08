@@ -12,10 +12,9 @@ style('files', 'files');
     <div id="app-content">
         <div id="app-content-wrapper">
 
-
-            <h1>Error History <small>(<?php p(sizeof($_['publications'])) ?>)</small></h1>
+            <h1>Error History <small>(<?php p(sizeof($_['fails'])) ?>)</small></h1>
             <table class="publish-queue-list">
-                <?php if(sizeof($_['publications']) > 0): ?>
+                <?php if(sizeof($_['fails']) > 0): ?>
                     <thead>
                         <tr>
                             <th>Transfer ID</th>
@@ -27,15 +26,15 @@ style('files', 'files');
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach($_['publications'] as $publication): ?>
+                        <?php foreach($_['fails'] as $fail): ?>
                             <tr>
-                                <td><?php p($publication->getId()) ?></td>
-                                <td><?php p($publication->getFilename()) ?></td>
+                                <td><?php p($fail->getId()) ?></td>
+                                <td><?php p($fail->getFilename()) ?></td>
                                 <?php // TODO: echo as user specific timedate ?>
-                                <td><?php p($publication->getStatus()) ?></td>
-                                <td><a target="_blank" href=<?php p($publication->getUrl()) ?>>URL</a></td>
-                                <td><?php p(date('D\, j M Y H:i:s', $publication->getCreatedAt())) ?></td>
-                                <td><?php p(date('D\, j M Y H:i:s', $publication->getUpdatedAt())) ?></td>
+                                <td><?php p($fail->getStatus()) ?></td>
+                                <td><a target="_blank" href=<?php p($fail->getUrl()) ?>>URL</a></td>
+                                <td><?php p(date('D\, j M Y H:i:s', $fail->getCreatedAt())) ?></td>
+                                <td><?php p(date('D\, j M Y H:i:s', $fail->getUpdatedAt())) ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>

@@ -96,15 +96,24 @@ class B2shareBridge extends Controller
         $publications = [];
         foreach (
             array_reverse(
-                $this->mapper->findAllForUser($this->_userId)
+                $this->mapper->findSuccessfulForUser($this->_userId)
             ) as $publication) {
                 $publications[] = $publication;
+        }
+        
+        $fails = [];
+        foreach (
+            array_reverse(
+                $this->mapper->findFailedForUser($this->_userId)
+            ) as $fail) {
+                $fails[] = $fail;
         }
 
         $params = [
             'user' => $this->_userId,
             'transfers' => $cron_transfers,
-            'publications' => $publications
+            'publications' => $publications,
+            'fails' => $fails
         ];
         return new TemplateResponse('b2sharebridge', 'main', $params);
     }
@@ -188,17 +197,17 @@ class B2shareBridge extends Controller
      */
     public function filterFailed()
     {
-        $publications = [];
+        $fails = [];
         foreach (
             array_reverse(
                 $this->mapper->findFailedForUser($this->_userId)
-            ) as $publication) {
-                $publications[] = $publication;
+            ) as $fail) {
+                $fails[] = $fail;
         }
 
         $params = [
             'user' => $this->_userId,
-            'publications' => $publications
+            'fails' => $fails
         ];
         return new TemplateResponse('b2sharebridge', 'failed', $params);
     }

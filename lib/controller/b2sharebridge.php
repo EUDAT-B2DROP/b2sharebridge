@@ -108,6 +108,100 @@ class B2shareBridge extends Controller
         ];
         return new TemplateResponse('b2sharebridge', 'main', $params);
     }
+    
+    /**
+     * CAUTION: the @Stuff turns off security checks; for this page no admin is
+     *          required and no CSRF check. If you don't know what CSRF is, read
+     *          it up in the docs or you might create a security hole. This is
+     *          basically the only required method to add this exemption, don't
+     *          add it to any other method if you don't exactly know what it does
+     *
+     * @return          TemplateResponse
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function filterPending()
+    {
+        $cron_transfers = [];
+        foreach (\OC::$server->getJobList()->getAll() as $cron_transfer) {
+            // filter on Transfers
+            if ($cron_transfer instanceof TransferHandler) {
+                // filter only own requested jobs
+                if ($cron_transfer->isPublishingUser($this->_userId)) {
+                    $id = $cron_transfer->getArgument()['transferId'];
+                    $publication = $this->mapper->find($id);
+                    $cron_transfers[] = [
+                        'id' => $id,
+                        'filename' => $publication->getFilename(),
+                        'date' => $publication->getCreatedAt()
+                    ];
+                }
+                // TODO: admin can view all publications
+            }
+        }
+        
+        $params = [
+            'user' => $this->_userId,
+            'transfers' => $cron_transfers
+        ];
+        return new TemplateResponse('b2sharebridge', 'pending', $params);
+    }
+    
+    /**
+     * CAUTION: the @Stuff turns off security checks; for this page no admin is
+     *          required and no CSRF check. If you don't know what CSRF is, read
+     *          it up in the docs or you might create a security hole. This is
+     *          basically the only required method to add this exemption, don't
+     *          add it to any other method if you don't exactly know what it does
+     *
+     * @return          TemplateResponse
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function filterPublished()
+    {
+        $publications = [];
+        foreach (
+            array_reverse(
+                $this->mapper->findSuccessfulForUser($this->_userId)
+            ) as $publication) {
+                $publications[] = $publication;
+        }
+
+        $params = [
+            'user' => $this->_userId,
+            'publications' => $publications
+        ];
+        return new TemplateResponse('b2sharebridge', 'published', $params);
+    }
+    
+    /**
+     * CAUTION: the @Stuff turns off security checks; for this page no admin is
+     *          required and no CSRF check. If you don't know what CSRF is, read
+     *          it up in the docs or you might create a security hole. This is
+     *          basically the only required method to add this exemption, don't
+     *          add it to any other method if you don't exactly know what it does
+     *
+     * @return          TemplateResponse
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function filterFailed()
+    {
+        $publications = [];
+        foreach (
+            array_reverse(
+                $this->mapper->findFailedForUser($this->_userId)
+            ) as $publication) {
+                $publications[] = $publication;
+        }
+
+        $params = [
+            'user' => $this->_userId,
+            'publications' => $publications
+        ];
+        return new TemplateResponse('b2sharebridge', 'failed', $params);
+    }
 
     /**
      * XHR request endpoint for getting publish command

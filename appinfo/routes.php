@@ -29,9 +29,12 @@ $application->registerRoutes(
     ['routes' => [
         ['name' => 'B2shareBridge#index', 'url' => '/', 'verb' => 'GET'],
         ['name' => 'B2shareBridge#publish', 'url' => '/publish', 'verb' => 'POST'],
-        ['name' => 'B2shareBridge#filter_pending', 'url' => '/pending', 'verb' => 'GET'],
-        ['name' => 'B2shareBridge#filter_published', 'url' => '/published', 'verb' => 'GET'],
+        ['name' => 'B2shareBridge#filter_pending', 'url' => '/pending',
+        'verb' => 'GET'],
+        ['name' => 'B2shareBridge#filter_published', 'url' => '/published',
+        'verb' => 'GET'],
         ['name' => 'B2shareBridge#index', 'url' => '/status', 'verb' => 'GET'],
-        ['name' => 'B2shareBridge#filter_failed', 'url' => '/failed', 'verb' => 'GET'],
+        ['name' => 'B2shareBridge#filter_failed', 'url' => '/failed',
+        'verb' => 'GET'],
     ]]
 );

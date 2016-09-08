@@ -117,7 +117,7 @@ class FilecacheStatusMapper extends Mapper
         return $this->execute($sql, [$user, 'new'])->fetchColumn();
     }
 
-	/**
+    /**
      * Return all failed file transfers for current user
      *
      * @param string $user name of the user to search transfers for

@@ -114,7 +114,40 @@ class FilecacheStatusMapper extends Mapper
     {
         $sql = 'SELECT COUNT(*) FROM `*PREFIX*b2sharebridge_filecache_status` '
             .'WHERE owner = ? AND status = ?';
-
         return $this->execute($sql, [$user, 'new'])->fetchColumn();
+    }
+
+	/**
+     * Return all failed file transfers for current user
+     *
+     * @param string $user name of the user to search transfers for
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return array(Entities)
+     */
+    public function findFailedForUser($user)
+    {
+        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
+            . 'WHERE `status` LIKE `%error%` AND `owner` = ?';
+        return $this->findEntities($sql, [$user]);
+    }
+    
+    /**
+     * Return all failed file transfers for current user
+     *
+     * @param string $user name of the user to search transfers for
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return array(Entities)
+     */
+    public function findSuccessfulForUser($user)
+    {
+        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
+            . 'WHERE `status` NOT LIKE `%error%` AND `owner` = ?';
+        return $this->findEntities($sql, [$user]);
     }
 }

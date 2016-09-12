@@ -61,6 +61,20 @@ class StatusCodeMapper extends Mapper
         return $this->findEntity($sql, [$status_code]);
     }
     
+    /**
+     * Find all database entry for status codes
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return Entity
+     */
+    public function findAllStatusCodes()
+    {
+        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_status_code`';
+        return $this->findEntities($sql);
+    }
+    
      /**
      * Return the number of currently lsited status codes
      *

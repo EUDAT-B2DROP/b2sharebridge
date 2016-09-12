@@ -39,5 +39,15 @@ class StatusCode extends Entity
         $this->addType('statusCode', 'integer');
         $this->addType('message', 'string');
     }
+    
+    /**
+     * Get message for statusCode
+     *
+     * @return \string
+     */
+    public function getMessage()
+    {
+        return $this->message;
+    }
 
 }

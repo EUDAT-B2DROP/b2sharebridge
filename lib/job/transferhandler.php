@@ -93,7 +93,7 @@ class TransferHandler extends QueuedJob
         // get the file transfer object for current job
         $fcStatus = $this->_mapper->find($args['transferId']);
 
-        $fcStatus->setStatus("processing");
+        $fcStatus->setStatus(2);//status = processing
         $this->_mapper->update($fcStatus);
         $user = $fcStatus->getOwner();
         $fileId = $fcStatus->getFileid();
@@ -115,19 +115,19 @@ class TransferHandler extends QueuedJob
                 $upload_result = $this->_publisher->upload($handle, $size);
 
                 if ($upload_result) {
-                    $fcStatus->setStatus('published');
+                    $fcStatus->setStatus(0);//status = published
                     $fcStatus->setUrl($create_result);
                 } else {
                     /**External error: during uploading file*/
-                    $fcStatus->setStatus('error');
+                    $fcStatus->setStatus(3);
                 }
             } else {
                 /**External error: during creating deposit*/
-                $fcStatus->setStatus('error');
+                $fcStatus->setStatus(4);
             }
         } else {
             /**Internal error: file not accessible*/
-            $fcStatus->setStatus('error');
+            $fcStatus->setStatus(5);
         }
         $fcStatus->setUpdatedAt(time());
         $this->_mapper->update($fcStatus);
@@ -194,7 +194,7 @@ class TransferHandler extends QueuedJob
         // TODO: make sure the user can access the file
         $fcStatus = $this->_mapper->find($args['transferId']);
 
-        $fcStatus->setStatus("processing");
+        $fcStatus->setStatus(2);//status = processing
         $this->_mapper->update($fcStatus);
         Util::writeLog('transfer', 'FORKED2', 3);
 

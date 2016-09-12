@@ -283,7 +283,7 @@ class B2shareBridge extends Controller
                 $fcStatus = new FilecacheStatus();
                 $fcStatus->setFileid($id);
                 $fcStatus->setOwner($_userId);
-                $fcStatus->setStatus("new");
+                $fcStatus->setStatus(1);//status = new
                 $fcStatus->setCreatedAt(time());
                 $fcStatus->setUpdatedAt(time());
                 $this->mapper->insert($fcStatus);

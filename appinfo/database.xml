@@ -30,9 +30,9 @@
             </field>
             <field>
                 <name>status</name>
-                <type>text</type>
+                <type>integer</type>
                 <notnull>true</notnull>
-                <length>128</length>
+                <length>4</length>
             </field>
             <field>
                 <name>created_at</name>

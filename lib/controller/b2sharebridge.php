@@ -40,6 +40,7 @@ use OCA\B2shareBridge\Db\StatusCodeMapper;
 class B2shareBridge extends Controller
 {
     private $_userId;
+    private $_statusCodes;
 
     /**
      * Creates the AppFramwork Controller
@@ -65,6 +66,7 @@ class B2shareBridge extends Controller
         $this->scMapper = $scMapper;
         $this->config = $config;
         $this->_initStatusCode();
+        $this->_statusCodes = $this->_listStatusCodes();
 
     }
 
@@ -372,5 +374,28 @@ class B2shareBridge extends Controller
             ];
             $this->scMapper->insertStatusCode($statuscode->fromParams($params));
         }
+    }
+    
+    /**
+     * CAUTION: the @Stuff turns off security checks; for this page no admin is
+     *          required and no CSRF check. If you don't know what CSRF is, read
+     *          it up in the docs or you might create a security hole. This is
+     *          basically the only required method to add this exemption, don't
+     *          add it to any other method if you don't exactly know what it does
+     *
+     * @return array
+     * 
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    private function _listStatusCodes()
+    {
+        $statuscodes = [];
+        foreach (
+                $this->scMapper->findAllStatusCodes()
+            as $statuscode) {
+                $statuscodes[] = $statuscode->getMessage();
+        }
+        return $statuscodes;
     }
 }

@@ -64,7 +64,7 @@ class B2shareBridge extends Controller
         $this->mapper = $mapper;
         $this->scMapper = $scMapper;
         $this->config = $config;
-        $this->initStatusCode();
+        $this->_initStatusCode();
 
     }
 
@@ -337,14 +337,39 @@ class B2shareBridge extends Controller
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function initStatusCode()
+    private function _initStatusCode()
     {
-        if ($this->scMapper->findCountForStatusCodes() != 1) {
+        if ($this->scMapper->findCountForStatusCodes() != 6) {
+            $statuscode = new StatusCode();
             $params = [
                 'statusCode' => 0,
-                'message' => 'dummy'
+                'message' => 'published'
             ];
-            $statuscode = new StatusCode();
+            $this->scMapper->insertStatusCode($statuscode->fromParams($params));
+            $params = [
+                'statusCode' => 1,
+                'message' => 'new'
+            ];
+            $this->scMapper->insertStatusCode($statuscode->fromParams($params));
+            $params = [
+                'statusCode' => 2,
+                'message' => 'processing'
+            ];
+            $this->scMapper->insertStatusCode($statuscode->fromParams($params));
+            $params = [
+                'statusCode' => 3,
+                'message' => 'External error: during uploading file'
+            ];
+            $this->scMapper->insertStatusCode($statuscode->fromParams($params));
+            $params = [
+                'statusCode' => 4,
+                'message' => 'External error: during creating deposit'
+            ];
+            $this->scMapper->insertStatusCode($statuscode->fromParams($params));
+            $params = [
+                'statusCode' => 5,
+                'message' => 'Internal error: file not accessible'
+            ];
             $this->scMapper->insertStatusCode($statuscode->fromParams($params));
         }
     }

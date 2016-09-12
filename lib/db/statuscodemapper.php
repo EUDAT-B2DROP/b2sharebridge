@@ -60,5 +60,34 @@ class StatusCodeMapper extends Mapper
             . 'WHERE `status_code` = ?';
         return $this->findEntity($sql, [$status_code]);
     }
+    
+     /**
+     * Return the number of currently lsited status codes
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return int number of status codes
+     */
+    public function findCountForStatusCodes()
+    {
+        $sql = 'SELECT COUNT(*) FROM `*PREFIX*b2sharebridge_status_codes`'
+        return $this->execute($sql)->fetchColumn();
+    }
+    
+     /**
+     * Insert a new status code with message
+     *
+     * @param entity $code contains statusCode and message
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return int number of active publishs per user
+     */
+    public function insertStatusCode($code)
+    {
+        $this->insert($code);
+    }
 
 }

@@ -26,6 +26,7 @@ use OCA\B2shareBridge\Job\TransferHandler;
 use OCA\B2shareBridge\Db\FilecacheStatusMapper;
 use OCA\B2shareBridge\Db\FilecacheStatus;
 use OCA\B2shareBridge\Db\StatusCode;
+use OCA\B2shareBridge\Db\StatusCodeMapper;
 
 /**
  * Implement a ownCloud AppFramework Controller
@@ -43,23 +44,27 @@ class B2shareBridge extends Controller
     /**
      * Creates the AppFramwork Controller
      *
-     * @param string                $appName name of the app
-     * @param IRequest              $request request object
-     * @param IConfig               $config  config object
-     * @param FilecacheStatusMapper $mapper  whatever
-     * @param string                $userId  userid
+     * @param string                $appName  name of the app
+     * @param IRequest              $request  request object
+     * @param IConfig               $config   config object
+     * @param FilecacheStatusMapper $mapper   whatever
+     * @param StatusCodeMapper      $scMapper whatever
+     * @param string                $userId   userid
      */
     public function __construct(
         $appName,
         IRequest $request,
         IConfig $config,
         FilecacheStatusMapper $mapper,
+        StatusCodeMapper $scMapper,
         $userId
     ) {
         parent::__construct($appName, $request);
         $this->_userId = $userId;
         $this->mapper = $mapper;
+        $this->scMapper = $scMapper;
         $this->config = $config;
+        $this->initStatusCode();
 
     }
 
@@ -318,5 +323,29 @@ class B2shareBridge extends Controller
                 'status' => 'success'
             ]
         );
+    }
+    
+    /**
+     * CAUTION: the @Stuff turns off security checks; for this page no admin is
+     *          required and no CSRF check. If you don't know what CSRF is, read
+     *          it up in the docs or you might create a security hole. This is
+     *          basically the only required method to add this exemption, don't
+     *          add it to any other method if you don't exactly know what it does
+     *
+     * @return something
+     * 
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     */
+    public function initStatusCode()
+    {
+        if ($this->scMapper->findCountForStatusCodes() != 1) {
+            $params = [
+                'statusCode' => 0,
+                'message' => 'dummy'
+            ];
+            $statuscode = new StatusCode();
+            $this->scMapper->insertStatusCode($statuscode->fromParams($params));
+        }
     }
 }

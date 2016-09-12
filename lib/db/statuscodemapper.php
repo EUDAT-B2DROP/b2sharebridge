@@ -71,7 +71,7 @@ class StatusCodeMapper extends Mapper
      */
     public function findCountForStatusCodes()
     {
-        $sql = 'SELECT COUNT(*) FROM `*PREFIX*b2sharebridge_status_codes`'
+        $sql = 'SELECT COUNT(*) FROM `*PREFIX*b2sharebridge_status_code`';
         return $this->execute($sql)->fetchColumn();
     }
     

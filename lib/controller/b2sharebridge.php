@@ -25,6 +25,7 @@ use OCP\Util;
 use OCA\B2shareBridge\Job\TransferHandler;
 use OCA\B2shareBridge\Db\FilecacheStatusMapper;
 use OCA\B2shareBridge\Db\FilecacheStatus;
+use OCA\B2shareBridge\Db\StatusCode;
 
 /**
  * Implement a ownCloud AppFramework Controller

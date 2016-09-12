@@ -121,7 +121,8 @@ class B2shareBridge extends Controller
             'user' => $this->_userId,
             'transfers' => $cron_transfers,
             'publications' => $publications,
-            'fails' => $fails
+            'fails' => $fails,
+            'statuscodes' => $this->_statusCodes
         ];
         return new TemplateResponse('b2sharebridge', 'main', $params);
     }
@@ -187,7 +188,8 @@ class B2shareBridge extends Controller
 
         $params = [
             'user' => $this->_userId,
-            'publications' => $publications
+            'publications' => $publications,
+            'statuscodes' => $this->_statusCodes
         ];
         return new TemplateResponse('b2sharebridge', 'published', $params);
     }
@@ -215,7 +217,8 @@ class B2shareBridge extends Controller
 
         $params = [
             'user' => $this->_userId,
-            'fails' => $fails
+            'fails' => $fails,
+            'statuscodes' => $this->_statusCodes
         ];
         return new TemplateResponse('b2sharebridge', 'failed', $params);
     }

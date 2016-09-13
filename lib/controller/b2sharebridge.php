@@ -41,7 +41,7 @@ class B2shareBridge extends Controller
 {
     private $_userId;
     private $_statusCodes;
-    private $_lastGoodStatusCode = 2;
+    private $_lastGoodStatusCode;
 
     /**
      * Creates the AppFramwork Controller
@@ -68,7 +68,7 @@ class B2shareBridge extends Controller
         $this->config = $config;
         $this->_initStatusCode();
         $this->_statusCodes = $this->_listStatusCodes();
-
+        $this->_lastGoodStatusCode = array_search('processing', $this->_statusCodes);
     }
 
     /**
@@ -281,7 +281,9 @@ class B2shareBridge extends Controller
             5
         );
 
-        $active_uploads = $this->mapper->findCountForUser($_userId);
+        $active_uploads = $this->mapper->findCountForUser(
+            $_userId, array_search('new', $this->_statusCodes)
+        );
         if ($active_uploads < $allowed_uploads) {
 
             Filesystem::init($_userId, '/');

@@ -39,4 +39,25 @@ class PageControllerTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('main', $result->getTemplateName());
         $this->assertTrue($result instanceof TemplateResponse);
     }
+    
+    public function testPublished() {
+        $result = $this->controller->filterPublished();
+        $this->assertEquals(['user' => 'john', 'publications' => Array ()], $result->getParams());
+        $this->assertEquals('published', $result->getTemplateName());
+        $this->assertTrue($result instanceof TemplateResponse);
+    }
+    
+    public function testPending() {
+        $result = $this->controller->filterPending();
+        $this->assertEquals(['user' => 'john', 'transfers' => Array ()], $result->getParams());
+        $this->assertEquals('pending', $result->getTemplateName());
+        $this->assertTrue($result instanceof TemplateResponse);
+    }
+    
+    public function testFailed() {
+        $result = $this->controller->filterFailed();
+        $this->assertEquals(['user' => 'john', 'fails' => Array ()], $result->getParams());
+        $this->assertEquals('failed', $result->getTemplateName());
+        $this->assertTrue($result instanceof TemplateResponse);
+    }
 }

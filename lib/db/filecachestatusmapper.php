@@ -120,34 +120,36 @@ class FilecacheStatusMapper extends Mapper
     /**
      * Return all failed file transfers for current user
      *
-     * @param string $user name of the user to search transfers for
+     * @param string  $user               name of the user to search transfers for
+     * @param integer $lastGoodStatusCode last status code for a sucessful transfer
      *
      * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
      * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
      *
      * @return array(Entities)
      */
-    public function findFailedForUser($user)
+    public function findFailedForUser($user, $lastGoodStatusCode)
     {
         $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
             . 'WHERE `status` > ? AND `owner` = ?';
-        return $this->findEntities($sql, [2, $user]);
+        return $this->findEntities($sql, [$lastGoodStatusCode, $user]);
     }
     
     /**
      * Return all failed file transfers for current user
      *
-     * @param string $user name of the user to search transfers for
+     * @param string  $user               name of the user to search transfers for
+     * @param integer $lastGoodStatusCode last status code for a sucessful transfer
      *
      * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
      * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
      *
      * @return array(Entities)
      */
-    public function findSuccessfulForUser($user)
+    public function findSuccessfulForUser($user, $lastGoodStatusCode)
     {
         $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
-            . 'WHERE `status` < ? AND `owner` = ?';
-        return $this->findEntities($sql, [3, $user]);
+            . 'WHERE `status` <= ? AND `owner` = ?';
+        return $this->findEntities($sql, [$lastGoodStatusCode, $user]);
     }
 }

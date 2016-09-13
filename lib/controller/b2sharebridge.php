@@ -41,6 +41,7 @@ class B2shareBridge extends Controller
 {
     private $_userId;
     private $_statusCodes;
+    private $_lastGoodStatusCode = 2;
 
     /**
      * Creates the AppFramwork Controller
@@ -104,7 +105,9 @@ class B2shareBridge extends Controller
         $publications = [];
         foreach (
             array_reverse(
-                $this->mapper->findSuccessfulForUser($this->_userId)
+                $this->mapper->findSuccessfulForUser(
+                    $this->_userId, $this->_lastGoodStatusCode
+                )
             ) as $publication) {
                 $publications[] = $publication;
         }
@@ -112,7 +115,9 @@ class B2shareBridge extends Controller
         $fails = [];
         foreach (
             array_reverse(
-                $this->mapper->findFailedForUser($this->_userId)
+                $this->mapper->findFailedForUser(
+                    $this->_userId, $this->_lastGoodStatusCode
+                )
             ) as $fail) {
                 $fails[] = $fail;
         }
@@ -181,7 +186,9 @@ class B2shareBridge extends Controller
         $publications = [];
         foreach (
             array_reverse(
-                $this->mapper->findSuccessfulForUser($this->_userId)
+                $this->mapper->findSuccessfulForUser(
+                    $this->_userId, $this->_lastGoodStatusCode
+                )
             ) as $publication) {
                 $publications[] = $publication;
         }
@@ -210,7 +217,9 @@ class B2shareBridge extends Controller
         $fails = [];
         foreach (
             array_reverse(
-                $this->mapper->findFailedForUser($this->_userId)
+                $this->mapper->findFailedForUser(
+                    $this->_userId, $this->_lastGoodStatusCode
+                )
             ) as $fail) {
                 $fails[] = $fail;
         }

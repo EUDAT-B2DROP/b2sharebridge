@@ -30,9 +30,9 @@
             </field>
             <field>
                 <name>status</name>
-                <type>text</type>
+                <type>integer</type>
                 <notnull>true</notnull>
-                <length>128</length>
+                <length>4</length>
             </field>
             <field>
                 <name>created_at</name>
@@ -44,6 +44,25 @@
             </field>
             <field>
                 <name>url</name>
+                <type>text</type>
+                <default></default>
+                <notnull>true</notnull>
+            </field>
+        </declaration>
+    </table>
+    <table>
+        <name>*dbprefix*b2sharebridge_status_code</name>
+        <declaration>
+            <field>
+                <name>status_code</name>
+                <type>integer</type>
+                <default>0</default>
+                <notnull>true</notnull>
+                <length>4</length>
+                <autoincrement>1</autoincrement>
+            </field>
+            <field>
+                <name>message</name>
                 <type>text</type>
                 <default></default>
                 <notnull>true</notnull>

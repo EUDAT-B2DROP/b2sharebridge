@@ -19,6 +19,7 @@ use OCP\IContainer;
 
 use OCA\B2shareBridge\Controller\B2shareBridge;
 use OCA\B2shareBridge\Db\FilecacheStatusMapper;
+use OCA\B2shareBridge\Db\StatusCodeMapper;
 use OCA\B2shareBridge\Publish;
 
 /**
@@ -58,6 +59,16 @@ class Application extends App
                 );
             }
         );
+        
+        $container->registerService(
+            'StatusCodeMapper',
+            function (IContainer $c) {
+                $server = $c->query('ServerContainer');
+                return new StatusCodeMapper(
+                    $server->getDatabaseConnection()
+                );
+            }
+        );
 
         $container->registerService(
             'B2shareBridgeController',
@@ -68,6 +79,7 @@ class Application extends App
                     $server->getRequest(),
                     $server->getConfig(),
                     $c->query('FilecacheStatusMapper'),
+                    $c->query('StatusCodeMapper'),
                     $c->query('CurrentUID')
                 );
             }

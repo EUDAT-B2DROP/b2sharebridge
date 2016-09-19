@@ -60,7 +60,7 @@ style('files', 'files');
                                 <td><?php p($publication->getId()) ?></td>
                                 <td><?php p($publication->getFilename()) ?></td>
                                 <?php // TODO: echo as user specific timedate ?>
-                                <td><?php p($publication->getStatus()) ?></td>
+                                <td><?php p($_['statuscodes'][$publication->getStatus()]) ?></td>
                                 <td><a target="_blank" href=<?php p($publication->getUrl()) ?>>URL</a></td>
                                 <td><?php p(date('D\, j M Y H:i:s', $publication->getCreatedAt())) ?></td>
                                 <td><?php p(date('D\, j M Y H:i:s', $publication->getUpdatedAt())) ?></td>
@@ -95,7 +95,7 @@ style('files', 'files');
                                 <td><?php p($fail->getId()) ?></td>
                                 <td><?php p($fail->getFilename()) ?></td>
                                 <?php // TODO: echo as user specific timedate ?>
-                                <td><?php p($fail->getStatus()) ?></td>
+                                <td><?php p($_['statuscodes'][$fail->getStatus()]) ?></td>
                                 <td><a target="_blank" href=<?php p($fail->getUrl()) ?>>URL</a></td>
                                 <td><?php p(date('D\, j M Y H:i:s', $fail->getCreatedAt())) ?></td>
                                 <td><?php p(date('D\, j M Y H:i:s', $fail->getUpdatedAt())) ?></td>

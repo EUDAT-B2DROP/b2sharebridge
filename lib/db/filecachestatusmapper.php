@@ -103,18 +103,54 @@ class FilecacheStatusMapper extends Mapper
     /**
      * Return the number of currently queued file transfers for a given user
      *
-     * @param string $user name of the user to search transfers for
+     * @param string  $user       name of the user to search transfers for
+     * @param integer $statuscode statuscode to search transfers for
      *
      * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
      * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
      *
      * @return int number of active publishs per user
      */
-    public function findCountForUser($user)
+    public function findCountForUser($user, $statuscode)
     {
         $sql = 'SELECT COUNT(*) FROM `*PREFIX*b2sharebridge_filecache_status` '
             .'WHERE owner = ? AND status = ?';
+        return $this->execute($sql, [$user, $statuscode])->fetchColumn();
+    }
 
-        return $this->execute($sql, [$user, 'new'])->fetchColumn();
+    /**
+     * Return all failed file transfers for current user
+     *
+     * @param string  $user               name of the user to search transfers for
+     * @param integer $lastGoodStatusCode last status code for a sucessful transfer
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return array(Entities)
+     */
+    public function findFailedForUser($user, $lastGoodStatusCode)
+    {
+        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
+            . 'WHERE `status` > ? AND `owner` = ?';
+        return $this->findEntities($sql, [$lastGoodStatusCode, $user]);
+    }
+    
+    /**
+     * Return all failed file transfers for current user
+     *
+     * @param string  $user               name of the user to search transfers for
+     * @param integer $lastGoodStatusCode last status code for a sucessful transfer
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return array(Entities)
+     */
+    public function findSuccessfulForUser($user, $lastGoodStatusCode)
+    {
+        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
+            . 'WHERE `status` <= ? AND `owner` = ?';
+        return $this->findEntities($sql, [$lastGoodStatusCode, $user]);
     }
 }

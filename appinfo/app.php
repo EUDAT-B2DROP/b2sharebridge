@@ -36,5 +36,7 @@ $c->getServer()->getNavigationManager()->add($navigationEntry);
 
 App::registerAdmin('b2sharebridge', 'lib/settings/admin');
 App::registerPersonal('b2sharebridge', 'lib/settings/user');
+Util::addScript('files','detailtabview');
+Util::addScript('b2sharebridge','b2sharebridgecollection');
+Util::addScript('b2sharebridge', 'b2sharebridgetabview');
 Util::addScript('b2sharebridge', 'b2sharebridge');
-Util::addStyle('b2sharebridge', 'b2sharebridgetabview');

@@ -1,5 +1,6 @@
 
 (function() {
+    
     OCA.B2shareBridge = OCA.B2shareBridge || {};
 
     /**
@@ -15,7 +16,7 @@
             if (fileList.id === 'trashbin' || fileList.id === 'files.public') {
                 return;
             }
-            /*             var fileActions = fileList.fileActions;
+            var fileActions = fileList.fileActions;
 
             fileActions.registerAction({
                name: "B2SHARE",
@@ -55,8 +56,9 @@
                         );
                     }
                 }
-            });*/
-            fileList.registerTabView(new OCA.B2shareBridge.B2shareBridgeTabView('b2shareBridgeTabView', {order: -30}));
+            });
+            //fileList.registerTabView(new OCA.B2shareBridge.B2shareBridgeTabView('b2shareBridgeTabView', {order: -30}));
+	    fileList.registerTabView(new OCA.B2shareBridge.B2shareBridgeTabView('B2shareBridgeTabView',{order: -30}));
         }
     };
 
@@ -65,7 +67,7 @@
 OC.Plugins.register('OCA.Files.FileList', OCA.B2shareBridge.Util);
 
 
-/*function getCookie(cname) {
+function getCookie(cname) {
  var name = cname + "=";
  var ca = document.cookie.split(';');
  for(var i=0; i<ca.length; i++) {
@@ -74,4 +76,4 @@ OC.Plugins.register('OCA.Files.FileList', OCA.B2shareBridge.Util);
  if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
  }
  return "";
- }*/
+ }

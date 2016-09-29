@@ -10,8 +10,6 @@
 
 (function() {
 
-	OCA.B2shareBridge = OCA.B2shareBridge || {};
-
 	/**
 	 * @class OCA.Activity.ActivityCollection
 	 * @classdesc
@@ -36,7 +34,7 @@
 		 */
 		_objectType: null,
 
-		model: OCA.B2shareBridge.B2shareBridgeModel,
+		//model: OCA.B2shareBridge.B2shareBridgeModel,
 
 		/**
 		 * Sets the object id to filter by or null for all.
@@ -59,6 +57,8 @@
 		url: function() {
 		}
 	});
+
+	OCA.B2shareBridge = OCA.B2shareBridge || {};
 
 	OCA.B2shareBridge.B2shareBridgeCollection = B2shareBridgeCollection;
 })();

@@ -16,4 +16,7 @@
     </dependencies>
     <rememberlogin>false</rememberlogin>
     <category>publishing</category>
+    <website>https://eudat.eu</website>
+    <bugs>https://github.com/EUDAT-B2DROP/b2sharebridge/issues</bugs>
+    <repository type="git">https://github.com/EUDAT-B2DROP/b2sharebridge.git</repository>
 </info>

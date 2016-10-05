@@ -14,8 +14,11 @@
 
 namespace OCA\B2shareBridge\AppInfo;
 
+
 use OCP\AppFramework\App;
 use OCP\IContainer;
+use OCP\Util;
+
 
 use OCA\B2shareBridge\Controller\B2shareBridge;
 use OCA\B2shareBridge\Db\FilecacheStatusMapper;
@@ -114,5 +117,52 @@ class Application extends App
                 return new $backend($baseurl);
             }
         );
+    }
+
+
+    /**
+     * Register Navigation Entry
+     *
+     * @return null
+     */
+    public function registerNavigationEntry()
+    {
+        $c = $this->getContainer();
+        $server = $c->getServer();
+
+        $navigationEntry = function () use ($c, $server) {
+            return [
+                'id' => $c->getAppName(),
+                'order' => 100,
+                'name' => 'B2SHARE',
+                'href' => $server->getURLGenerator()
+                    ->linkToRoute('b2sharebridge.B2shareBridge.index'),
+                'icon' => $server->getURLGenerator()
+                    ->imagePath('b2sharebridge', 'appbrowsericon.svg'),
+            ];
+        };
+        $server->getNavigationManager()->add($navigationEntry);
+    }
+
+    /**
+     * Register settings pages
+     *
+     * @return null
+     */
+    public function registerSettings()
+    {
+        \OCP\App::registerAdmin('b2sharebridge', 'lib/settings/admin');
+        \OCP\App::registerPersonal('b2sharebridge', 'lib/settings/personal');
+    }
+
+
+    /**
+     * Load additional javascript files
+     *
+     * @return null
+     */
+    public static function loadScripts()
+    {
+        Util::addScript('b2sharebridge', 'fileactions');
     }
 }

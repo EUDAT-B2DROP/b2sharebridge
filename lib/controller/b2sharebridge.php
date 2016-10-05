@@ -66,7 +66,6 @@ class B2shareBridge extends Controller
         $this->mapper = $mapper;
         $this->scMapper = $scMapper;
         $this->config = $config;
-        $this->_initStatusCode();
         $this->_statusCodes = $this->_listStatusCodes();
         $this->_lastGoodStatusCode = array_search('processing', $this->_statusCodes);
     }
@@ -340,7 +339,7 @@ class B2shareBridge extends Controller
             ]
         );
     }
-    
+
     /**
      * CAUTION: the @Stuff turns off security checks; for this page no admin is
      *          required and no CSRF check. If you don't know what CSRF is, read
@@ -349,7 +348,7 @@ class B2shareBridge extends Controller
      *          add it to any other method if you don't exactly know what it does
      *
      * @return something
-     * 
+     *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
@@ -389,7 +388,7 @@ class B2shareBridge extends Controller
             $this->scMapper->insertStatusCode($statuscode->fromParams($params));
         }
     }
-    
+
     /**
      * CAUTION: the @Stuff turns off security checks; for this page no admin is
      *          required and no CSRF check. If you don't know what CSRF is, read

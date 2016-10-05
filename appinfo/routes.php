@@ -7,7 +7,7 @@
  * without the controller part, the stuff after the hash is the method.
  * e.g. page#index -> OCA\Eudat\Controller\PageController->index()
  *
- * The controller class has to be registered in the application.php file since
+ * The controller class has to be registered in the Application.php file since
  * it's instantiated in there
 
  *
@@ -21,9 +21,8 @@
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
-namespace OCA\B2shareBridge\AppInfo;
+$application = new OCA\B2shareBridge\AppInfo\Application();
 
-$application = new Application();
 $application->registerRoutes(
     $this,
     ['routes' => [

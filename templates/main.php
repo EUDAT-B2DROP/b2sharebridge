@@ -6,7 +6,6 @@ style('files', 'files');
 <div id="app" class="b2sharebridge">
     <div id="app-navigation">
         <?php print_unescaped($this->inc('part.navigation')); ?>
-        <?php print_unescaped($this->inc('part.settings')); ?>
     </div>
 
     <div id="app-content">

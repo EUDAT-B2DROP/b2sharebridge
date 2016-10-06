@@ -41,7 +41,7 @@ class B2shareBridge extends Controller
 {
     private $_userId;
     private $_statusCodes;
-    private $_lastGoodStatusCode;
+    private $_lastGoodStatusCode = 2;
 
     /**
      * Creates the AppFramwork Controller
@@ -66,6 +66,7 @@ class B2shareBridge extends Controller
         $this->mapper = $mapper;
         $this->scMapper = $scMapper;
         $this->config = $config;
+        $this->_initStatusCode();
         $this->_statusCodes = $this->_listStatusCodes();
         $this->_lastGoodStatusCode = array_search('processing', $this->_statusCodes);
     }

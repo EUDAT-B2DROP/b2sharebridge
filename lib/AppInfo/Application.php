@@ -21,9 +21,9 @@ use OCP\Util;
 
 
 use OCA\B2shareBridge\Controller\B2shareBridge;
+use OCA\B2shareBridge\Controller\ViewController;
 use OCA\B2shareBridge\Db\FilecacheStatusMapper;
 use OCA\B2shareBridge\Db\StatusCodeMapper;
-use OCA\B2shareBridge\Publish;
 
 /**
  * Implement a ownCloud Application for our b2sharebridge
@@ -45,6 +45,7 @@ class Application extends App
     {
         parent::__construct('b2sharebridge', $urlParams);
         $container = $this->getContainer();
+        $server = $container->getServer();
 
         $container->registerService(
             'EudatL10N',
@@ -55,8 +56,7 @@ class Application extends App
 
         $container->registerService(
             'FilecacheStatusMapper',
-            function (IContainer $c) {
-                $server = $c->query('ServerContainer');
+            function () use ($server) {
                 return new FilecacheStatusMapper(
                     $server->getDatabaseConnection()
                 );
@@ -65,8 +65,7 @@ class Application extends App
         
         $container->registerService(
             'StatusCodeMapper',
-            function (IContainer $c) {
-                $server = $c->query('ServerContainer');
+            function () use ($server) {
                 return new StatusCodeMapper(
                     $server->getDatabaseConnection()
                 );
@@ -75,8 +74,7 @@ class Application extends App
 
         $container->registerService(
             'B2shareBridgeController',
-            function (IContainer $c) {
-                $server = $c->query('ServerContainer');
+            function (IContainer $c) use ($server) {
                 return new B2shareBridge(
                     $c->query('AppName'),
                     $server->getRequest(),
@@ -89,14 +87,22 @@ class Application extends App
         );
 
         $container->registerService(
+            'ViewController',
+            function (IContainer $c) use ($server) {
+                return new ViewController(
+                    $c->query('AppName'),
+                    $server->getRequest(),
+                    $server->getConfig(),
+                    $c->query('FilecacheStatusMapper'),
+                    $c->query('StatusCodeMapper'),
+                    $c->query('CurrentUID')
+                );
+            }
+        );
+
+        $container->registerService(
             'CurrentUID',
-            function (IContainer $c) {
-                /**
-                 * Get current user ID
-                 *
-                 * @var \OC\Server $server
-                 */
-                $server = $c->query('ServerContainer');
+            function () use ($server) {
                 $user = $server->getUserSession()->getUser();
                 return ($user) ? $user->getUID() : '';
             }
@@ -104,8 +110,7 @@ class Application extends App
 
         $container->registerService(
             'PublishBackend',
-            function (IContainer $c) {
-                $server = $c->query('ServerContainer');
+            function () use ($server) {
 
                 /* TODO: we could inject the publish backend via config.
                  * $backend = $server->getConfig()
@@ -136,7 +141,7 @@ class Application extends App
                 'order' => 100,
                 'name' => 'B2SHARE',
                 'href' => $server->getURLGenerator()
-                    ->linkToRoute('b2sharebridge.B2shareBridge.index'),
+                    ->linkToRoute('b2sharebridge.View.index'),
                 'icon' => $server->getURLGenerator()
                     ->imagePath('b2sharebridge', 'appbrowsericon.svg'),
             ];

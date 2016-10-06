@@ -37,8 +37,9 @@ use OCA\B2shareBridge\Db\StatusCodeMapper;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class B2shareBridge extends Controller
+class ViewController extends Controller
 {
+    private $_appName;
     private $_userId;
     private $_statusCodes;
     private $_lastGoodStatusCode = 2;
@@ -62,6 +63,7 @@ class B2shareBridge extends Controller
         $userId
     ) {
         parent::__construct($appName, $request);
+        $this->_appName = $appName;
         $this->_userId = $userId;
         $this->mapper = $mapper;
         $this->scMapper = $scMapper;
@@ -84,6 +86,9 @@ class B2shareBridge extends Controller
      */
     public function index()
     {
+        Util::addStyle('b2sharebridge', 'style');
+        Util::addStyle('files', 'files');
+
         $cron_transfers = [];
         foreach (\OC::$server->getJobList()->getAll() as $cron_transfer) {
             // filter on Transfers
@@ -122,14 +127,52 @@ class B2shareBridge extends Controller
                 $fails[] = $fail;
         }
 
+        //$nav = new \OCP\Template('files', 'navigation', '');
+        //$navItems = \OCA\Files\App::getNavigationManager()->getAll();
+        //usort($navItems, function($item1, $item2) {
+        //    return $item1['order'] - $item2['order'];
+        //});
+        //$nav->assign('navigationItems', $navItems);
+        //
+        //$contentItems = [];
+        //
+        //// render the container content for every navigation item
+        //foreach ($navItems as $item) {
+        //    $content = '';
+        //    if (isset($item['script'])) {
+        //        $content = $this->renderScript($item['appname'], $item['script']);
+        //    }
+        //    $contentItem = [];
+        //    $contentItem['id'] = $item['id'];
+        //    $contentItem['content'] = $content;
+        //    $contentItems[] = $contentItem;
+        //}
+        //$nav->assign('navigationItems', $navItems);
+        //$params = [
+        //    'user' => $this->_userId,
+        //    'appNavigation' => $nav,
+        //    'appContents' =>  $contentItems,
+        //    'transfers' => $cron_transfers,
+        //    'publications' => $publications,
+        //    'fails' => $fails,
+        //    'statuscodes' => $this->_statusCodes,
+        //];
+
+
         $params = [
             'user' => $this->_userId,
             'transfers' => $cron_transfers,
             'publications' => $publications,
             'fails' => $fails,
-            'statuscodes' => $this->_statusCodes
+            'statuscodes' => $this->_statusCodes,
         ];
-        return new TemplateResponse('b2sharebridge', 'main', $params);
+
+        $response = new TemplateResponse(
+            $this->_appName,
+            'index',
+            $params
+        );
+        return $response;
     }
     
     /**
@@ -233,120 +276,12 @@ class B2shareBridge extends Controller
     }
 
     /**
-     * XHR request endpoint for getting publish command
-     *
-     * @return          JSONResponse
-     * @NoAdminRequired
-     */
-    public function publish()
-    {
-        $param = $this->request->getParams();
-
-        $error = false;
-        if (!is_array($param)
-            || !array_key_exists('id', $param)
-            || !array_key_exists('token', $param)
-        ) {
-            $error = 'Parameters gotten from UI are no array or they are missing';
-        }
-        $id = (int) $param['id'];
-        $token = $param['token'];
-
-        if (!is_int($id) || !is_string($token)) {
-            $error = 'Problems while parsing fileid or publishToken';
-        }
-        $_userId = \OC::$server->getUserSession()->getUser()->getUID();
-        if (strlen($_userId) <= 0) {
-            $error = 'No user configured for session';
-        }
-        if (($error)) {
-            Util::writeLog('b2sharebridge', $error, 3);
-            return new JSONResponse(
-                [
-                    'message'=>'Internal server error, contact the EUDAT helpdesk',
-                    'status' => 'error'
-                ]
-            );
-        }
-
-
-        $allowed_uploads = $this->config->getAppValue(
-            'b2sharebridge',
-            'max_uploads',
-            5
-        );
-        $allowed_filesize=$this->config->getAppValue(
-            'b2sharebridge',
-            'max_upload_filesize',
-            5
-        );
-
-        $active_uploads = $this->mapper->findCountForUser(
-            $_userId, array_search('new', $this->_statusCodes)
-        );
-        if ($active_uploads < $allowed_uploads) {
-
-            Filesystem::init($_userId, '/');
-            $view = Filesystem::getView();
-            $filesize = $view->filesize(Filesystem::getPath($id));
-            if ($filesize < $allowed_filesize*1024*1024) {
-                $job = new TransferHandler($this->mapper);
-                $fcStatus = new FilecacheStatus();
-                $fcStatus->setFileid($id);
-                $fcStatus->setOwner($_userId);
-                $fcStatus->setStatus(1);//status = new
-                $fcStatus->setCreatedAt(time());
-                $fcStatus->setUpdatedAt(time());
-                $this->mapper->insert($fcStatus);
-            } else {
-                return new JSONResponse(
-                    [
-                        'message' => 'We currently only support files smaller then '.
-                        $allowed_filesize.' MB',
-                        'status' => 'error'
-                    ]
-                );
-            }
-        } else {
-            return new JSONResponse(
-                [
-                    'message' => 'Until your '.$active_uploads.' deposits are done,
-                    you are not allowed to create further deposits.',
-                    'status' => 'error'
-                ]
-            );
-        }
-        // create the actual transfer job in the database
-
-        /* TODO: we should add a configuration setting for admins to
-         * configure the maximum number of uploads per user and a max filesize.
-         *both to avoid DoS
-         *
-         */
-
-        // register transfer cron
-        \OC::$server->getJobList()->add(
-            $job, [
-                'transferId' => $fcStatus->getId(),
-                'token' => $token,
-                '_userId' => $_userId
-            ]
-        );
-
-        return new JSONResponse(
-            [
-                "message" => 'Transferring file to B2SHARE in the Background',
-                'status' => 'success'
-            ]
-        );
-    }
-
-    /**
      * CAUTION: the @Stuff turns off security checks; for this page no admin is
      *          required and no CSRF check. If you don't know what CSRF is, read
      *          it up in the docs or you might create a security hole. This is
      *          basically the only required method to add this exemption, don't
      *          add it to any other method if you don't exactly know what it does
+     * %TODO: move this code away!
      *
      * @return something
      *
@@ -411,5 +346,28 @@ class B2shareBridge extends Controller
                 $statuscodes[] = $statuscode->getMessage();
         }
         return $statuscodes;
+    }
+
+    /**
+     * Render some php scripts
+     *
+     * @param string $appName    The name of the app, actually b2sharebridge
+     * @param string $scriptName The name of the script to load
+     *
+     * @return string            Some bits and bytes
+     */
+    protected function renderScript($appName, $scriptName)
+    {
+        $content = '';
+        $appPath = \OC_App::getAppPath($appName);
+        $scriptPath = $appPath . '/' . $scriptName;
+        if (file_exists($scriptPath)) {
+            // TODO: sanitize path / script name ?
+            ob_start();
+            include $scriptPath;
+            $content = ob_get_contents();
+            @ob_end_clean();
+        }
+        return $content;
     }
 }

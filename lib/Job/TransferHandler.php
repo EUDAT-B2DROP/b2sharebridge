@@ -15,12 +15,11 @@
 namespace OCA\B2shareBridge\Job;
 
 use OCA\B2shareBridge\AppInfo\Application;
-use OCA\B2shareBridge\Db\FilecacheStatusMapper;
+use OCA\B2shareBridge\Db\DepositStatusMapper;
 use OCA\B2shareBridge\Publish\IPublish;
 
 use OC\BackgroundJob\QueuedJob;
 use OC\Files\Filesystem;
-use OCP\IConfig;
 use OCP\Util;
 
 
@@ -42,11 +41,11 @@ class TransferHandler extends QueuedJob
     /**
      * Create the database mapper
      *
-     * @param FilecacheStatusMapper $mapper    the database mapper for transfers
-     * @param IPublish              $publisher publishing backend to use
+     * @param DepositStatusMapper $mapper    the database mapper for transfers
+     * @param IPublish            $publisher publishing backend to use
      */
     public function __construct(
-        FilecacheStatusMapper $mapper = null,
+        DepositStatusMapper $mapper = null,
         IPublish $publisher = null
     ) {
         if ($mapper === null || $publisher === null) {
@@ -67,7 +66,7 @@ class TransferHandler extends QueuedJob
     {
         $application = new Application();
         $this->_mapper = $application->getContainer()
-            ->query('FilecacheStatusMapper');
+            ->query('DepositStatusMapper');
         $this->_publisher = $application->getContainer()->query('PublishBackend');
     }
 
@@ -90,7 +89,7 @@ class TransferHandler extends QueuedJob
             );
             return;
         }
-        // get the file transfer object for current job
+        // get the file transfer object for current Job
         $fcStatus = $this->_mapper->find($args['transferId']);
 
         $fcStatus->setStatus(2);//status = processing
@@ -136,7 +135,7 @@ class TransferHandler extends QueuedJob
         /*
          *
          * TODO: think of a fork alternative or make it possible to not loose
-         * the database connection. also it is running only one job per cron run...
+         * the database connection. also it is running only one Job per cron run...
          * TODO: we need to be carefull of zombies here!
          */
     }

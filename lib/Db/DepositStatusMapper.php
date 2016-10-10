@@ -15,8 +15,9 @@
 namespace OCA\B2shareBridge\Db;
 
 use OCP\AppFramework\Db\Entity;
-use OCP\IDBConnection;
 use OCP\AppFramework\Db\Mapper;
+use OCP\IDBConnection;
+use OCP\Util;
 
 /**
  * Work on a database table
@@ -27,7 +28,7 @@ use OCP\AppFramework\Db\Mapper;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class FilecacheStatusMapper extends Mapper
+class DepositStatusMapper extends Mapper
 {
 
     /**
@@ -39,8 +40,8 @@ class FilecacheStatusMapper extends Mapper
     {
         parent::__construct(
             $db,
-            'b2sharebridge_filecache_status',
-            '\OCA\B2shareBridge\Db\FilecacheStatus'
+            'b2sharebridge_deposit_status',
+            '\OCA\B2shareBridge\Db\DepositStatus'
         );
     }
 
@@ -56,8 +57,7 @@ class FilecacheStatusMapper extends Mapper
      */
     public function find($id)
     {
-        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
-            . 'WHERE `id` = ?';
+        $sql = 'SELECT * FROM `' . $this->tableName . '` WHERE `id` = ?';
         return $this->findEntity($sql, [$id]);
     }
 
@@ -77,7 +77,7 @@ class FilecacheStatusMapper extends Mapper
      */
     public function findAll()
     {
-        $sql = 'SELECT * FROM *PREFIX*b2sharebridge_filecache_status';
+        $sql = 'SELECT * FROM `' . $this->tableName  .'`';
         return $this->findEntities($sql);
     }
 
@@ -94,8 +94,7 @@ class FilecacheStatusMapper extends Mapper
      */
     public function findAllForUser($user)
     {
-        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
-            . 'WHERE `owner` = ?';
+        $sql = 'SELECT * FROM `' . $this->tableName . '` WHERE `owner` = ?';
         return $this->findEntities($sql, [$user]);
     }
 
@@ -113,44 +112,73 @@ class FilecacheStatusMapper extends Mapper
      */
     public function findCountForUser($user, $statuscode)
     {
-        $sql = 'SELECT COUNT(*) FROM `*PREFIX*b2sharebridge_filecache_status` '
-            .'WHERE owner = ? AND status = ?';
+        $sql = 'SELECT COUNT(*) FROM `' . $this->tableName
+            . '` WHERE owner = ? AND status = ?';
         return $this->execute($sql, [$user, $statuscode])->fetchColumn();
     }
 
     /**
-     * Return all failed file transfers for current user
+     * Return all file transfers for current user with state
      *
-     * @param string  $user               name of the user to search transfers for
-     * @param integer $lastGoodStatusCode last status code for a sucessful transfer
+     * @param string $user  name of the user to search transfers for
+     * @param string $state styte type
      *
      * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
      * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
      *
      * @return array(Entities)
      */
-    public function findFailedForUser($user, $lastGoodStatusCode)
+    public function findAllForUserAndState($user, $state)
     {
-        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
-            . 'WHERE `status` > ? AND `owner` = ?';
-        return $this->findEntities($sql, [$lastGoodStatusCode, $user]);
+        $sql = 'SELECT * FROM `' . $this->tableName
+            . '` WHERE owner = ? AND status = ?';
+        return $this->findEntities($sql, [$user, $state]);
     }
-    
+
     /**
-     * Return all failed file transfers for current user
+     * Return all file transfers for current user with state
      *
-     * @param string  $user               name of the user to search transfers for
-     * @param integer $lastGoodStatusCode last status code for a sucessful transfer
+     * @param string $user  name of the user to search transfers for
+     * @param string $state type
      *
      * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
      * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
      *
      * @return array(Entities)
      */
-    public function findSuccessfulForUser($user, $lastGoodStatusCode)
+    public function findAllForUserAndStateString($user, $state)
     {
-        $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status` '
-            . 'WHERE `status` <= ? AND `owner` = ?';
-        return $this->findEntities($sql, [$lastGoodStatusCode, $user]);
+        $nStates = $this->mapFilterToStates($state);
+
+        $deposits = [];
+        foreach ($nStates as $nState) {
+            foreach ($this->findAllForUserAndState($user, $nState) as $deposit) {
+                $deposits[] = $deposit;
+            }
+        }
+
+        return $deposits;
+    }
+
+
+    /**
+     * Return status code numbers for several keywords
+     *
+     * @param string $filter the filter to apply
+     *
+     * @return array containing integer status codes
+     */
+    public function mapFilterToStates($filter)
+    {
+        switch ($filter) {
+        case 'published':
+            return [0];
+        case 'pending':
+            return [1, 2];
+        case 'failed':
+            return [3, 4, 5];
+        default:
+            return [];
+        }
     }
 }

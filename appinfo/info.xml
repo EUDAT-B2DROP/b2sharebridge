@@ -10,7 +10,7 @@
     </description>
     <licence>AGPL</licence>
     <author>EUDAT</author>
-    <version>0.0.7</version>
+    <version>0.0.8</version>
     <dependencies>
         <owncloud min-version="8.1" max-version="9.1" />
         <database>sqlite</database>

@@ -15,15 +15,16 @@
 namespace OCA\B2shareBridge\AppInfo;
 
 
+use OCA\B2shareBridge\Controller\PublishController;
+use OCA\B2shareBridge\Controller\ViewController;
+use OCA\B2shareBridge\Data;
+use OCA\B2shareBridge\Db\DepositStatusMapper;
+use OCA\B2shareBridge\Db\StatusCodeMapper;
+use OCA\B2shareBridge\View\Navigation;
 use OCP\AppFramework\App;
 use OCP\IContainer;
 use OCP\Util;
 
-
-use OCA\B2shareBridge\Controller\B2shareBridge;
-use OCA\B2shareBridge\Controller\ViewController;
-use OCA\B2shareBridge\Db\FilecacheStatusMapper;
-use OCA\B2shareBridge\Db\StatusCodeMapper;
 
 /**
  * Implement a ownCloud Application for our b2sharebridge
@@ -55,14 +56,14 @@ class Application extends App
         );
 
         $container->registerService(
-            'FilecacheStatusMapper',
+            'DepositStatusMapper',
             function () use ($server) {
-                return new FilecacheStatusMapper(
+                return new DepositStatusMapper(
                     $server->getDatabaseConnection()
                 );
             }
         );
-        
+
         $container->registerService(
             'StatusCodeMapper',
             function () use ($server) {
@@ -73,13 +74,13 @@ class Application extends App
         );
 
         $container->registerService(
-            'B2shareBridgeController',
+            'PublishController',
             function (IContainer $c) use ($server) {
-                return new B2shareBridge(
+                return new PublishController(
                     $c->query('AppName'),
                     $server->getRequest(),
                     $server->getConfig(),
-                    $c->query('FilecacheStatusMapper'),
+                    $c->query('DepositStatusMapper'),
                     $c->query('StatusCodeMapper'),
                     $c->query('CurrentUID')
                 );
@@ -91,11 +92,23 @@ class Application extends App
             function (IContainer $c) use ($server) {
                 return new ViewController(
                     $c->query('AppName'),
-                    $server->getRequest(),
+                    $c->query('Request'),
                     $server->getConfig(),
-                    $c->query('FilecacheStatusMapper'),
+                    $c->query('DepositStatusMapper'),
                     $c->query('StatusCodeMapper'),
-                    $c->query('CurrentUID')
+                    $c->query('CurrentUID'),
+                    $c->query('Navigation')
+                );
+            }
+        );
+
+        $container->registerService(
+            'Navigation',
+            function (IContainer $c) {
+                $server = $c->query('ServerContainer');
+
+                return new Navigation(
+                    $server->getURLGenerator()
                 );
             }
         );
@@ -111,11 +124,6 @@ class Application extends App
         $container->registerService(
             'PublishBackend',
             function () use ($server) {
-
-                /* TODO: we could inject the publish backend via config.
-                 * $backend = $server->getConfig()
-                 *              ->getAppValue('eudat', 'publish_backend');
-                 */
                 $backend = 'OCA\B2shareBridge\Publish\B2share';
                 $baseurl = $server->getConfig()
                     ->getAppValue('b2sharebridge', 'publish_baseurl');
@@ -141,7 +149,7 @@ class Application extends App
                 'order' => 100,
                 'name' => 'B2SHARE',
                 'href' => $server->getURLGenerator()
-                    ->linkToRoute('b2sharebridge.View.index'),
+                    ->linkToRoute('b2sharebridge.View.depositList'),
                 'icon' => $server->getURLGenerator()
                     ->imagePath('b2sharebridge', 'appbrowsericon.svg'),
             ];

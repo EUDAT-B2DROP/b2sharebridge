@@ -15,6 +15,8 @@
 use OCP\Template;
 use OCP\Util;
 
+script('b2sharebridge', 'settings');
+
 $config = \OC::$server->getConfig();
 
 $tmpl = new Template('b2sharebridge', 'settings-admin');

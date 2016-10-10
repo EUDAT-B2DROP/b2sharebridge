@@ -1,15 +1,10 @@
 <div id="app" class="b2sharebridge">
-    <div id="app-navigation">
-        <?php print_unescaped($this->inc('navigation')); ?>
-    </div>
+
+    <?php $_['appNavigation']->printPage(); ?>
 
     <div id="app-content">
         <div id="app-content-wrapper">
 
-
-            <h1>Publishing History
-                <small>(<?php p(sizeof($_['publications'])) ?>)</small>
-            </h1>
             <table class="publish-queue-list">
                 <?php if (sizeof($_['publications']) > 0): ?>
                     <thead>
@@ -18,7 +13,7 @@
                         <th>Filename</th>
                         <th>Status</th>
                         <th>Publish URL</th>
-                        <th>Publish Date</th>
+                        <th>Triggered At</th>
                         <th>Last Update</th>
                     </tr>
                     </thead>
@@ -39,10 +34,12 @@
                     </tbody>
                 <?php else: ?>
                     <tr>
-                        <td>No published files found.</td>
+                        <td>No deposits for this category found.</td>
                     </tr>
                 <?php endif; ?>
             </table>
+
+            <div style="margin-top: 20px;">&nbsp;</div>
         </div>
     </div>
 </div>

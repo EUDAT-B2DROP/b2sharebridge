@@ -15,17 +15,15 @@
 namespace OCA\B2shareBridge\Controller;
 
 use OC\Files\Filesystem;
+use OCA\B2shareBridge\Db\DepositStatus;
+use OCA\B2shareBridge\Db\DepositStatusMapper;
+use OCA\B2shareBridge\Db\StatusCodeMapper;
+use OCA\B2shareBridge\Job\TransferHandler;
+use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\JSONResponse;
 use OCP\IConfig;
 use OCP\IRequest;
-use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Http\JSONResponse;
 use OCP\Util;
-
-use OCA\B2shareBridge\Job\TransferHandler;
-use OCA\B2shareBridge\Db\FilecacheStatusMapper;
-use OCA\B2shareBridge\Db\FilecacheStatus;
-use OCA\B2shareBridge\Db\StatusCodeMapper;
 
 /**
  * Implement a ownCloud AppFramework Controller
@@ -36,7 +34,7 @@ use OCA\B2shareBridge\Db\StatusCodeMapper;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class B2shareBridge extends Controller
+class PublishController extends Controller
 {
     private $_appName;
     private $_userId;
@@ -46,18 +44,18 @@ class B2shareBridge extends Controller
     /**
      * Creates the AppFramwork Controller
      *
-     * @param string                $appName  name of the app
-     * @param IRequest              $request  request object
-     * @param IConfig               $config   config object
-     * @param FilecacheStatusMapper $mapper   whatever
-     * @param StatusCodeMapper      $scMapper whatever
-     * @param string                $userId   userid
+     * @param string              $appName  name of the app
+     * @param IRequest            $request  request object
+     * @param IConfig             $config   config object
+     * @param DepositStatusMapper $mapper   whatever
+     * @param StatusCodeMapper    $scMapper whatever
+     * @param string              $userId   userid
      */
     public function __construct(
         $appName,
         IRequest $request,
         IConfig $config,
-        FilecacheStatusMapper $mapper,
+        DepositStatusMapper $mapper,
         StatusCodeMapper $scMapper,
         $userId
     ) {
@@ -111,7 +109,7 @@ class B2shareBridge extends Controller
         ) {
             $error = 'Parameters gotten from UI are no array or they are missing';
         }
-        $id = (int) $param['id'];
+        $id = (int)$param['id'];
         $token = $param['token'];
 
         if (!is_int($id) || !is_string($token)) {
@@ -125,7 +123,7 @@ class B2shareBridge extends Controller
             Util::writeLog('b2sharebridge', $error, 3);
             return new JSONResponse(
                 [
-                    'message'=>'Internal server error, contact the EUDAT helpdesk',
+                    'message' => 'Internal server error, contact the EUDAT helpdesk',
                     'status' => 'error'
                 ]
             );
@@ -137,7 +135,7 @@ class B2shareBridge extends Controller
             'max_uploads',
             5
         );
-        $allowed_filesize=$this->config->getAppValue(
+        $allowed_filesize = $this->config->getAppValue(
             'b2sharebridge',
             'max_upload_filesize',
             5
@@ -151,9 +149,9 @@ class B2shareBridge extends Controller
             Filesystem::init($_userId, '/');
             $view = Filesystem::getView();
             $filesize = $view->filesize(Filesystem::getPath($id));
-            if ($filesize < $allowed_filesize*1024*1024) {
+            if ($filesize < $allowed_filesize * 1024 * 1024) {
                 $job = new TransferHandler($this->mapper);
-                $fcStatus = new FilecacheStatus();
+                $fcStatus = new DepositStatus();
                 $fcStatus->setFileid($id);
                 $fcStatus->setOwner($_userId);
                 $fcStatus->setStatus(1);//status = new
@@ -163,8 +161,8 @@ class B2shareBridge extends Controller
             } else {
                 return new JSONResponse(
                     [
-                        'message' => 'We currently only support files smaller then '.
-                        $allowed_filesize.' MB',
+                        'message' => 'We currently only support 
+                        files smaller then ' . $allowed_filesize . ' MB',
                         'status' => 'error'
                     ]
                 );
@@ -172,13 +170,13 @@ class B2shareBridge extends Controller
         } else {
             return new JSONResponse(
                 [
-                    'message' => 'Until your '.$active_uploads.' deposits are done,
-                    you are not allowed to create further deposits.',
+                    'message' => 'Until your ' . $active_uploads . ' deposits 
+                        are done, you are not allowed to create further deposits.',
                     'status' => 'error'
                 ]
             );
         }
-        // create the actual transfer job in the database
+        // create the actual transfer Job in the database
 
         /* TODO: we should add a configuration setting for admins to
          * configure the maximum number of uploads per user and a max filesize.

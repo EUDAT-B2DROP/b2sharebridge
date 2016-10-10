@@ -26,14 +26,7 @@ $application = new OCA\B2shareBridge\AppInfo\Application();
 $application->registerRoutes(
     $this,
     ['routes' => [
-        ['name' => 'B2shareBridge#publish', 'url' => '/publish', 'verb' => 'POST'],
-        ['name' => 'View#index', 'url' => '/', 'verb' => 'GET'],
-        ['name' => 'View#filter_pending', 'url' => '/pending',
-        'verb' => 'GET'],
-        ['name' => 'View#filter_published', 'url' => '/published',
-        'verb' => 'GET'],
-        ['name' => 'View#index', 'url' => '/all', 'verb' => 'GET'],
-        ['name' => 'View#filter_failed', 'url' => '/failed',
-        'verb' => 'GET'],
+        ['name' => 'Publish#publish', 'url' => '/publish', 'verb' => 'POST'],
+        ['name' => 'View#depositList', 'url' => '/', 'verb' => 'GET'],
     ]]
 );

@@ -18,7 +18,7 @@ use OC\Files\Filesystem;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * Creates a database entity for the file upload status
+ * Creates a database entity for the deposit status
  *
  * @category Owncloud
  * @package  B2shareBridge
@@ -26,7 +26,7 @@ use OCP\AppFramework\Db\Entity;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class FilecacheStatus extends Entity
+class DepositStatus extends Entity
 {
     protected $fileid;
     protected $status;
@@ -41,7 +41,7 @@ class FilecacheStatus extends Entity
     public function __construct()
     {
         $this->addType('fileid', 'integer');
-        $this->addType('status', 'string');
+        $this->addType('status', 'integer');
         $this->addType('owner', 'string');
         $this->addType('createdAt', 'integer');
         $this->addType('updatedAt', 'integer');
@@ -58,4 +58,15 @@ class FilecacheStatus extends Entity
         return Filesystem::getPath($this->fileid);
     }
 
+    /**
+     * Get string representation
+     *
+     * @return \string
+     */
+    public function __toString()
+    {
+        return 'Deposit with id: '. $this->getId().
+        ' and status:'.$this->getStatus().
+        ' belonging to user:'.$this->getOwner();
+    }
 }

@@ -9,3 +9,11 @@ eudat (0.0.5)
 
 b2sharebridge (0.0.6)
 * simplistic implementation of token passthrough to publishing api using owncloud dialogs.
+
+
+b2sharebridge (0.0.7)
+*
+
+b2sharebridge (0.0.8)
+* renamed classes from filecache to deposit
+* many refactorings

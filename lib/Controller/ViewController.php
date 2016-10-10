@@ -14,19 +14,16 @@
 
 namespace OCA\B2shareBridge\Controller;
 
-use OC\Files\Filesystem;
-use OCP\IConfig;
-use OCP\IRequest;
-use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Http\JSONResponse;
-use OCP\Util;
-
-use OCA\B2shareBridge\Job\TransferHandler;
-use OCA\B2shareBridge\Db\FilecacheStatusMapper;
-use OCA\B2shareBridge\Db\FilecacheStatus;
+use OCA\B2shareBridge\Data;
+use OCA\B2shareBridge\Db\DepositStatusMapper;
 use OCA\B2shareBridge\Db\StatusCode;
 use OCA\B2shareBridge\Db\StatusCodeMapper;
+use OCA\B2shareBridge\View\Navigation;
+use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\TemplateResponse;
+use OCP\IConfig;
+use OCP\IRequest;
+use OCP\Util;
 
 /**
  * Implement a ownCloud AppFramework Controller
@@ -39,38 +36,41 @@ use OCA\B2shareBridge\Db\StatusCodeMapper;
  */
 class ViewController extends Controller
 {
-    private $_appName;
-    private $_userId;
-    private $_statusCodes;
-    private $_lastGoodStatusCode = 2;
+    protected $appName;
+    protected $userId;
+    protected $statusCodes;
+    protected $lastGoodStatusCode;
+    protected $navigation;
+    protected $data;
 
     /**
      * Creates the AppFramwork Controller
      *
-     * @param string                $appName  name of the app
-     * @param IRequest              $request  request object
-     * @param IConfig               $config   config object
-     * @param FilecacheStatusMapper $mapper   whatever
-     * @param StatusCodeMapper      $scMapper whatever
-     * @param string                $userId   userid
+     * @param string              $appName    name of the app
+     * @param IRequest            $request    request object
+     * @param IConfig             $config     config object
+     * @param DepositStatusMapper $mapper     whatever
+     * @param StatusCodeMapper    $scMapper   whatever
+     * @param string              $userId     userid
+     * @param Navigation          $navigation navigation bar object
      */
     public function __construct(
         $appName,
         IRequest $request,
         IConfig $config,
-        FilecacheStatusMapper $mapper,
+        DepositStatusMapper $mapper,
         StatusCodeMapper $scMapper,
-        $userId
+        $userId,
+        Navigation $navigation
     ) {
         parent::__construct($appName, $request);
-        $this->_appName = $appName;
-        $this->_userId = $userId;
+        $this->appName = $appName;
+        $this->userId = $userId;
         $this->mapper = $mapper;
         $this->scMapper = $scMapper;
         $this->config = $config;
-        $this->_initStatusCode();
-        $this->_statusCodes = $this->_listStatusCodes();
-        $this->_lastGoodStatusCode = array_search('processing', $this->_statusCodes);
+        $this->statusCodes = $this->_listStatusCodes();
+        $this->navigation = $navigation;
     }
 
     /**
@@ -80,200 +80,54 @@ class ViewController extends Controller
      *          basically the only required method to add this exemption, don't
      *          add it to any other method if you don't exactly know what it does
      *
-     * @return          TemplateResponse
+     * @param string $filter filtering string
+     *
+     * @return TemplateResponse
+     *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
-    public function index()
+    public function depositList($filter = 'all')
     {
+
         Util::addStyle('b2sharebridge', 'style');
         Util::addStyle('files', 'files');
 
-        $cron_transfers = [];
-        foreach (\OC::$server->getJobList()->getAll() as $cron_transfer) {
-            // filter on Transfers
-            if ($cron_transfer instanceof TransferHandler) {
-                // filter only own requested jobs
-                if ($cron_transfer->isPublishingUser($this->_userId)) {
-                    $id = $cron_transfer->getArgument()['transferId'];
-                    $publication = $this->mapper->find($id);
-                    $cron_transfers[] = [
-                        'id' => $id,
-                        'filename' => $publication->getFilename(),
-                        'date' => $publication->getCreatedAt()
-                    ];
-                }
-                // TODO: admin can view all publications
+        $publications = [];
+        if ($filter == 'all') {
+            foreach (
+                array_reverse(
+                    $this->mapper->findAllForUser($this->userId)
+                ) as $publication) {
+                $publications[] = $publication;
+            }
+        } else {
+            foreach (
+                array_reverse(
+                    $this->mapper->findAllForUserAndStateString(
+                        $this->userId,
+                        $filter
+                    )
+                ) as $publication) {
+                $publications[] = $publication;
             }
         }
 
-        $publications = [];
-        foreach (
-            array_reverse(
-                $this->mapper->findSuccessfulForUser(
-                    $this->_userId, $this->_lastGoodStatusCode
-                )
-            ) as $publication) {
-                $publications[] = $publication;
-        }
-        
-        $fails = [];
-        foreach (
-            array_reverse(
-                $this->mapper->findFailedForUser(
-                    $this->_userId, $this->_lastGoodStatusCode
-                )
-            ) as $fail) {
-                $fails[] = $fail;
-        }
-
-        //$nav = new \OCP\Template('files', 'navigation', '');
-        //$navItems = \OCA\Files\App::getNavigationManager()->getAll();
-        //usort($navItems, function($item1, $item2) {
-        //    return $item1['order'] - $item2['order'];
-        //});
-        //$nav->assign('navigationItems', $navItems);
-        //
-        //$contentItems = [];
-        //
-        //// render the container content for every navigation item
-        //foreach ($navItems as $item) {
-        //    $content = '';
-        //    if (isset($item['script'])) {
-        //        $content = $this->renderScript($item['appname'], $item['script']);
-        //    }
-        //    $contentItem = [];
-        //    $contentItem['id'] = $item['id'];
-        //    $contentItem['content'] = $content;
-        //    $contentItems[] = $contentItem;
-        //}
-        //$nav->assign('navigationItems', $navItems);
-        //$params = [
-        //    'user' => $this->_userId,
-        //    'appNavigation' => $nav,
-        //    'appContents' =>  $contentItems,
-        //    'transfers' => $cron_transfers,
-        //    'publications' => $publications,
-        //    'fails' => $fails,
-        //    'statuscodes' => $this->_statusCodes,
-        //];
-
-
         $params = [
-            'user' => $this->_userId,
-            'transfers' => $cron_transfers,
+            'user' => $this->userId,
             'publications' => $publications,
-            'fails' => $fails,
-            'statuscodes' => $this->_statusCodes,
+            'statuscodes' => $this->statusCodes,
+            'appNavigation' => $this->navigation->getTemplate($filter),
+            'filter' => $filter,
         ];
 
-        $response = new TemplateResponse(
-            $this->_appName,
-            'index',
+        return new TemplateResponse(
+            $this->appName,
+            'body',
             $params
         );
-        return $response;
     }
-    
-    /**
-     * CAUTION: the @Stuff turns off security checks; for this page no admin is
-     *          required and no CSRF check. If you don't know what CSRF is, read
-     *          it up in the docs or you might create a security hole. This is
-     *          basically the only required method to add this exemption, don't
-     *          add it to any other method if you don't exactly know what it does
-     *
-     * @return          TemplateResponse
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
-    public function filterPending()
-    {
-        $cron_transfers = [];
-        foreach (\OC::$server->getJobList()->getAll() as $cron_transfer) {
-            // filter on Transfers
-            if ($cron_transfer instanceof TransferHandler) {
-                // filter only own requested jobs
-                if ($cron_transfer->isPublishingUser($this->_userId)) {
-                    $id = $cron_transfer->getArgument()['transferId'];
-                    $publication = $this->mapper->find($id);
-                    $cron_transfers[] = [
-                        'id' => $id,
-                        'filename' => $publication->getFilename(),
-                        'date' => $publication->getCreatedAt()
-                    ];
-                }
-                // TODO: admin can view all publications
-            }
-        }
-        
-        $params = [
-            'user' => $this->_userId,
-            'transfers' => $cron_transfers
-        ];
-        return new TemplateResponse('b2sharebridge', 'pending', $params);
-    }
-    
-    /**
-     * CAUTION: the @Stuff turns off security checks; for this page no admin is
-     *          required and no CSRF check. If you don't know what CSRF is, read
-     *          it up in the docs or you might create a security hole. This is
-     *          basically the only required method to add this exemption, don't
-     *          add it to any other method if you don't exactly know what it does
-     *
-     * @return          TemplateResponse
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
-    public function filterPublished()
-    {
-        $publications = [];
-        foreach (
-            array_reverse(
-                $this->mapper->findSuccessfulForUser(
-                    $this->_userId, $this->_lastGoodStatusCode
-                )
-            ) as $publication) {
-                $publications[] = $publication;
-        }
 
-        $params = [
-            'user' => $this->_userId,
-            'publications' => $publications,
-            'statuscodes' => $this->_statusCodes
-        ];
-        return new TemplateResponse('b2sharebridge', 'published', $params);
-    }
-    
-    /**
-     * CAUTION: the @Stuff turns off security checks; for this page no admin is
-     *          required and no CSRF check. If you don't know what CSRF is, read
-     *          it up in the docs or you might create a security hole. This is
-     *          basically the only required method to add this exemption, don't
-     *          add it to any other method if you don't exactly know what it does
-     *
-     * @return          TemplateResponse
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
-    public function filterFailed()
-    {
-        $fails = [];
-        foreach (
-            array_reverse(
-                $this->mapper->findFailedForUser(
-                    $this->_userId, $this->_lastGoodStatusCode
-                )
-            ) as $fail) {
-                $fails[] = $fail;
-        }
-
-        $params = [
-            'user' => $this->_userId,
-            'fails' => $fails,
-            'statuscodes' => $this->_statusCodes
-        ];
-        return new TemplateResponse('b2sharebridge', 'failed', $params);
-    }
 
     /**
      * CAUTION: the @Stuff turns off security checks; for this page no admin is
@@ -333,7 +187,7 @@ class ViewController extends Controller
      *          add it to any other method if you don't exactly know what it does
      *
      * @return array
-     * 
+     *
      * @NoAdminRequired
      * @NoCSRFRequired
      */
@@ -341,33 +195,10 @@ class ViewController extends Controller
     {
         $statuscodes = [];
         foreach (
-                $this->scMapper->findAllStatusCodes()
+            $this->scMapper->findAllStatusCodes()
             as $statuscode) {
-                $statuscodes[] = $statuscode->getMessage();
+            $statuscodes[] = $statuscode->getMessage();
         }
         return $statuscodes;
-    }
-
-    /**
-     * Render some php scripts
-     *
-     * @param string $appName    The name of the app, actually b2sharebridge
-     * @param string $scriptName The name of the script to load
-     *
-     * @return string            Some bits and bytes
-     */
-    protected function renderScript($appName, $scriptName)
-    {
-        $content = '';
-        $appPath = \OC_App::getAppPath($appName);
-        $scriptPath = $appPath . '/' . $scriptName;
-        if (file_exists($scriptPath)) {
-            // TODO: sanitize path / script name ?
-            ob_start();
-            include $scriptPath;
-            $content = ob_get_contents();
-            @ob_end_clean();
-        }
-        return $content;
     }
 }

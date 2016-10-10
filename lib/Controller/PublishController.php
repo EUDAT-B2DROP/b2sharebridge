@@ -52,7 +52,7 @@ class PublishController extends Controller
      * @param string              $userId   userid
      */
     public function __construct(
-        $appName,
+        string $appName,
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,
@@ -60,7 +60,6 @@ class PublishController extends Controller
         $userId
     ) {
         parent::__construct($appName, $request);
-        $this->_appName = $appName;
         $this->_userId = $userId;
         $this->mapper = $mapper;
         $this->scMapper = $scMapper;

@@ -55,7 +55,7 @@ class ViewController extends Controller
      * @param Navigation          $navigation navigation bar object
      */
     public function __construct(
-        $appName,
+        string $appName,
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,
@@ -64,7 +64,6 @@ class ViewController extends Controller
         Navigation $navigation
     ) {
         parent::__construct($appName, $request);
-        $this->appName = $appName;
         $this->userId = $userId;
         $this->mapper = $mapper;
         $this->scMapper = $scMapper;

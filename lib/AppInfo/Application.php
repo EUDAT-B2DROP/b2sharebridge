@@ -49,13 +49,6 @@ class Application extends App
         $server = $container->getServer();
 
         $container->registerService(
-            'EudatL10N',
-            function (IContainer $c) {
-                return $c->query('ServerContainer')->getL10N('b2sharebridge');
-            }
-        );
-
-        $container->registerService(
             'DepositStatusMapper',
             function () use ($server) {
                 return new DepositStatusMapper(

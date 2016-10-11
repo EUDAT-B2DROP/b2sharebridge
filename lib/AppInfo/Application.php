@@ -18,8 +18,8 @@ namespace OCA\B2shareBridge\AppInfo;
 use OCA\B2shareBridge\Controller\PublishController;
 use OCA\B2shareBridge\Controller\ViewController;
 use OCA\B2shareBridge\Data;
-use OCA\B2shareBridge\Db\DepositStatusMapper;
-use OCA\B2shareBridge\Db\StatusCodeMapper;
+use OCA\B2shareBridge\Model\DepositStatusMapper;
+use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\View\Navigation;
 use OCP\AppFramework\App;
 use OCP\IContainer;
@@ -58,10 +58,9 @@ class Application extends App
         );
 
         $container->registerService(
-            'StatusCodeMapper',
+            'StatusCodes',
             function () use ($server) {
-                return new StatusCodeMapper(
-                    $server->getDatabaseConnection()
+                return new StatusCodes(
                 );
             }
         );
@@ -74,7 +73,7 @@ class Application extends App
                     $server->getRequest(),
                     $server->getConfig(),
                     $c->query('DepositStatusMapper'),
-                    $c->query('StatusCodeMapper'),
+                    $c->query('StatusCodes'),
                     $c->query('CurrentUID')
                 );
             }
@@ -88,7 +87,7 @@ class Application extends App
                     $c->query('Request'),
                     $server->getConfig(),
                     $c->query('DepositStatusMapper'),
-                    $c->query('StatusCodeMapper'),
+                    $c->query('StatusCodes'),
                     $c->query('CurrentUID'),
                     $c->query('Navigation')
                 );

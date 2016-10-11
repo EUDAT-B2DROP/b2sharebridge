@@ -31,7 +31,7 @@ function getCookie(cname) {
                         OC.dialogs.prompt(
                             t(
                                 'b2sharebridge',
-                                'You are publishing for the first time during this browser session, please provide the token for B2SHARE and then restart the publish action.'
+                                'You are publishing for the first time during this browser session, please provide the token for B2SHARE and then restart the Publish action.'
                             ),
                             t('b2sharebridge', 'B2SHARE API auth token'),
                             function (decision, password) {

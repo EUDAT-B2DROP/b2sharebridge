@@ -23,10 +23,10 @@ class PageControllerTest extends PHPUnit_Framework_TestCase {
     public function setUp() {
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();
-        $mapper = $this->getMockBuilder('OCA\B2shareBridge\Db\FilecacheStatusMapper')
+        $mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\FilecacheStatusMapper')
             ->disableOriginalConstructor()
             ->getMock();
-        $scMapper = $this->getMockBuilder('OCA\B2shareBridge\Db\StatusCodeMapper')
+        $scMapper = $this->getMockBuilder('OCA\B2shareBridge\Model\StatusCodeMapper')
             ->disableOriginalConstructor()
             ->getMock();
             

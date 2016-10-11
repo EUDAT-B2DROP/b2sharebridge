@@ -12,12 +12,11 @@
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
-namespace OCA\B2shareBridge\Db;
+namespace OCA\B2shareBridge\Model;
 
 use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\Mapper;
 use OCP\IDBConnection;
-use OCP\Util;
 
 /**
  * Work on a database table
@@ -41,7 +40,7 @@ class DepositStatusMapper extends Mapper
         parent::__construct(
             $db,
             'b2sharebridge_deposit_status',
-            '\OCA\B2shareBridge\Db\DepositStatus'
+            '\OCA\B2shareBridge\Model\DepositStatus'
         );
     }
 

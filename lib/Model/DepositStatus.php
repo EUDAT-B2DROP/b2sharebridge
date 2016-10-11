@@ -12,7 +12,7 @@
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
-namespace OCA\B2shareBridge\Db;
+namespace OCA\B2shareBridge\Model;
 
 use OC\Files\Filesystem;
 use OCP\AppFramework\Db\Entity;

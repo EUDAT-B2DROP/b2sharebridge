@@ -15,10 +15,10 @@
 namespace OCA\B2shareBridge\Controller;
 
 use OC\Files\Filesystem;
-use OCA\B2shareBridge\Db\DepositStatus;
-use OCA\B2shareBridge\Db\DepositStatusMapper;
-use OCA\B2shareBridge\Db\StatusCodeMapper;
 use OCA\B2shareBridge\Job\TransferHandler;
+use OCA\B2shareBridge\Model\DepositStatus;
+use OCA\B2shareBridge\Model\DepositStatusMapper;
+use OCA\B2shareBridge\Model\StatusCodes;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IConfig;
@@ -36,63 +36,38 @@ use OCP\Util;
  */
 class PublishController extends Controller
 {
-    private $_appName;
-    private $_userId;
-    private $_statusCodes;
-    private $_lastGoodStatusCode = 2;
+    protected $config;
+    protected $mapper;
+    protected $statusCodes;
+    protected $userId;
 
     /**
      * Creates the AppFramwork Controller
      *
-     * @param string              $appName  name of the app
-     * @param IRequest            $request  request object
-     * @param IConfig             $config   config object
-     * @param DepositStatusMapper $mapper   whatever
-     * @param StatusCodeMapper    $scMapper whatever
-     * @param string              $userId   userid
+     * @param string              $appName     name of the app
+     * @param IRequest            $request     request object
+     * @param IConfig             $config      config object
+     * @param DepositStatusMapper $mapper      whatever
+     * @param StatusCodes         $statusCodes whatever
+     * @param string              $userId      userid
      */
     public function __construct(
         string $appName,
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,
-        StatusCodeMapper $scMapper,
-        $userId
+        StatusCodes $statusCodes,
+        string $userId
     ) {
         parent::__construct($appName, $request);
-        $this->_userId = $userId;
+        $this->userId = $userId;
         $this->mapper = $mapper;
-        $this->scMapper = $scMapper;
+        $this->statusCodes = $statusCodes;
         $this->config = $config;
-        $this->_statusCodes = $this->_listStatusCodes();
-        $this->_lastGoodStatusCode = array_search('processing', $this->_statusCodes);
     }
 
     /**
-     * CAUTION: the @Stuff turns off security checks; for this page no admin is
-     *          required and no CSRF check. If you don't know what CSRF is, read
-     *          it up in the docs or you might create a security hole. This is
-     *          basically the only required method to add this exemption, don't
-     *          add it to any other method if you don't exactly know what it does
-     *
-     * @return array
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     */
-    private function _listStatusCodes()
-    {
-        $statuscodes = [];
-        foreach (
-            $this->scMapper->findAllStatusCodes()
-            as $statuscode) {
-            $statuscodes[] = $statuscode->getMessage();
-        }
-        return $statuscodes;
-    }
-
-    /**
-     * XHR request endpoint for getting publish command
+     * XHR request endpoint for getting Publish command
      *
      * @return          JSONResponse
      * @NoAdminRequired
@@ -114,8 +89,7 @@ class PublishController extends Controller
         if (!is_int($id) || !is_string($token)) {
             $error = 'Problems while parsing fileid or publishToken';
         }
-        $_userId = \OC::$server->getUserSession()->getUser()->getUID();
-        if (strlen($_userId) <= 0) {
+        if (strlen($this->userId) <= 0) {
             $error = 'No user configured for session';
         }
         if (($error)) {
@@ -139,21 +113,22 @@ class PublishController extends Controller
             'max_upload_filesize',
             5
         );
-
-        $active_uploads = $this->mapper->findCountForUser(
-            $_userId, array_search('new', $this->_statusCodes)
+        $active_uploads = count(
+            $this->mapper->findAllForUserAndStateString(
+                $this->userId,
+                'pending'
+            )
         );
         if ($active_uploads < $allowed_uploads) {
-
-            Filesystem::init($_userId, '/');
+            Filesystem::init($this->userId, '/');
             $view = Filesystem::getView();
             $filesize = $view->filesize(Filesystem::getPath($id));
             if ($filesize < $allowed_filesize * 1024 * 1024) {
                 $job = new TransferHandler($this->mapper);
                 $fcStatus = new DepositStatus();
                 $fcStatus->setFileid($id);
-                $fcStatus->setOwner($_userId);
-                $fcStatus->setStatus(1);//status = new
+                $fcStatus->setOwner($this->userId);
+                $fcStatus->setStatus(1);
                 $fcStatus->setCreatedAt(time());
                 $fcStatus->setUpdatedAt(time());
                 $this->mapper->insert($fcStatus);
@@ -188,7 +163,7 @@ class PublishController extends Controller
             $job, [
                 'transferId' => $fcStatus->getId(),
                 'token' => $token,
-                '_userId' => $_userId
+                '_userId' => $this->userId
             ]
         );
 

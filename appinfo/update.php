@@ -18,72 +18,15 @@ $installedVersion = \OC::$server->getConfig()->getAppValue(
 );
 $connection = \OC::$server->getDatabaseConnection();
 
-$states = [
-    array(
-        'status_code' => 0,
-        'message'     => 'published'
-    ),
-    array(
-        'status_code' => 1,
-        'message'     => 'new'
-    ),
-    array(
-        'status_code' => 2,
-        'message'     => 'processing'
-    ),
-    array(
-        'status_code' => 3,
-        'message'     => 'External error: during uploading file'
-    ),
-    array(
-        'status_code' => 4,
-        'message'     => 'External error: during creating deposit'
-    ),
-    array(
-        'status_code' => 5,
-        'message'     => 'Internal error: file not accessible'
-    ),
-];
+if (version_compare($installedVersion, '0.0.8', '<')) {
+    $connection->executeQuery(
+        'DROP TABLE `*PREFIX*b2sharebridge_filecache_status`'
+    );
 
-foreach ($states as $state) {
-    try {
-        if (version_compare($installedVersion, '0.0.8', '<')) {
-            \OC::$server->getLogger()->debug(
-                'Inside update function for b2sharebridge older 0.0.7',
-                ['app' => 'b2sharebridge']
-            );
-
-            //alter old table, changing from string to int
-            /**
-             * UPDATE oc_b2sharebridge_filecache_status SET
-             * status=0 WHERE status='published';
-             * UPDATE oc_b2sharebridge_filecache_status SET status=1 WHERE
-             * status='new';
-             * UPDATE oc_b2sharebridge_filecache_status SET status=2 WHERE
-             * status='processing';
-             * UPDATE oc_b2sharebridge_filecache_status SET status=3 WHERE
-             * status='External error: during uploading file';
-             * UPDATE oc_b2sharebridge_filecache_status SET status=4 WHERE
-             * status='External error: during creating deposit';
-             * UPDATE oc_b2sharebridge_filecache_status SET status=5 WHERE
-             * status='Internal error: file not accessible';
-             */
-            $connection->executeUpdate(
-                'UPDATE `*PREFIX*b2sharebridge_filecache_status` SET `status`'
-                . ' = ? WHERE `status` = ?', $state
-            );
-        }
-        // create new table only holding states
-        $result = $connection->insertIfNotExist(
-            '*PREFIX*b2sharebridge_status_code',
-            $state
-        );
-    } catch (\Exception $e) {
-        \OC::$server->getLogger()->error(
-            'Error while updating b2sharebridge 0.0.7 to 0.0.8',
-            ['app' => 'b2sharebridge']
-        );
-        return false;
-    }
 }
 
+if (version_compare($installedVersion, '0.0.9', '<')
+    and $connection->tableExists('b2sharebridge_status_code')
+) {
+    $connection->dropTable('b2sharebridge_status_code');
+}

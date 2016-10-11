@@ -15,7 +15,7 @@
 namespace OCA\B2shareBridge\Job;
 
 use OCA\B2shareBridge\AppInfo\Application;
-use OCA\B2shareBridge\Db\DepositStatusMapper;
+use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Publish\IPublish;
 
 use OC\BackgroundJob\QueuedJob;

@@ -23,7 +23,7 @@
                             <td><?php p($publication->getId()) ?></td>
                             <td><?php p($publication->getFilename()) ?></td>
                             <?php // TODO: echo as user specific timedate ?>
-                            <td><?php p($_['statuscodes'][$publication->getStatus()]) ?></td>
+                            <td><?php p($_['statuscodes']->getForNumber($publication->getStatus())) ?></td>
                             <td><a target="_blank"
                                    href=<?php p($publication->getUrl()) ?>>URL</a>
                             </td>

@@ -14,9 +14,6 @@
 
 namespace OCA\B2shareBridge\Publish;
 
-
-use OCP\Util;
-
 /**
  * Implement a backend that is able to move data from owncloud to B2SHARE
  *
@@ -28,10 +25,9 @@ use OCP\Util;
  */
 class B2share implements IPublish
 {
-    private $_api_endpoint;
-    private $_curl_client;
-    private $_deposit_url;
-    private $_file_upload_url;
+    protected $api_endpoint;
+    protected $curl_client;
+    protected $file_upload_url;
 
     /**
      * Create object for actual upload
@@ -40,8 +36,8 @@ class B2share implements IPublish
      */
     public function __construct($api_endpoint)
     {
-        $this->_api_endpoint = $api_endpoint;
-        $this->_curl_client = curl_init();
+        $this->api_endpoint = $api_endpoint;
+        $this->curl_client = curl_init();
         $defaults = array(
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,
@@ -49,7 +45,7 @@ class B2share implements IPublish
             CURLOPT_SSL_VERIFYHOST => 0,
             CURLOPT_SSL_VERIFYPEER => 0
         );
-        curl_setopt_array($this->_curl_client, $defaults);
+        curl_setopt_array($this->curl_client, $defaults);
     }
 
     /**
@@ -77,21 +73,21 @@ class B2share implements IPublish
 
         $config = array(
             CURLOPT_URL =>
-                $this->_api_endpoint.'/api/records/?access_token='.$token,
+                $this->api_endpoint.'/api/records/?access_token='.$token,
             CURLOPT_POST => 1,
             CURLOPT_POSTFIELDS => $data,
             CURLOPT_HTTPHEADER => array(
                 'Content-Type: application/json',
                 'Content-Length: '.strlen($data))
         );
-        curl_setopt_array($this->_curl_client, $config);
+        curl_setopt_array($this->curl_client, $config);
 
 
-        $response = curl_exec($this->_curl_client);
+        $response = curl_exec($this->curl_client);
         if (!$response) {
             return false;
         } else {
-            $header_size = curl_getinfo($this->_curl_client, CURLINFO_HEADER_SIZE);
+            $header_size = curl_getinfo($this->curl_client, CURLINFO_HEADER_SIZE);
             $header = substr($response, 0, $header_size);
             $body = substr($response, $header_size);
             $results = json_decode(utf8_encode($body));
@@ -99,7 +95,7 @@ class B2share implements IPublish
                 and array_key_exists('self', $results->links)
                 and array_key_exists('files', $results->links)
             ) {
-                $this->_file_upload_url
+                $this->file_upload_url
                     = $results->links->files.'/'.$filename.'?access_token='.$token;
                 return str_replace(
                     'draft',
@@ -123,7 +119,7 @@ class B2share implements IPublish
     public function upload($filehandle, $filesize)
     {
         $config = array(
-            CURLOPT_URL => $this->_file_upload_url,
+            CURLOPT_URL => $this->file_upload_url,
             CURLOPT_INFILE => $filehandle,
             CURLOPT_INFILESIZE => $filesize,
             CURLOPT_BINARYTRANSFER => true,
@@ -136,9 +132,9 @@ class B2share implements IPublish
                 'Content-Type: application/octet-stream'
             )
         );
-        curl_setopt_array($this->_curl_client, $config);
+        curl_setopt_array($this->curl_client, $config);
 
-        $response = curl_exec($this->_curl_client);
+        $response = curl_exec($this->curl_client);
         if (!$response) {
             return false;
         } else {

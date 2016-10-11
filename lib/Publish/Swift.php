@@ -25,9 +25,9 @@ namespace OCA\B2shareBridge\Publish;
  */
 class Swift implements IPublish
 {
-    private $_api_endpoint;
-    private $_curl_client;
-    private $_result;
+    protected $api_endpoint;
+    protected $curl_client;
+    protected $result;
 
     /**
      * Create object for actual upload
@@ -36,8 +36,8 @@ class Swift implements IPublish
      */
     public function __construct($api_endpoint)
     {
-        $this->_api_endpoint = $api_endpoint;
-        $this->_curl_client = curl_init();
+        $this->api_endpoint = $api_endpoint;
+        $this->curl_client = curl_init();
     }
 
     /**
@@ -51,10 +51,10 @@ class Swift implements IPublish
      */
     public function create($token, $filename)
     {
-        $this->_result['url'] = $this->_api_endpoint.'/'.uniqid();
-        curl_setopt($this->_curl_client, CURLOPT_URL, $this->_result['url']);
+        $this->result['url'] = $this->api_endpoint.'/'.uniqid();
+        curl_setopt($this->curl_client, CURLOPT_URL, $this->result['url']);
         curl_setopt(
-            $this->_curl_client,
+            $this->curl_client,
             CURLOPT_HTTPHEADER,
             array(
                 'X-Auth-Token: '.$token,
@@ -70,20 +70,20 @@ class Swift implements IPublish
      */
     public function finalize()
     {
-        $tmp = curl_exec($this->_curl_client);
-        $response_code = curl_getinfo($this->_curl_client)['http_code'];
+        $tmp = curl_exec($this->curl_client);
+        $response_code = curl_getinfo($this->curl_client)['http_code'];
 
         if ($response_code === 201) {
-            $this->_result['output'] = 'successfully transferred file';
-            $this->_result['status'] = 'success';
+            $this->result['output'] = 'successfully transferred file';
+            $this->result['status'] = 'success';
 
         } else {
-            $this->_result['output'] = 'error transferring file'.$tmp;
-            $this->_result['status'] = 'error';
+            $this->result['output'] = 'error transferring file'.$tmp;
+            $this->result['status'] = 'error';
 
         }
-        curl_close($this->_curl_client);
-        return $this->_result;
+        curl_close($this->curl_client);
+        return $this->result;
     }
 
     /**
@@ -96,10 +96,10 @@ class Swift implements IPublish
      */
     public function upload($filehandle, $filesize)
     {
-        curl_setopt($this->_curl_client, CURLOPT_INFILE, $filehandle);
-        curl_setopt($this->_curl_client, CURLOPT_INFILESIZE, $filesize);
-        curl_setopt($this->_curl_client, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($this->_curl_client, CURLOPT_PUT, true);
-        curl_setopt($this->_curl_client, CURLOPT_FORBID_REUSE, 1);
+        curl_setopt($this->curl_client, CURLOPT_INFILE, $filehandle);
+        curl_setopt($this->curl_client, CURLOPT_INFILESIZE, $filesize);
+        curl_setopt($this->curl_client, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($this->curl_client, CURLOPT_PUT, true);
+        curl_setopt($this->curl_client, CURLOPT_FORBID_REUSE, 1);
     }
 }

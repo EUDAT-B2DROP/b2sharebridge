@@ -15,8 +15,13 @@
 
 use OCP\Template;
 use OCP\User;
+use OCP\Util;
 
 User::checkLoggedIn();
+$userId = \OC::$server->getUserSession()->getUser()->getUID();
+
+
+Util::addScript('b2sharebridge', 'settings-personal');
 
 $tmpl = new Template('b2sharebridge', 'settings-personal');
 $tmpl->assign(
@@ -25,6 +30,15 @@ $tmpl->assign(
         'b2sharebridge',
         'publish_baseurl'
     )
+);
+
+$tmpl->assign(
+	'b2share_apitoken',
+	\OC::$server->getConfig()->getUserValue(
+			$userId
+			,'b2sharebridge'
+			,'token'
+	)
 );
 
 return $tmpl->fetchPage();

@@ -3,8 +3,25 @@
 	
     var TEMPLATE =
         '<div>' +
-        '<div class="dialogContainer">TEMPLATE</div>' +
+        '<div id="b2sharebridgeTabView" class="dialogContainer"><div id="communitySelector"></div><div><input type="button" value="publish" id="publish_button"/></div></div>' +
         '</div>';
+		
+		function publishAction(e){
+			fileInfo = e.data.param;
+            $.post(
+				OC.generateUrl('/apps/b2sharebridge/publish'), 
+				{id: fileInfo.id
+				}, 
+				function (result) {
+                	if (result && result.status === 'success') {
+                    	OC.dialogs.info(
+							t('b2sharebridge', result.message),
+							t('b2sharebridge', 'Info'));
+					}
+				});
+		}
+		
+	
     /**
      * @class OCA.B2shareBridge.B2shareBridgeTabView
      * @memberof OCA.B2shareBridge
@@ -22,6 +39,7 @@
 
         _loading: false,
 
+
         initialize: function() {
 
             OCA.Files.DetailTabView.prototype.initialize.apply(this, arguments);
@@ -31,6 +49,7 @@
             this.collection.on('sync', this._onEndRequest, this);
             this.collection.on('update', this._onChange, this);
             this.collection.on('error', this._onError, this);
+			
 			
         },
 
@@ -62,8 +81,38 @@
 
         _onAddModel: function(model) {
         },
-
+		
+		getCommunitySelectorHTML: function(){
+			//TODO implement warning if token not yet set in settings
+			var url_path = 
+				"/apps/b2sharebridge/gettabviewcontent?requesttoken=" + 
+				encodeURIComponent(oc_requesttoken);
+			communities = [];
+			result = "";
+			$.ajax({
+				type: 'GET',
+				url: OC.generateUrl(url_path),
+				async: false
+			}).done(function(data){		
+				result = "<select>";
+				$.each(data, function(index, value){
+					result = result + "<option name=\"" + value['id'] + "\">"+ value['name'] + "</option>";
+				});
+				result = result + "</select>"
+			}).fail(function(data){
+				//TODO: implement unhappy flow
+				alert('failed');
+			});
+			
+			
+			
+			return result;
+		}
+		,
+		
+		
         template: function(data) {
+	
 			if (!this._template) {
 				this._template = Handlebars.compile(TEMPLATE);
 			}
@@ -74,6 +123,9 @@
         },
 
         setFileInfo: function(fileInfo) {
+			if (fileInfo){
+				this.fileInfo = fileInfo;
+			}
 			this.render();
         },
 
@@ -85,6 +137,8 @@
          */
         render: function() {
 			this.$el.html(this.template());
+			$(communitySelector).html(this.getCommunitySelectorHTML());
+			$(publish_button).bind('click',{param: this.fileInfo}, publishAction);
 			this.delegateEvents();
         },
 

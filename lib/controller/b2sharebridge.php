@@ -18,6 +18,7 @@ use OC\Files\Filesystem;
 use OCP\IConfig;
 use OCP\IRequest;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\Response;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Util;
@@ -214,6 +215,7 @@ class B2shareBridge extends Controller
      */
     public function filterFailed()
     {
+
         $fails = [];
         foreach (
             array_reverse(
@@ -240,25 +242,29 @@ class B2shareBridge extends Controller
      */
     public function publish()
     {
+		Util::writeLog($this->appName, "in publish", 3);
         $param = $this->request->getParams();
-
-        $error = false;
-        if (!is_array($param)
-            || !array_key_exists('id', $param)
-            || !array_key_exists('token', $param)
-        ) {
-            $error = 'Parameters gotten from UI are no array or they are missing';
-        }
-        $id = (int) $param['id'];
-        $token = $param['token'];
-
-        if (!is_int($id) || !is_string($token)) {
-            $error = 'Problems while parsing fileid or publishToken';
-        }
+		//TODO what if token wasn't set? We couldn't have gotten here 
+		//but still a check seems in place.
         $_userId = \OC::$server->getUserSession()->getUser()->getUID();
         if (strlen($_userId) <= 0) {
             $error = 'No user configured for session';
         }
+		$token = $this->config->getUserValue($_userId, $this->appName, "token");
+
+        $error = false;
+        if (!is_array($param)
+            || !array_key_exists('id', $param)
+            
+        ) {
+            $error = 'Parameters gotten from UI are no array or they are missing';
+        }
+        $id = (int) $param['id'];
+
+        if (!is_int($id) || !is_string($token)) {
+            $error = 'Problems while parsing fileid or publishToken';
+        }
+        
         if (($error)) {
             Util::writeLog('b2sharebridge', $error, 3);
             return new JSONResponse(
@@ -290,6 +296,7 @@ class B2shareBridge extends Controller
             $view = Filesystem::getView();
             $filesize = $view->filesize(Filesystem::getPath($id));
             if ($filesize < $allowed_filesize*1024*1024) {
+				Util::writeLog($this->appName,"making transfer handler",3);
                 $job = new TransferHandler($this->mapper);
                 $fcStatus = new FilecacheStatus();
                 $fcStatus->setFileid($id);
@@ -334,6 +341,94 @@ class B2shareBridge extends Controller
         );
     }
     
+    /**
+     * XHR request endpoint for token setter
+     *
+     * @return          JSONResponse
+     * @NoAdminRequired
+     */
+	public function setToken(){
+		$param = $this->request->getParams();
+        $error = false;
+        if (!is_array($param)
+            || !array_key_exists('token', $param)
+        ) {
+            $error = 'Parameters gotten from UI are no array or they are missing';
+        }
+        $token = $param['token'];
+
+        if  (!is_string($token)) {
+            $error = 'Problems while parsing fileid or publishToken';
+        }
+        $userId = \OC::$server->getUserSession()->getUser()->getUID();
+        if (strlen($userId) <= 0) {
+            $error = 'No user configured for session';
+        }
+        if (($error)) {
+            Util::writeLog('b2sharebridge', $error, 3);
+            return new JSONResponse(
+                [
+                    'message'=>'Internal server error, contact the EUDAT helpdesk',
+                    'status' => 'error'
+                ]
+            );
+        }
+		
+	
+		Util::writeLog('b2sharebridge', "saving API token", 3);
+		$this->config->setUserValue($userId, $this->appName, "token", $token);
+		return new JSONResponse(["data"=>["message" => "Saved"] , "status" => "success"]); 
+	}
+	
+    /**
+     * XHR request endpoint for token setter
+     *
+     * @return          JSONResponse
+     * @NoAdminRequired
+     */
+	public function deleteToken(){
+		Util::writeLog('b2sharebridge',"Deleting API token",3);
+        $userId = \OC::$server->getUserSession()->getUser()->getUID();
+        if (strlen($userId) <= 0) {
+            $error = 'No user configured for session';
+        }
+        if (($error)) {
+            Util::writeLog('b2sharebridge', $error, 3);
+            return new JSONResponse(
+                [
+                    'message'=>'Internal server error, contact the EUDAT helpdesk',
+                    'status' => 'error'
+                ]
+            );
+        }
+		
+		$this->config->setUserValue($userId, $this->appName, "token","");
+	}
+	
+    /**
+     * XHR request endpoint for token setter
+     *
+     * @return          JSONResponse
+     * @NoAdminRequired
+     */
+	public function getTabViewContent(){
+		Util::writeLog('b2sharebridge','serving tab view',3);
+		$url = $this->config->getAppValue(
+        	'b2sharebridge',
+        	'publish_baseurl'
+    	);
+		$userId = \OC::$server->getUserSession()->getUser()->getUID();
+		$token = $this->config->getUserValue($userId, $this->appName, "token");
+		//TODO serve a warning when token is not set
+		$url = $url."api/communities/?token=".$token;
+		Util::writeLog('b2sharebridge',"fetching ".$url,3);
+		$json = file_get_contents($url);
+		#TODO: Unhappy flow
+		$data = json_decode($json, TRUE)['hits']['hits'];
+		Util::writeLog("b2sharebridge","JSON: ".$data,3);
+		return $data;
+	}
+	
     /**
      * CAUTION: the @Stuff turns off security checks; for this page no admin is
      *          required and no CSRF check. If you don't know what CSRF is, read

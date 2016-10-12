@@ -36,5 +36,10 @@ $application->registerRoutes(
         ['name' => 'B2shareBridge#index', 'url' => '/status', 'verb' => 'GET'],
         ['name' => 'B2shareBridge#filter_failed', 'url' => '/failed',
         'verb' => 'GET'],
+        ['name' => 'B2shareBridge#set_token', 'url' => '/apitoken',
+        'verb' => 'POST'],
+		['name' => 'B2shareBridge#delete_token', 'url' => '/apitoken', 'verb' => 'DELETE']
+		,['name' => 'B2shareBridge#get_tabview_content', 'url'=>'/gettabviewcontent', 'verb'=>'GET']
+		,
     ]]
 );

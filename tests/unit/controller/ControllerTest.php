@@ -15,7 +15,7 @@ use PHPUnit_Framework_TestCase;
 use OCP\AppFramework\Http\TemplateResponse;
 
 
-class PageControllerTest extends PHPUnit_Framework_TestCase {
+class ViewControllerTest extends PHPUnit_Framework_TestCase {
 
     private $controller;
     private $userId = 'john';
@@ -23,44 +23,51 @@ class PageControllerTest extends PHPUnit_Framework_TestCase {
     public function setUp() {
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();
-        $mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\FilecacheStatusMapper')
+        $mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
             ->disableOriginalConstructor()
             ->getMock();
-        $scMapper = $this->getMockBuilder('OCA\B2shareBridge\Model\StatusCodeMapper')
+        $statusCodes = $this->getMockBuilder('OCA\B2shareBridge\Model\StatusCodes')
             ->disableOriginalConstructor()
             ->getMock();
-            
 
-        $this->controller = new B2shareBridge(
-            'b2sharebridge', $request, $config, $mapper, $scMapper, $this->userId
+        $navigation = $this->getMockBuilder('OCA\B2shareBridge\View\Navigation')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->controller = new ViewController(
+            'b2sharebridge', $request, $config, $mapper, $statusCodes, $this->userId, $navigation
         );
     }
 
     public function testIndex() {
-        $result = $this->controller->index();
-        $this->assertEquals(['user' => 'john', 'transfers' => Array (), 'publications' => Array (), 'fails' => Array (), 'statuscodes' => Array ()], $result->getParams());
-        $this->assertEquals('main', $result->getTemplateName());
+        $filter = 'all';
+        $result = $this->controller->depositList();
+        $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());
+        $this->assertEquals('body', $result->getTemplateName());
         $this->assertTrue($result instanceof TemplateResponse);
     }
     
     public function testPublished() {
-        $result = $this->controller->filterPublished();
-        $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => Array ()], $result->getParams());
-        $this->assertEquals('published', $result->getTemplateName());
+        $filter = 'published';
+        $result = $this->controller->depositList($filter);
+        $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());
+        $this->assertEquals('body', $result->getTemplateName());
         $this->assertTrue($result instanceof TemplateResponse);
     }
     
     public function testPending() {
-        $result = $this->controller->filterPending();
-        $this->assertEquals(['user' => 'john', 'transfers' => Array ()], $result->getParams());
-        $this->assertEquals('pending', $result->getTemplateName());
+        $filter = 'pending';
+        $result = $this->controller->depositList($filter);
+        $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());
+        $this->assertEquals('body', $result->getTemplateName());
         $this->assertTrue($result instanceof TemplateResponse);
     }
     
     public function testFailed() {
-        $result = $this->controller->filterFailed();
-        $this->assertEquals(['user' => 'john', 'fails' => Array (), 'statuscodes' => Array ()], $result->getParams());
-        $this->assertEquals('failed', $result->getTemplateName());
+        $filter = 'failed';
+        $result = $this->controller->depositList($filter);
+        $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());
+        $this->assertEquals('body', $result->getTemplateName());
         $this->assertTrue($result instanceof TemplateResponse);
     }
 }

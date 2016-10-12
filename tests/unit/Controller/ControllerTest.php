@@ -13,12 +13,15 @@ namespace OCA\B2shareBridge\Controller;
 use PHPUnit_Framework_TestCase;
 
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\Template;
 
 
 class ViewControllerTest extends PHPUnit_Framework_TestCase {
 
     private $controller;
     private $userId = 'john';
+    private $navigation;
+    private $statusCodes;
 
     public function setUp() {
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
@@ -26,20 +29,24 @@ class ViewControllerTest extends PHPUnit_Framework_TestCase {
         $mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
             ->disableOriginalConstructor()
             ->getMock();
-        $statusCodes = $this->getMockBuilder('OCA\B2shareBridge\Model\StatusCodes')
+        $this->statusCodes = $this->getMockBuilder('OCA\B2shareBridge\Model\StatusCodes')
+            ->getMock();
+
+        $this->navigation = $this->getMockBuilder('OCA\B2shareBridge\View\Navigation')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $navigation = $this->getMockBuilder('OCA\B2shareBridge\View\Navigation')
-            ->disableOriginalConstructor()
-            ->getMock();
+        $template = $this->createMock(Template::class);
+
+        $this->navigation->method('getTemplate')
+            ->willReturn($template);
 
         $this->controller = new ViewController(
-            'b2sharebridge', $request, $config, $mapper, $statusCodes, $this->userId, $navigation
+            'b2sharebridge', $request, $config, $mapper,  $this->statusCodes, $this->userId, $this->navigation
         );
     }
 
-    public function testIndex() {
+    public function testList() {
         $filter = 'all';
         $result = $this->controller->depositList();
         $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());

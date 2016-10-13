@@ -13,8 +13,6 @@ namespace OCA\B2shareBridge\Controller;
 use PHPUnit_Framework_TestCase;
 
 use OCP\AppFramework\Http\TemplateResponse;
-use OCP\Template;
-
 
 class ViewControllerTest extends PHPUnit_Framework_TestCase {
 
@@ -36,10 +34,8 @@ class ViewControllerTest extends PHPUnit_Framework_TestCase {
             ->disableOriginalConstructor()
             ->getMock();
 
-        $template = $this->createMock(Template::class);
-
         $this->navigation->method('getTemplate')
-            ->willReturn($template);
+            ->willReturn($this->returnValue('OCP\AppFramework\Http\TemplateResponse'));
 
         $this->controller = new ViewController(
             'b2sharebridge', $request, $config, $mapper,  $this->statusCodes, $this->userId, $this->navigation

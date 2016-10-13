@@ -17,3 +17,6 @@ b2sharebridge (0.0.7)
 b2sharebridge (0.0.8)
 * renamed classes from filecache to deposit
 * many refactorings
+
+b2sharebridge (0.1.0)
+* implemented tabview where user can select his community

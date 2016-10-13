@@ -61,7 +61,7 @@
 
 
         getLabel: function() {
-            return t('b2sharebridge', 'B2shareBridge');
+            return t('b2sharebridge', 'B2SHARE');
         },
 
         nextPage: function() {

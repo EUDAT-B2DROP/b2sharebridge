@@ -121,4 +121,124 @@ class ViewController extends Controller
             $params
         );
     }
+
+    /**
+     * XHR request endpoint for token setter
+     *
+     * @return          JSONResponse
+     * @NoAdminRequired
+     */
+    public function setToken()
+    {
+        $param = $this->request->getParams();
+        $error = false;
+        if (!is_array($param)
+            || !array_key_exists('token', $param)
+        ) {
+            $error = 'Parameters gotten from UI are no array or they are missing';
+        }
+        $token = $param['token'];
+
+        if (!is_string($token)) {
+            $error = 'Problems while parsing fileid or publishToken';
+        }
+        $userId = \OC::$server->getUserSession()->getUser()->getUID();
+        if (strlen($userId) <= 0) {
+            $error = 'No user configured for session';
+        }
+        if (($error)) {
+            Util::writeLog('b2sharebridge', $error, 3);
+            return new JSONResponse(
+                [
+                    'message'=>'Internal server error, contact the EUDAT helpdesk',
+                    'status' => 'error'
+                ]
+            );
+        }
+
+
+        Util::writeLog('b2sharebridge', "saving API token", 3);
+        $this->config->setUserValue($userId, $this->appName, "token", $token);
+        return new JSONResponse(
+            [
+                "data" => ["message" => "Saved"],
+                "status" => "success"
+            ]
+        );
+    }
+
+    /**
+     * XHR request endpoint for token setter
+     *
+     * @return          JSONResponse
+     * @NoAdminRequired
+     */
+    public function deleteToken()
+    {
+        Util::writeLog('b2sharebridge', 'Deleting API token', 3);
+        $userId = \OC::$server->getUserSession()->getUser()->getUID();
+        if (strlen($userId) <= 0) {
+            $error = 'No user configured for session';
+        }
+        if (($error)) {
+            Util::writeLog('b2sharebridge', $error, 3);
+            return new JSONResponse(
+                [
+                    'message'=>'Internal server error, contact the EUDAT helpdesk',
+                    'status' => 'error'
+                ]
+            );
+        }
+
+        $this->config->setUserValue($userId, $this->appName, 'token', '');
+    }
+
+    /**
+     * XHR request endpoint for token setter
+     *
+     * @return          JSONResponse
+     * @NoAdminRequired
+     */
+    public function getTabViewContent()
+    {
+        Util::writeLog('b2sharebridge', 'serving tab view', 3);
+        $url = $this->config->getAppValue(
+            'b2sharebridge',
+            'publish_baseurl'
+        );
+        $userId = \OC::$server->getUserSession()->getUser()->getUID();
+        //$token = $this->config->getUserValue($userId, $this->appName, "token");
+        //TODO serve a warning when token is not set
+        $url = $url."/api/communities";
+        Util::writeLog('b2sharebridge', "fetching ".$url, 3);
+        $json = $this->getSslPage($url);
+        //TODO: Unhappy flow
+        $data = json_decode($json, true)['hits']['hits'];
+        Util::writeLog("b2sharebridge", "JSON: " .$data, 3);
+        return $data;
+    }
+
+    /**
+     * Fetch url for json, currently insecure because ssl validation turned off.
+     *
+     * @param \string $url URL to fetch
+     *
+     * @return \string Response
+     *
+     * @NoAdminRequired
+     */
+    function getSslPage($url)
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_REFERER, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $result = curl_exec($ch);
+        curl_close($ch);
+        return $result;
+    }
 }

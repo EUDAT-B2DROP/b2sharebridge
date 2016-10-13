@@ -75,28 +75,33 @@ class PublishController extends Controller
     public function publish()
     {
         $param = $this->request->getParams();
+        //TODO what if token wasn't set? We couldn't have gotten here
+        //but still a check seems in place.
+        $_userId = \OC::$server->getUserSession()->getUser()->getUID();
+        if (strlen($_userId) <= 0) {
+            $error = 'No user configured for session';
+        }
+        $token = $this->config->getUserValue($_userId, $this->appName, "token");
 
         $error = false;
         if (!is_array($param)
             || !array_key_exists('id', $param)
-            || !array_key_exists('token', $param)
+            || !array_key_exists('community', $param)
         ) {
             $error = 'Parameters gotten from UI are no array or they are missing';
         }
-        $id = (int)$param['id'];
-        $token = $param['token'];
+        $id = (int) $param['id'];
+        $community = $param['community'];
 
         if (!is_int($id) || !is_string($token)) {
             $error = 'Problems while parsing fileid or publishToken';
         }
-        if (strlen($this->userId) <= 0) {
-            $error = 'No user configured for session';
-        }
+
         if (($error)) {
             Util::writeLog('b2sharebridge', $error, 3);
             return new JSONResponse(
                 [
-                    'message' => 'Internal server error, contact the EUDAT helpdesk',
+                    'message'=>'Internal server error, contact the EUDAT helpdesk',
                     'status' => 'error'
                 ]
             );
@@ -163,7 +168,8 @@ class PublishController extends Controller
             $job, [
                 'transferId' => $fcStatus->getId(),
                 'token' => $token,
-                '_userId' => $this->userId
+                '_userId' => $this->userId,
+                'community' => $community
             ]
         );
 

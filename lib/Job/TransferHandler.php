@@ -62,7 +62,7 @@ class TransferHandler extends QueuedJob
      *
      * @return null
      */
-    protected function fixTransferForCron() 
+    protected function fixTransferForCron()
     {
         $application = new Application();
         $this->_mapper = $application->getContainer()
@@ -81,10 +81,11 @@ class TransferHandler extends QueuedJob
     {
         if (!array_key_exists('transferId', $args)
             || !array_key_exists('token', $args)
+            || !array_key_exists('community', $args)
         ) {
             Util::writeLog(
                 'transfer',
-                'Bad request, can not handle transfer without transferId / token',
+                'Bad request, can not handle transfer w/o id, token, community',
                 3
             );
             return;
@@ -106,7 +107,8 @@ class TransferHandler extends QueuedJob
 
             $create_result = $this->_publisher->create(
                 $args['token'],
-                basename($filename)
+                basename($filename),
+                $args['community']
             );
             if ($create_result) {
                 $handle = $view->fopen($filename, 'rb');
@@ -150,8 +152,8 @@ class TransferHandler extends QueuedJob
     public function isPublishingUser($userId)
     {
         return is_array($this->argument) &&
-            array_key_exists('userId', $this->argument) &&
-            $this->argument['userId'] === $userId;
+        array_key_exists('userId', $this->argument) &&
+        $this->argument['userId'] === $userId;
     }
 
     /**
@@ -174,64 +176,5 @@ class TransferHandler extends QueuedJob
     {
         return $this->argument['requestDate'];
     }
-
-    /**
-     * Fork process that uploads the file to b2share
-     *
-     * @param string $pid  process id
-     * @param array  $args arguments
-     *
-     * @return null
-     */
-    public function forked($pid, $args)
-    {
-        Util::writeLog('transfer', 'FORKED', 3);
-        foreach ($args as &$value) {
-            Util::writeLog('transfer_array', $value, 3);
-        }
-        // get path of file
-        // TODO: make sure the user can access the file
-        $fcStatus = $this->_mapper->find($args['transferId']);
-
-        $fcStatus->setStatus(2);//status = processing
-        $this->_mapper->update($fcStatus);
-        Util::writeLog('transfer', 'FORKED2', 3);
-
-        Filesystem::init($args['userId'], '/');
-        $path = Filesystem::getPath($args['fileId']);
-        Util::writeLog('transfer', 'FORKED3', 3);
-        // detect failed lookups
-        if (strlen($path) <= 0) {
-            Util::writeLog(
-                'transfer',
-                "cannot find path: `".$args['userId'].":".$args['fileId']."`",
-                3
-            );
-            return;
-        }
-
-
-        Util::writeLog('transfer', 'start...', 3);
-        sleep(5);
-        Util::writeLog('transfer', '...end', 3);
-
-        // \OC\Files\Filesystem::getFileInfo($args['fileId']);
-
-        // $view = new \OC\Files\View('/' . $args['userId'] . '/files');
-        // $fileinfo = $view->getFileInfo("blaat.txt");
-        // echo "{{ " . $fileinfo->getInternalPath() . " }}" .PHP_EOL;
-        // echo "{{ " . $fileinfo->getId() . " }}" .PHP_EOL;
-        // echo "{{ " . $fileinfo->getMountPoint() . " }}" .PHP_EOL;
-        // echo "{{ " . $fileinfo->getSize() . " }}" .PHP_EOL;
-        // echo "{{ " . $fileinfo->getType() . " }}" .PHP_EOL;
-        // echo "{{ " . $fileinfo->stat() . " }}" .PHP_EOL;
-
-        // echo "... forked end \t" . $pid . PHP_EOL;
-
-        // TODO: start external session
-        // TODO: start transfer
-
-    }
-
 }
 

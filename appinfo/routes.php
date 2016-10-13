@@ -28,5 +28,11 @@ $application->registerRoutes(
     ['routes' => [
         ['name' => 'Publish#publish', 'url' => '/publish', 'verb' => 'POST'],
         ['name' => 'View#depositList', 'url' => '/', 'verb' => 'GET'],
+        ['name' => 'View#set_token', 'url' => '/apitoken', 'verb' => 'POST'],
+        ['name' => 'View#delete_token', 'url' => '/apitoken', 'verb' => 'DELETE'],
+        [
+            'name' => 'View#get_tabview_content',
+            'url'=>'/gettabviewcontent', 'verb'=>'GET'
+        ]
     ]]
 );

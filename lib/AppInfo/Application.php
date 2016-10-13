@@ -168,6 +168,9 @@ class Application extends App
      */
     public static function loadScripts()
     {
-        Util::addScript('b2sharebridge', 'fileactions');
+        Util::addScript('files', 'detailtabview');
+        Util::addScript('b2sharebridge', 'b2sharebridgecollection');
+        Util::addScript('b2sharebridge', 'b2sharebridgetabview');
+        Util::addScript('b2sharebridge', 'b2sharebridge');
     }
 }

@@ -6,4 +6,11 @@
                style="width: 400px" disabled/>
         <em>External publishing endpoint</em>
     </p>
+    <p id="b2shareAPITokenField">
+        <input title= "b2share API token" type="text"  id="b2share_apitoken" value="<?php p($_['b2share_apitoken']); ?>" name="b2share_apitoken"
+               style="width: 400px" /> <a id="b2share_delete_apitoken" href="#">delete</a>
+		<div id="lostpassword"><span class="msg"></span><br /></div>
+        <em>B2Share API token</em>
+    </p>
+
 </div>

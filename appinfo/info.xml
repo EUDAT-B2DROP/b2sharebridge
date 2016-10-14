@@ -17,6 +17,7 @@
         <database>mysql</database>
         <lib>curl</lib>
         <os>Linux</os>
+        <os>Darwin</os>
     </dependencies>
     <rememberlogin>false</rememberlogin>
     <category>publishing</category>

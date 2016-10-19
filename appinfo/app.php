@@ -12,7 +12,7 @@
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
-$app = new \OCA\B2shareBridge\AppInfo\Application();
-$app->registerNavigationEntry();
-$app->loadScripts();
-$app->registerSettings();
+$application = new OCA\B2shareBridge\AppInfo\Application();
+$application->registerNavigationEntry();
+$application->loadScripts();
+$application->registerSettings();

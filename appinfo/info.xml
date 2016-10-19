@@ -2,6 +2,7 @@
 <info>
     <id>b2sharebridge</id>
     <name>EUDAT B2SHARE bridge</name>
+    <namespace>B2shareBridge</namespace>
     <description>
         This application enables B2DROP users to publish data to a external publishing service, such as B2SHARE.
         Because B2DROP is based on ownCloud, this plugin will work with general ownCloud servers.
@@ -12,7 +13,7 @@
     <author>EUDAT</author>
     <version>0.1.0</version>
     <dependencies>
-        <owncloud min-version="8.1" max-version="9.1" />
+        <owncloud min-version="9.1" max-version="9.1" />
         <database>sqlite</database>
         <database>mysql</database>
         <lib>curl</lib>

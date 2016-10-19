@@ -23,7 +23,7 @@ namespace OCA\B2shareBridge\Publish;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class B2share implements IPublish
+class B2share implements Ipublish
 {
     protected $api_endpoint;
     protected $curl_client;

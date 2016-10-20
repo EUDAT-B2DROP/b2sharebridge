@@ -51,7 +51,7 @@ class ViewController extends Controller
      * @param Navigation          $navigation  navigation bar object
      */
     public function __construct(
-        string $appName,
+        $appName,
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,

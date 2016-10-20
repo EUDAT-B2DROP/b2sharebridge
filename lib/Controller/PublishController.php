@@ -52,7 +52,7 @@ class PublishController extends Controller
      * @param string              $userId      userid
      */
     public function __construct(
-        string $appName,
+        $appName,
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,

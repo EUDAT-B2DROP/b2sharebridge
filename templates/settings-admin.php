@@ -22,5 +22,12 @@
                value="<?php p($_['max_upload_filesize']); ?>"/>
         <em>MB maximum filesize per upload</em>
     </p>
+    <p>
+        <input type="checkbox" name="check_ssl" id="checkSsl" class="checkbox"
+               value="1" <?php if ($_['check_ssl']) print_unescaped('checked="checked"'); ?> />
+        <label for="checkSsl">
+            <?php p($l->t('Check valid secure (https) connections to B2SHARE'));?>
+        </label>
+    </p>
 
 </div>

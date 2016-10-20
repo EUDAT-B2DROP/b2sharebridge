@@ -13,4 +13,11 @@ $(document).ready(function() {
     $('#maxB2shareUploadFilesize').change(function() {
         OC.AppConfig.setValue('b2sharebridge', $(this).attr('name'), $(this).val())
     });
+    $('#checkSsl').change(function() {
+        var value = '0';
+        if (this.checked) {
+            value = '1';
+        }
+        OC.AppConfig.setValue('b2sharebridge', $(this).attr('name'), value);
+    });
 });

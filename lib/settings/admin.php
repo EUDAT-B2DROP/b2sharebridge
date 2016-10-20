@@ -41,5 +41,13 @@ $tmpl->assign(
         'max_upload_filesize'
     )
 );
+$tmpl->assign(
+    'check_ssl',
+    $config->getAppValue(
+        'b2sharebridge',
+        'check_ssl',
+        '1'
+    )
+);
 
 return $tmpl->fetchPage();

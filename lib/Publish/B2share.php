@@ -32,9 +32,10 @@ class B2share implements Ipublish
     /**
      * Create object for actual upload
      *
-     * @param string $api_endpoint api endpoint baseurl for b2share
+     * @param string  $api_endpoint api endpoint baseurl for b2share
+     * @param boolean $check_ssl    whether to check security for https
      */
-    public function __construct($api_endpoint)
+    public function __construct($api_endpoint, $check_ssl)
     {
         $this->api_endpoint = $api_endpoint;
         $this->curl_client = curl_init();
@@ -42,9 +43,11 @@ class B2share implements Ipublish
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,
             CURLOPT_HEADER => 1,
-            CURLOPT_SSL_VERIFYHOST => 0,
-            CURLOPT_SSL_VERIFYPEER => 0
         );
+        if (!$check_ssl) {
+            $defaults['CURLOPT_SSL_VERIFYHOST'] = false;
+            $defaults['CURLOPT_SSL_VERIFYPEER'] = false;
+        }
         curl_setopt_array($this->curl_client, $defaults);
     }
 

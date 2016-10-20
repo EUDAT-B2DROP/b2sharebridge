@@ -82,6 +82,7 @@ class TransferHandler extends QueuedJob
         if (!array_key_exists('transferId', $args)
             || !array_key_exists('token', $args)
             || !array_key_exists('community', $args)
+            || !array_key_exists('check_ssl', $args)
         ) {
             Util::writeLog(
                 'transfer',

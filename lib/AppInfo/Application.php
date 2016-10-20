@@ -119,7 +119,9 @@ class Application extends App
                 $backend = 'OCA\B2shareBridge\Publish\B2share';
                 $baseurl = $server->getConfig()
                     ->getAppValue('b2sharebridge', 'publish_baseurl');
-                return new $backend($baseurl);
+                $checkssl = $server->getConfig()
+                    ->getAppValue('b2sharebridge', 'check_ssl', '1');
+                return new $backend($baseurl, $checkssl);
             }
         );
     }

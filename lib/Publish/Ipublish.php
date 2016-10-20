@@ -28,11 +28,12 @@ interface IPublish
     /**
      * Placeholder for actually creating a deposit
      *
-     * @param string $api_endpoint url of the b2access server
+     * @param string  $api_endpoint url of the b2access server
+     * @param boolean $check_ssl    whether to check security for https
      *
      * @return null
      */
-    public function __construct($api_endpoint);
+    public function __construct($api_endpoint, $check_ssl);
 
     /**
      * Placeholder for actually creating a deposit

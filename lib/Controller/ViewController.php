@@ -201,20 +201,16 @@ class ViewController extends Controller
      */
     public function getTabViewContent()
     {
-        Util::writeLog('b2sharebridge', 'serving tab view', 3);
         $url = $this->config->getAppValue(
             'b2sharebridge',
             'publish_baseurl'
         );
-        $userId = \OC::$server->getUserSession()->getUser()->getUID();
-        //$token = $this->config->getUserValue($userId, $this->appName, "token");
         //TODO serve a warning when token is not set
         $url = $url."/api/communities";
         Util::writeLog('b2sharebridge', "fetching ".$url, 3);
         $json = $this->getSslPage($url);
         //TODO: Unhappy flow
         $data = json_decode($json, true)['hits']['hits'];
-        Util::writeLog("b2sharebridge", "JSON: " .$data, 3);
         return $data;
     }
 

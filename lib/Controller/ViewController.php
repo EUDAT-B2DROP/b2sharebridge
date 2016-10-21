@@ -179,10 +179,7 @@ class ViewController extends Controller
         Util::writeLog('b2sharebridge', 'Deleting API token', 3);
         $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if (strlen($userId) <= 0) {
-            $error = 'No user configured for session';
-        }
-        if (($error)) {
-            Util::writeLog('b2sharebridge', $error, 3);
+            Util::writeLog('b2sharebridge', 'No user configured for session', 3);
             return new JSONResponse(
                 [
                     'message'=>'Internal server error, contact the EUDAT helpdesk',
@@ -190,7 +187,6 @@ class ViewController extends Controller
                 ]
             );
         }
-
         $this->config->setUserValue($userId, $this->appName, 'token', '');
     }
 

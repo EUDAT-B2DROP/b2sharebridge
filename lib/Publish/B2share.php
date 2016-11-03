@@ -45,8 +45,8 @@ class B2share implements Ipublish
             CURLOPT_HEADER => 1,
         );
         if (!$check_ssl) {
-            $defaults['CURLOPT_SSL_VERIFYHOST'] = false;
-            $defaults['CURLOPT_SSL_VERIFYPEER'] = false;
+            $defaults[CURLOPT_SSL_VERIFYHOST] = 0;
+            $defaults[CURLOPT_SSL_VERIFYPEER] = 0;
         }
         curl_setopt_array($this->curl_client, $defaults);
     }
@@ -138,6 +138,7 @@ class B2share implements Ipublish
         curl_setopt_array($this->curl_client, $config);
 
         $response = curl_exec($this->curl_client);
+        curl_close($this->curl_client);
         if (!$response) {
             return false;
         } else {

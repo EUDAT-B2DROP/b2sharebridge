@@ -203,7 +203,7 @@ class ViewController extends Controller
             'publish_baseurl'
         );
         //TODO serve a warning when token is not set
-        $url = $url."/api/communities";
+        $url = $url."/api/communities/";
         Util::writeLog('b2sharebridge', "fetching ".$url, 3);
         $json = $this->getSslPage($url);
         //TODO: Unhappy flow
@@ -223,22 +223,32 @@ class ViewController extends Controller
     function getSslPage($url)
     {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_HEADER, false);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_REFERER, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $config = array(
+            CURLOPT_HEADER => false,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_URL => $url,
+            CURLOPT_REFERER => $url,
+            CURLOPT_RETURNTRANSFER => true
+        );
+
         $check_ssl = $this->config->getAppValue(
             'b2sharebridge',
             'check_ssl',
             '1'
         );
         if (!$check_ssl) {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+            $config[CURLOPT_SSL_VERIFYHOST] = false;
+            $config[CURLOPT_SSL_VERIFYPEER] = false;
         }
+
+        curl_setopt_array($ch, $config);
+
         $result = curl_exec($ch);
         curl_close($ch);
-        return $result;
+        if (!$result) {
+            return false;
+        } else {
+            return $result;
+        }
     }
 }

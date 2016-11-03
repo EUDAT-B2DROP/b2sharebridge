@@ -31,8 +31,9 @@ $application->registerRoutes(
         ['name' => 'View#set_token', 'url' => '/apitoken', 'verb' => 'POST'],
         ['name' => 'View#delete_token', 'url' => '/apitoken', 'verb' => 'DELETE'],
         [
-            'name' => 'View#get_tabview_content',
-            'url'=>'/gettabviewcontent', 'verb'=>'GET'
+            'name' => 'View#getTabViewContent',
+            'url'=>'/gettabviewcontent',
+            'verb'=>'GET'
         ]
     ]]
 );

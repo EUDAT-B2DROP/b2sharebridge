@@ -15,7 +15,7 @@
 namespace OCA\B2shareBridge\Controller;
 
 use OC\Files\Filesystem;
-use OCA\B2shareBridge\Job\TransferHandler;
+use OCA\B2shareBridge\Cron\TransferHandler;
 use OCA\B2shareBridge\Model\DepositStatus;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
@@ -155,7 +155,7 @@ class PublishController extends Controller
                 ]
             );
         }
-        // create the actual transfer Job in the database
+        // create the actual transfer Cron in the database
 
         /* TODO: we should add a configuration setting for admins to
          * configure the maximum number of uploads per user and a max filesize.

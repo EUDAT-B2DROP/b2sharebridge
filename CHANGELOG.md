@@ -20,3 +20,9 @@ b2sharebridge (0.0.8)
 
 b2sharebridge (0.1.0)
 * implemented tabview where user can select his community
+
+
+b2sharebridge (0.1.1)
+* make b2share community fetching a server task
+** store information in database
+** register cron that is fetching b2share on a regular basis

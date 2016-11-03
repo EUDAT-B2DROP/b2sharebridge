@@ -12,7 +12,7 @@
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
-namespace OCA\B2shareBridge\Job;
+namespace OCA\B2shareBridge\Cron;
 
 use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
@@ -90,7 +90,7 @@ class TransferHandler extends QueuedJob
             );
             return;
         }
-        // get the file transfer object for current Job
+        // get the file transfer object for current Cron
         $fcStatus = $this->_mapper->find($args['transferId']);
 
         $fcStatus->setStatus(2);//status = processing
@@ -137,7 +137,7 @@ class TransferHandler extends QueuedJob
         /*
          *
          * TODO: think of a fork alternative or make it possible to not loose
-         * the database connection. also it is running only one Job per cron run...
+         * the database connection. also it is running only one Cron per cron run...
          * TODO: we need to be carefull of zombies here!
          */
     }

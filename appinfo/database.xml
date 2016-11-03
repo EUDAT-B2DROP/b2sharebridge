@@ -50,4 +50,21 @@
             </field>
         </declaration>
     </table>
+    <table>
+        <name>*dbprefix*b2sharebridge_communities</name>
+        <declaration>
+            <field>
+                <name>id</name>
+                <type>text</type>
+                <notnull>true</notnull>
+                <length>36</length>
+            </field>
+            <field>
+                <name>name</name>
+                <type>text</type>
+                <notnull>true</notnull>
+                <length>64</length>
+            </field>
+        </declaration>
+    </table>
 </database>

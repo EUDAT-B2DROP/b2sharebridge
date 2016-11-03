@@ -18,6 +18,7 @@ namespace OCA\B2shareBridge\AppInfo;
 use OCA\B2shareBridge\Controller\PublishController;
 use OCA\B2shareBridge\Controller\ViewController;
 use OCA\B2shareBridge\Data;
+use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\View\Navigation;
@@ -48,6 +49,14 @@ class Application extends App
         $container = $this->getContainer();
         $server = $container->getServer();
 
+        $container->registerService(
+            'CommunityMapper',
+            function () use ($server) {
+                return new CommunityMapper(
+                    $server->getDatabaseConnection()
+                );
+            }
+        );
         $container->registerService(
             'DepositStatusMapper',
             function () use ($server) {
@@ -87,6 +96,7 @@ class Application extends App
                     $c->query('Request'),
                     $server->getConfig(),
                     $c->query('DepositStatusMapper'),
+                    $c->query('CommunityMapper'),
                     $c->query('StatusCodes'),
                     $c->query('CurrentUID'),
                     $c->query('Navigation')

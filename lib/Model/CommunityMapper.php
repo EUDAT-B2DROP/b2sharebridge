@@ -57,4 +57,19 @@ class CommunityMapper extends Mapper
         $sql = 'SELECT * FROM `' . $this->tableName  .'`';
         return $this->findEntities($sql);
     }
+
+    /**
+     * Return all communities as aray with id and name
+     *
+     * @return array(string(id) => string(name))
+     */
+    public function getCommunityList()
+    {
+        $communities_b2share = [];
+        foreach ($this->findAll() as $community) {
+            $communities_b2share[$community->getId()] = $community->getName();
+        }
+        return $communities_b2share;
+    }
+
 }

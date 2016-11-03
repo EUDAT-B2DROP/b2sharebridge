@@ -14,6 +14,7 @@
 
 namespace OCA\B2shareBridge\Controller;
 
+use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\View\Navigation;
@@ -38,6 +39,7 @@ class ViewController extends Controller
     protected $userId;
     protected $statusCodes;
     protected $mapper;
+    protected $cMapper;
     protected $navigation;
 
     /**
@@ -47,6 +49,7 @@ class ViewController extends Controller
      * @param IRequest            $request     request object
      * @param IConfig             $config      config object
      * @param DepositStatusMapper $mapper      whatever
+     * @param CommunityMapper     $cMapper     a community mapper
      * @param StatusCodes         $statusCodes whatever
      * @param string              $userId      userid
      * @param Navigation          $navigation  navigation bar object
@@ -56,6 +59,7 @@ class ViewController extends Controller
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,
+        CommunityMapper $cMapper,
         StatusCodes $statusCodes,
         $userId,
         Navigation $navigation
@@ -63,6 +67,7 @@ class ViewController extends Controller
         parent::__construct($appName, $request);
         $this->userId = $userId;
         $this->mapper = $mapper;
+        $this->cMapper = $cMapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
         $this->navigation = $navigation;
@@ -198,57 +203,6 @@ class ViewController extends Controller
      */
     public function getTabViewContent()
     {
-        $url = $this->config->getAppValue(
-            'b2sharebridge',
-            'publish_baseurl'
-        );
-        //TODO serve a warning when token is not set
-        $url = $url."/api/communities/";
-        Util::writeLog('b2sharebridge', "fetching ".$url, 3);
-        $json = $this->getSslPage($url);
-        //TODO: Unhappy flow
-        $data = json_decode($json, true)['hits']['hits'];
-        return $data;
-    }
-
-    /**
-     * Fetch url for json, currently insecure because ssl validation turned off.
-     *
-     * @param \string $url URL to fetch
-     *
-     * @return \string Response
-     *
-     * @NoAdminRequired
-     */
-    function getSslPage($url)
-    {
-        $ch = curl_init();
-        $config = array(
-            CURLOPT_HEADER => false,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_URL => $url,
-            CURLOPT_REFERER => $url,
-            CURLOPT_RETURNTRANSFER => true
-        );
-
-        $check_ssl = $this->config->getAppValue(
-            'b2sharebridge',
-            'check_ssl',
-            '1'
-        );
-        if (!$check_ssl) {
-            $config[CURLOPT_SSL_VERIFYHOST] = false;
-            $config[CURLOPT_SSL_VERIFYPEER] = false;
-        }
-
-        curl_setopt_array($ch, $config);
-
-        $result = curl_exec($ch);
-        curl_close($ch);
-        if (!$result) {
-            return false;
-        } else {
-            return $result;
-        }
+        return $this->cMapper->getCommunityList();
     }
 }

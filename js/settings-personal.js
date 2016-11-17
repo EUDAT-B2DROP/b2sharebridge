@@ -1,6 +1,6 @@
 
-function changeAPIToken(){
-	OC.msg.startSaving('#lostpassword .msg');
+function saveAPIToken(){
+	OC.msg.startSaving('#lostpassword .msg','Saving API token');
 	result = {};
 	var post = $("#b2share_apitoken").serializeArray();
 	$.ajax({
@@ -30,6 +30,6 @@ function deleteAPIToken(){
 }
 
 $(document).ready(function (){
-	$("#b2share_apitoken").keyUpDelayedOrEnter(changeAPIToken);	
+	$('#b2share_save_apitoken').click(saveAPIToken);
 	$('#b2share_delete_apitoken').click(deleteAPIToken);
 });

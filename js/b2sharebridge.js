@@ -28,7 +28,7 @@
                     fileList.showDetailsView(fileName, 'b2shareBridgeTabView');
                 },
             });
-	    fileList.registerTabView(new OCA.B2shareBridge.B2shareBridgeTabView('B2shareBridgeTabView',{order: -30}));
+            fileList.registerTabView(new OCA.B2shareBridge.B2shareBridgeTabView('B2shareBridgeTabView',{order: -30}));
         }
     };
 

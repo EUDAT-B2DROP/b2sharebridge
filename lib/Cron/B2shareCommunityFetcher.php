@@ -76,14 +76,28 @@ class B2shareCommunityFetcher extends Job
             'b2sharebridge',
             'publish_baseurl'
         ).'/api/communities/';
-        $json = $this->_getSslPage($b2share_communities_url);
-        //TODO: error catching here
+        $json = $this->_getUrlContent($b2share_communities_url);
+        if (!$json) {
+            $this->logger->error(
+                'Fetching the B2SHARE communities API was not possible.',
+                ['app' => 'b2sharebridge']
+            );
+            return;
+        }
         $communities_fetched = json_decode($json, true)['hits']['hits'];
+        if ($communities_fetched === null) {
+            $this->logger->error(
+                'Fetching the B2SHARE communities API did not return a valid JSON.',
+                ['app' => 'b2sharebridge']
+            );
+            return;
+        }
+
         $communities_b2share = [];
         foreach ($communities_fetched as $community) {
             $this->logger->debug(
-                'Community with id: '.$community['id'].
-                ' and name: '.$community['name'].' fetched',
+                'Community with id: ' . $community['id'] .
+                ' and name: ' . $community['name'] . ' fetched',
                 ['app' => 'b2sharebridge']
             );
             $communities_b2share[$community['id']] = $community['name'];
@@ -100,10 +114,10 @@ class B2shareCommunityFetcher extends Job
             $communities_b2drop,
             $communities_b2share
         );
-        foreach ($remove_communities as $id=>$name) {
+        foreach ($remove_communities as $id => $name) {
             $this->logger->info(
-                'Removing community with id: '.$id.
-                ' and name: '.$name.' after synchronization with b2share',
+                'Removing community with id: ' . $id .
+                ' and name: ' . $name . ' after synchronization with b2share',
                 ['app' => 'b2sharebridge']
             );
             $c_mapper->delete($id);
@@ -111,10 +125,10 @@ class B2shareCommunityFetcher extends Job
 
         // do we need to add a community?
         $add_communities = array_diff_key($communities_b2share, $communities_b2drop);
-        foreach ($add_communities as $id=>$name) {
+        foreach ($add_communities as $id => $name) {
             $this->logger->info(
-                'Adding community with id: '.$id.' and name: '
-                .$name.' after synchronization with b2share',
+                'Adding community with id: ' . $id . ' and name: '
+                . $name . ' after synchronization with b2share',
                 ['app' => 'b2sharebridge']
             );
             $c_mapper->insert(Community::fromParams(['id' => $id, 'name' => $name]));
@@ -130,7 +144,7 @@ class B2shareCommunityFetcher extends Job
      *
      * @NoAdminRequired
      */
-    private function _getSslPage($url)
+    private function _getUrlContent($url)
     {
         $ch = curl_init();
         $config = array(

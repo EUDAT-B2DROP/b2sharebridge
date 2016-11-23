@@ -151,7 +151,10 @@
          * @return {bool} true for files, false for folders
          */
         canDisplay: function(fileInfo) {
-            return true;
+            if (!fileInfo) {
+                return false;
+            }
+            return !fileInfo.isDirectory();
         }
     });
 

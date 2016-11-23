@@ -98,8 +98,8 @@
                 async: false
             }).done(function(data){
                 result = "<select id='ddCommunitySelector'>";
-                $.each(data, function(index, value){
-                    result = result + "<option value=\"" + value['id'] + "\">"+ value['name'] + "</option>";
+                $.each(data, function(key, value){
+                    result = result + "<option value=\"" + key + "\">"+ value + "</option>";
                 });
                 result = result + "</select>"
             }).fail(function(data){

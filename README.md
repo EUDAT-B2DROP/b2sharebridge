@@ -38,7 +38,7 @@ Another way to directly test your code with your browser is via "ocdev". This is
 
 ```
 pip install ocdev
-BRANCH=stable9
+BRANCH=stable9.1
 B2SHAREBRIDGE=<YOUR_LOCAL_REPO>
 
 ocdev setup core --dir owncloud --branch $BRANCH --no-history

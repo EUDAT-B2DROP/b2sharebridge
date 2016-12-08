@@ -203,6 +203,30 @@ class ViewController extends Controller
      */
     public function getTabViewContent()
     {
+		
         return $this->cMapper->getCommunityList();
     }
+	
+	public function getTokenState(){
+		Util::writeLog("b2sharebridge","in func getTS",0);
+		 $userId = \OC::$server->getUserSession()->getUser()->getUID();
+        if (strlen($userId) <= 0) {
+            Util::writeLog('b2sharebridge', 'No user configured for session', 0);
+            return new JSONResponse(
+                [
+                    'message'=>'Internal server error, contact the EUDAT helpdesk',
+                    'status' => 'error'
+                ]
+            );
+        }
+		$token = $this->config->getUserValue($userId, $this->appName, 'token');
+		Util::writeLog('b2sharebridge',"token = ".$token,0);
+		$result = "false";
+		if (strlen($token)>1){
+			Util::writeLog('b2sharebridge',"token exists ",3);
+			$result = "true";
+		}
+		
+		return new JSONResponse(['result' => $result]);
+	}
 }

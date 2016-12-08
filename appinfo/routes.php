@@ -34,6 +34,11 @@ $application->registerRoutes(
             'name' => 'View#getTabViewContent',
             'url'=>'/gettabviewcontent',
             'verb'=>'GET'
-        ]
+        ],
+		[
+			'name' => 'View#getTokenState',
+			'url' => '/gettokenstate',
+			'verb' => 'GET'
+		],
     ]]
 );

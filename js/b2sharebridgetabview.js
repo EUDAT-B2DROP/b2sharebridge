@@ -1,4 +1,6 @@
 
+
+
 (function() {
 
     var TEMPLATE =
@@ -41,6 +43,8 @@
         _label: 'b2sharebridge',
 
         _loading: false,
+			
+		_publish_buton_disabled: false,
 
 
         initialize: function() {
@@ -52,7 +56,7 @@
             this.collection.on('sync', this._onEndRequest, this);
             this.collection.on('update', this._onChange, this);
             this.collection.on('error', this._onError, this);
-
+			this._publish_button_disabled = this.setPublishButtonState();
 
         },
 
@@ -142,6 +146,7 @@
             this.$el.html(this.template());
             $(communitySelector).html(this.getCommunitySelectorHTML());
             $(publish_button).bind('click',{param: this.fileInfo}, publishAction);
+			$(publish_button).prop('disabled', this._publish_button_disabled);
             this.delegateEvents();
         },
 
@@ -155,7 +160,32 @@
                 return false;
             }
             return !fileInfo.isDirectory();
-        }
+        },
+		
+		setPublishButtonState(){
+        var url_path =
+            "/apps/b2sharebridge/gettokenstate?requesttoken=" +
+            encodeURIComponent(oc_requesttoken);
+        communities = [];
+        result = "";
+        $.ajax({
+            type: 'GET',
+            url: OC.generateUrl(url_path),
+            async: false
+        }).done(function(data){
+            if (data['result']=="true"){
+            	result = false;
+			} else {
+				result = true;
+				}
+            
+        }).fail(function(data){
+            //if PHP not reachable, disable publish button
+			result = true;
+			
+        });
+		return result;	
+		}
     });
 
     OCA.B2shareBridge = OCA.B2shareBridge || {};

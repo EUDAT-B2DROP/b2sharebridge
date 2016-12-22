@@ -196,7 +196,7 @@ class ViewController extends Controller
     }
 
     /**
-     * XHR request endpoint for token setter
+     * XHR request endpoint for getting communities list dropdown for tabview
      *
      * @return          JSONResponse
      * @NoAdminRequired
@@ -207,6 +207,12 @@ class ViewController extends Controller
         return $this->cMapper->getCommunityList();
     }
 	
+	
+    /**
+     * XHR request endpoint for token state: disables or enables publish button
+     *
+     * @return          JSONResponse
+     */
 	public function getTokenState(){
 		Util::writeLog("b2sharebridge","in func getTS",0);
 		 $userId = \OC::$server->getUserSession()->getUser()->getUID();

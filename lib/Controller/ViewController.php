@@ -212,6 +212,7 @@ class ViewController extends Controller
      * XHR request endpoint for token state: disables or enables publish button
      *
      * @return          JSONResponse
+	 * @NoAdminRequired
      */
 	public function getTokenState(){
 		Util::writeLog("b2sharebridge","in func getTS",0);

@@ -18,16 +18,18 @@
             }
             var fileActions = fileList.fileActions;
 
-            fileActions.registerAction({
-                name: 'B2SHARE',
-                displayName: 'B2SHARE',
-                mime: 'all',
-                permissions: OC.PERMISSION_READ,
-                icon: OC.imagePath('b2sharebridge', 'filelisticon'),
-                actionHandler: function(fileName) {
-                    fileList.showDetailsView(fileName, 'b2shareBridgeTabView');
-                },
-            });
+            fileActions.registerAction(
+                {
+                    name: 'B2SHARE',
+                    displayName: 'B2SHARE',
+                    mime: 'all',
+                    permissions: OC.PERMISSION_READ,
+                    icon: OC.imagePath('b2sharebridge', 'filelisticon'),
+                    actionHandler: function(fileName) {
+                        fileList.showDetailsView(fileName, 'b2shareBridgeTabView');
+                    },
+                }
+            );
             fileList.registerTabView(new OCA.B2shareBridge.B2shareBridgeTabView('B2shareBridgeTabView',{order: -30}));
         }
     };

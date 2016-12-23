@@ -4,7 +4,7 @@
  *
  * This file is licensed under the MIT License. See the LICENSE file.
  *
- * @author Dennis Blommesteijn <dennis@blommesteijn.com>
+ * @author    Dennis Blommesteijn <dennis@blommesteijn.com>
  * @copyright Dennis Blommesteijn 2015
  */
 
@@ -14,14 +14,16 @@ use PHPUnit_Framework_TestCase;
 
 use OCP\AppFramework\Http\TemplateResponse;
 
-class ViewControllerTest extends PHPUnit_Framework_TestCase {
+class ViewControllerTest extends PHPUnit_Framework_TestCase
+{
 
     private $controller;
     private $userId = 'john';
     private $navigation;
     private $statusCodes;
 
-    public function setUp() {
+    public function setUp() 
+    {
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();
         $mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
@@ -42,7 +44,8 @@ class ViewControllerTest extends PHPUnit_Framework_TestCase {
         );
     }
 
-    public function testList() {
+    public function testList() 
+    {
         $filter = 'all';
         $result = $this->controller->depositList();
         $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());
@@ -50,7 +53,8 @@ class ViewControllerTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue($result instanceof TemplateResponse);
     }
     
-    public function testPublished() {
+    public function testPublished() 
+    {
         $filter = 'published';
         $result = $this->controller->depositList($filter);
         $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());
@@ -58,7 +62,8 @@ class ViewControllerTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue($result instanceof TemplateResponse);
     }
     
-    public function testPending() {
+    public function testPending() 
+    {
         $filter = 'pending';
         $result = $this->controller->depositList($filter);
         $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());
@@ -66,7 +71,8 @@ class ViewControllerTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue($result instanceof TemplateResponse);
     }
     
-    public function testFailed() {
+    public function testFailed() 
+    {
         $filter = 'failed';
         $result = $this->controller->depositList($filter);
         $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());

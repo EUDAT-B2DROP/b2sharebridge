@@ -6,7 +6,7 @@
         <div id="app-content-wrapper">
 
             <table class="publish-queue-list">
-                <?php if (sizeof($_['publications']) > 0): ?>
+                <?php if (sizeof($_['publications']) > 0) : ?>
                     <thead>
                     <tr>
                         <th>Transfer ID</th>

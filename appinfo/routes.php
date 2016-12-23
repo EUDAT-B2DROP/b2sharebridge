@@ -35,10 +35,10 @@ $application->registerRoutes(
             'url'=>'/gettabviewcontent',
             'verb'=>'GET'
         ],
-		[
-			'name' => 'View#getTokenState',
-			'url' => '/gettokenstate',
-			'verb' => 'GET'
-		],
+        [
+            'name' => 'View#getTokenState',
+            'url' => '/gettokenstate',
+            'verb' => 'GET'
+        ],
     ]]
 );

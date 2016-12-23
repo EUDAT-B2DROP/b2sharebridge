@@ -17,10 +17,9 @@
  *
  * You should have received a copy of the GNU Affero General Public License, version 3,
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
- *
  */
 if (!defined('PHPUNIT_RUN')) {
-	define('PHPUNIT_RUN', 1);
+    define('PHPUNIT_RUN', 1);
 }
 
 require_once __DIR__.'/../../../lib/base.php';
@@ -31,7 +30,7 @@ require_once __DIR__.'/../../../lib/base.php';
 \OC_App::loadApp('b2sharebridge');
 
 if(!class_exists('PHPUnit_Framework_TestCase')) {
-	require_once('PHPUnit/Autoload.php');
+    include_once 'PHPUnit/Autoload.php';
 }
 
 OC_Hook::clear();

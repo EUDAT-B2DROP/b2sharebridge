@@ -99,7 +99,7 @@ class ViewController extends Controller
                 array_reverse(
                     $this->mapper->findAllForUser($this->userId)
                 ) as $publication) {
-                $publications[] = $publication;
+                    $publications[] = $publication;
             }
         } else {
             foreach (
@@ -109,7 +109,7 @@ class ViewController extends Controller
                         $filter
                     )
                 ) as $publication) {
-                $publications[] = $publication;
+                    $publications[] = $publication;
             }
         }
 
@@ -203,20 +203,21 @@ class ViewController extends Controller
      */
     public function getTabViewContent()
     {
-		
+        
         return $this->cMapper->getCommunityList();
     }
-	
-	
+    
+    
     /**
      * XHR request endpoint for token state: disables or enables publish button
      *
      * @return          JSONResponse
-	 * @NoAdminRequired
+     * @NoAdminRequired
      */
-	public function getTokenState(){
-		Util::writeLog("b2sharebridge","in func getTS",0);
-		 $userId = \OC::$server->getUserSession()->getUser()->getUID();
+    public function getTokenState()
+    {
+        Util::writeLog("b2sharebridge", "in func getTS", 0);
+         $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if (strlen($userId) <= 0) {
             Util::writeLog('b2sharebridge', 'No user configured for session', 0);
             return new JSONResponse(
@@ -226,14 +227,14 @@ class ViewController extends Controller
                 ]
             );
         }
-		$token = $this->config->getUserValue($userId, $this->appName, 'token');
-		Util::writeLog('b2sharebridge',"token = ".$token,0);
-		$result = "false";
-		if (strlen($token)>1){
-			Util::writeLog('b2sharebridge',"token exists ",3);
-			$result = "true";
-		}
-		
-		return new JSONResponse(['result' => $result]);
-	}
+        $token = $this->config->getUserValue($userId, $this->appName, 'token');
+        Util::writeLog('b2sharebridge', "token = ".$token, 0);
+        $result = "false";
+        if (strlen($token)>1) {
+            Util::writeLog('b2sharebridge', "token exists ", 3);
+            $result = "true";
+        }
+        
+        return new JSONResponse(['result' => $result]);
+    }
 }

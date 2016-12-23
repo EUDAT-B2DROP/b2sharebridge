@@ -1,53 +1,53 @@
 .b2shareBridgeTabView .clear-float {
-	clear: both;
+    clear: both;
 }
 .b2shareBridgeTabView li {
-	width: 100%;
-	cursor: default;
-	height: 56px;
-	float: left;
-	border-bottom: 1px solid rgba(100,100,100,.1);
+    width: 100%;
+    cursor: default;
+    height: 56px;
+    float: left;
+    border-bottom: 1px solid rgba(100,100,100,.1);
 }
 .b2shareBridgeTabView li:last-child {
-	border-bottom: none;
+    border-bottom: none;
 }
 
 .b2shareBridgeTabView li > * {
-	vertical-align: middle;
-	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-	filter: alpha(opacity=50);
-	opacity: .5;
+    vertical-align: middle;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+    filter: alpha(opacity=50);
+    opacity: .5;
 }
 
 .b2shareBridgeTabView li > a,
 .b2shareBridgeTabView li > span {
-	padding: 15px 10px 11px;
+    padding: 15px 10px 11px;
 }
 
 .b2shareBridgeTabView li > *:hover,
 .b2shareBridgeTabView li > *:focus {
-	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
-	filter: alpha(opacity=100);
-	opacity: 1;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+    filter: alpha(opacity=100);
+    opacity: 1;
 }
 
 .b2shareBridgeTabView img {
-	cursor: pointer;
-	padding-right: 4px;
+    cursor: pointer;
+    padding-right: 4px;
 }
 
 .b2shareBridgeTabView img.preview {
-	cursor: default;
-	opacity: 1;
+    cursor: default;
+    opacity: 1;
 }
 
 .b2shareBridgeTabView .versiondate {
-	min-width: 100px;
-	vertical-align: super;
+    min-width: 100px;
+    vertical-align: super;
 }
 
 .b2shareBridgeTabView .revertVersion {
-	cursor: pointer;
-	float: right;
-	margin-right: -10px;
+    cursor: pointer;
+    float: right;
+    margin-right: -10px;
 }

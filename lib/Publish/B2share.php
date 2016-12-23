@@ -67,11 +67,13 @@ class B2share implements Ipublish
         $community = "e9b9792e-79fb-4b07-b6b4-b9c2bd06d095"
     ) {
         $data = json_encode(
-            array(
+            [
                 'community'   => $community,
-                'title'       => basename($filename),
+                'titles'      => [
+                    'title'   => basename($filename)
+                ],
                 'open_access' => true
-            )
+            ]
         );
 
         $config = array(

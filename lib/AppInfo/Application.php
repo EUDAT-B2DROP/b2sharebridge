@@ -184,5 +184,6 @@ class Application extends App
         Util::addScript('b2sharebridge', 'b2sharebridgecollection');
         Util::addScript('b2sharebridge', 'b2sharebridgetabview');
         Util::addScript('b2sharebridge', 'b2sharebridge');
+	Util::addStyle('b2sharebridge', 'b2sharebridgetabview');
     }
 }

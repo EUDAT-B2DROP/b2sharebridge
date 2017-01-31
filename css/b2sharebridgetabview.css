@@ -51,3 +51,8 @@
     float: right;
     margin-right: -10px;
 }
+
+.b2shareBridgeTabView .errormsg {
+	color: red;
+	display: none;
+}

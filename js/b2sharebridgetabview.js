@@ -5,17 +5,24 @@
 
     var TEMPLATE =
         '<div>' +
-        '<div id="b2sharebridgeTabView" class="dialogContainer"><div id="communitySelector"></div><div><input type="button" value="publish" id="publish_button"/></div></div>' +
+        '<div id="b2sharebridgeTabView" class="dialogContainer"><div id="communitySelector"></div>' + 
+		'<div><input type="checkbox" id="open_access">open access</div>' +
+		'<div><input type="button" value="publish" id="publish_button"/></div></div>' +
+		'<div class="errormsg" id="b2sharebridge_errormsg">ERROR3</div>' +
         '</div>';
 
         function publishAction(e){
+			$(publish_button).prop('disabled', true);
             fileInfo = e.data.param;
             selected_community = $(ddCommunitySelector).val();
+			open_access = $(open_access).val();
+			alert("Open access:" + open_access);
             $.post(
                 OC.generateUrl('/apps/b2sharebridge/publish'),
                 {
                     id: fileInfo.id,
-                    community: selected_community
+                    community: selected_community,
+					open_access: open_access
                 },
                 function (result) {
                     if (result && result.status === 'success') {
@@ -57,6 +64,7 @@
             this.collection.on('update', this._onChange, this);
             this.collection.on('error', this._onError, this);
 			this._publish_button_disabled = this.setPublishButtonState();
+			this._error_msg = "initializing";
 
         },
 
@@ -148,6 +156,8 @@
             $(publish_button).bind('click',{param: this.fileInfo}, publishAction);
 			$(publish_button).prop('disabled', this._publish_button_disabled);
             this.delegateEvents();
+			$(b2sharebridge_errormsg).html(this._error_msg);
+			$(b2sharebridge_errormsg).show();
         },
 
         /**

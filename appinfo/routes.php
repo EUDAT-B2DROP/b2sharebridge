@@ -36,8 +36,8 @@ $application->registerRoutes(
             'verb'=>'GET'
         ],
         [
-            'name' => 'View#getTokenState',
-            'url' => '/gettokenstate',
+            'name' => 'View#initializeB2ShareUI',
+            'url' => '/initializeb2shareui',
             'verb' => 'GET'
         ],
     ]]

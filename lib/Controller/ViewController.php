@@ -14,6 +14,7 @@
 
 namespace OCA\B2shareBridge\Controller;
 
+use OC\Files\Filesystem;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
@@ -214,27 +215,61 @@ class ViewController extends Controller
      * @return          JSONResponse
      * @NoAdminRequired
      */
-    public function getTokenState()
+    public function initializeB2ShareUI()
     {
-        Util::writeLog("b2sharebridge", "in func getTS", 0);
+		$is_error = false;
+		$error_msg = "";
+        Util::writeLog("b2sharebridge", "in func initUI", 0);
          $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if (strlen($userId) <= 0) {
             Util::writeLog('b2sharebridge', 'No user configured for session', 0);
-            return new JSONResponse(
-                [
-                    'message'=>'Internal server error, contact the EUDAT helpdesk',
-                    'status' => 'error'
-                ]
-            );
+			$is_error = true;
+			$error_msg .= "Authorization failure: login first.<br>\n";
         }
+        $param = $this->request->getParams();
+        $id = (int) $param['file_id'];
+        Filesystem::init($this->userId, '/');
+        $view = Filesystem::getView();
+		Util::writeLog('b2sharebridge','File ID: '.$id,0);
+        $filesize = $view->filesize(Filesystem::getPath($id));		
+		
+		$is_dir = $view->is_dir(Filesystem::getPath($id));
+		if ($is_dir){
+			$is_error = true;
+			$error_msg .= "You cannot publish a folder, you can only publish a file to B2Share.<br>\n";
+		}
         $token = $this->config->getUserValue($userId, $this->appName, 'token');
         Util::writeLog('b2sharebridge', "token = ".$token, 0);
-        $result = "false";
-        if (strlen($token)>1) {
-            Util::writeLog('b2sharebridge', "token exists ", 3);
-            $result = "true";
+        if (!(strlen($token)>1)) {
+            $is_error = true;
+			$error_msg .= "Please set B2SHARE API token<br>\n";
         }
-        
-        return new JSONResponse(['result' => $result]);
+        $allowed_uploads = $this->config->getAppValue(
+            'b2sharebridge',
+            'max_uploads',
+            5
+        );
+        $allowed_filesize = $this->config->getAppValue(
+            'b2sharebridge',
+            'max_upload_filesize',
+            5
+        );
+        $active_uploads = count(
+            $this->mapper->findAllForUserAndStateString(
+                $this->userId,
+                'pending'
+            )
+        );
+		if ($active_uploads>$allowed_uploads){
+			$is_error = true;
+			$error_msg .= "You already have ".$active_uploads." active uploads. You are only allowed ".$allowed_uploads." uploads. Please try again later.<br>\n";
+		}
+		
+		
+        $result = [
+        	"error" => $is_error,
+			"error_msg" => $error_msg
+        ];
+        return new JSONResponse($result);
     }
 }

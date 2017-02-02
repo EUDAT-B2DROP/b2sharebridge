@@ -13,6 +13,7 @@
  */
 
 namespace OCA\B2shareBridge\Publish;
+use OCP\Util;
 
 /**
  * Implement a backend that is able to move data from owncloud to B2SHARE
@@ -64,17 +65,24 @@ class B2share implements Ipublish
     public function create(
         $token,
         $filename,
-        $community = "e9b9792e-79fb-4b07-b6b4-b9c2bd06d095"
+        $community = "e9b9792e-79fb-4b07-b6b4-b9c2bd06d095",
+		$open_access = false
     ) {
+		//now settype("false","boolean") evaluates to true, so:
+		$b_open_access = false;
+		if (($open_access)=="true"){
+			$b_open_access = true;
+		}
         $data = json_encode(
             [
                 'community'   => $community,
                 'titles'      => [[
                     'title'   => basename($filename)
                 ]],
-                'open_access' => true
+                'open_access' => $b_open_access
             ]
         );
+		Util::writeLog('b2share_cron',"Data: ".$data,3);
 
         $config = array(
             CURLOPT_URL =>
@@ -134,6 +142,7 @@ class B2share implements Ipublish
             CURLOPT_HEADER => true,
             CURLINFO_HEADER_OUT => true,
             CURLOPT_HTTPHEADER => array(
+				'Accept:application/json',
                 'Content-Type: application/octet-stream'
             )
         );

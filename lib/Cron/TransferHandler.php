@@ -82,10 +82,11 @@ class TransferHandler extends QueuedJob
         if (!array_key_exists('transferId', $args)
             || !array_key_exists('token', $args)
             || !array_key_exists('community', $args)
+			|| !array_key_exists('open_access', $args)
         ) {
             Util::writeLog(
                 'transfer',
-                'Bad request, can not handle transfer w/o id, token, community',
+                'Bad request, can not handle transfer w/o id, token, community, open_access',
                 3
             );
             return;
@@ -108,7 +109,8 @@ class TransferHandler extends QueuedJob
             $create_result = $this->_publisher->create(
                 $args['token'],
                 basename($filename),
-                $args['community']
+                $args['community'],
+				$args['open_access']
             );
             if ($create_result) {
                 $handle = $view->fopen($filename, 'rb');

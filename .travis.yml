@@ -12,7 +12,7 @@ env:
 before_install:
   # install core
   - cd ../
-  - git clone https://github.com/nextcloud/core.git --recursive --depth 1 -b $CORE_BRANCH nextcloud
+  - git clone https://github.com/nextcloud/core.git --recursive --depth 1 -b $BRANCH nextcloud
   - mv b2sharebridge nextcloud/apps/
 
 install:

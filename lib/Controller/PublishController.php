@@ -92,7 +92,7 @@ class PublishController extends Controller
         }
         $id = (int) $param['id'];
         $community = $param['community'];
-		$open_access = $param['open_access'];
+        $open_access = $param['open_access'];
         if (!is_int($id) || !is_string($token)) {
             $error = 'Problems while parsing fileid or publishToken';
         }
@@ -170,7 +170,7 @@ class PublishController extends Controller
                 'token' => $token,
                 '_userId' => $this->userId,
                 'community' => $community,
-				'open_access' => $open_access
+            'open_access' => $open_access
             ]
         );
 

@@ -26,7 +26,10 @@ class ViewControllerTest extends PHPUnit_Framework_TestCase
     {
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();
-        $mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
+        $deposit_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $community_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\CommunityMapper')
             ->disableOriginalConstructor()
             ->getMock();
         $this->statusCodes = $this->getMockBuilder('OCA\B2shareBridge\Model\StatusCodes')
@@ -40,7 +43,7 @@ class ViewControllerTest extends PHPUnit_Framework_TestCase
             ->willReturn($this->returnValue('OCP\AppFramework\Http\TemplateResponse'));
 
         $this->controller = new ViewController(
-            'b2sharebridge', $request, $config, $mapper,  $this->statusCodes, $this->userId, $this->navigation
+            'b2sharebridge', $request, $config, $deposit_mapper, $community_mapper, $this->statusCodes, $this->userId, $this->navigation
         );
     }
 

@@ -12,16 +12,16 @@
 
 ## Module Description
 
-This owncloud plugin allows the user to directly publish files from his personal cloud store to EUDAT B2SHARE.
+This owncloud/nextcloud plugin allows the user to directly publish files from his personal cloud store to EUDAT B2SHARE.
 The user interface of B2DROP is extended with a icon to publish files, and with a table view that shows the last published files.
 If a user wants to publish a file, this transfer is done via the B2DROP server in the background.
 
 ## Install
 
-1. on your B2DROP server go to the <owncloud>/apps directory
+1. on your B2DROP server go to the <owncloud/nextcloud>/apps directory
 2. git clone this repository
-3. enable the app on the B2DROP/owncloud web interface
-4. configure a B2SHARE endpoint in the B2DROP/owncloud admin menu
+3. enable the app on the B2DROP owncloud/nextcloud web interface
+4. configure a B2SHARE endpoint in the B2DROP owncloud/nextcloud admin menu
 
 ## Development
 
@@ -34,20 +34,22 @@ For testing your php code you need to [install PHPUnit](http://phpunit.de/gettin
     phpunit -c phpunit.xml
     phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
 
-Another way to directly test your code with your browser is via "ocdev". This is a tool provided by the owncloud developers, it requires python3 (virtualenv is suggested) and php. Some but not all instructions:
+Another way to directly test your code with your browser locally, when you have a php interpreter:
 
 ```
-pip install ocdev
-BRANCH=stable9.1
-B2SHAREBRIDGE=<YOUR_LOCAL_REPO>
-
-ocdev setup core --dir owncloud --branch $BRANCH --no-history
-
-rsync -uvaPr --delete  --exclude “.git*” --exclude ".idea" $B2SHAREBRIDGE/ owncloud/apps/b2sharebridge
-cd owncloud
+export CORE_BRANCH=stable11;
+export BRIDGE_BRANCH=nextcloud11;
+export B2SHAREBRIDGE=<local path>
+git clone https://github.com/nextcloud/core.git --recursive --depth 1 -b $CORE_BRANCH nextcloud
+cd nextcloud
 ./occ maintenance:install --admin-user admin --admin-pass admin
+
+#decide whether you want to use github code or your local developments:
+git clone https://github.com/EUDAT-B2DROP/b2sharebridge.git -b $BRIDGE_BRANCH apps/b2sharebridge
+#rsync -uvaPr --delete  --exclude “.git*” --exclude ".idea" $B2SHAREBRIDGE/ apps/b2sharebridge
 ./occ app:enable b2sharebridge
-ocdev server
+
+php -S localhost:8080
 ```
 
 You should be able to connect to [localhost:8080](http://localhost:8080) and see a working service

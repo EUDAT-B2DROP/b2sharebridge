@@ -1,45 +1,38 @@
-sudo: false
-dist: trusty
 language: php
 
 php:
-  - 5.4
-  - 5.5
   - 5.6
   - 7.0
+  - 7.1
 
 env:
-  - DB=sqlite BRANCH=nextcloud11
-  - DB=mysql BRANCH=nextcloud11
-
-matrix:
-  allow_failures:
-    - php: hhvm
+  - DB=sqlite BRANCH=stable11
+  - DB=mysql BRANCH=stable11
 
 before_install:
   # install core
   - cd ../
-  - git clone https://github.com/owncloud/core.git --recursive --depth 1 -b $BRANCH owncloud
-  - mv b2sharebridge owncloud/apps/
+  - git clone https://github.com/nextcloud/core.git --recursive --depth 1 -b $CORE_BRANCH nextcloud
+  - mv b2sharebridge nextcloud/apps/
 
 install:
   - pear install pear/PHP_CodeSniffer
   - phpenv rehash
-  - phpenv config-add owncloud/apps/b2sharebridge/tests/travis/php.ini
+  - phpenv config-add nextcloud/apps/b2sharebridge/tests/travis/php.ini
 
 before_script:
     - if [[ "$DB" == 'mysql' ]]; then mysql -u root -e 'create database oc_autotest;'; fi
     - if [[ "$DB" == 'mysql' ]]; then mysql -u root -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"; fi
     - if [[ "$DB" == 'mysql' ]]; then mysql -u root -e "grant all on oc_autotest.* to 'oc_autotest'@'localhost';"; fi
-    # fill owncloud with default configs and enable news
-    - cd owncloud
+    # fill nextcloud with default configs and enable news
+    - cd nextcloud
     - mkdir data
     - ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --admin-user admin --admin-pass admin --database $DB --database-pass=''
     - ./occ app:enable b2sharebridge
 
 script:
-  # owncloud check-code
-  #- ./occ app:check-code b2sharebridge
+  # nextcloud check-code
+  - ./occ app:check-code b2sharebridge
   # php unit/lint checking
   - cd apps/b2sharebridge
   - phpcs --extensions=php --ignore=*/tests/*,*/templates/* .

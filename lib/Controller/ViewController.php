@@ -95,7 +95,7 @@ class ViewController extends Controller
         Util::addStyle('files', 'files');
 
         $publications = [];
-        if ($filter == 'all') {
+        if ($filter === 'all') {
             foreach (
                 array_reverse(
                     $this->mapper->findAllForUser($this->userId)
@@ -270,7 +270,7 @@ class ViewController extends Controller
         
         $result = [
             "error" => $is_error,
-        "error_msg" => $error_msg
+            "error_msg" => $error_msg
         ];
         return new JSONResponse($result);
     }

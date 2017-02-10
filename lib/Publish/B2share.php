@@ -71,7 +71,7 @@ class B2share implements Ipublish
     ) {
         //now settype("false","boolean") evaluates to true, so:
         $b_open_access = false;
-        if (($open_access)=="true") {
+        if ($open_access==="true") {
                $b_open_access = true;
         }
         $data = json_encode(

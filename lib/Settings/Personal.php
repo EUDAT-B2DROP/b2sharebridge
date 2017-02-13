@@ -2,6 +2,7 @@
 /**
  * OwnCloud - B2sharebridge App
  *
+ * Settings view for a user, showing the b2share api url
  * PHP Version 5-7
  *
  * @category  Owncloud
@@ -12,41 +13,33 @@
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
+namespace OCA\B2shareBridge\Settings\Personal;
+
 use OCP\Template;
+use OCP\User;
 use OCP\Util;
 
-script('b2sharebridge', 'settings');
+User::checkLoggedIn();
+$userId = \OC::$server->getUserSession()->getUser()->getUID();
 
-$config = \OC::$server->getConfig();
 
-$tmpl = new Template('b2sharebridge', 'settings-admin');
+Util::addScript('b2sharebridge', 'settings-personal');
+
+$tmpl = new Template('b2sharebridge', 'settings-personal');
 $tmpl->assign(
     'publish_baseurl',
-    $config->getAppValue(
+    \OC::$server->getConfig()->getAppValue(
         'b2sharebridge',
         'publish_baseurl'
     )
 );
+
 $tmpl->assign(
-    'max_uploads',
-    $config->getAppValue(
+    'b2share_apitoken',
+    \OC::$server->getConfig()->getUserValue(
+        $userId,
         'b2sharebridge',
-        'max_uploads'
-    )
-);
-$tmpl->assign(
-    'max_upload_filesize',
-    $config->getAppValue(
-        'b2sharebridge',
-        'max_upload_filesize'
-    )
-);
-$tmpl->assign(
-    'check_ssl',
-    $config->getAppValue(
-        'b2sharebridge',
-        'check_ssl',
-        '1'
+        'token'
     )
 );
 

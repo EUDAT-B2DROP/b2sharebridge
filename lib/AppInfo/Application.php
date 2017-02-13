@@ -162,14 +162,13 @@ class Application extends App
     }
 
     /**
-     * Register settings pages
+     * Register Settings pages
      *
      * @return null
      */
     public function registerSettings()
     {
-        \OCP\App::registerAdmin('b2sharebridge', 'lib/settings/admin');
-        \OCP\App::registerPersonal('b2sharebridge', 'lib/settings/personal');
+        \OCP\App::registerPersonal('b2sharebridge', 'lib/Settings/Personal');
     }
 
 

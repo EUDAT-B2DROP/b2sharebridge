@@ -13,7 +13,7 @@
     <author>EUDAT</author>
     <version>0.1.1</version>
     <dependencies>
-        <owncloud min-version="11" max-version="11" />
+        <nextcloud min-version="11" max-version="11" />
         <database>sqlite</database>
         <database>mysql</database>
         <lib>curl</lib>
@@ -25,4 +25,8 @@
     <website>https://eudat.eu</website>
     <bugs>https://github.com/EUDAT-B2DROP/b2sharebridge/issues</bugs>
     <repository type="git">https://github.com/EUDAT-B2DROP/b2sharebridge.git</repository>
+    <settings>
+        <admin>\OCA\B2shareBridge\Settings\Admin</admin>
+        <admin-section>OCA\B2shareBridge\Settings\AdminSection</admin-section>
+    </settings>
 </info>

@@ -25,6 +25,9 @@
     <website>https://eudat.eu</website>
     <bugs>https://github.com/EUDAT-B2DROP/b2sharebridge/issues</bugs>
     <repository type="git">https://github.com/EUDAT-B2DROP/b2sharebridge.git</repository>
+    <background-jobs>
+        <jobs>OCA\B2shareBridge\Cron\B2ShareCommunityFetcher</jobs>
+    </background-jobs>
     <settings>
         <admin>\OCA\B2shareBridge\Settings\Admin</admin>
         <admin-section>OCA\B2shareBridge\Settings\AdminSection</admin-section>

@@ -12,9 +12,6 @@
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
-
-\OC::$server->getJobList()->add('OCA\B2shareBridge\Cron\B2shareCommunityFetcher');
-
 $application = new OCA\B2shareBridge\AppInfo\Application();
 $application->registerNavigationEntry();
 $application->loadScripts();

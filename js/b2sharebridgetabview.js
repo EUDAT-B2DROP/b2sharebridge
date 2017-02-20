@@ -138,9 +138,9 @@
         setFileInfo: function(fileInfo) {
             if (fileInfo){
                 this.fileInfo = fileInfo;
+                this.initializeB2ShareUI(fileInfo);
+                this.render();
             }
-			this.initializeB2ShareUI(fileInfo);
-            this.render();
         },
 
         _formatItem: function(version) {

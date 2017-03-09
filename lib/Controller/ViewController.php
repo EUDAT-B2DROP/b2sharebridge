@@ -239,7 +239,6 @@ class ViewController extends Controller
                $error_msg .= "You can only publish a file to B2SHARE.<br>\n";
         }
         $token = $this->config->getUserValue($userId, $this->appName, 'token');
-        Util::writeLog('b2sharebridge', "token = ".$token, 0);
         if (!(strlen($token)>1)) {
             $is_error = true;
             $error_msg .= "Please set B2SHARE API token<br>\n";

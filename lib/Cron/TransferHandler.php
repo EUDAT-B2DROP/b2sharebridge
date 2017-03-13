@@ -108,7 +108,7 @@ class TransferHandler extends QueuedJob
 
             $create_result = $this->_publisher->create(
                 $args['token'],
-                basename($filename),
+                basename(urlencode($filename)),
                 $args['community'],
                 $args['open_access']
             );

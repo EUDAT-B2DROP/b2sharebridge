@@ -129,6 +129,7 @@ class PublishController extends Controller
             $view = Filesystem::getView();
             $filesize = $view->filesize(Filesystem::getPath($id));
             if ($filesize < $allowed_filesize * 1024 * 1024) {
+				$fileName = Filesystem::getPath($id);
                 $job = new TransferHandler($this->mapper);
                 $fcStatus = new DepositStatus();
                 $fcStatus->setFileid($id);
@@ -136,6 +137,7 @@ class PublishController extends Controller
                 $fcStatus->setStatus(1);
                 $fcStatus->setCreatedAt(time());
                 $fcStatus->setUpdatedAt(time());
+				$fcStatus->setFilename($fileName);
                 $this->mapper->insert($fcStatus);
             } else {
                 return new JSONResponse(

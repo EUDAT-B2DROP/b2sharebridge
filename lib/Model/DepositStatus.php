@@ -30,6 +30,7 @@ class DepositStatus extends Entity
 {
     protected $fileid;
     protected $status;
+	protected $filename;
     protected $owner;
     protected $createdAt;
     protected $updatedAt;
@@ -42,21 +43,14 @@ class DepositStatus extends Entity
     {
         $this->addType('fileid', 'integer');
         $this->addType('status', 'integer');
+		$this->addType('filename', 'string');
         $this->addType('owner', 'string');
         $this->addType('createdAt', 'integer');
         $this->addType('updatedAt', 'integer');
         $this->addType('url', 'string');
     }
 
-    /**
-     * Get filename for fileid
-     *
-     * @return \integer
-     */
-    public function getFilename()
-    {
-        return Filesystem::getPath($this->fileid);
-    }
+
 
     /**
      * Get string representation
@@ -66,7 +60,7 @@ class DepositStatus extends Entity
     public function __toString()
     {
         return 'Deposit with id: '. $this->getId().
-        ' and status:'.$this->getStatus().
+        ', fileName:'.$this->getFilename().' and status:'.$this->getStatus().
         ' belonging to user:'.$this->getOwner();
     }
 }

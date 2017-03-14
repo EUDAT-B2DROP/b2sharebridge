@@ -232,7 +232,7 @@ class ViewController extends Controller
         $view = Filesystem::getView();
         Util::writeLog('b2sharebridge', 'File ID: '.$id, 0);
         $filesize = $view->filesize(Filesystem::getPath($id));        
-        
+        $fileName = basename(Filesystem::getPath($id));
         $is_dir = $view->is_dir(Filesystem::getPath($id));
         if ($is_dir) {
                $is_error = true;
@@ -268,6 +268,7 @@ class ViewController extends Controller
         
         
         $result = [
+			"title" => $fileName,
             "error" => $is_error,
             "error_msg" => $error_msg
         ];

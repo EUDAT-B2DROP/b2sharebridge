@@ -5,9 +5,11 @@
 
     var TEMPLATE =
         '<div>' +
-        '<div id="b2sharebridgeTabView" class="dialogContainer"><div id="communitySelector"></div>' + 
-		'<div><input type="checkbox" name="open_access" id="cbopen_access" />open access</div>' +
-		'<div><input type="button" value="deposit" id="publish_button"/></div></div>' +
+		'<div id="b2sharebridgeTabView" class="dialogContainer">' +
+		'<table><tr><td>Title:</td><td><input type="text" name="b2s_title" id="b2s_title"></input></td></tr>' +
+		'<tr><td>Community:</td><td><div id="communitySelector"></div></td></tr>' + 
+		'<tr><td>Open access:</td><td><input type="checkbox" name="open_access" id="cbopen_access" /></td></tr>' +
+		'<tr><td></td><td><input type="button" value="deposit" id="publish_button"/></td></tr></table>' +
 		'<div class="errormsg" id="b2sharebridge_errormsg">ERROR3</div>' +
         '</div>';
 
@@ -16,12 +18,14 @@
             fileInfo = e.data.param;
             selected_community = $(ddCommunitySelector).val();
 			open_access = $('input[name="open_access"]:checked').length > 0;
+			title = $(b2s_title).val();
             $.post(
                 OC.generateUrl('/apps/b2sharebridge/publish'),
                 {
                     id: fileInfo.id,
                     community: selected_community,
-					open_access: open_access
+					open_access: open_access,
+					title: title
                 },
                 function (result) {
                     if (result && result.status === 'success') {
@@ -63,6 +67,7 @@
             this.collection.on('update', this._onChange, this);
             this.collection.on('error', this._onError, this);
 			this._error_msg = "initializing";
+			this._b2s_title = "Deposit title here";
 
         },
 
@@ -154,6 +159,7 @@
             $(communitySelector).html(this.getCommunitySelectorHTML());
             $(publish_button).bind('click',{param: this.fileInfo}, publishAction);
 			$(publish_button).prop('disabled', this._publish_button_disabled);
+			$(b2s_title).val(this._b2s_title);
             this.delegateEvents();
 			$(b2sharebridge_errormsg).html(this._error_msg);
 			if (this._error_msg!=""){
@@ -175,7 +181,8 @@
 	
 		processData: function(data){
 			this._publish_button_disabled = data['error'];
-			this._error_msg = data['error_msg'];	
+			this._error_msg = data['error_msg'];
+			this._b2s_title = data['title'];
 		},
 		
 		initializeB2ShareUI: function(fileInfo){
@@ -195,7 +202,7 @@
         }).fail(function(data){
             //if PHP not reachable, disable publish button
 			that._publish_button_disabled = true;
-			that._error_msg = "ERROR - Owncloud server cannot be reached."
+			that._error_msg = "ERROR - Nextcloud server cannot be reached."
 			
         });
 		}

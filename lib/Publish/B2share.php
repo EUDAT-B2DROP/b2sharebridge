@@ -67,7 +67,8 @@ class B2share implements Ipublish
         $token,
         $filename,
         $community = "e9b9792e-79fb-4b07-b6b4-b9c2bd06d095",
-        $open_access = false
+        $open_access = false,
+		$title = "Deposit title"
     ) {
         //now settype("false","boolean") evaluates to true, so:
         $b_open_access = false;
@@ -78,7 +79,7 @@ class B2share implements Ipublish
             [
                 'community'   => $community,
                 'titles'      => [[
-                    'title'   => basename($filename)
+                    'title'   => $title
                 ]],
                 'open_access' => $b_open_access
             ]

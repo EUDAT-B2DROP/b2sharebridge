@@ -35,7 +35,7 @@ class StatusCodes
     public function __construct()
     {
         $this->statusCodes = [
-            0 => 'published',
+            0 => 'deposited',
             1 => 'new',
             2 => 'processing',
             3 => 'External error: during uploading file',

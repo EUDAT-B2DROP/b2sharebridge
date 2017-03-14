@@ -16,6 +16,7 @@ namespace OCA\B2shareBridge\Model;
 
 use OC\Files\Filesystem;
 use OCP\AppFramework\Db\Entity;
+use OCP\Util;
 
 /**
  * Creates a database entity for the deposit status
@@ -31,6 +32,7 @@ class DepositStatus extends Entity
     protected $fileid;
     protected $status;
 	protected $filename;
+	protected $title;
     protected $owner;
     protected $createdAt;
     protected $updatedAt;
@@ -44,6 +46,7 @@ class DepositStatus extends Entity
         $this->addType('fileid', 'integer');
         $this->addType('status', 'integer');
 		$this->addType('filename', 'string');
+		$this->addType('title','string');
         $this->addType('owner', 'string');
         $this->addType('createdAt', 'integer');
         $this->addType('updatedAt', 'integer');
@@ -61,6 +64,24 @@ class DepositStatus extends Entity
     {
         return 'Deposit with id: '. $this->getId().
         ', fileName:'.$this->getFilename().' and status:'.$this->getStatus().
-        ' belonging to user:'.$this->getOwner();
+        ' belonging to user:'.$this->getOwner().' deposited under title'.
+			$this->getTitle();
     }
+	
+	
+	/**
+	*
+	* getUrl - return URL only if status = PUBLISHED
+	* @return \string
+	*/
+	public function getHyperlink(){
+		$result = "N/A";
+		
+		if ($this->getStatus()==0){
+			$result = '<a href="'.$this->getUrl().'" target="_blank">B2SHARE deposit</a>';
+		}
+		Util::writeLog("B2sharebridge","TEST ".$result,3);
+		
+		return urldecode($result);
+	}
 }

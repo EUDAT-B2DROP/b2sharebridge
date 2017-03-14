@@ -93,6 +93,7 @@ class PublishController extends Controller
         $id = (int) $param['id'];
         $community = $param['community'];
         $open_access = $param['open_access'];
+		$title = $param['title'];
         if (!is_int($id) || !is_string($token)) {
             $error = 'Problems while parsing fileid or publishToken';
         }
@@ -138,6 +139,7 @@ class PublishController extends Controller
                 $fcStatus->setCreatedAt(time());
                 $fcStatus->setUpdatedAt(time());
 				$fcStatus->setFilename($fileName);
+				$fcStatus->setTitle($title);
                 $this->mapper->insert($fcStatus);
             } else {
                 return new JSONResponse(
@@ -172,7 +174,8 @@ class PublishController extends Controller
                 'token' => $token,
                 '_userId' => $this->userId,
                 'community' => $community,
-            'open_access' => $open_access
+            'open_access' => $open_access, 
+			'title' => $title
             ]
         );
 

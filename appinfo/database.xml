@@ -34,12 +34,18 @@
                 <notnull>true</notnull>
                 <length>4</length>
             </field>
-	    <field>
-               <name>filename</name>
-	       <type>text</type>
-               <notnull>false</notnull>
-               <length>255</length>
-            </field>
+	    	<field>
+           		<name>filename</name>
+	       		<type>text</type>
+           		<notnull>false</notnull>
+           		<length>255</length>
+        	</field>
+	    	<field>
+           		<name>title</name>
+	       		<type>text</type>
+           		<notnull>false</notnull>
+           		<length>255</length>
+        	</field>
             <field>
                 <name>created_at</name>
                 <type>integer</type>

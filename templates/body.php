@@ -12,7 +12,7 @@
                         <th>Transfer ID</th>
                         <th>Filename</th>
                         <th>Status</th>
-                        <th>Publish URL</th>
+                        <th>Deposit URL</th>
                         <th>Triggered At</th>
                         <th>Last Update</th>
                     </tr>

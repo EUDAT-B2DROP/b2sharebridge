@@ -7,7 +7,7 @@
         '<div>' +
         '<div id="b2sharebridgeTabView" class="dialogContainer"><div id="communitySelector"></div>' + 
 		'<div><input type="checkbox" name="open_access" id="cbopen_access" />open access</div>' +
-		'<div><input type="button" value="publish" id="publish_button"/></div></div>' +
+		'<div><input type="button" value="deposit" id="publish_button"/></div></div>' +
 		'<div class="errormsg" id="b2sharebridge_errormsg">ERROR3</div>' +
         '</div>';
 

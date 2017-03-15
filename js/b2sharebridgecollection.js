@@ -26,14 +26,14 @@
          *
          * @var int
          */
-    _objectId: null,
+        _objectId: null,
 
         /**
          * Type of the object to filter by
          *
          * @var string
          */
-    _objectType: null,
+        _objectType: null,
 
         //model: OCA.B2shareBridge.B2shareBridgeModel,
 
@@ -42,21 +42,21 @@
          * 
          * @param {int} objectId file id or null
          */
-    setObjectId: function(objectId) {
+        setObjectId: function(objectId) {
         this._objectId = objectId;
-    },
+        },
 
         /**
          * Sets the object type to filter by or null for all.
          * 
          * @param {int} objectType file id or null
          */
-    setObjectType: function(objectType) {
+        setObjectType: function(objectType) {
         this._objectType = objectType;
-    },
+        },
 
-    url: function() {
-    }
+        url: function() {
+        }
         }
     );
 

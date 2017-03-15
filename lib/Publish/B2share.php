@@ -60,6 +60,7 @@ class B2share implements Ipublish
      * @param string $filename    local filename of file that should be submitted
      * @param string $community   id of community metadata schema, defaults to EUDAT
      * @param string $open_access publish as open access, defaults to false
+     * @param string $title       actual title of the deposit
      *
      * @return null
      */
@@ -68,7 +69,7 @@ class B2share implements Ipublish
         $filename,
         $community = "e9b9792e-79fb-4b07-b6b4-b9c2bd06d095",
         $open_access = false,
-		$title = "Deposit title"
+        $title = "Deposit title"
     ) {
         //now settype("false","boolean") evaluates to true, so:
         $b_open_access = false;

@@ -268,7 +268,7 @@ class ViewController extends Controller
         
         
         $result = [
-			"title" => $fileName,
+        "title" => $fileName,
             "error" => $is_error,
             "error_msg" => $error_msg
         ];

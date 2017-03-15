@@ -10,11 +10,11 @@
 
 namespace OCA\B2shareBridge\Controller;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
 use OCP\AppFramework\Http\TemplateResponse;
 
-class ViewControllerTest extends PHPUnit_Framework_TestCase
+class ViewControllerTest extends TestCase
 {
 
     private $controller;

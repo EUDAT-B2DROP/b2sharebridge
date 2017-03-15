@@ -130,7 +130,7 @@ class PublishController extends Controller
             $view = Filesystem::getView();
             $filesize = $view->filesize(Filesystem::getPath($id));
             if ($filesize < $allowed_filesize * 1024 * 1024) {
-				$fileName = Filesystem::getPath($id);
+				$fileName = basename(Filesystem::getPath($id));
                 $job = new TransferHandler($this->mapper);
                 $fcStatus = new DepositStatus();
                 $fcStatus->setFileid($id);

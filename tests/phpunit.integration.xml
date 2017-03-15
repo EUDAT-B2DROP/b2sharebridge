@@ -1,7 +1,12 @@
-<phpunit bootstrap="bootstrap.php">
-    <testsuites>
-        <testsuite name='ownCloud - B2shareBridge App Tests'>
-            <directory>./integration</directory>
-        </testsuite>
-    </testsuites>
+<?xml version="1.0" encoding="utf-8" ?>
+<phpunit bootstrap="bootstrap.php"
+         strict="true"
+         verbose="true"
+         timeoutForSmallTests="900"
+         timeoutForMediumTests="900"
+         timeoutForLargeTests="900"
+>
+    <testsuite name='B2SHAREBRIDGE Integration Tests'>
+        <directory suffix='Test.php'>integration</directory>
+    </testsuite>
 </phpunit>

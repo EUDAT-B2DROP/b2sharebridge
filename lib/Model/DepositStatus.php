@@ -78,7 +78,7 @@ class DepositStatus extends Entity
     {
         $result = "N/A";
         
-        if ($this->getStatus()==0) {
+        if ($this->getStatus()===0) {
             $result = '<a href="'.$this->getUrl()
                 .'" target="_blank">B2SHARE deposit</a>';
         }

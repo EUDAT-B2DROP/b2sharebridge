@@ -29,17 +29,16 @@ There are no formal requirements to participate. If there are questions, feel fr
 
 ## Testing
 
-For testing your php code you need to [install PHPUnit](http://phpunit.de/getting-started.html) and PHP_CodeSniffer, then run:
-
-    phpunit -c phpunit.xml
-    phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
-
-Another way to directly test your code with your browser locally, when you have a php interpreter:
-
+For testing your php code against styleguides you need to install PHP_CodeSniffer, then run:
 ```
-export CORE_BRANCH=stable11;
-export BRIDGE_BRANCH=nextcloud11;
-export B2SHAREBRIDGE=<local path>
+phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
+```
+For unit tests you need to hava a php interpreter and [PHPUnit](http://phpunit.de/getting-started.html).
+These tests need a Nextcloud deployment, so execute:
+```
+export CORE_BRANCH=stable11
+export BRIDGE_BRANCH=nextcloud11
+export B2SHAREBRIDGE=<PATH>
 git clone https://github.com/nextcloud/core.git --recursive --depth 1 -b $CORE_BRANCH nextcloud
 cd nextcloud
 ./occ maintenance:install --admin-user admin --admin-pass admin
@@ -49,7 +48,14 @@ git clone https://github.com/EUDAT-B2DROP/b2sharebridge.git -b $BRIDGE_BRANCH ap
 #rsync -uvaPr --delete  --exclude “.git*” --exclude ".idea" $B2SHAREBRIDGE/ apps/b2sharebridge
 ./occ app:enable b2sharebridge
 
+./occ app:check-code b2sharebridge
+cd apps/b2sharebridge/tests
+phpunit -c phpunit.xml
+phpunit -c phpunit.integration.xml
+```
+You can afterwards also:
+```
+cd ../../..
 php -S localhost:8080
 ```
-
-You should be able to connect to [localhost:8080](http://localhost:8080) and see a working service
+And should be able to connect to [localhost:8080](http://localhost:8080) and see a working service.

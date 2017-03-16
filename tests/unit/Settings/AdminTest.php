@@ -21,7 +21,7 @@ use PHPUnit\Framework\TestCase;
 class AdminTest extends TestCase  {
     /** @var \OCA\B2shareBridge\Settings\Admin */
     private $admin;
-    /** @var IConfig|\PHPUnit_Framework_MockObject_MockObject */
+    /** @var IConfig|\PHPUnit\Framework\MockObject\MockObject */
     private $config;
 
     public function setUp() {

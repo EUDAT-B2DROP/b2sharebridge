@@ -1,27 +1,19 @@
 <?php
 /**
- * @copyright Copyright (c) 2016 Lukas Reschke <lukas@statuscode.ch>
+ * B2SHAREBRIDGE
  *
- * @license GNU AGPL version 3 or any later version
+ * PHP Version 7
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
+ * @category  Nextcloud
+ * @package   B2shareBridge
+ * @author    EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright 2015 EUDAT
+ * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
 namespace OCA\B2shareBridge\ests\Settings;
 
-use OCP\IL10N;
 use OCP\IURLGenerator;
 use PHPUnit\Framework\TestCase;
 

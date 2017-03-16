@@ -1,6 +1,6 @@
 <?php
 /**
- * ownCloud - b2sharebridge
+ * b2sharebridge
  *
  * This file is licensed under the MIT License. See the LICENSE file.
  *

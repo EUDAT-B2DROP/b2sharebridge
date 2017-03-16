@@ -38,14 +38,19 @@ These tests need a Nextcloud deployment, so execute:
 ```
 export CORE_BRANCH=stable11
 export BRIDGE_BRANCH=nextcloud11
-export B2SHAREBRIDGE=<PATH>
+export B2SHAREBRIDGE_LOCAL_PATH=
 git clone https://github.com/nextcloud/core.git --recursive --depth 1 -b $CORE_BRANCH nextcloud
 cd nextcloud
 ./occ maintenance:install --admin-user admin --admin-pass admin
 
 #decide whether you want to use github code or your local developments:
-git clone https://github.com/EUDAT-B2DROP/b2sharebridge.git -b $BRIDGE_BRANCH apps/b2sharebridge
-#rsync -uvaPr --delete  --exclude “.git*” --exclude ".idea" $B2SHAREBRIDGE/ apps/b2sharebridge
+if [[ "$B2SHAREBRIDGE_LOCAL_PATH" == '' ]]
+then
+    git clone https://github.com/EUDAT-B2DROP/b2sharebridge.git -b $BRIDGE_BRANCH apps/b2sharebridge
+else
+    rsync -uvaPr --delete  --exclude “.git*” --exclude ".idea" $B2SHAREBRIDGE_LOCAL_PATH/ apps/b2sharebridge
+fi
+
 ./occ app:enable b2sharebridge
 
 ./occ app:check-code b2sharebridge

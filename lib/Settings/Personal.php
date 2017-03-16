@@ -17,13 +17,9 @@ namespace OCA\B2shareBridge\Settings\Personal;
 
 use OCP\Template;
 use OCP\User;
-use OCP\Util;
 
 User::checkLoggedIn();
 $userId = \OC::$server->getUserSession()->getUser()->getUID();
-
-
-Util::addScript('b2sharebridge', 'settings-personal');
 
 $tmpl = new Template('b2sharebridge', 'settings-personal');
 $tmpl->assign(

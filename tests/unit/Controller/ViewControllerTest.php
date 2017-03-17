@@ -24,9 +24,6 @@ class ViewControllerTest extends TestCase
 
     public function setUp() 
     {
-        $this->markTestSkipped(
-            'ViewControllerTest currently not implemented because of missing persistency.'
-        );
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();
         $deposit_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
@@ -42,6 +39,10 @@ class ViewControllerTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
+        $deposit_mapper->method('findAllForUser')
+            ->willReturn([]);
+        $deposit_mapper->method('findAllForUserAndStateString')
+            ->willReturn([]);
         $this->navigation->method('getTemplate')
             ->willReturn($this->returnValue('OCP\AppFramework\Http\TemplateResponse'));
 
@@ -52,9 +53,6 @@ class ViewControllerTest extends TestCase
 
     public function testList() 
     {
-        $this->markTestSkipped(
-            'ViewControllerTest currently not implemented because of missing persistency.'
-        );
         $filter = 'all';
         $result = $this->controller->depositList();
         $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());
@@ -64,9 +62,6 @@ class ViewControllerTest extends TestCase
     
     public function testPublished() 
     {
-        $this->markTestSkipped(
-            'ViewControllerTest currently not implemented because of missing persistency.'
-        );
         $filter = 'published';
         $result = $this->controller->depositList($filter);
         $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());
@@ -76,9 +71,6 @@ class ViewControllerTest extends TestCase
     
     public function testPending() 
     {
-        $this->markTestSkipped(
-            'ViewControllerTest currently not implemented because of missing persistency.'
-        );
         $filter = 'pending';
         $result = $this->controller->depositList($filter);
         $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());
@@ -88,9 +80,6 @@ class ViewControllerTest extends TestCase
     
     public function testFailed() 
     {
-        $this->markTestSkipped(
-            'ViewControllerTest currently not implemented because of missing persistency.'
-        );
         $filter = 'failed';
         $result = $this->controller->depositList($filter);
         $this->assertEquals(['user' => 'john', 'publications' => Array (), 'statuscodes' => $this->statusCodes, 'appNavigation' => $this->navigation->getTemplate(), 'filter' => $filter], $result->getParams());

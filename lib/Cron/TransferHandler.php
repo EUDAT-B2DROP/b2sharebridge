@@ -82,18 +82,19 @@ class TransferHandler extends QueuedJob
         if (!array_key_exists('transferId', $args)
             || !array_key_exists('token', $args)
             || !array_key_exists('community', $args)
-			|| !array_key_exists('open_access', $args)
+            || !array_key_exists('open_access', $args)
+            || !array_key_exists('title', $args)
         ) {
             Util::writeLog(
                 'transfer',
-                'Bad request, can not handle transfer w/o id, token, community, open_access',
+                'Can not handle w/o id, token, community, open_access, title',
                 3
             );
             return;
         }
         // get the file transfer object for current Cron
         $fcStatus = $this->_mapper->find($args['transferId']);
-
+        Util::writeLog('b2sharebridge', 'Title: '.$args['title'], 3);
         $fcStatus->setStatus(2);//status = processing
         $this->_mapper->update($fcStatus);
         $user = $fcStatus->getOwner();
@@ -108,9 +109,10 @@ class TransferHandler extends QueuedJob
 
             $create_result = $this->_publisher->create(
                 $args['token'],
-                basename($filename),
+                urlencode(basename($filename)),
                 $args['community'],
-				$args['open_access']
+                $args['open_access'],
+                $args['title']
             );
             if ($create_result) {
                 $handle = $view->fopen($filename, 'rb');

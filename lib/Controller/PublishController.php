@@ -92,7 +92,8 @@ class PublishController extends Controller
         }
         $id = (int) $param['id'];
         $community = $param['community'];
-		$open_access = $param['open_access'];
+        $open_access = $param['open_access'];
+        $title = $param['title'];
         if (!is_int($id) || !is_string($token)) {
             $error = 'Problems while parsing fileid or publishToken';
         }
@@ -129,6 +130,7 @@ class PublishController extends Controller
             $view = Filesystem::getView();
             $filesize = $view->filesize(Filesystem::getPath($id));
             if ($filesize < $allowed_filesize * 1024 * 1024) {
+                $fileName = basename(Filesystem::getPath($id));
                 $job = new TransferHandler($this->mapper);
                 $fcStatus = new DepositStatus();
                 $fcStatus->setFileid($id);
@@ -136,6 +138,8 @@ class PublishController extends Controller
                 $fcStatus->setStatus(1);
                 $fcStatus->setCreatedAt(time());
                 $fcStatus->setUpdatedAt(time());
+                $fcStatus->setFilename($fileName);
+                $fcStatus->setTitle($title);
                 $this->mapper->insert($fcStatus);
             } else {
                 return new JSONResponse(
@@ -170,7 +174,8 @@ class PublishController extends Controller
                 'token' => $token,
                 '_userId' => $this->userId,
                 'community' => $community,
-				'open_access' => $open_access
+            'open_access' => $open_access, 
+            'title' => $title
             ]
         );
 

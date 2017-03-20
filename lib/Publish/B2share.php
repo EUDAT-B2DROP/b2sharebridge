@@ -56,9 +56,11 @@ class B2share implements Ipublish
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
-     * @param string $token     users access token
-     * @param string $filename  local filename of file that should be submitted
-     * @param string $community id of community metadata schema, defaults to EUDAT
+     * @param string $token       users access token
+     * @param string $filename    local filename of file that should be submitted
+     * @param string $community   id of community metadata schema, defaults to EUDAT
+     * @param string $open_access publish as open access, defaults to false
+     * @param string $title       actual title of the deposit
      *
      * @return null
      */
@@ -66,23 +68,24 @@ class B2share implements Ipublish
         $token,
         $filename,
         $community = "e9b9792e-79fb-4b07-b6b4-b9c2bd06d095",
-		$open_access = false
+        $open_access = false,
+        $title = "Deposit title"
     ) {
-		//now settype("false","boolean") evaluates to true, so:
-		$b_open_access = false;
-		if (($open_access)=="true"){
-			$b_open_access = true;
-		}
+        //now settype("false","boolean") evaluates to true, so:
+        $b_open_access = false;
+        if ($open_access==="true") {
+               $b_open_access = true;
+        }
         $data = json_encode(
             [
                 'community'   => $community,
                 'titles'      => [[
-                    'title'   => basename($filename)
+                    'title'   => $title
                 ]],
                 'open_access' => $b_open_access
             ]
         );
-		Util::writeLog('b2share_cron',"Data: ".$data,3);
+        Util::writeLog('b2share_cron', "Data: ".$data, 3);
 
         $config = array(
             CURLOPT_URL =>
@@ -142,7 +145,7 @@ class B2share implements Ipublish
             CURLOPT_HEADER => true,
             CURLINFO_HEADER_OUT => true,
             CURLOPT_HTTPHEADER => array(
-				'Accept:application/json',
+        'Accept:application/json',
                 'Content-Type: application/octet-stream'
             )
         );

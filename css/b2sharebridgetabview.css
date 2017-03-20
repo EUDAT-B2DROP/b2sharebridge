@@ -53,6 +53,14 @@
 }
 
 .b2shareBridgeTabView .errormsg {
-	color: red;
-	display: none;
+    color: red;
+    display: none;
+}
+
+.b2shareBridgeTabView td {
+    border: 0px;
+}
+
+.b2shareBridgeTabView select {
+    width:100%;
 }

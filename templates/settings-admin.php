@@ -1,3 +1,6 @@
+<?php
+script('b2sharebridge', 'settings-admin');
+?>
 <div class="section" id="eudat_b2share">
     <h2>EUDAT B2SHARE Bridge</h2>
 

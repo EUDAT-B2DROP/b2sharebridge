@@ -1,6 +1,6 @@
 <?php
 /**
- * ownCloud - b2sharebridge
+ * b2sharebridge
  *
  * This file is licensed under the MIT License. See the LICENSE file.
  *
@@ -10,11 +10,11 @@
 
 namespace OCA\B2shareBridge\Controller;
 
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
 use OCP\AppFramework\Http\TemplateResponse;
 
-class ViewControllerTest extends PHPUnit_Framework_TestCase
+class ViewControllerTest extends TestCase
 {
 
     private $controller;
@@ -26,7 +26,10 @@ class ViewControllerTest extends PHPUnit_Framework_TestCase
     {
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();
-        $mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
+        $deposit_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $community_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\CommunityMapper')
             ->disableOriginalConstructor()
             ->getMock();
         $this->statusCodes = $this->getMockBuilder('OCA\B2shareBridge\Model\StatusCodes')
@@ -36,11 +39,15 @@ class ViewControllerTest extends PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
+        $deposit_mapper->method('findAllForUser')
+            ->willReturn([]);
+        $deposit_mapper->method('findAllForUserAndStateString')
+            ->willReturn([]);
         $this->navigation->method('getTemplate')
             ->willReturn($this->returnValue('OCP\AppFramework\Http\TemplateResponse'));
 
         $this->controller = new ViewController(
-            'b2sharebridge', $request, $config, $mapper,  $this->statusCodes, $this->userId, $this->navigation
+            'b2sharebridge', $request, $config, $deposit_mapper, $community_mapper, $this->statusCodes, $this->userId, $this->navigation
         );
     }
 

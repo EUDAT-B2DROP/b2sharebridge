@@ -95,7 +95,7 @@ class ViewController extends Controller
         Util::addStyle('files', 'files');
 
         $publications = [];
-        if ($filter == 'all') {
+        if ($filter === 'all') {
             foreach (
                 array_reverse(
                     $this->mapper->findAllForUser($this->userId)
@@ -217,32 +217,31 @@ class ViewController extends Controller
      */
     public function initializeB2ShareUI()
     {
-		$is_error = false;
-		$error_msg = "";
+        $is_error = false;
+        $error_msg = "";
         Util::writeLog("b2sharebridge", "in func initUI", 0);
          $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if (strlen($userId) <= 0) {
             Util::writeLog('b2sharebridge', 'No user configured for session', 0);
-			$is_error = true;
-			$error_msg .= "Authorization failure: login first.<br>\n";
+            $is_error = true;
+            $error_msg .= "Authorization failure: login first.<br>\n";
         }
         $param = $this->request->getParams();
         $id = (int) $param['file_id'];
         Filesystem::init($this->userId, '/');
         $view = Filesystem::getView();
-		Util::writeLog('b2sharebridge','File ID: '.$id,0);
-        $filesize = $view->filesize(Filesystem::getPath($id));		
-		
-		$is_dir = $view->is_dir(Filesystem::getPath($id));
-		if ($is_dir){
-			$is_error = true;
-			$error_msg .= "You cannot publish a folder, you can only publish a file to B2Share.<br>\n";
-		}
+        Util::writeLog('b2sharebridge', 'File ID: '.$id, 0);
+        $filesize = $view->filesize(Filesystem::getPath($id));        
+        $fileName = basename(Filesystem::getPath($id));
+        $is_dir = $view->is_dir(Filesystem::getPath($id));
+        if ($is_dir) {
+               $is_error = true;
+               $error_msg .= "You can only publish a file to B2SHARE.<br>\n";
+        }
         $token = $this->config->getUserValue($userId, $this->appName, 'token');
-        Util::writeLog('b2sharebridge', "token = ".$token, 0);
         if (!(strlen($token)>1)) {
             $is_error = true;
-			$error_msg .= "Please set B2SHARE API token<br>\n";
+            $error_msg .= "Please set B2SHARE API token<br>\n";
         }
         $allowed_uploads = $this->config->getAppValue(
             'b2sharebridge',
@@ -260,15 +259,18 @@ class ViewController extends Controller
                 'pending'
             )
         );
-		if ($active_uploads>$allowed_uploads){
-			$is_error = true;
-			$error_msg .= "You already have ".$active_uploads." active uploads. You are only allowed ".$allowed_uploads." uploads. Please try again later.<br>\n";
-		}
-		
-		
+        if ($active_uploads>$allowed_uploads) {
+               $is_error = true;
+               $error_msg .= "You already have ".$active_uploads.
+                   " active uploads. You are only allowed ".$allowed_uploads.
+                   " uploads. Please try again later.<br>\n";
+        }
+        
+        
         $result = [
-        	"error" => $is_error,
-			"error_msg" => $error_msg
+        "title" => $fileName,
+            "error" => $is_error,
+            "error_msg" => $error_msg
         ];
         return new JSONResponse($result);
     }

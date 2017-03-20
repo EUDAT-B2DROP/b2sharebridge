@@ -11,8 +11,9 @@
                     <tr>
                         <th>Transfer ID</th>
                         <th>Filename</th>
+                        <th>Title</th>
                         <th>Status</th>
-                        <th>Publish URL</th>
+                        <th>Deposit URL</th>
                         <th>Triggered At</th>
                         <th>Last Update</th>
                     </tr>
@@ -23,9 +24,13 @@
                             <td><?php p($publication->getId()) ?></td>
                             <td><?php p($publication->getFilename()) ?></td>
                             <?php // TODO: echo as user specific timedate ?>
+                            <td><?php p($publication->getTitle()) ?></td>
                             <td><?php p($_['statuscodes']->getForNumber($publication->getStatus())) ?></td>
-                            <td><a target="_blank"
-                                   href=<?php p($publication->getUrl()) ?>>URL</a>
+                            <td><?php if ($publication->getStatus() > 0) : ?>
+                                    N/A
+                                <?php else: ?>
+                                    <a href="<?php p($publication->getUrl()) ?>" target="_blank">Deposit URL</a>
+                                <?php endif; ?>
                             </td>
                             <td><?php p(date('D\, j M Y H:i:s', $publication->getCreatedAt())) ?></td>
                             <td><?php p(date('D\, j M Y H:i:s', $publication->getUpdatedAt())) ?></td>

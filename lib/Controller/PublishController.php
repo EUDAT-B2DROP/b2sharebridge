@@ -117,7 +117,7 @@ class PublishController extends Controller
         $allowed_filesize = $this->config->getAppValue(
             'b2sharebridge',
             'max_upload_filesize',
-            5
+            512
         );
         $active_uploads = count(
             $this->mapper->findAllForUserAndStateString(

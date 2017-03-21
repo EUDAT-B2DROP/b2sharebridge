@@ -252,7 +252,7 @@ class ViewController extends Controller
         $allowed_filesize = $this->config->getAppValue(
             'b2sharebridge',
             'max_upload_filesize',
-            5
+            512
         );
         $active_uploads = count(
             $this->mapper->findAllForUserAndStateString(
@@ -266,7 +266,11 @@ class ViewController extends Controller
                    " active uploads. You are only allowed ".$allowed_uploads.
                    " uploads. Please try again later.<br>\n";
         }
-        
+        if ($filesize>$allowed_filesize * 1024 * 1024) {
+            $is_error = true;
+            $error_msg .= "We currently only support files smaller then "
+                    . $allowed_filesize . " MB.<br>\n";
+        }
         $result = [
         "title" => $fileName,
             "error" => $is_error,

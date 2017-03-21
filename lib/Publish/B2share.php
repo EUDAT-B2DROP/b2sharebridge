@@ -56,11 +56,11 @@ class B2share implements Ipublish
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
-     * @param string $token       users access token
-     * @param string $filename    local filename of file that should be submitted
-     * @param string $community   id of community metadata schema, defaults to EUDAT
-     * @param string $open_access publish as open access, defaults to false
-     * @param string $title       actual title of the deposit
+     * @param string  $token       users access token
+     * @param string  $filename    local filename of file that should be submitted
+     * @param string  $community   id of community metadata schema, defaults to EUDAT
+     * @param boolean $open_access publish as open access, defaults to false
+     * @param string  $title       actual title of the deposit
      *
      * @return null
      */
@@ -104,7 +104,6 @@ class B2share implements Ipublish
             return false;
         } else {
             $header_size = curl_getinfo($this->curl_client, CURLINFO_HEADER_SIZE);
-            $header = substr($response, 0, $header_size);
             $body = substr($response, $header_size);
             $results = json_decode(utf8_encode($body));
             if (array_key_exists('links', $results)
@@ -130,7 +129,7 @@ class B2share implements Ipublish
      * @param string $filehandle file handle
      * @param string $filesize   local filename of file that should be submitted
      *
-     * @return array
+     * @return boolean
      */
     public function upload($filehandle, $filesize)
     {

@@ -62,6 +62,7 @@ class Swift implements Ipublish
                 'Expect:'
             )
         );
+        return;
     }
 
     /**
@@ -102,5 +103,6 @@ class Swift implements Ipublish
         curl_setopt($this->curl_client, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->curl_client, CURLOPT_PUT, true);
         curl_setopt($this->curl_client, CURLOPT_FORBID_REUSE, 1);
+        return;
     }
 }

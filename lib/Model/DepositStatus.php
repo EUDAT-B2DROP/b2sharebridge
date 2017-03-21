@@ -14,7 +14,6 @@
 
 namespace OCA\B2shareBridge\Model;
 
-use OC\Files\Filesystem;
 use OCP\AppFramework\Db\Entity;
 use OCP\Util;
 

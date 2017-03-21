@@ -48,18 +48,16 @@ class Navigation
     /**
      * Get a filled navigation menu
      *
-     * @param null|string $forceActive Navigation entry
+     * @param null|string $filter Navigation entry
      *
      * @return \OCP\Template
      */
-    public function getTemplate($forceActive = null)
+    public function getTemplate($filter = 'all')
     {
-        $active = $forceActive ?: $this->active;
-
         $template = new Template('b2sharebridge', 'navigation', '');
         $entries = $this->getLinkList();
 
-        $template->assign('activeNavigation', $active);
+        $template->assign('activeNavigation', $filter);
         $template->assign('navigations', $entries);
 
         return $template;

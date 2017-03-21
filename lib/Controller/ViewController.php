@@ -40,6 +40,7 @@ class ViewController extends Controller
     protected $userId;
     protected $statusCodes;
     protected $mapper;
+    protected $config;
     protected $cMapper;
     protected $navigation;
 
@@ -199,7 +200,7 @@ class ViewController extends Controller
     /**
      * XHR request endpoint for getting communities list dropdown for tabview
      *
-     * @return          JSONResponse
+     * @return          array
      * @NoAdminRequired
      */
     public function getTabViewContent()
@@ -265,7 +266,6 @@ class ViewController extends Controller
                    " active uploads. You are only allowed ".$allowed_uploads.
                    " uploads. Please try again later.<br>\n";
         }
-        
         
         $result = [
         "title" => $fileName,

@@ -14,7 +14,6 @@
 
 namespace OCA\B2shareBridge\Model;
 
-use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\Mapper;
 use OCP\IDBConnection;
 

@@ -17,7 +17,6 @@ namespace OCA\B2shareBridge\AppInfo;
 
 use OCA\B2shareBridge\Controller\PublishController;
 use OCA\B2shareBridge\Controller\ViewController;
-use OCA\B2shareBridge\Data;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
@@ -159,6 +158,7 @@ class Application extends App
             ];
         };
         $server->getNavigationManager()->add($navigationEntry);
+        return;
     }
 
     /**
@@ -169,6 +169,7 @@ class Application extends App
     public function registerSettings()
     {
         \OCP\App::registerPersonal('b2sharebridge', 'lib/Settings/Personal');
+        return;
     }
 
 
@@ -184,5 +185,6 @@ class Application extends App
         Util::addScript('b2sharebridge', 'b2sharebridgetabview');
         Util::addScript('b2sharebridge', 'b2sharebridge');
         Util::addStyle('b2sharebridge', 'b2sharebridgetabview');
+        return;
     }
 }

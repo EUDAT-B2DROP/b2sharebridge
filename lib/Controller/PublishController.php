@@ -78,12 +78,12 @@ class PublishController extends Controller
         //TODO what if token wasn't set? We couldn't have gotten here
         //but still a check seems in place.
         $_userId = \OC::$server->getUserSession()->getUser()->getUID();
-        if (strlen($_userId) <= 0) {
-            $error = 'No user configured for session';
-        }
         $token = $this->config->getUserValue($_userId, $this->appName, "token");
 
         $error = false;
+        if (strlen($_userId) <= 0) {
+            $error = 'No user configured for session';
+        }
         if (!is_array($param)
             || !array_key_exists('id', $param)
             || !array_key_exists('community', $param)

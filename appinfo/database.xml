@@ -21,25 +21,13 @@
                 <default></default>
                 <notnull>true</notnull>
                 <length>64</length>
-            </field>
-            <field>
-                <name>fileid</name>
-                <type>integer</type>
-                <notnull>true</notnull>
-                <length>4</length>
-            </field>
+            </field>    
             <field>
                 <name>status</name>
                 <type>integer</type>
                 <notnull>true</notnull>
                 <length>4</length>
             </field>
-	    	<field>
-           		<name>filename</name>
-	       		<type>text</type>
-           		<notnull>false</notnull>
-           		<length>255</length>
-        	</field>
 	    	<field>
            		<name>title</name>
 	       		<type>text</type>
@@ -79,4 +67,36 @@
             </field>
         </declaration>
     </table>
+	<table>
+		<name>*dbprefix*b2sharebridge_deposit_file</name>
+		<declaration>
+            <field>
+                <name>id</name>
+                <type>integer</type>
+                <default>0</default>
+                <notnull>true</notnull>
+                <autoincrement>1</autoincrement>
+                <length>64</length>
+            </field>
+            <field>
+                <name>depositStatusId</name>
+                <type>integer</type>
+                <default>0</default>
+                <notnull>true</notnull>
+                <length>64</length>
+            </field>
+    		<field>
+        		<name>fileid</name>
+        		<type>integer</type>
+        		<notnull>true</notnull>
+        		<length>4</length>
+    		</field>
+	    	<field>
+           		<name>filename</name>
+	       		<type>text</type>
+           		<notnull>false</notnull>
+           		<length>255</length>
+        	</field>
+		</declaration>
+	</table>
 </database>

@@ -17,7 +17,9 @@ namespace OCA\B2shareBridge\Controller;
 use OC\Files\Filesystem;
 use OCA\B2shareBridge\Cron\TransferHandler;
 use OCA\B2shareBridge\Model\DepositStatus;
+use OCA\B2shareBridge\Model\DepositFile;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
+use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
@@ -38,6 +40,7 @@ class PublishController extends Controller
 {
     protected $config;
     protected $mapper;
+	protected $dfmapper;
     protected $statusCodes;
     protected $userId;
 
@@ -56,12 +59,14 @@ class PublishController extends Controller
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,
+		DepositFileMapper $dfmapper,
         StatusCodes $statusCodes,
         string $userId
     ) {
         parent::__construct($appName, $request);
         $this->userId = $userId;
         $this->mapper = $mapper;
+		$this->dfmapper = $dfmapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
     }
@@ -77,6 +82,7 @@ class PublishController extends Controller
         $param = $this->request->getParams();
         //TODO what if token wasn't set? We couldn't have gotten here
         //but still a check seems in place.
+		
         $_userId = \OC::$server->getUserSession()->getUser()->getUID();
         $token = $this->config->getUserValue($_userId, $this->appName, "token");
 
@@ -85,19 +91,19 @@ class PublishController extends Controller
             $error = 'No user configured for session';
         }
         if (!is_array($param)
-            || !array_key_exists('id', $param)
+            || !array_key_exists('ids', $param)
             || !array_key_exists('community', $param)
         ) {
             $error = 'Parameters gotten from UI are no array or they are missing';
         }
-        $id = (int) $param['id'];
+        $ids = $param['ids'];
         $community = $param['community'];
         $open_access = $param['open_access'];
         $title = $param['title'];
-        if (!is_int($id) || !is_string($token)) {
-            $error = 'Problems while parsing fileid or publishToken';
+        if (!is_string($token)) {
+            $error = 'Problems while parsing publishToken';
         }
-
+		
         if (($error)) {
             Util::writeLog('b2sharebridge', $error, 3);
             return new JSONResponse(
@@ -128,19 +134,27 @@ class PublishController extends Controller
         if ($active_uploads < $allowed_uploads) {
             Filesystem::init($this->userId, '/');
             $view = Filesystem::getView();
-            $filesize = $view->filesize(Filesystem::getPath($id));
+			$filesize = 0;
+			foreach ($ids as $id){
+				$filesize = $filesize + $view->filesize(Filesystem::getPath($id));
+			}
+			Util::writeLog("b2sharebridge","filesize: ".$filesize,3);
             if ($filesize < $allowed_filesize * 1024 * 1024) {
-                $fileName = basename(Filesystem::getPath($id));
                 $job = new TransferHandler($this->mapper);
                 $fcStatus = new DepositStatus();
-                $fcStatus->setFileid($id);
                 $fcStatus->setOwner($this->userId);
                 $fcStatus->setStatus(1);
                 $fcStatus->setCreatedAt(time());
                 $fcStatus->setUpdatedAt(time());
-                $fcStatus->setFilename($fileName);
                 $fcStatus->setTitle($title);
-                $this->mapper->insert($fcStatus);
+                $depositId = $this->mapper->insert($fcStatus);
+				foreach ($ids as $id){ 
+					$depositFile = new DepositFile();
+					$depositFile->setFilename(basename(Filesystem::getPath($id)));
+					$depositFile->setFileid($id);
+					$depositFile->setDepositstatusid($depositId);				
+					$this->dfmapper->insert($depositFile);
+				}
             } else {
                 return new JSONResponse(
                     [

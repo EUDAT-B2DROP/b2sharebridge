@@ -11,7 +11,7 @@
     </description>
     <licence>AGPL</licence>
     <author>EUDAT</author>
-    <version>0.1.4</version>
+    <version>0.1.5</version>
     <dependencies>
         <nextcloud min-version="11" max-version="12" />
         <database>sqlite</database>

@@ -19,6 +19,7 @@ use OCA\B2shareBridge\Controller\PublishController;
 use OCA\B2shareBridge\Controller\ViewController;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
+use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\View\Navigation;
 use OCP\AppFramework\App;
@@ -64,6 +65,14 @@ class Application extends App
                 );
             }
         );
+        $container->registerService(
+            'DepositFileMapper',
+            function () use ($server) {
+                return new DepositFileMapper(
+                    $server->getDatabaseConnection()
+                );
+            }
+        );
 
         $container->registerService(
             'StatusCodes',
@@ -81,6 +90,7 @@ class Application extends App
                     $server->getRequest(),
                     $server->getConfig(),
                     $c->query('DepositStatusMapper'),
+					$c->query('DepositFileMapper'),
                     $c->query('StatusCodes'),
                     $c->query('CurrentUID')
                 );

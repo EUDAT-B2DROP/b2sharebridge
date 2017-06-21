@@ -28,9 +28,8 @@ use OCP\Util;
  */
 class DepositStatus extends Entity
 {
-    protected $fileid;
+  
     protected $status;
-    protected $filename;
     protected $title;
     protected $owner;
     protected $createdAt;
@@ -42,9 +41,7 @@ class DepositStatus extends Entity
      */
     public function __construct()
     {
-        $this->addType('fileid', 'integer');
         $this->addType('status', 'integer');
-        $this->addType('filename', 'string');
         $this->addType('title', 'string');
         $this->addType('owner', 'string');
         $this->addType('createdAt', 'integer');
@@ -62,7 +59,7 @@ class DepositStatus extends Entity
     public function __toString()
     {
         return 'Deposit with id: '. $this->getId().
-        ', fileName:'.$this->getFilename().' and status:'.$this->getStatus().
+        ' and status:'.$this->getStatus().
         ' belonging to user:'.$this->getOwner().' deposited under title'.
         $this->getTitle();
     }
@@ -81,7 +78,6 @@ class DepositStatus extends Entity
             $result = '<a href="'.$this->getUrl()
                 .'" target="_blank">B2SHARE deposit</a>';
         }
-        Util::writeLog("B2sharebridge", "TEST ".$result, 3);
         
         return urldecode($result);
     }

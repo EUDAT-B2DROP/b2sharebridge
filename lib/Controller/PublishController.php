@@ -82,7 +82,6 @@ class PublishController extends Controller
         $param = $this->request->getParams();
         //TODO what if token wasn't set? We couldn't have gotten here
         //but still a check seems in place.
-		
         $_userId = \OC::$server->getUserSession()->getUser()->getUID();
         $token = $this->config->getUserValue($_userId, $this->appName, "token");
 
@@ -138,7 +137,6 @@ class PublishController extends Controller
 			foreach ($ids as $id){
 				$filesize = $filesize + $view->filesize(Filesystem::getPath($id));
 			}
-			Util::writeLog("b2sharebridge","filesize: ".$filesize,3);
             if ($filesize < $allowed_filesize * 1024 * 1024) {
                 $job = new TransferHandler($this->mapper);
                 $fcStatus = new DepositStatus();
@@ -152,7 +150,8 @@ class PublishController extends Controller
 					$depositFile = new DepositFile();
 					$depositFile->setFilename(basename(Filesystem::getPath($id)));
 					$depositFile->setFileid($id);
-					$depositFile->setDepositstatusid($depositId);				
+					$depositFile->setDepositStatusId($depositId->getId());
+					Util::writeLog("b2sharebridge",$depositFile,3);				
 					$this->dfmapper->insert($depositFile);
 				}
             } else {

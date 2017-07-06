@@ -17,6 +17,7 @@ namespace OCA\B2shareBridge\Controller;
 use OC\Files\Filesystem;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
+use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\View\Navigation;
 use OCP\AppFramework\Controller;
@@ -40,6 +41,7 @@ class ViewController extends Controller
     protected $userId;
     protected $statusCodes;
     protected $mapper;
+	protected $fdmapper;
     protected $config;
     protected $cMapper;
     protected $navigation;
@@ -61,6 +63,7 @@ class ViewController extends Controller
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,
+		DepositFileMapper $fdmapper,
         CommunityMapper $cMapper,
         StatusCodes $statusCodes,
         $userId,
@@ -70,6 +73,7 @@ class ViewController extends Controller
         $this->userId = $userId;
         $this->mapper = $mapper;
         $this->cMapper = $cMapper;
+		$this->fdmapper = $fdmapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
         $this->navigation = $navigation;
@@ -114,7 +118,9 @@ class ViewController extends Controller
                     $publications[] = $publication;
             }
         }
-
+		foreach ($publications as $publication){
+			$publication->setFileCount($this->fdmapper->getFileCount($publication->getId()));
+		}
         $params = [
             'user' => $this->userId,
             'publications' => $publications,

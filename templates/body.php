@@ -10,7 +10,7 @@
                     <thead>
                     <tr>
                         <th>Transfer ID</th>
-                        <th>Filename</th>
+                        <th>#Files</th>
                         <th>Title</th>
                         <th>Status</th>
                         <th>Deposit URL</th>
@@ -22,7 +22,7 @@
                     <?php foreach ($_['publications'] as $publication): ?>
                         <tr>
                             <td><?php p($publication->getId()) ?></td>
-                            <td><?php p($publication->getFilename()) ?></td>
+                            <td><?php p($publication->getFileCount()) ?></td>
                             <?php // TODO: echo as user specific timedate ?>
                             <td><?php p($publication->getTitle()) ?></td>
                             <td><?php p($_['statuscodes']->getForNumber($publication->getStatus())) ?></td>

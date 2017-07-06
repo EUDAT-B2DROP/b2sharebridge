@@ -39,7 +39,7 @@ class DepositFile extends Entity
     public function __construct()
     {
 
-        $this->addType('depositstatusid', 'integer');
+        $this->addType('depositStatusId', 'integer');
         $this->addType('fileid', 'integer');
         $this->addType('filename', 'string');
 
@@ -57,7 +57,7 @@ class DepositFile extends Entity
         return 'DepositFile with id: '. $this->getId().
         ', fileId: '.$this->getFileid().
 		' fileName: '.$this->getFilename().
-		' and DepositId:'.$this->getDepositstatusid();
+		' and DepositId:'.$this->getDepositStatusId();
     }
     
 }

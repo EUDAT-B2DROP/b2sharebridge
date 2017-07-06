@@ -37,6 +37,7 @@ class TransferHandler extends QueuedJob
 
     private $_mapper;
     private $_publisher;
+	private $_dfmapper;
 
     /**
      * Create the database mapper
@@ -46,12 +47,14 @@ class TransferHandler extends QueuedJob
      */
     public function __construct(
         DepositStatusMapper $mapper = null,
+		DepositFileMapper $dfmapper = null,
         IPublish $publisher = null
     ) {
-        if ($mapper === null || $publisher === null) {
+        if ($mapper === null || $publisher === null || $dfmapper === null) {
             $this->fixTransferForCron();
         } else {
             $this->_mapper = $mapper;
+			$this->_dfmapper = $dfmapper;
             $this->_publisher = $publisher;
         }
     }
@@ -67,6 +70,9 @@ class TransferHandler extends QueuedJob
         $application = new Application();
         $this->_mapper = $application->getContainer()
             ->query('DepositStatusMapper');
+        $this->_dfmapper = $application->getContainer()
+            ->query('DepositFileMapper');
+        
         $this->_publisher = $application->getContainer()->query('PublishBackend');
     }
 
@@ -95,45 +101,56 @@ class TransferHandler extends QueuedJob
         // get the file transfer object for current Cron
         $fcStatus = $this->_mapper->find($args['transferId']);
         Util::writeLog('b2sharebridge', 'Title: '.$args['title'], 3);
-        $fcStatus->setStatus(2);//status = processing
+        $fcStatus->setStatus(2); //status = processing
         $this->_mapper->update($fcStatus);
         $user = $fcStatus->getOwner();
-        $fileId = $fcStatus->getFileid();
 
-        Filesystem::init($user, '/');
-        $filename = Filesystem::getPath($fileId);
-        $has_access = Filesystem::isReadable($filename);
-        if ($has_access) {
-            $view = Filesystem::getView();
-            // TODO: is it good to take the owncloud fopen?
 
-            $create_result = $this->_publisher->create(
+        $create_result = $this->_publisher->create(
                 $args['token'],
-                urlencode(basename($filename)),
                 $args['community'],
                 $args['open_access'],
                 $args['title']
-            );
-            if ($create_result) {
-                $handle = $view->fopen($filename, 'rb');
-                $size = $view->filesize($filename);
-                $upload_result = $this->_publisher->upload($handle, $size);
-
-                if ($upload_result) {
-                    $fcStatus->setStatus(0);//status = published
-                    $fcStatus->setUrl($create_result);
-                } else {
-                    /**External error: during uploading file*/
-                    $fcStatus->setStatus(3);
-                }
+        );
+        if ($create_result) {
+			$file_upload_link = $this->_publisher->getFileUploadUrlPart();
+			Filesystem::init($user, '/');
+			$view = Filesystem::getView();
+			$files = 
+				$this->_dfmapper->findAllForDeposit($fcStatus->getId());
+			$upload_result = true;
+		
+			foreach ($files as $file){
+				$filename = $file->getFilename();
+				$fileid = $file->getFileid();
+				$path = Filesystem::getPath($fileid);
+				$has_access = Filesystem::isReadable($path);
+				if ($has_access){
+	            	$handle = $view->fopen($filename, 'rb');
+	            	$size = $view->filesize($filename);
+					$upload_url = $file_upload_link."/".urlencode($filename);
+					$upload_url = $upload_url."?access_token=".$args['token'];
+	            	$upload_result = $upload_result && $this->_publisher->upload($upload_url, $handle, $size);					
+				} else {
+	                /**External error: during uploading file*/
+					Util::writeLog("b2share_transferhandler","File not accesable".$file->getFilename(),3);
+	                $fcStatus->setStatus(3);	
+				}
+			}
+            if ($upload_result) {
+                $fcStatus->setStatus(0);//status = published
+                $fcStatus->setUrl($create_result);
             } else {
-                /**External error: during creating deposit*/
-                $fcStatus->setStatus(4);
+                /**External error: during uploading file*/
+				Util::writeLog("b2share_transferhandler","No upload_result",3);
+                $fcStatus->setStatus(3);
             }
         } else {
-            /**Internal error: file not accessible*/
-            $fcStatus->setStatus(5);
+            /**External error: during creating deposit*/
+			Util::writeLog("b2share_transferhandler","No create result",3);
+            $fcStatus->setStatus(4);
         }
+        
         $fcStatus->setUpdatedAt(time());
         $this->_mapper->update($fcStatus);
 

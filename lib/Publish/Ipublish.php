@@ -53,5 +53,5 @@ interface IPublish
      *
      * @return null
      */
-    public function upload($filehandle, $filesize);
+    public function upload($file_upload_url, $filehandle, $filesize);
 }

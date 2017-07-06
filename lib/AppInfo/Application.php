@@ -105,6 +105,7 @@ class Application extends App
                     $c->query('Request'),
                     $server->getConfig(),
                     $c->query('DepositStatusMapper'),
+					$c->query('DepositFileMapper'),
                     $c->query('CommunityMapper'),
                     $c->query('StatusCodes'),
                     $c->query('CurrentUID'),

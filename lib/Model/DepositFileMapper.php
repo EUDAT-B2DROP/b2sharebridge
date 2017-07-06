@@ -17,6 +17,7 @@ namespace OCA\B2shareBridge\Model;
 use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\Mapper;
 use OCP\IDBConnection;
+use OCP\Util;
 
 /**
  * Work on a database table
@@ -93,8 +94,24 @@ class DepositFileMapper extends Mapper
      */
     public function findAllForDeposit($depositId)
     {
-        $sql = 'SELECT * FROM `' . $this->tableName . '` WHERE `depositStatusId` = ?';
+        $sql = 'SELECT * FROM `' . $this->tableName . '` WHERE `deposit_status_id` = ?';
         return $this->findEntities($sql, [$depositId]);
+    }
+	
+    /**
+     * Return file count for a deposit
+     *
+     * @param string $depositId the id of the deposit to search transfers for
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return array(Entities)
+     */
+    public function getFileCount($depositId)
+    {
+        $sql = 'SELECT count(*) FROM `' . $this->tableName . '` WHERE `deposit_status_id` = ?';
+		return $this->execute($sql, [$depositId])->fetchColumn();
     }
 	
     /**

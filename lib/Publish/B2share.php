@@ -52,6 +52,14 @@ class B2share implements Ipublish
         curl_setopt_array($this->curl_client, $defaults);
     }
 
+	/**
+	* get the portion of the file upload URL
+	* filename + access_token still need to be pasted
+	*/
+	public function getFileUploadUrlPart(){
+		return $this->file_upload_url;
+	}
+	
     /**
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
@@ -66,7 +74,6 @@ class B2share implements Ipublish
      */
     public function create(
         $token,
-        $filename,
         $community = "e9b9792e-79fb-4b07-b6b4-b9c2bd06d095",
         $open_access = false,
         $title = "Deposit title"
@@ -85,7 +92,6 @@ class B2share implements Ipublish
                 'open_access' => $b_open_access
             ]
         );
-        Util::writeLog('b2share_cron', "Data: ".$data, 3);
 
         $config = array(
             CURLOPT_URL =>
@@ -106,12 +112,13 @@ class B2share implements Ipublish
             $header_size = curl_getinfo($this->curl_client, CURLINFO_HEADER_SIZE);
             $body = substr($response, $header_size);
             $results = json_decode(utf8_encode($body));
+			Util::writeLog("b2share_publish","Response:".$body." ".$config[CURLOPT_URL],3);
             if (array_key_exists('links', $results)
                 and array_key_exists('self', $results->links)
                 and array_key_exists('files', $results->links)
             ) {
                 $this->file_upload_url
-                    = $results->links->files.'/'.$filename.'?access_token='.$token;
+                    = $results->links->files;
                 return str_replace(
                     'draft',
                     'edit',
@@ -131,14 +138,15 @@ class B2share implements Ipublish
      *
      * @return boolean
      */
-    public function upload($filehandle, $filesize)
+    public function upload($file_upload_url, $filehandle, $filesize)
     {
-        $config = array(
-            CURLOPT_URL => $this->file_upload_url,
+        $config2 = array(
+            CURLOPT_URL => $file_upload_url,
             CURLOPT_INFILE => $filehandle,
             CURLOPT_INFILESIZE => $filesize,
             CURLOPT_BINARYTRANSFER => true,
-            CURLOPT_PUT => true,
+            #CURLOPT_PUT => true,
+			CURLOPT_CUSTOMREQUEST => 'PUT',
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,
             CURLOPT_HEADER => true,
@@ -148,9 +156,10 @@ class B2share implements Ipublish
                 'Content-Type: application/octet-stream'
             )
         );
-        curl_setopt_array($this->curl_client, $config);
+        curl_setopt_array($this->curl_client, $config2);
 
         $response = curl_exec($this->curl_client);
+		Util::writeLog("b2share_cron","PUT URL:".$config2[CURLOPT_URL].", CURL_PUT: ".$config2[CURLOPT_PUT].", ".$response, 3);
         curl_close($this->curl_client);
         if (!$response) {
             return false;

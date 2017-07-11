@@ -112,7 +112,6 @@ class B2share implements Ipublish
             $header_size = curl_getinfo($this->curl_client, CURLINFO_HEADER_SIZE);
             $body = substr($response, $header_size);
             $results = json_decode(utf8_encode($body));
-			Util::writeLog("b2share_publish","Response:".$body." ".$config[CURLOPT_URL],3);
             if (array_key_exists('links', $results)
                 and array_key_exists('self', $results->links)
                 and array_key_exists('files', $results->links)
@@ -140,26 +139,27 @@ class B2share implements Ipublish
      */
     public function upload($file_upload_url, $filehandle, $filesize)
     {
+		$this->curl_client = curl_init();
+
         $config2 = array(
             CURLOPT_URL => $file_upload_url,
             CURLOPT_INFILE => $filehandle,
             CURLOPT_INFILESIZE => $filesize,
             CURLOPT_BINARYTRANSFER => true,
-            #CURLOPT_PUT => true,
-			CURLOPT_CUSTOMREQUEST => 'PUT',
+            CURLOPT_PUT => true,
+			#CURLOPT_CUSTOMREQUEST => 'PUT',
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,
             CURLOPT_HEADER => true,
             CURLINFO_HEADER_OUT => true,
             CURLOPT_HTTPHEADER => array(
-        'Accept:application/json',
+        		'Accept:application/json',
                 'Content-Type: application/octet-stream'
             )
         );
         curl_setopt_array($this->curl_client, $config2);
 
         $response = curl_exec($this->curl_client);
-		Util::writeLog("b2share_cron","PUT URL:".$config2[CURLOPT_URL].", CURL_PUT: ".$config2[CURLOPT_PUT].", ".$response, 3);
         curl_close($this->curl_client);
         if (!$response) {
             return false;

@@ -100,7 +100,6 @@ class TransferHandler extends QueuedJob
         }
         // get the file transfer object for current Cron
         $fcStatus = $this->_mapper->find($args['transferId']);
-        Util::writeLog('b2sharebridge', 'Title: '.$args['title'], 3);
         $fcStatus->setStatus(2); //status = processing
         $this->_mapper->update($fcStatus);
         $user = $fcStatus->getOwner();
@@ -126,8 +125,8 @@ class TransferHandler extends QueuedJob
 				$path = Filesystem::getPath($fileid);
 				$has_access = Filesystem::isReadable($path);
 				if ($has_access){
-	            	$handle = $view->fopen($filename, 'rb');
-	            	$size = $view->filesize($filename);
+	            	$handle = $view->fopen($path, 'rb');
+					$size = $view->filesize($path);
 					$upload_url = $file_upload_link."/".urlencode($filename);
 					$upload_url = $upload_url."?access_token=".$args['token'];
 	            	$upload_result = $upload_result && $this->_publisher->upload($upload_url, $handle, $size);					
@@ -150,10 +149,9 @@ class TransferHandler extends QueuedJob
 			Util::writeLog("b2share_transferhandler","No create result",3);
             $fcStatus->setStatus(4);
         }
-        
         $fcStatus->setUpdatedAt(time());
         $this->_mapper->update($fcStatus);
-
+        Util::writeLog("b2share_transferhandler","Job completed, depositStatusId: ".$fcStatus->getId());
 
         /*
          *

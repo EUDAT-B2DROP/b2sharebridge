@@ -94,10 +94,12 @@ class DepositFileMapper extends Mapper
      */
     public function findAllForDeposit($depositId)
     {
-        $sql = 'SELECT * FROM `' . $this->tableName . '` WHERE `deposit_status_id` = ?';
+        $sql = 'SELECT * FROM `' 
+            . $this->tableName 
+            . '` WHERE `deposit_status_id` = ?';
         return $this->findEntities($sql, [$depositId]);
     }
-	
+    
     /**
      * Return file count for a deposit
      *
@@ -110,27 +112,12 @@ class DepositFileMapper extends Mapper
      */
     public function getFileCount($depositId)
     {
-        $sql = 'SELECT count(*) FROM `' . $this->tableName . '` WHERE `deposit_status_id` = ?';
-		return $this->execute($sql, [$depositId])->fetchColumn();
-    }
-	
-    /**
-     * Return the number of files belonging to a given deposit
-     *
-     * @param string  $deposit       name of the user to search transfers for
-     *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
-     *
-     * @return int number files in a deposit
-     */
-    public function findCountForUser($depositId)
-    {
-        $sql = 'SELECT COUNT(*) FROM `' . $this->tableName
-            . '` WHERE depositStatusId = ?';
+        $sql = 'SELECT count(*) FROM `' 
+            . $this->tableName 
+            . '` WHERE `deposit_status_id` = ?';
         return $this->execute($sql, [$depositId])->fetchColumn();
     }
-
+    
 
   
 }

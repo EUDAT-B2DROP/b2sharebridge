@@ -41,7 +41,7 @@ class ViewController extends Controller
     protected $userId;
     protected $statusCodes;
     protected $mapper;
-	protected $fdmapper;
+    protected $fdmapper;
     protected $config;
     protected $cMapper;
     protected $navigation;
@@ -53,6 +53,7 @@ class ViewController extends Controller
      * @param IRequest            $request     request object
      * @param IConfig             $config      config object
      * @param DepositStatusMapper $mapper      whatever
+     * @param DepositFileMapper   $fdmapper    ORM for DepositFile
      * @param CommunityMapper     $cMapper     a community mapper
      * @param StatusCodes         $statusCodes whatever
      * @param string              $userId      userid
@@ -63,7 +64,7 @@ class ViewController extends Controller
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,
-		DepositFileMapper $fdmapper,
+        DepositFileMapper $fdmapper,
         CommunityMapper $cMapper,
         StatusCodes $statusCodes,
         $userId,
@@ -73,7 +74,7 @@ class ViewController extends Controller
         $this->userId = $userId;
         $this->mapper = $mapper;
         $this->cMapper = $cMapper;
-		$this->fdmapper = $fdmapper;
+        $this->fdmapper = $fdmapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
         $this->navigation = $navigation;
@@ -118,9 +119,11 @@ class ViewController extends Controller
                     $publications[] = $publication;
             }
         }
-		foreach ($publications as $publication){
-			$publication->setFileCount($this->fdmapper->getFileCount($publication->getId()));
-		}
+        foreach ($publications as $publication) {
+            $publication->setFileCount(
+                $this->fdmapper->getFileCount($publication->getId())
+            );
+        }
         $params = [
             'user' => $this->userId,
             'publications' => $publications,

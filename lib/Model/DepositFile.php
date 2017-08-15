@@ -29,7 +29,7 @@ use OCP\Util;
 class DepositFile extends Entity
 {
 
-	protected $depositStatusId;
+    protected $depositStatusId;
     protected $fileid;
     protected $filename;
     
@@ -56,8 +56,8 @@ class DepositFile extends Entity
     {
         return 'DepositFile with id: '. $this->getId().
         ', fileId: '.$this->getFileid().
-		' fileName: '.$this->getFilename().
-		' and DepositId:'.$this->getDepositStatusId();
+        ' fileName: '.$this->getFilename().
+        ' and DepositId:'.$this->getDepositStatusId();
     }
     
 }

@@ -1,5 +1,5 @@
 
-(function() {
+(function () {
     
     OCA.B2shareBridge = OCA.B2shareBridge || {};
 
@@ -12,7 +12,7 @@
          *
          * @param {OCA.Files.FileList} fileList file list to be extended
          */
-        attach: function(fileList) {
+        attach: function (fileList) {
             if (fileList.id === 'trashbin' || fileList.id === 'files.public') {
                 return;
             }
@@ -25,7 +25,7 @@
                     mime: 'all',
                     permissions: OC.PERMISSION_READ,
                     icon: OC.imagePath('b2sharebridge', 'filelisticon'),
-                    actionHandler: function(fileName) {
+                    actionHandler: function (fileName) {
                         fileList.showDetailsView(fileName, 'b2shareBridgeTabView');
                     },
                 }

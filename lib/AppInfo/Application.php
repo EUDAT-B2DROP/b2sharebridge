@@ -26,7 +26,6 @@ use OCP\AppFramework\App;
 use OCP\IContainer;
 use OCP\Util;
 
-
 /**
  * Implement a ownCloud Application for our b2sharebridge
  *
@@ -90,7 +89,7 @@ class Application extends App
                     $server->getRequest(),
                     $server->getConfig(),
                     $c->query('DepositStatusMapper'),
-					$c->query('DepositFileMapper'),
+                    $c->query('DepositFileMapper'),
                     $c->query('StatusCodes'),
                     $c->query('CurrentUID')
                 );
@@ -105,7 +104,7 @@ class Application extends App
                     $c->query('Request'),
                     $server->getConfig(),
                     $c->query('DepositStatusMapper'),
-					$c->query('DepositFileMapper'),
+                    $c->query('DepositFileMapper'),
                     $c->query('CommunityMapper'),
                     $c->query('StatusCodes'),
                     $c->query('CurrentUID'),

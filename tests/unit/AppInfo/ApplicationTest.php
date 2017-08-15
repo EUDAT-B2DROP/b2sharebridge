@@ -17,24 +17,32 @@ use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Controller\PublishController;
 use PHPUnit\Framework\TestCase;
 
-class ApplicationTest extends TestCase  {
-    /** @var Application */
+class ApplicationTest extends TestCase
+{
+    /**
+     * @var Application 
+     */
     protected $app;
-    /** @var \OCP\AppFramework\IAppContainer */
+    /**
+     * @var \OCP\AppFramework\IAppContainer 
+     */
     protected $container;
 
-    protected function setUp() {
+    protected function setUp() 
+    {
         parent::setUp();
         $this->app = new Application();
         $this->container = $this->app->getContainer();
     }
 
-    public function testContainerAppName() {
+    public function testContainerAppName() 
+    {
         $this->app = new Application();
         $this->assertEquals('b2sharebridge', $this->container->getAppName());
     }
 
-    public function queryData() {
+    public function queryData() 
+    {
         return [
             ['PublishController', PublishController::class],
         ];
@@ -46,7 +54,8 @@ class ApplicationTest extends TestCase  {
      * @param string $service
      * @param string $expected
      */
-    public function testContainerQuery($service, $expected = null) {
+    public function testContainerQuery($service, $expected = null) 
+    {
         if ($expected === null) {
             $expected = $service;
         }

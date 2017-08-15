@@ -52,20 +52,22 @@ class B2share implements Ipublish
         curl_setopt_array($this->curl_client, $defaults);
     }
 
-	/**
-	* get the portion of the file upload URL
-	* filename + access_token still need to be pasted
-	*/
-	public function getFileUploadUrlPart(){
-		return $this->file_upload_url;
-	}
-	
+    /**
+     * Get the portion of the file upload URL
+     * filename + access_token still need to be pasted
+     * 
+     * @return the file_upload_url for the files bucket
+     */
+    public function getFileUploadUrlPart()
+    {
+        return $this->file_upload_url;
+    }
+    
     /**
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
      * @param string  $token       users access token
-     * @param string  $filename    local filename of file that should be submitted
      * @param string  $community   id of community metadata schema, defaults to EUDAT
      * @param boolean $open_access publish as open access, defaults to false
      * @param string  $title       actual title of the deposit
@@ -132,14 +134,15 @@ class B2share implements Ipublish
     /**
      * Create upload object but do not the upload here
      *
-     * @param string $filehandle file handle
-     * @param string $filesize   local filename of file that should be submitted
+     * @param string $file_upload_url the upload_url for the files bucket
+     * @param string $filehandle      file handle
+     * @param string $filesize        local filename of file that should be submitted
      *
      * @return boolean
      */
     public function upload($file_upload_url, $filehandle, $filesize)
     {
-		$this->curl_client = curl_init();
+        $this->curl_client = curl_init();
 
         $config2 = array(
             CURLOPT_URL => $file_upload_url,
@@ -147,13 +150,13 @@ class B2share implements Ipublish
             CURLOPT_INFILESIZE => $filesize,
             CURLOPT_BINARYTRANSFER => true,
             CURLOPT_PUT => true,
-			#CURLOPT_CUSTOMREQUEST => 'PUT',
+        // CURLOPT_CUSTOMREQUEST => 'PUT',
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,
             CURLOPT_HEADER => true,
             CURLINFO_HEADER_OUT => true,
             CURLOPT_HTTPHEADER => array(
-        		'Accept:application/json',
+                'Accept:application/json',
                 'Content-Type: application/octet-stream'
             )
         );

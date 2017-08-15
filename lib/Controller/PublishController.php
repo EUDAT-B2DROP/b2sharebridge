@@ -40,7 +40,7 @@ class PublishController extends Controller
 {
     protected $config;
     protected $mapper;
-	protected $dfmapper;
+    protected $dfmapper;
     protected $statusCodes;
     protected $userId;
 
@@ -51,6 +51,7 @@ class PublishController extends Controller
      * @param IRequest            $request     request object
      * @param IConfig             $config      config object
      * @param DepositStatusMapper $mapper      whatever
+     * @param DepositFileMapper   $dfmapper    ORM for DepositFile objects
      * @param StatusCodes         $statusCodes whatever
      * @param string              $userId      userid
      */
@@ -59,14 +60,14 @@ class PublishController extends Controller
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,
-		DepositFileMapper $dfmapper,
+        DepositFileMapper $dfmapper,
         StatusCodes $statusCodes,
         string $userId
     ) {
         parent::__construct($appName, $request);
         $this->userId = $userId;
         $this->mapper = $mapper;
-		$this->dfmapper = $dfmapper;
+        $this->dfmapper = $dfmapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
     }
@@ -102,7 +103,7 @@ class PublishController extends Controller
         if (!is_string($token)) {
             $error = 'Problems while parsing publishToken';
         }
-		
+        
         if (($error)) {
             Util::writeLog('b2sharebridge', $error, 3);
             return new JSONResponse(
@@ -133,10 +134,10 @@ class PublishController extends Controller
         if ($active_uploads < $allowed_uploads) {
             Filesystem::init($this->userId, '/');
             $view = Filesystem::getView();
-			$filesize = 0;
-			foreach ($ids as $id){
-				$filesize = $filesize + $view->filesize(Filesystem::getPath($id));
-			}
+            $filesize = 0;
+            foreach ($ids as $id) {
+                $filesize = $filesize + $view->filesize(Filesystem::getPath($id));
+            }
             if ($filesize < $allowed_filesize * 1024 * 1024) {
                 $job = new TransferHandler($this->mapper);
                 $fcStatus = new DepositStatus();
@@ -146,14 +147,14 @@ class PublishController extends Controller
                 $fcStatus->setUpdatedAt(time());
                 $fcStatus->setTitle($title);
                 $depositId = $this->mapper->insert($fcStatus);
-				foreach ($ids as $id){ 
-					$depositFile = new DepositFile();
-					$depositFile->setFilename(basename(Filesystem::getPath($id)));
-					$depositFile->setFileid($id);
-					$depositFile->setDepositStatusId($depositId->getId());
-					Util::writeLog("b2sharebridge",$depositFile,3);				
-					$this->dfmapper->insert($depositFile);
-				}
+                foreach ($ids as $id) { 
+                    $depositFile = new DepositFile();
+                    $depositFile->setFilename(basename(Filesystem::getPath($id)));
+                    $depositFile->setFileid($id);
+                    $depositFile->setDepositStatusId($depositId->getId());
+                    Util::writeLog("b2sharebridge", $depositFile, 3);                
+                    $this->dfmapper->insert($depositFile);
+                }
             } else {
                 return new JSONResponse(
                     [

@@ -35,9 +35,9 @@ class DepositStatus extends Entity
     protected $createdAt;
     protected $updatedAt;
     protected $url;
-	protected $fileMapper;
-	protected $fileCount;
-	
+    protected $fileMapper;
+    protected $fileCount;
+    
     /**
      * Creates the actual database entity
      */
@@ -49,7 +49,7 @@ class DepositStatus extends Entity
         $this->addType('createdAt', 'integer');
         $this->addType('updatedAt', 'integer');
         $this->addType('url', 'string');
-		$this->addType('fileCount','integer');
+        $this->addType('fileCount', 'integer');
     }
 
 
@@ -68,7 +68,7 @@ class DepositStatus extends Entity
     }
     
 
-	
+    
     /**
      * Return URL only if status = PUBLISHED
      *

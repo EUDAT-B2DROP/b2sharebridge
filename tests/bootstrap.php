@@ -30,7 +30,7 @@ require_once __DIR__.'/../../../lib/base.php';
 \OC_App::loadApp('b2sharebridge');
 
 if(!class_exists('\PHPUnit\Framework\TestCase')) {
-    require_once 'PHPUnit/Autoload.php';
+    include_once 'PHPUnit/Autoload.php';
 }
 
 OC_Hook::clear();

@@ -108,6 +108,7 @@ class ViewController extends Controller
                 ) as $publication) {
                     $publications[] = $publication;
             }
+     
         } else {
             foreach (
                 array_reverse(

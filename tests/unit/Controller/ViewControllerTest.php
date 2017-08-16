@@ -27,7 +27,7 @@ class ViewControllerTest extends TestCase
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();
         $deposit_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
-            ->setMethods(['findAllForUser'])
+            ->setMethods(['findAllForUser','findAllForUserAndStateString'])
             ->disableOriginalConstructor()
             ->getMock();
         $deposit_file_mapper =
@@ -42,6 +42,7 @@ class ViewControllerTest extends TestCase
             ->getMock();
 
         $this->navigation = $this->getMockBuilder('OCA\B2shareBridge\View\Navigation')
+            ->setMethods(['getTemplate'])
             ->disableOriginalConstructor()
             ->getMock();
 

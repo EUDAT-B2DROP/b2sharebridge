@@ -37,6 +37,7 @@ class DepositStatus extends Entity
     protected $url;
     protected $fileMapper;
     protected $fileCount;
+    protected $errorMessage;
     
     /**
      * Creates the actual database entity
@@ -50,6 +51,7 @@ class DepositStatus extends Entity
         $this->addType('updatedAt', 'integer');
         $this->addType('url', 'string');
         $this->addType('fileCount', 'integer');
+        $this->addType('errorMessage','string');
     }
 
 

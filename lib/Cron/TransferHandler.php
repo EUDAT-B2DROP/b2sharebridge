@@ -105,13 +105,13 @@ class TransferHandler extends QueuedJob
         $this->_mapper->update($fcStatus);
         $user = $fcStatus->getOwner();
 
-
         $create_result = $this->_publisher->create(
             $args['token'],
             $args['community'],
             $args['open_access'],
             $args['title']
         );
+        
         if ($create_result) {
             $file_upload_link = $this->_publisher->getFileUploadUrlPart();
             Filesystem::init($user, '/');
@@ -159,6 +159,7 @@ class TransferHandler extends QueuedJob
                 "b2share_transferhandler", 
                 "No create result".$upload_url." ".$handle, 3
             );
+            $fcStatus->setErrorMessage($this->_publisher->getErrorMessage());
             $fcStatus->setStatus(4);
         }
         $fcStatus->setUpdatedAt(time());

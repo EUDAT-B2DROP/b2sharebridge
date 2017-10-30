@@ -48,6 +48,12 @@
                 <default></default>
                 <notnull>true</notnull>
             </field>
+            <field>
+                <name>error_message</name>
+                <type>text</type>
+                <default></default>
+                <notnull>true</notnull>
+            </field>
         </declaration>
     </table>
     <table>

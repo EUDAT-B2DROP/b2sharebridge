@@ -156,6 +156,7 @@ class PublishController extends Controller
                     $this->dfmapper->insert($depositFile);
                 }
             } else {
+                
                 return new JSONResponse(
                     [
                         'message' => 'We currently only support 
@@ -175,11 +176,6 @@ class PublishController extends Controller
         }
         // create the actual transfer Cron in the database
 
-        /* TODO: we should add a configuration setting for admins to
-         * configure the maximum number of uploads per user and a max filesize.
-         *both to avoid DoS
-         *
-         */
 
         // register transfer cron
         \OC::$server->getJobList()->add(

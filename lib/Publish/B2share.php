@@ -29,6 +29,7 @@ class B2share implements Ipublish
     protected $api_endpoint;
     protected $curl_client;
     protected $file_upload_url;
+    protected $error_message;
 
     /**
      * Create object for actual upload
@@ -62,6 +63,17 @@ class B2share implements Ipublish
     {
         return $this->file_upload_url;
     }
+    
+    /**
+     * Get the error message from HTTP service
+     * 
+     * @return the error message from the http interaction
+     */
+    public function getErrorMessage()
+    {
+        return $this->error_message;
+    }
+    
     
     /**
      * Publish to url via post, use uuid for filename. Use a token and set expect
@@ -126,6 +138,12 @@ class B2share implements Ipublish
                     str_replace('/api', '', $results->links->self)
                 );
             } else {
+                $this->error_message = "Something went wrong in uploading.";
+                if (array_key_exists('status',$results)){
+                    if ($results->status==403){
+                        $this->error_message = "403 - Authorization Required";
+                    }
+                }
                 return false;
             }
         }

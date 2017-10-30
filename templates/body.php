@@ -1,3 +1,5 @@
+
+
 <div id="app" class="b2sharebridge">
 
     <?php $_['appNavigation']->printPage(); ?>
@@ -27,7 +29,7 @@
                             <td><?php p($publication->getTitle()) ?></td>
                             <td><?php p($_['statuscodes']->getForNumber($publication->getStatus())) ?></td>
                             <td><?php if ($publication->getStatus() > 0) : ?>
-                                    N/A
+                                    ERROR : <?php  p($publication->getErrorMessage()) ?>
                                 <?php else: ?>
                                     <a href="<?php p($publication->getUrl()) ?>" target="_blank">Deposit URL</a>
                                 <?php endif; ?>

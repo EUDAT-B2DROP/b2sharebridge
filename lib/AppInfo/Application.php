@@ -172,6 +172,16 @@ class Application extends App
         return;
     }
 
+    /**
+     * Register Jobs
+     *
+     * @return null
+     */
+    public function registerJobs()
+    {
+                   \OCP\Backgroundjob::registerJob('OCA\B2shareBridge\Cron\B2shareCommunityFetcher');
+        return;
+    }
 
     /**
      * Load additional javascript files

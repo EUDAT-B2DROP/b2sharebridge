@@ -50,6 +50,7 @@ class B2shareCommunityFetcher extends Job
             $this->config = $config;
             $this->logger = $logger;
         }
+
     }
 
     /**
@@ -70,7 +71,7 @@ class B2shareCommunityFetcher extends Job
      *
      * @return null
      */
-    public function run($args)
+    protected function run($args)
     {
         $b2share_communities_url = $this->config->getAppValue(
             'b2sharebridge',

@@ -51,10 +51,8 @@ class DepositStatus extends Entity
         $this->addType('updatedAt', 'integer');
         $this->addType('url', 'string');
         $this->addType('fileCount', 'integer');
-        $this->addType('errorMessage','string');
+        $this->addType('errorMessage', 'string');
     }
-
-
 
     /**
      * Get string representation

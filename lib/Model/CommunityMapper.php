@@ -71,7 +71,7 @@ class CommunityMapper extends Mapper
         return $communities_b2share;
     }
 
-    /*
+    /**
      * @param string $uid internal uid of the Community
      * @return Community
      * @throws ClientNotFoundException
@@ -86,13 +86,13 @@ class CommunityMapper extends Mapper
         $result = $qb->execute();
         $row = $result->fetch();
         $result->closeCursor();
-        if($row === false) {
+        if ($row === false) {
             throw new CommunityNotFoundException();
         }
         return Client::fromRow($row);
     }
 
-    /*
+    /**
      * Return all communities as aray with id and name
      * @param string $id internal id of the Community
      * @return Communities

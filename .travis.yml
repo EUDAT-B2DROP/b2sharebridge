@@ -5,8 +5,8 @@ php:
   - 7.1
 
 env:
-  - DB=sqlite BRANCH=stable11
-  - DB=mysql BRANCH=stable11
+  - DB=sqlite BRANCH=stable12
+  - DB=mysql BRANCH=stable12
 
 before_install:
   # install core

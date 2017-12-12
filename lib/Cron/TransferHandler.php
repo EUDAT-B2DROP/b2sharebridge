@@ -136,7 +136,9 @@ class TransferHandler extends QueuedJob
                             $upload_url, $handle, $size
                         );                    
                 } else {
-                          /**External error: during uploading file*/
+                    /*
+                     * External error: during uploading file
+                     */
                     Util::writeLog(
                         "b2share_transferhandler", 
                         "File not accesable".$file->getFilename(), 
@@ -149,12 +151,16 @@ class TransferHandler extends QueuedJob
                 $fcStatus->setStatus(0);//status = published
                 $fcStatus->setUrl($create_result);
             } else {
-                /**External error: during uploading file*/
+                /*
+                 * External error: during uploading file
+                 */
                 Util::writeLog("b2share_transferhandler", "No upload_result", 3);
                 $fcStatus->setStatus(3);
             }
         } else {
-            /**External error: during creating deposit*/
+            /*
+             * External error: during creating deposit
+             */
             Util::writeLog(
                 "b2share_transferhandler", 
                 "No create result".$upload_url." ".$handle, 3

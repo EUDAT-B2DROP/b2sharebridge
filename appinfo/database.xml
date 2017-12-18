@@ -5,7 +5,7 @@
     <overwrite>false</overwrite>
     <charset>utf8</charset>
     <table>
-        <name>*dbprefix*b2sharebridge_deposit_status</name>
+        <name>*dbprefix*b2sharebridge_status</name>
         <declaration>
             <field>
                 <name>id</name>
@@ -74,7 +74,7 @@
         </declaration>
     </table>
 	<table>
-		<name>*dbprefix*b2sharebridge_deposit_file</name>
+		<name>*dbprefix*b2sharebridge_file</name>
 		<declaration>
             <field>
                 <name>id</name>

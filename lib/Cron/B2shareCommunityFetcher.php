@@ -102,7 +102,7 @@ class B2shareCommunityFetcher extends Job
                 ' and restricted_submission: '. $community['restricted_submission'],
                 ['app' => 'b2sharebridge']
             );
-            if ($community['restricted_submission'] != '1') {
+            if ($community['restricted_submission'] !== '1') {
                 $communities_b2share[$community['id']] = $community['name'];    
             }
 

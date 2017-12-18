@@ -189,7 +189,9 @@ class Application extends App
      */
     public function registerJobs()
     {
-                   \OCP\BackgroundJob::registerJob('OCA\B2shareBridge\Cron\B2shareCommunityFetcher');
+        \OCP\BackgroundJob::registerJob(
+            'OCA\B2shareBridge\Cron\B2shareCommunityFetcher'
+        );
         return;
     }
 

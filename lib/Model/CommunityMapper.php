@@ -85,7 +85,11 @@ class CommunityMapper extends Mapper
         $qb
             ->select('*')
             ->from($this->tableName)
-            ->where($qb->expr()->eq('id', $qb->createNamedParameter($uid, IQueryBuilder::PARAM_INT)));
+            ->where(
+                $qb->expr()->eq(
+                    'id', $qb->createNamedParameter($uid, IQueryBuilder::PARAM_INT)
+                )
+            );
         $result = $qb->execute();
         $row = $result->fetch();
         $result->closeCursor();

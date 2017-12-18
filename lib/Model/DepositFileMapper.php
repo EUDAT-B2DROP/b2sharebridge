@@ -40,7 +40,7 @@ class DepositFileMapper extends Mapper
     {
         parent::__construct(
             $db,
-            'b2sharebridge_deposit_file',
+            'b2sharebridge_file',
             '\OCA\B2shareBridge\Model\DepositFile'
         );
     }

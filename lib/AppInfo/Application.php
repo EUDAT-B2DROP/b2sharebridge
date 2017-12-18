@@ -190,10 +190,10 @@ class Application extends App
      */
     public function registerJobs()
     {
-        #\OCP\BackgroundJob::registerJob(
-        #    'OCA\B2shareBridge\Cron\B2shareCommunityFetcher'
-        #);
-		\OC::$server->getJoblist()->add(B2ShareCommunityFetcher::class);
+        //\OCP\BackgroundJob::registerJob(
+        //    'OCA\B2shareBridge\Cron\B2shareCommunityFetcher'
+        //);
+        \OC::$server->getJoblist()->add(B2ShareCommunityFetcher::class);
         return;
     }
 

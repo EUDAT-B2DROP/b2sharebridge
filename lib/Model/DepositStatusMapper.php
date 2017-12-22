@@ -39,7 +39,7 @@ class DepositStatusMapper extends Mapper
     {
         parent::__construct(
             $db,
-            'b2sharebridge_deposit_status',
+            'b2sharebridge_status',
             '\OCA\B2shareBridge\Model\DepositStatus'
         );
     }

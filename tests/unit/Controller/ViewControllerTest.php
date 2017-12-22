@@ -27,8 +27,14 @@ class ViewControllerTest extends TestCase
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();
         $deposit_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
+            ->setMethods(['findAllForUser','findAllForUserAndStateString'])
             ->disableOriginalConstructor()
             ->getMock();
+        $deposit_file_mapper =
+            $this->getMockBuilder('OCA\B2shareBridge\Model\DepositFileMapper')
+                ->disableOriginalConstructor()
+                    ->getMock();
+        
         $community_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\CommunityMapper')
             ->disableOriginalConstructor()
             ->getMock();
@@ -36,18 +42,20 @@ class ViewControllerTest extends TestCase
             ->getMock();
 
         $this->navigation = $this->getMockBuilder('OCA\B2shareBridge\View\Navigation')
+            ->setMethods(['getTemplate'])
             ->disableOriginalConstructor()
             ->getMock();
 
         $deposit_mapper->method('findAllForUser')
             ->willReturn([]);
+        
         $deposit_mapper->method('findAllForUserAndStateString')
             ->willReturn([]);
         $this->navigation->method('getTemplate')
-            ->willReturn($this->returnValue('OCP\AppFramework\Http\TemplateResponse'));
-
+    ->willReturn($this->returnValue('OCP\AppFramework\Http\TemplateResponse'));
         $this->controller = new ViewController(
-            'b2sharebridge', $request, $config, $deposit_mapper, $community_mapper, $this->statusCodes, $this->userId, $this->navigation
+            'b2sharebridge', $request, $config, $deposit_mapper,
+            $deposit_file_mapper, $community_mapper, $this->statusCodes, $this->userId, $this->navigation
         );
     }
 

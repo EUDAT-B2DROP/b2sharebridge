@@ -17,7 +17,9 @@ namespace OCA\B2shareBridge\Controller;
 use OC\Files\Filesystem;
 use OCA\B2shareBridge\Cron\TransferHandler;
 use OCA\B2shareBridge\Model\DepositStatus;
+use OCA\B2shareBridge\Model\DepositFile;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
+use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
@@ -38,6 +40,7 @@ class PublishController extends Controller
 {
     protected $config;
     protected $mapper;
+    protected $dfmapper;
     protected $statusCodes;
     protected $userId;
 
@@ -48,6 +51,7 @@ class PublishController extends Controller
      * @param IRequest            $request     request object
      * @param IConfig             $config      config object
      * @param DepositStatusMapper $mapper      whatever
+     * @param DepositFileMapper   $dfmapper    ORM for DepositFile objects
      * @param StatusCodes         $statusCodes whatever
      * @param string              $userId      userid
      */
@@ -56,12 +60,14 @@ class PublishController extends Controller
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,
+        DepositFileMapper $dfmapper,
         StatusCodes $statusCodes,
         string $userId
     ) {
         parent::__construct($appName, $request);
         $this->userId = $userId;
         $this->mapper = $mapper;
+        $this->dfmapper = $dfmapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
     }
@@ -85,19 +91,19 @@ class PublishController extends Controller
             $error = 'No user configured for session';
         }
         if (!is_array($param)
-            || !array_key_exists('id', $param)
+            || !array_key_exists('ids', $param)
             || !array_key_exists('community', $param)
         ) {
             $error = 'Parameters gotten from UI are no array or they are missing';
         }
-        $id = (int) $param['id'];
+        $ids = $param['ids'];
         $community = $param['community'];
         $open_access = $param['open_access'];
         $title = $param['title'];
-        if (!is_int($id) || !is_string($token)) {
-            $error = 'Problems while parsing fileid or publishToken';
+        if (!is_string($token)) {
+            $error = 'Problems while parsing publishToken';
         }
-
+        
         if (($error)) {
             Util::writeLog('b2sharebridge', $error, 3);
             return new JSONResponse(
@@ -128,20 +134,29 @@ class PublishController extends Controller
         if ($active_uploads < $allowed_uploads) {
             Filesystem::init($this->userId, '/');
             $view = Filesystem::getView();
-            $filesize = $view->filesize(Filesystem::getPath($id));
+            $filesize = 0;
+            foreach ($ids as $id) {
+                $filesize = $filesize + $view->filesize(Filesystem::getPath($id));
+            }
             if ($filesize < $allowed_filesize * 1024 * 1024) {
-                $fileName = basename(Filesystem::getPath($id));
                 $job = new TransferHandler($this->mapper);
                 $fcStatus = new DepositStatus();
-                $fcStatus->setFileid($id);
                 $fcStatus->setOwner($this->userId);
                 $fcStatus->setStatus(1);
                 $fcStatus->setCreatedAt(time());
                 $fcStatus->setUpdatedAt(time());
-                $fcStatus->setFilename($fileName);
                 $fcStatus->setTitle($title);
-                $this->mapper->insert($fcStatus);
+                $depositId = $this->mapper->insert($fcStatus);
+                foreach ($ids as $id) { 
+                    $depositFile = new DepositFile();
+                    $depositFile->setFilename(basename(Filesystem::getPath($id)));
+                    $depositFile->setFileid($id);
+                    $depositFile->setDepositStatusId($depositId->getId());
+                    Util::writeLog("b2sharebridge", $depositFile, 3);                
+                    $this->dfmapper->insert($depositFile);
+                }
             } else {
+                
                 return new JSONResponse(
                     [
                         'message' => 'We currently only support 
@@ -161,11 +176,6 @@ class PublishController extends Controller
         }
         // create the actual transfer Cron in the database
 
-        /* TODO: we should add a configuration setting for admins to
-         * configure the maximum number of uploads per user and a max filesize.
-         *both to avoid DoS
-         *
-         */
 
         // register transfer cron
         \OC::$server->getJobList()->add(

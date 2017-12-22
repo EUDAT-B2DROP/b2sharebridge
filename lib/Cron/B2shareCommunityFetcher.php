@@ -98,10 +98,14 @@ class B2shareCommunityFetcher extends Job
         foreach ($communities_fetched as $community) {
             $this->logger->debug(
                 'Community with id: ' . $community['id'] .
-                ' and name: ' . $community['name'] . ' fetched',
+                ' and name: ' . $community['name'] . ' fetched' .
+                ' and restricted_submission: '. $community['restricted_submission'],
                 ['app' => 'b2sharebridge']
             );
-            $communities_b2share[$community['id']] = $community['name'];
+            if ($community['restricted_submission'] !== '1') {
+                $communities_b2share[$community['id']] = $community['name'];    
+            }
+
         }
 
         $c_mapper = new CommunityMapper(\OC::$server->getDatabaseConnection());
@@ -121,7 +125,7 @@ class B2shareCommunityFetcher extends Job
                 ' and name: ' . $name . ' after synchronization with b2share',
                 ['app' => 'b2sharebridge']
             );
-            $c_mapper->delete($id);
+            $c_mapper->deleteCommunity($id);
         }
 
         // do we need to add a community?

@@ -15,9 +15,11 @@ namespace OCA\B2shareBridge\Tests\AppInfo;
 
 use PHPUnit\Framework\TestCase;
 
-class Test extends TestCase  {
-    public function testFile() {
-        $routes = require_once __DIR__ . '/../../../appinfo/routes.php';
+class Test extends TestCase
+{
+    public function testFile() 
+    {
+        $routes = include_once __DIR__ . '/../../../appinfo/routes.php';
 
 
         $expected = [

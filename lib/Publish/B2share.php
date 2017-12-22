@@ -29,6 +29,7 @@ class B2share implements Ipublish
     protected $api_endpoint;
     protected $curl_client;
     protected $file_upload_url;
+    protected $error_message;
 
     /**
      * Create object for actual upload
@@ -53,11 +54,32 @@ class B2share implements Ipublish
     }
 
     /**
+     * Get the portion of the file upload URL
+     * filename + access_token still need to be pasted
+     * 
+     * @return the file_upload_url for the files bucket
+     */
+    public function getFileUploadUrlPart()
+    {
+        return $this->file_upload_url;
+    }
+    
+    /**
+     * Get the error message from HTTP service
+     * 
+     * @return the error message from the http interaction
+     */
+    public function getErrorMessage()
+    {
+        return $this->error_message;
+    }
+    
+    
+    /**
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
      * @param string  $token       users access token
-     * @param string  $filename    local filename of file that should be submitted
      * @param string  $community   id of community metadata schema, defaults to EUDAT
      * @param boolean $open_access publish as open access, defaults to false
      * @param string  $title       actual title of the deposit
@@ -66,7 +88,6 @@ class B2share implements Ipublish
      */
     public function create(
         $token,
-        $filename,
         $community = "e9b9792e-79fb-4b07-b6b4-b9c2bd06d095",
         $open_access = false,
         $title = "Deposit title"
@@ -85,7 +106,6 @@ class B2share implements Ipublish
                 'open_access' => $b_open_access
             ]
         );
-        Util::writeLog('b2share_cron', "Data: ".$data, 3);
 
         $config = array(
             CURLOPT_URL =>
@@ -111,13 +131,19 @@ class B2share implements Ipublish
                 and array_key_exists('files', $results->links)
             ) {
                 $this->file_upload_url
-                    = $results->links->files.'/'.$filename.'?access_token='.$token;
+                    = $results->links->files;
                 return str_replace(
                     'draft',
                     'edit',
                     str_replace('/api', '', $results->links->self)
                 );
             } else {
+                $this->error_message = "Something went wrong in uploading.";
+                if (array_key_exists('status', $results)) {
+                    if ($results->status==='403') {
+                        $this->error_message = "403 - Authorization Required";
+                    }
+                }
                 return false;
             }
         }
@@ -126,29 +152,33 @@ class B2share implements Ipublish
     /**
      * Create upload object but do not the upload here
      *
-     * @param string $filehandle file handle
-     * @param string $filesize   local filename of file that should be submitted
+     * @param string $file_upload_url the upload_url for the files bucket
+     * @param string $filehandle      file handle
+     * @param string $filesize        local filename of file that should be submitted
      *
      * @return boolean
      */
-    public function upload($filehandle, $filesize)
+    public function upload($file_upload_url, $filehandle, $filesize)
     {
-        $config = array(
-            CURLOPT_URL => $this->file_upload_url,
+        $this->curl_client = curl_init();
+
+        $config2 = array(
+            CURLOPT_URL => $file_upload_url,
             CURLOPT_INFILE => $filehandle,
             CURLOPT_INFILESIZE => $filesize,
             CURLOPT_BINARYTRANSFER => true,
             CURLOPT_PUT => true,
+        // CURLOPT_CUSTOMREQUEST => 'PUT',
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,
             CURLOPT_HEADER => true,
             CURLINFO_HEADER_OUT => true,
             CURLOPT_HTTPHEADER => array(
-        'Accept:application/json',
+                'Accept:application/json',
                 'Content-Type: application/octet-stream'
             )
         );
-        curl_setopt_array($this->curl_client, $config);
+        curl_setopt_array($this->curl_client, $config2);
 
         $response = curl_exec($this->curl_client);
         curl_close($this->curl_client);

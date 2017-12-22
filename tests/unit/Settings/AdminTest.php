@@ -18,13 +18,19 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 use PHPUnit\Framework\TestCase;
 
-class AdminTest extends TestCase  {
-    /** @var \OCA\B2shareBridge\Settings\Admin */
+class AdminTest extends TestCase
+{
+    /**
+     * @var \OCA\B2shareBridge\Settings\Admin 
+     */
     private $admin;
-    /** @var IConfig|\PHPUnit\Framework\MockObject\MockObject */
+    /**
+     * @var IConfig|\PHPUnit\Framework\MockObject\MockObject 
+     */
     private $config;
 
-    public function setUp() {
+    public function setUp() 
+    {
         $this->config = $this->createMock(IConfig::class);
 
         $this->admin = new \OCA\B2shareBridge\Settings\Admin(
@@ -34,7 +40,8 @@ class AdminTest extends TestCase  {
         return parent::setUp();
     }
 
-    public function formDataProvider() {
+    public function formDataProvider() 
+    {
         $params = [
             'publish_baseurl' => $this->config->getAppValue(
                 'b2sharebridge', 'publish_baseurl'
@@ -52,18 +59,21 @@ class AdminTest extends TestCase  {
         return $params;
     }
 
-    public function testGetForm() {
+    public function testGetForm() 
+    {
         $params = $this->formDataProvider();
 
         $expected = new TemplateResponse('b2sharebridge', 'settings-admin', $params);
         $this->assertEquals($expected, $this->admin->getForm());
     }
 
-    public function testGetSection() {
+    public function testGetSection() 
+    {
         $this->assertSame('b2sharebridge', $this->admin->getSection());
     }
 
-    public function testGetPriority() {
+    public function testGetPriority() 
+    {
         $this->assertSame(0, $this->admin->getPriority());
     }
 }

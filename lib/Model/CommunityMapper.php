@@ -71,4 +71,46 @@ class CommunityMapper extends Mapper
         return $communities_b2share;
     }
 
+    /**
+     * Returns Commnuityname by given id. 
+     *
+     * @param string $uid internal uid of the Community
+     * 
+     * @return Community
+     * @throws ClientNotFoundException
+     */
+    public function getByUid($uid)
+    {
+        $qb = $this->db->getQueryBuilder();
+        $qb
+            ->select('*')
+            ->from($this->tableName)
+            ->where(
+                $qb->expr()->eq(
+                    'id', $qb->createNamedParameter($uid, IQueryBuilder::PARAM_INT)
+                )
+            );
+        $result = $qb->execute();
+        $row = $result->fetch();
+        $result->closeCursor();
+        if ($row === false) {
+            throw new CommunityNotFoundException();
+        }
+        return Client::fromRow($row);
+    }
+
+    /** 
+     * Return all communities as aray with id and name
+     * 
+     * @param string $id internal id of the Community
+     * 
+     * @return Communities
+     */    
+    public function deleteCommunity($id)
+    {
+        $sql = 'DELETE FROM `' . $this->tableName
+            . '` WHERE id = ?';
+        return $this->findEntities($sql, [$id]);    
+    }
+
 }

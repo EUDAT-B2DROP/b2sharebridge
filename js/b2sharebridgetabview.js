@@ -14,15 +14,26 @@
         '</div>';
 
         function publishAction(e){
-			$(publish_button).prop('disabled', true);
-            fileInfo = e.data.param;
+			$(publish_button).prop('disabled', true);	
+			selectedFiles = FileList.getSelectedFiles();
+			// if selectedFiles is empty, use fileInfo
+			// otherwise create an array of files from the selection
+			if (selectedFiles.length>0){
+				ids = []
+				for (index in selectedFiles){
+					ids.push(selectedFiles[index].id)
+				}
+			} else {
+            	fileInfo = e.data.param;
+				ids = [fileInfo.id];
+			}
             selected_community = $(ddCommunitySelector).val();
 			open_access = $('input[name="open_access"]:checked').length > 0;
 			title = $(b2s_title).val();
             $.post(
                 OC.generateUrl('/apps/b2sharebridge/publish'),
                 {
-                    id: fileInfo.id,
+                    ids: ids,
                     community: selected_community,
 					open_access: open_access,
 					title: title

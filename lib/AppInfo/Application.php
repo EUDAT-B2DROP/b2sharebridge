@@ -19,12 +19,13 @@ use OCA\B2shareBridge\Controller\PublishController;
 use OCA\B2shareBridge\Controller\ViewController;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
+use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
+use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
 use OCA\B2shareBridge\View\Navigation;
 use OCP\AppFramework\App;
 use OCP\IContainer;
 use OCP\Util;
-
 
 /**
  * Implement a ownCloud Application for our b2sharebridge
@@ -64,6 +65,14 @@ class Application extends App
                 );
             }
         );
+        $container->registerService(
+            'DepositFileMapper',
+            function () use ($server) {
+                return new DepositFileMapper(
+                    $server->getDatabaseConnection()
+                );
+            }
+        );
 
         $container->registerService(
             'StatusCodes',
@@ -81,6 +90,7 @@ class Application extends App
                     $server->getRequest(),
                     $server->getConfig(),
                     $c->query('DepositStatusMapper'),
+                    $c->query('DepositFileMapper'),
                     $c->query('StatusCodes'),
                     $c->query('CurrentUID')
                 );
@@ -95,6 +105,7 @@ class Application extends App
                     $c->query('Request'),
                     $server->getConfig(),
                     $c->query('DepositStatusMapper'),
+                    $c->query('DepositFileMapper'),
                     $c->query('CommunityMapper'),
                     $c->query('StatusCodes'),
                     $c->query('CurrentUID'),
@@ -179,7 +190,10 @@ class Application extends App
      */
     public function registerJobs()
     {
-                   \OCP\BackgroundJob::registerJob('OCA\B2shareBridge\Cron\B2shareCommunityFetcher');
+        //\OCP\BackgroundJob::registerJob(
+        //    'OCA\B2shareBridge\Cron\B2shareCommunityFetcher'
+        //);
+        \OC::$server->getJoblist()->add(B2ShareCommunityFetcher::class);
         return;
     }
 

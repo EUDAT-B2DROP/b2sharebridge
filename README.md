@@ -36,8 +36,8 @@ phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
 For unit tests you need to hava a php interpreter and [PHPUnit](http://phpunit.de/getting-started.html).
 These tests need a Nextcloud deployment, so execute:
 ```
-export CORE_BRANCH=stable11
-export BRIDGE_BRANCH=nextcloud11
+export CORE_BRANCH=stable12
+export BRIDGE_BRANCH=nextcloud12
 export B2SHAREBRIDGE_LOCAL_PATH=
 git clone https://github.com/nextcloud/core.git --recursive --depth 1 -b $CORE_BRANCH nextcloud
 cd nextcloud

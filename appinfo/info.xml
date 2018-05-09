@@ -13,7 +13,7 @@
     <author>EUDAT</author>
     <version>1.0.0</version>
     <dependencies>
-        <nextcloud min-version="11" max-version="12" />
+        <nextcloud min-version="11" max-version="13" />
         <database>sqlite</database>
         <database>mysql</database>
         <lib>curl</lib>

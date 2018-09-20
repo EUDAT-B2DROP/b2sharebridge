@@ -36,7 +36,7 @@ class StatusCodes
     {
         $this->statusCodes = [
             0 => 'deposited',
-            1 => 'new',
+            1 => 'scheduled',
             2 => 'processing',
             3 => 'External error: during uploading file',
             4 => 'External error: during creating deposit',

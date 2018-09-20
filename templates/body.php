@@ -28,9 +28,9 @@
                             <?php // TODO: echo as user specific timedate ?>
                             <td><?php p($publication->getTitle()) ?></td>
                             <td><?php p($_['statuscodes']->getForNumber($publication->getStatus())) ?></td>
-                            <td><?php if ($publication->getStatus() > 0) : ?>
-                                    ERROR : <?php  p($publication->getErrorMessage()) ?>
-                                <?php else: ?>
+                            <td><?php if ($publication->getStatus() > 2) : ?>
+                                    ERROR: <?php  p($publication->getErrorMessage()) ?>
+                                <?php elseif ($publication->getStatus() == 0) : ?>
                                     <a href="<?php p($publication->getUrl()) ?>" target="_blank">Deposit URL</a>
                                 <?php endif; ?>
                             </td>

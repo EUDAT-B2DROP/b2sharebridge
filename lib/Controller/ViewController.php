@@ -252,7 +252,7 @@ class ViewController extends Controller
         $token = $this->config->getUserValue($userId, $this->appName, 'token');
         if (!(strlen($token)>1)) {
             $is_error = true;
-            $error_msg .= "Please set B2SHARE API token<br>\n";
+            $error_msg .= "Please set B2SHARE API token <a href=\"../../settings/user/additional\" style=\"text-decoration: underline; color:red;\">here</a><br>\n";
         }
         $allowed_uploads = $this->config->getAppValue(
             'b2sharebridge',

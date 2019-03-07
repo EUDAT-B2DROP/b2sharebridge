@@ -191,7 +191,8 @@ class PublishController extends Controller
 
         return new JSONResponse(
             [
-                "message" => 'Transferring file to B2SHARE in the Background',
+                "message" => 'Transferring file to B2SHARE in the Background. '.
+                'Review the status in B2SHARE app.',
                 'status' => 'success'
             ]
         );

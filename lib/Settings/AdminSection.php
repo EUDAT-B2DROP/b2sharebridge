@@ -28,19 +28,22 @@ use OCP\Settings\IIconSection;
  */
 class AdminSection implements IIconSection
 {
-     /** @var IL10N */
-        private $l;
-        /** @var IURLGenerator */
-        private $url;
+    /** @var IL10N */
+    private $l;
+    /** @var IURLGenerator */
+    private $url;
 
-        /**
-         * @param IURLGenerator $url
-         * @param IL10N $l
-         */
-        public function __construct(IURLGenerator $url, IL10N $l) {
-                $this->url = $url;
-                $this->l = $l;
-        }
+    /**
+     * {@inheritdoc}
+     *
+     * @param IURLGenerator $url
+     * @param IL10N $l
+     */
+    public function __construct(IURLGenerator $url, IL10N $l) 
+    {
+        $this->url = $url;
+        $this->l = $l;
+    }
 
     /**
      * {@inheritdoc}
@@ -73,9 +76,12 @@ class AdminSection implements IIconSection
     }
 
      /**
-     * {@inheritdoc}
-     */
-    public function getIcon() {
+      * {@inheritdoc}
+      *
+      * @return URL of the icon shown in the admin settings
+      */
+    public function getIcon()
+    {
         return $this->url->imagePath('b2sharebridge', 'eudat_logo.png');
     }
 }

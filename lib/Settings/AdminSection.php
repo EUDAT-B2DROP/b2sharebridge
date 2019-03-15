@@ -72,4 +72,11 @@ class AdminSection implements ISection
     {
         return 75;
     }
+
+     /**
+     * {@inheritdoc}
+     */
+    public function getIcon() {
+        return $this->url->imagePath('b2sharebridge', 'eudat_logo.png');
+    }
 }

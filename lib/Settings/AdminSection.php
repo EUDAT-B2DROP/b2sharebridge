@@ -26,6 +26,20 @@ use OCP\Settings\ISection;
  */
 class AdminSection implements ISection
 {
+     /** @var IL10N */
+        private $l;
+        /** @var IURLGenerator */
+        private $url;
+
+        /**
+         * @param IURLGenerator $url
+         * @param IL10N $l
+         */
+        public function __construct(IURLGenerator $url, IL10N $l) {
+                $this->url = $url;
+                $this->l = $l;
+        }
+
     /**
      * {@inheritdoc}
      *

@@ -33,14 +33,14 @@ class AdminSection implements IIconSection
      *
      * @var IL10N
      */
-    private $l;
+    private $_l;
 
     /**
      * URL generator
      *
      * @var IURLGenerator 
      * */
-    private $url;
+    private $_url;
 
     /**
      * {@inheritdoc}
@@ -50,8 +50,8 @@ class AdminSection implements IIconSection
      */
     public function __construct(IURLGenerator $url, IL10N $l) 
     {
-        $this->url = $url;
-        $this->l = $l;
+        $this->_url = $url;
+        $this->_l = $l;
     }
 
     /**
@@ -91,6 +91,6 @@ class AdminSection implements IIconSection
       */
     public function getIcon()
     {
-        return $this->url->imagePath('b2sharebridge', 'eudat_logo.png');
+        return $this->_url->imagePath('b2sharebridge', 'eudat_logo.png');
     }
 }

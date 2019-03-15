@@ -60,14 +60,11 @@ class SectionTest extends TestCase
 
     public function testGetIcon() 
     {
-        $this->markTestSkipped(
-            'We do not have a icon yet.'
-        );
         $this->urlGenerator
             ->expects($this->once())
             ->method('imagePath')
-            ->with('user_saml', 'app-dark.svg')
-            ->willReturn('/apps/user_saml/myicon.svg');
-        $this->assertSame('/apps/user_saml/myicon.svg', $this->section->getIcon());
+            ->with('b2sharebridge', 'eudat_logo.png')
+            ->willReturn('/apps/b2sharebridge/eudat_logo.png');
+        $this->assertSame('/apps/b2sharebridge/eudat_logo.png', $this->section->getIcon());
     }
 }

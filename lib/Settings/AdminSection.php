@@ -14,6 +14,9 @@
 namespace OCA\B2shareBridge\Settings;
 
 use OCP\Settings\ISection;
+use OCP\IL10N;
+use OCP\IURLGenerator;
+use OCP\Settings\IIconSection;
 
 /**
  * Creates the admin settings section

@@ -15,6 +15,7 @@
 namespace OCA\B2shareBridge\ests\Settings;
 
 use OCP\IURLGenerator;
+use OCP\IL10N;
 use PHPUnit\Framework\TestCase;
 
 class SectionTest extends TestCase
@@ -27,6 +28,11 @@ class SectionTest extends TestCase
      * @var  IURLGenerator|\PHPUnit\Framework\MockObject\MockObject 
      */
     private $urlGenerator;
+
+    /**
+     *  @var IL10N|\PHPUnit_Framework_MockObject_MockObject 
+     */
+	private $l10n;
 
     public function setUp() 
     {

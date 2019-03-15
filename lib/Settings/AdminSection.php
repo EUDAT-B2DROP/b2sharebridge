@@ -13,7 +13,6 @@
  */
 namespace OCA\B2shareBridge\Settings;
 
-use OCP\Settings\ISection;
 use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\Settings\IIconSection;
@@ -27,7 +26,7 @@ use OCP\Settings\IIconSection;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class AdminSection implements ISection
+class AdminSection implements IIconSection
 {
      /** @var IL10N */
         private $l;

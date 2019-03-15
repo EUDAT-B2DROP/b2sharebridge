@@ -28,16 +28,25 @@ use OCP\Settings\IIconSection;
  */
 class AdminSection implements IIconSection
 {
-    /** @var IL10N */
+    /** 
+     * Different language support
+     *
+     * @var IL10N
+     */
     private $l;
-    /** @var IURLGenerator */
+
+    /**
+     * URL generator
+     *
+     * @var IURLGenerator 
+     * */
     private $url;
 
     /**
      * {@inheritdoc}
      *
-     * @param IURLGenerator $url
-     * @param IL10N $l
+     * @param IURLGenerator $url URL generator used to link to the image
+     * @param IL10N         $l   Language support
      */
     public function __construct(IURLGenerator $url, IL10N $l) 
     {

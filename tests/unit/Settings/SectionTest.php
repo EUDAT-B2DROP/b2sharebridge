@@ -23,39 +23,39 @@ class SectionTest extends TestCase
     /**
      * @var \OCA\B2shareBridge\Settings\Section 
      */
-    private $section;
+    private $_section;
     /**
-     * @var  IURLGenerator|\PHPUnit\Framework\MockObject\MockObject 
+     * @var  IURLGenerator|\PHPUnit_Framework_MockObject_MockObject 
      */
-    private $urlGenerator;
+    private $_urlGenerator;
 
     /**
      *  @var IL10N|\PHPUnit_Framework_MockObject_MockObject 
      */
-	private $l10n;
+	private $_l10n;
 
     public function setUp() 
     {
-        $this->urlGenerator = $this->createMock(IURLGenerator::class);
-        $this->l10n = $this->createMock(IL10N::class);
-        $this->section = new \OCA\B2shareBridge\Settings\AdminSection($this->urlGenerator, $this->l10n);
+        $this->_urlGenerator = $this->createMock(IURLGenerator::class);
+        $this->_l10n = $this->createMock(IL10N::class);
+        $this->_section = new \OCA\B2shareBridge\Settings\AdminSection($this->_urlGenerator, $this->_l10n);
 
         return parent::setUp();
     }
 
     public function testGetId() 
     {
-        $this->assertSame('b2sharebridge', $this->section->getID());
+        $this->assertSame('b2sharebridge', $this->_section->getID());
     }
 
     public function testGetName() 
     {
-        $this->assertSame('EUDAT', $this->section->getName());
+        $this->assertSame('EUDAT', $this->_section->getName());
     }
 
     public function testGetPriority() 
     {
-        $this->assertSame(75, $this->section->getPriority());
+        $this->assertSame(75, $this->_section->getPriority());
     }
 
     public function testGetIcon() 

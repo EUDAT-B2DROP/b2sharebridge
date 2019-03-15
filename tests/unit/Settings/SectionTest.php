@@ -60,11 +60,11 @@ class SectionTest extends TestCase
 
     public function testGetIcon() 
     {
-        $this->urlGenerator
+        $this->_urlGenerator
             ->expects($this->once())
             ->method('imagePath')
             ->with('b2sharebridge', 'eudat_logo.png')
             ->willReturn('/apps/b2sharebridge/eudat_logo.png');
-        $this->assertSame('/apps/b2sharebridge/eudat_logo.png', $this->section->getIcon());
+        $this->assertSame('/apps/b2sharebridge/eudat_logo.png', $this->_section->getIcon());
     }
 }

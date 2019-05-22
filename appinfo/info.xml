@@ -2,10 +2,10 @@
 <info>
     <id>b2sharebridge</id>
     <name>EUDAT B2SHARE bridge</name>
-    <namespace>B2shareBridge</namespace>
+    <summary>The B2SHARE bridge transfers files from B2DROP to B2SHARE</summary>
     <description>
         This application enables B2DROP users to publish data to a external publishing service, such as B2SHARE.
-        Because B2DROP is based on ownCloud, this plugin will work with general ownCloud servers.
+        Because B2DROP is based on Nextcloud, this plugin will work with general Nextcloud servers.
         If enabled, a icon is added to the file-list, that triggers a third party file transfer from the B2DROP server to a service like B2SHARE.
         Because this upload is delayed and happening in the background, there is a status page available that is holding additional information.
     </description>

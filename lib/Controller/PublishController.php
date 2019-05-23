@@ -25,6 +25,7 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IConfig;
 use OCP\IRequest;
+use \OCP\ILogger;
 use OCP\Util;
 
 /**
@@ -105,7 +106,7 @@ class PublishController extends Controller
         }
         
         if (($error)) {
-            Util::writeLog('b2sharebridge', $error, 3);
+            \OC::$server->getLogger()->error($error, ['app' => 'b2sharebridge']);
             return new JSONResponse(
                 [
                     'message'=>'Internal server error, contact the EUDAT helpdesk',
@@ -152,7 +153,7 @@ class PublishController extends Controller
                     $depositFile->setFilename(basename(Filesystem::getPath($id)));
                     $depositFile->setFileid($id);
                     $depositFile->setDepositStatusId($depositId->getId());
-                    Util::writeLog("b2sharebridge", $depositFile, 3);                
+                    \OC::$server->getLogger()->error($depositedFile, ['app' => 'b2sharebridge']);               
                     $this->dfmapper->insert($depositFile);
                 }
             } else {

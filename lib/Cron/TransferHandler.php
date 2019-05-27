@@ -20,6 +20,7 @@ use OCA\B2shareBridge\Publish\IPublish;
 
 use OC\BackgroundJob\QueuedJob;
 use OC\Files\Filesystem;
+use OCP\ILogger;
 use OCP\Util;
 
 
@@ -92,10 +93,9 @@ class TransferHandler extends QueuedJob
             || !array_key_exists('open_access', $args)
             || !array_key_exists('title', $args)
         ) {
-            Util::writeLog(
-                'transfer',
+            \OC::$server->getLogger()->error(
                 'Can not handle w/o id, token, community, open_access, title',
-                3
+                ['app' => 'b2sharebridge']
             );
             return;
         }
@@ -139,10 +139,9 @@ class TransferHandler extends QueuedJob
                     /*
                      * External error: during uploading file
                      */
-                    Util::writeLog(
-                        "b2share_transferhandler", 
-                        "File not accesable".$file->getFilename(), 
-                        3
+                    \OC::$server->getLogger()->error(
+                        "File not accesable".$file->getFilename(),
+                        ['app' => 'b2sharebridge']
                     );
                     $fcStatus->setStatus(3);    
                 }
@@ -154,26 +153,27 @@ class TransferHandler extends QueuedJob
                 /*
                  * External error: during uploading file
                  */
-                Util::writeLog("b2share_transferhandler", "No upload_result", 3);
+                \OC::$server->getLogger()->error(
+                    'No upload_result', ['app' => 'b2sharebridge']
+                );
                 $fcStatus->setStatus(3);
             }
         } else {
             /*
              * External error: during creating deposit
              */
-            Util::writeLog(
-                "b2share_transferhandler", 
-                "No create result".$upload_url." ".$handle, 3
+            \OC::$server->getLogger()->error(
+                "No create result".$upload_url." ".$handle,
+                ['app' => 'b2sharebridge']
             );
             $fcStatus->setErrorMessage($this->_publisher->getErrorMessage());
             $fcStatus->setStatus(4);
         }
         $fcStatus->setUpdatedAt(time());
         $this->_mapper->update($fcStatus);
-        Util::writeLog(
-            "b2share_transferhandler", 
+        \OC::$server->getLogger()->info(
             "Job completed, depositStatusId: ".$fcStatus->getId(),
-            3
+            ['app' => 'b2sharebridge']
         );
 
         /*

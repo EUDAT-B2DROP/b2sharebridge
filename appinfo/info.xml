@@ -9,27 +9,25 @@
         If enabled, a icon is added to the file-list, that triggers a third party file transfer from the B2DROP server to a service like B2SHARE.
         Because this upload is delayed and happening in the background, there is a status page available that is holding additional information.
     </description>
-    <licence>AGPL</licence>
-    <author>EUDAT</author>
     <version>1.0.0</version>
-    <dependencies>
-        <nextcloud min-version="14" max-version="15" />
-        <database>sqlite</database>
-        <database>mysql</database>
-        <lib>curl</lib>
-        <os>Linux</os>
-        <os>Darwin</os>
-    </dependencies>
-    <rememberlogin>false</rememberlogin>
-    <category>publishing</category>
+    <licence>agpl</licence>
+    <author>EUDAT</author>
+    <category>integration</category>
     <website>https://eudat.eu</website>
     <bugs>https://github.com/EUDAT-B2DROP/b2sharebridge/issues</bugs>
     <repository type="git">https://github.com/EUDAT-B2DROP/b2sharebridge.git</repository>
+    <dependencies>
+        <database>sqlite</database>
+        <database>mysql</database>
+        <lib>curl</lib>
+        <nextcloud min-version="14" max-version="15" />
+    </dependencies>
     <background-jobs>
-        <jobs>OCA\B2shareBridge\Cron\B2ShareCommunityFetcher</jobs>
+        <job>OCA\B2shareBridge\Cron\B2ShareCommunityFetcher</job>
     </background-jobs>
     <settings>
-        <admin>\OCA\B2shareBridge\Settings\Admin</admin>
+        <admin>OCA\B2shareBridge\Settings\Admin</admin>
         <admin-section>OCA\B2shareBridge\Settings\AdminSection</admin-section>
     </settings>
 </info>
+

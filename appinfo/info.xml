@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <info>
-    <id>b2sharebridge</id>
+    <id>B2shareBridge</id>
     <name>EUDAT B2SHARE bridge</name>
     <summary>The B2SHARE bridge transfers files from B2DROP to B2SHARE</summary>
     <description>

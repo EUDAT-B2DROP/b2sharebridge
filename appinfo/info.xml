@@ -29,6 +29,8 @@
     <settings>
         <admin>OCA\B2shareBridge\Settings\Admin</admin>
         <admin-section>OCA\B2shareBridge\Settings\AdminSection</admin-section>
+        <personal>OCA\B2shareBridge\Settings\Personal</personal>
+        <personal-section>OCA\B2shareBridge\Settings\PersonalSection</personal-section>
     </settings>
 </info>
 

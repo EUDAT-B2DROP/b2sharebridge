@@ -2,10 +2,9 @@
 /**
  * OwnCloud - B2sharebridge App
  *
- * Settings view for a user, showing the b2share api url
- * PHP Version 5-7
+ * PHP Version 7
  *
- * @category  Owncloud
+ * @category  Nextcloud
  * @package   B2shareBridge
  * @author    EUDAT <b2drop-devel@postit.csc.fi>
  * @copyright 2015 EUDAT
@@ -13,30 +12,78 @@
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
-namespace OCA\B2shareBridge\Settings\Personal;
 
-use OCP\Template;
-use OCP\User;
+namespace OCA\B2shareBridge\Settings;
 
-User::checkLoggedIn();
-$userId = \OC::$server->getUserSession()->getUser()->getUID();
+use OCP\AppFramework\Http\TemplateResponse;
+use OCP\IConfig;
+use OCP\Settings\ISettings;
 
-$tmpl = new Template('b2sharebridge', 'settings-personal');
-$tmpl->assign(
-    'publish_baseurl',
-    \OC::$server->getConfig()->getAppValue(
-        'b2sharebridge',
-        'publish_baseurl'
-    )
-);
+/**
+ * Creates the personal settings for b2sharebirdge.
+ *
+ * @category Nextcloud
+ * @package  B2shareBridge
+ * @author   EUDAT <b2drop-devel@postit.csc.fi>
+ * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
+ */
+class Personal implements ISettings
+{
+    /**
+     * Nextcloud config container
+     *
+     * @var IConfig
+     */
+    private $_config;
 
-$tmpl->assign(
-    'b2share_apitoken',
-    \OC::$server->getConfig()->getUserValue(
-        $userId,
-        'b2sharebridge',
-        'token'
-    )
-);
+    /**
+     * Constructors construct.
+     *
+     * @param IConfig $config Nextcloud config container
+     */
+    public function __construct(IConfig $config) 
+    {
+        $this->_config = $config;
+    }
 
-return $tmpl->fetchPage();
+    /**
+     * Create Admin menue content
+     *
+     * @return TemplateResponse
+     */
+    public function getForm() 
+    {
+	$userId = \OC::$server->getUserSession()->getUser()->getUID();
+        $params = [
+            'publish_baseurl' => $this->_config->getAppValue(
+                'b2sharebridge', 'publish_baseurl'
+            ),
+            'b2share_apitoken' => $this->_config->getUserValue(
+                $userId, 'b2sharebridge', 'token'
+            ),
+        ];
+
+        return new TemplateResponse('b2sharebridge', 'settings-personal', $params);
+    }
+
+    /**
+     * Actual section name to use
+     *
+     * @return string the section, 'b2sharebridge'
+     */
+    public function getSection() 
+    {
+        return 'b2sharebridge';
+    }
+
+    /**
+     * Where to show the section
+     *
+     * @return int 0
+     */
+    public function getPriority() 
+    {
+        return 0;
+    }
+}

@@ -25,6 +25,7 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 use OCP\IRequest;
+use OCP\ILogger;
 use OCP\Util;
 
 /**
@@ -165,7 +166,7 @@ class ViewController extends Controller
             $error = 'No user configured for session';
         }
         if (($error)) {
-            Util::writeLog('b2sharebridge', $error, 3);
+            \OC::$server->getLogger()->error($error, ['app' => 'b2sharebridge']);
             return new JSONResponse(
                 [
                     'message'=>'Internal server error, contact the EUDAT helpdesk',
@@ -175,7 +176,7 @@ class ViewController extends Controller
         }
 
 
-        Util::writeLog('b2sharebridge', "saving API token", 0);
+        \OC::$server->getLogger()->info('saving API token', ['app' => 'b2sharebridge']);
         $this->config->setUserValue($userId, $this->appName, "token", $token);
         return new JSONResponse(
             [
@@ -193,10 +194,10 @@ class ViewController extends Controller
      */
     public function deleteToken()
     {
-        Util::writeLog('b2sharebridge', 'Deleting API token', 0);
+        \OC::$server->getLogger()->info('Deleting API token', ['app' => 'b2sharebridge']);
         $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if (strlen($userId) <= 0) {
-            Util::writeLog('b2sharebridge', 'No user configured for session', 0);
+            \OC::$server->getLogger()->error('No user configured for session', ['app' => 'b2sharebridge']);
             return new JSONResponse(
                 [
                     'message'=>'Internal server error, contact the EUDAT helpdesk',
@@ -230,10 +231,10 @@ class ViewController extends Controller
     {
         $is_error = false;
         $error_msg = "";
-        Util::writeLog("b2sharebridge", "in func initUI", 0);
+        \OC::$server->getLogger()->info('in func initUI', ['app' => 'b2sharebridge']);
          $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if (strlen($userId) <= 0) {
-            Util::writeLog('b2sharebridge', 'No user configured for session', 0);
+            \OC::$server->getLogger()->info('No user configured for session', ['app' => 'b2sharebridge']);
             $is_error = true;
             $error_msg .= "Authorization failure: login first.<br>\n";
         }
@@ -241,7 +242,7 @@ class ViewController extends Controller
         $id = (int) $param['file_id'];
         Filesystem::init($this->userId, '/');
         $view = Filesystem::getView();
-        Util::writeLog('b2sharebridge', 'File ID: '.$id, 0);
+        \OC::$server->getLogger()->info('File ID: '.$id, ['app' => 'b2sharebridge']);
         $filesize = $view->filesize(Filesystem::getPath($id));        
         $fileName = basename(Filesystem::getPath($id));
         $is_dir = $view->is_dir(Filesystem::getPath($id));

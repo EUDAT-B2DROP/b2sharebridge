@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <info>
-    <id>B2shareBridge</id>
+    <id>b2sharebridge</id>
     <name>EUDAT B2SHARE bridge</name>
     <summary>The B2SHARE bridge transfers files from B2DROP to B2SHARE</summary>
     <description>
@@ -12,6 +12,7 @@
     <version>1.0.0</version>
     <licence>agpl</licence>
     <author>EUDAT</author>
+    <namespace>B2shareBridge</namespace>
     <category>integration</category>
     <website>https://eudat.eu</website>
     <bugs>https://github.com/EUDAT-B2DROP/b2sharebridge/issues</bugs>

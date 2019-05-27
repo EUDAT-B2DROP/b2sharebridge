@@ -54,7 +54,7 @@ class Personal implements ISettings
      */
     public function getForm() 
     {
-	$userId = \OC::$server->getUserSession()->getUser()->getUID();
+        $userId = \OC::$server->getUserSession()->getUser()->getUID();
         $params = [
             'publish_baseurl' => $this->_config->getAppValue(
                 'b2sharebridge', 'publish_baseurl'

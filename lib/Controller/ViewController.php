@@ -176,7 +176,9 @@ class ViewController extends Controller
         }
 
 
-        \OC::$server->getLogger()->info('saving API token', ['app' => 'b2sharebridge']);
+        \OC::$server->getLogger()->info(
+            'saving API token', ['app' => 'b2sharebridge']
+        );
         $this->config->setUserValue($userId, $this->appName, "token", $token);
         return new JSONResponse(
             [
@@ -194,10 +196,14 @@ class ViewController extends Controller
      */
     public function deleteToken()
     {
-        \OC::$server->getLogger()->info('Deleting API token', ['app' => 'b2sharebridge']);
+        \OC::$server->getLogger()->info(
+            'Deleting API token', ['app' => 'b2sharebridge']
+        );
         $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if (strlen($userId) <= 0) {
-            \OC::$server->getLogger()->error('No user configured for session', ['app' => 'b2sharebridge']);
+            \OC::$server->getLogger()->error(
+                'No user configured for session', ['app' => 'b2sharebridge']
+            );
             return new JSONResponse(
                 [
                     'message'=>'Internal server error, contact the EUDAT helpdesk',
@@ -231,10 +237,14 @@ class ViewController extends Controller
     {
         $is_error = false;
         $error_msg = "";
-        \OC::$server->getLogger()->info('in func initUI', ['app' => 'b2sharebridge']);
+        \OC::$server->getLogger()->info(
+            'in func initUI', ['app' => 'b2sharebridge']
+        );
          $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if (strlen($userId) <= 0) {
-            \OC::$server->getLogger()->info('No user configured for session', ['app' => 'b2sharebridge']);
+            \OC::$server->getLogger()->info(
+                'No user configured for session', ['app' => 'b2sharebridge']
+            );
             $is_error = true;
             $error_msg .= "Authorization failure: login first.<br>\n";
         }

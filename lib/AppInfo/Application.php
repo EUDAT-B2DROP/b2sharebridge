@@ -179,7 +179,6 @@ class Application extends App
      */
     public function registerSettings()
     {
-        \OCP\App::registerPersonal('b2sharebridge', 'lib/Settings/Personal');
         return;
     }
 

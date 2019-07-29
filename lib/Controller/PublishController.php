@@ -154,7 +154,7 @@ class PublishController extends Controller
                     $depositFile->setFileid($id);
                     $depositFile->setDepositStatusId($depositId->getId());
                     \OC::$server->getLogger()->error(
-                        $depositedFile, ['app' => 'b2sharebridge']
+                        $depositFile, ['app' => 'b2sharebridge']
                     );               
                     $this->dfmapper->insert($depositFile);
                 }

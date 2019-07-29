@@ -141,11 +141,7 @@
 
 
         template: function(data) {
-
-            if (!this._template) {
-                this._template = Handlebars.compile(TEMPLATE);
-            }
-            return this._template(data);
+            return TEMPLATE;
         },
 
         itemTemplate: function(data) {

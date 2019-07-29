@@ -201,7 +201,7 @@ class ViewController extends Controller
         );
         $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if (strlen($userId) <= 0) {
-            \OC::$server->getLogger()->error(
+            \OC::$server->getLogger()->info(
                 'No user configured for session', ['app' => 'b2sharebridge']
             );
             return new JSONResponse(
@@ -237,7 +237,7 @@ class ViewController extends Controller
     {
         $is_error = false;
         $error_msg = "";
-        \OC::$server->getLogger()->info(
+        \OC::$server->getLogger()->debug(
             'in func initUI', ['app' => 'b2sharebridge']
         );
          $userId = \OC::$server->getUserSession()->getUser()->getUID();
@@ -252,7 +252,7 @@ class ViewController extends Controller
         $id = (int) $param['file_id'];
         Filesystem::init($this->userId, '/');
         $view = Filesystem::getView();
-        \OC::$server->getLogger()->info('File ID: '.$id, ['app' => 'b2sharebridge']);
+        \OC::$server->getLogger()->debug('File ID: '.$id, ['app' => 'b2sharebridge']);
         $filesize = $view->filesize(Filesystem::getPath($id));        
         $fileName = basename(Filesystem::getPath($id));
         $is_dir = $view->is_dir(Filesystem::getPath($id));

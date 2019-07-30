@@ -90,6 +90,10 @@
             return t('b2sharebridge', 'B2SHARE');
         },
 
+        getIcon: function() {
+           return 'icon-filelist';
+        },
+
         nextPage: function() {
         },
 

@@ -1,3 +1,8 @@
+.icon-filelist {
+    @include icon-color('filelisticon', 'b2sharebridge', $color-white, 1, false);
+}
+
+
 .b2shareBridgeTabView .clear-float {
     clear: both;
 }

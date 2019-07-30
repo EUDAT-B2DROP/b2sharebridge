@@ -252,7 +252,9 @@ class ViewController extends Controller
         $id = (int) $param['file_id'];
         Filesystem::init($this->userId, '/');
         $view = Filesystem::getView();
-        \OC::$server->getLogger()->debug('File ID: '.$id, ['app' => 'b2sharebridge']);
+        \OC::$server->getLogger()->debug(
+            'File ID: '.$id, ['app' => 'b2sharebridge']
+        );
         $filesize = $view->filesize(Filesystem::getPath($id));        
         $fileName = basename(Filesystem::getPath($id));
         $is_dir = $view->is_dir(Filesystem::getPath($id));

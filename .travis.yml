@@ -1,8 +1,8 @@
 language: php
 
 php:
-  - 7.0
-  - 7.1
+  - 7.2
+  - 7.3
 
 env:
   - DB=sqlite BRANCH=stable15
@@ -18,6 +18,9 @@ install:
   - pear install pear/PHP_CodeSniffer
   - phpenv rehash
   - phpenv config-add nextcloud/apps/b2sharebridge/tests/travis/php.ini
+
+services:
+  - mysql
 
 before_script:
     - if [[ "$DB" == 'mysql' ]]; then mysql -u root -e 'create database oc_autotest;'; fi

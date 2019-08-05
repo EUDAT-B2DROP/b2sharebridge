@@ -29,7 +29,7 @@ class AdminTest extends TestCase
      */
     private $config;
 
-    public function setUp() 
+    public function setUp(): void 
     {
         $this->config = $this->createMock(IConfig::class);
 

@@ -34,13 +34,12 @@ class SectionTest extends TestCase
      */
 	private $_l10n;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->_urlGenerator = $this->createMock(IURLGenerator::class);
         $this->_l10n = $this->createMock(IL10N::class);
         $this->_section = new \OCA\B2shareBridge\Settings\AdminSection($this->_urlGenerator, $this->_l10n);
-
-        return parent::setUp();
+        parent::setUp();
     }
 
     public function testGetId() 

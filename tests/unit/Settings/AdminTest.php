@@ -29,15 +29,14 @@ class AdminTest extends TestCase
      */
     private $config;
 
-    public function setUp() 
+    public function setUp(): void
     {
         $this->config = $this->createMock(IConfig::class);
 
         $this->admin = new \OCA\B2shareBridge\Settings\Admin(
             $this->config
         );
-
-        return parent::setUp();
+        parent::setUp();
     }
 
     public function formDataProvider() 

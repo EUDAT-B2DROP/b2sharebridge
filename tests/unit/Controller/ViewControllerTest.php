@@ -22,7 +22,7 @@ class ViewControllerTest extends TestCase
     private $navigation;
     private $statusCodes;
 
-    public function setUp() 
+    public function setUp(): void
     {
         $request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();

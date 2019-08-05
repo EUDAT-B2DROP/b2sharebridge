@@ -34,7 +34,7 @@ class SectionTest extends TestCase
      */
 	private $_l10n;
 
-    public function setUp(): void
+    public function setUp()
     {
         $this->_urlGenerator = $this->createMock(IURLGenerator::class);
         $this->_l10n = $this->createMock(IL10N::class);

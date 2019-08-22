@@ -102,10 +102,12 @@ class B2shareCommunityFetcher extends Job
                 ' and restricted_submission: '. $community['restricted_submission'],
                 ['app' => 'b2sharebridge']
             );
-            if ($community['restricted_submission'] !== '1') {
+            if ($community['restricted_submission'] !== true) {
                 $communities_b2share[$community['id']] = $community['name'];    
             }
-
+            else {
+                $communities_b2share[$community['id']] = $community['name'].' '."\u{0001F512}";
+            }
         }
 
         $c_mapper = new CommunityMapper(\OC::$server->getDatabaseConnection());

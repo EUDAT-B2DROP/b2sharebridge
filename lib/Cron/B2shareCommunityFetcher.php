@@ -104,9 +104,9 @@ class B2shareCommunityFetcher extends Job
             );
             if ($community['restricted_submission'] !== true) {
                 $communities_b2share[$community['id']] = $community['name'];    
-            }
-            else {
-                $communities_b2share[$community['id']] = $community['name'].' '."\u{0001F512}";
+            } else {
+                $communities_b2share[$community['id']] = $community['name'] . ' ' .
+                "\u{0001F512}";
             }
         }
 

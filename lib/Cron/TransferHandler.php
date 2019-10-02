@@ -163,7 +163,7 @@ class TransferHandler extends QueuedJob
              * External error: during creating deposit
              */
             \OC::$server->getLogger()->error(
-                "No create result".$upload_url." ".$handle,
+                "No create result, there was an error during deposit creation",
                 ['app' => 'b2sharebridge']
             );
             $fcStatus->setErrorMessage($this->_publisher->getErrorMessage());

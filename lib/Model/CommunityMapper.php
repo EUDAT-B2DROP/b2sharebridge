@@ -68,6 +68,7 @@ class CommunityMapper extends Mapper
         foreach ($this->findAll() as $community) {
             $communities_b2share[$community->getId()] = $community->getName();
         }
+        asort($communities_b2share);
         return $communities_b2share;
     }
 

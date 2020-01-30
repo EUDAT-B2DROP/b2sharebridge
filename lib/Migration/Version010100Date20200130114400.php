@@ -23,20 +23,21 @@ class Version010100Date20200130114400 extends SimpleMigrationStep {
 
 		if (!$schema->hasTable('b2sharebridge_server')) {
 			$table = $schema->createTable('b2sharebridge_server');
-			$table->addColumn('id', Type::INTEGER, [
+			$table->addColumn('id', 'integer', [
 				'autoincrement' => true,
 				'notnull' => true,
 			]);
-			$table->addColumn('name', Type::STRING, [
+			$table->addColumn('name', 'string', [
 				'notnull' => true,
 				'length' => 64,
 				'default' => '',
 			]);
-			$table->addColumn('publish_url', Type::STRING, [
+			$table->addColumn('publish_url', 'string', [
 				'notnull' => true,
                 'length' => 64,
                 'default' => '',
-			]);
+            ]);
+            $table->setPrimaryKey(['id']);
 		}
 		return $schema;
 	}

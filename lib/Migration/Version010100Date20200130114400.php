@@ -11,21 +11,6 @@ use OCP\Migration\IOutput;
 
 class Version010100Date20200130114400 extends SimpleMigrationStep {
 
-    /** @var IDBConnection */
-    protected $connection;
-
-    /** @var IConfig */
-    protected $config;
-
-    /**
-     * @param IDBConnection $connection
-     * @param IConfig $config
-     */
-    public function __construct(IDBConnection $connection, IConfig $config) {
-        $this->connection = $connection;
-        $this->config = $config;
-    }
-
 	/**
 	 * @param IOutput $output
 	 * @param Closure $schemaClosure The `\Closure` returns a `ISchemaWrapper`

@@ -37,9 +37,8 @@ class B2share implements Ipublish
      * @param string  $api_endpoint api endpoint baseurl for b2share
      * @param boolean $check_ssl    whether to check security for https
      */
-    public function __construct($api_endpoint, $check_ssl)
+    public function __construct($check_ssl)
     {
-        $this->api_endpoint = $api_endpoint;
         $this->curl_client = curl_init();
         $defaults = array(
             CURLOPT_RETURNTRANSFER => 1,
@@ -63,7 +62,7 @@ class B2share implements Ipublish
     {
         return $this->file_upload_url;
     }
-    
+
     /**
      * Get the error message from HTTP service
      * 
@@ -71,26 +70,30 @@ class B2share implements Ipublish
      */
     public function getErrorMessage()
     {
+        if (is_null($this->error_message)) {
+            return '';
+        }
         return $this->error_message;
     }
-    
-    
+
+
     /**
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
-     * @param string  $token       users access token
-     * @param string  $community   id of community metadata schema, defaults to EUDAT
-     * @param boolean $open_access publish as open access, defaults to false
-     * @param string  $title       actual title of the deposit
-     *
+     * @param string  $token        users access token
+     * @param string  $community    id of community metadata schema, defaults to EUDAT
+     * @param boolean $open_access  publish as open access, defaults to false
+     * @param string  $title        actual title of the deposit
+     * @param string  $api_endpoint api url 
      * @return null
      */
     public function create(
         $token,
         $community = "e9b9792e-79fb-4b07-b6b4-b9c2bd06d095",
         $open_access = false,
-        $title = "Deposit title"
+        $title = "Deposit title",
+        $api_endpoint = "https://trng-b2share.eudat.eu"
     ) {
         //now settype("false","boolean") evaluates to true, so:
         $b_open_access = false;
@@ -108,18 +111,19 @@ class B2share implements Ipublish
         );
 
         $config = array(
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_POSTREDIR => 3,
             CURLOPT_URL =>
-                $this->api_endpoint.'/api/records/?access_token='.$token,
-            CURLOPT_POST => 1,
+                $api_endpoint.'/api/records/?access_token='.$token,
+            CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_POSTFIELDS => $data,
             CURLOPT_HTTPHEADER => array(
                 'Content-Type: application/json',
                 'Content-Length: '.strlen($data))
         );
         curl_setopt_array($this->curl_client, $config);
-
-
         $response = curl_exec($this->curl_client);
+        \OC::$server->getLogger()->error($response);
         if (!$response) {
             return false;
         } else {
@@ -139,7 +143,7 @@ class B2share implements Ipublish
                 );
             } else {
                 $this->error_message = "Something went wrong in uploading.";
-                if (array_key_exists('status', $results)) {
+                if (array_key_exists('status', $results)) { 
                     if ($results->status==='403') {
                         $this->error_message = "403 - Authorization Required";
                     }
@@ -163,12 +167,13 @@ class B2share implements Ipublish
         $this->curl_client = curl_init();
 
         $config2 = array(
+            CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_URL => $file_upload_url,
             CURLOPT_INFILE => $filehandle,
             CURLOPT_INFILESIZE => $filesize,
             CURLOPT_BINARYTRANSFER => true,
             CURLOPT_PUT => true,
-        // CURLOPT_CUSTOMREQUEST => 'PUT',
+            CURLOPT_CUSTOMREQUEST => 'PUT',
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,
             CURLOPT_HEADER => true,
@@ -181,6 +186,7 @@ class B2share implements Ipublish
         curl_setopt_array($this->curl_client, $config2);
 
         $response = curl_exec($this->curl_client);
+        \OC::$server->getLogger()->info($response);
         curl_close($this->curl_client);
         if (!$response) {
             return false;

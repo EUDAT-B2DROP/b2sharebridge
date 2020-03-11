@@ -14,9 +14,10 @@
 
 namespace OCA\B2shareBridge\Cron;
 
-use OC\BackgroundJob\Job;
+use OC\BackgroundJob\TimedJob;
 use OCA\B2shareBridge\Model\Community;
 use OCA\B2shareBridge\Model\CommunityMapper;
+use OCA\B2shareBridge\Model\ServerMapper;
 
 
 /**
@@ -28,7 +29,7 @@ use OCA\B2shareBridge\Model\CommunityMapper;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class B2shareCommunityFetcher extends Job
+class B2shareCommunityFetcher extends TimedJob
 {
 
     protected $config;
@@ -50,7 +51,7 @@ class B2shareCommunityFetcher extends Job
             $this->config = $config;
             $this->logger = $logger;
         }
-
+        $this->setInterval(86400); // 24hrs
     }
 
     /**
@@ -73,72 +74,91 @@ class B2shareCommunityFetcher extends Job
      */
     protected function run($args)
     {
-        $b2share_communities_url = $this->config->getAppValue(
-            'b2sharebridge',
-            'publish_baseurl'
-        ).'/api/communities/';
-        $json = $this->_getUrlContent($b2share_communities_url);
-        if (!$json) {
-            $this->logger->error(
-                'Fetching the B2SHARE communities API was not possible.',
-                ['app' => 'b2sharebridge']
-            );
-            return;
-        }
-        $communities_fetched = json_decode($json, true)['hits']['hits'];
-        if ($communities_fetched === null) {
-            $this->logger->error(
-                'Fetching the B2SHARE communities API did not return a valid JSON.',
-                ['app' => 'b2sharebridge']
-            );
-            return;
-        }
+        $serverMapper =  new ServerMapper(\OC::$server->getDatabaseConnection());
+        $c_mapper = new CommunityMapper(\OC::$server->getDatabaseConnection());
+        $servers = $serverMapper->findAll();
+        foreach($servers as $server) {
+            $b2share_communities_url = $server->getPublishUrl().'/api/communities/';
+            $json = $this->_getUrlContent($b2share_communities_url);
+            if (!$json) {
+                $this->logger->error(
+                    'Fetching the B2SHARE communities API was not possible.',
+                    ['app' => 'b2sharebridge']
+                );
+                return;
+            }
+            $communities_fetched = json_decode($json, true)['hits']['hits'];
+            if ($communities_fetched === null) {
+                $this->logger->error(
+                    'Fetching the B2SHARE communities API did not return a valid JSON.',
+                    ['app' => 'b2sharebridge']
+                );
+                return;
+            }
 
-        $communities_b2share = [];
-        foreach ($communities_fetched as $community) {
-            $this->logger->debug(
-                'Community with id: ' . $community['id'] .
-                ' and name: ' . $community['name'] . ' fetched' .
-                ' and restricted_submission: '. $community['restricted_submission'],
-                ['app' => 'b2sharebridge']
+            $communities_b2share = [];
+            foreach ($communities_fetched as $community) {
+                $this->logger->debug(
+                    'Fetched community with id: ' . $community['id'] .
+                    ' and name: ' . $community['name'] . ' fetched' .
+                    ' and restricted_submission: '. $community['restricted_submission'] . ' from server ' . $server->getName(),
+                    ['app' => 'b2sharebridge']
+                );
+                if ($community['restricted_submission'] !== true) {
+                    $communities_b2share[$community['id']] = $community['name'];
+                } else {
+                    $communities_b2share[$community['id']] = $community['name'] . ' ' .
+                    "\u{0001F512}";
+                }
+            }
+
+            $communities_b2drop = [];
+            foreach ($c_mapper->findForServer($server->getId()) as $community) {
+                $communities_b2drop[$community->getId()] = $community->getName();
+            }
+
+            // do we need to remove a community?
+            $remove_communities = array_diff_key(
+                $communities_b2drop,
+                $communities_b2share
             );
-            if ($community['restricted_submission'] !== true) {
-                $communities_b2share[$community['id']] = $community['name'];    
-            } else {
-                $communities_b2share[$community['id']] = $community['name'] . ' ' .
-                "\u{0001F512}";
+            foreach ($remove_communities as $id => $name) {
+                $this->logger->info(
+                    'Removing community with id: ' . $id .
+                    ' and name: ' . $name . ' after synchronization with b2share',
+                    ['app' => 'b2sharebridge']
+                );
+                $c_mapper->deleteCommunity($id);
+            }
+
+            // do we need to add a community?
+            $add_communities = array_diff_key($communities_b2share, $communities_b2drop);
+            foreach ($add_communities as $id => $name) {
+                $this->logger->info(
+                    'Adding community with id: ' . $id . ' and name: '
+                    . $name . ' after synchronization with B2SHARE server ' . $server->getName(),
+                    ['app' => 'b2sharebridge']
+                );
+                $c_mapper->insert(Community::fromParams(['id' => $id, 'name' => $name, 'serverId' => $server->getId()]));
             }
         }
 
-        $c_mapper = new CommunityMapper(\OC::$server->getDatabaseConnection());
-        $communities_b2drop = [];
-        foreach ($c_mapper->findAll() as $community) {
-            $communities_b2drop[$community->getId()] = $community->getName();
-        }
+        // Remove orphans
 
-        // do we need to remove a community?
-        $remove_communities = array_diff_key(
-            $communities_b2drop,
-            $communities_b2share
-        );
-        foreach ($remove_communities as $id => $name) {
-            $this->logger->info(
-                'Removing community with id: ' . $id .
-                ' and name: ' . $name . ' after synchronization with b2share',
-                ['app' => 'b2sharebridge']
-            );
-            $c_mapper->deleteCommunity($id);
-        }
-
-        // do we need to add a community?
-        $add_communities = array_diff_key($communities_b2share, $communities_b2drop);
-        foreach ($add_communities as $id => $name) {
-            $this->logger->info(
-                'Adding community with id: ' . $id . ' and name: '
-                . $name . ' after synchronization with b2share',
-                ['app' => 'b2sharebridge']
-            );
-            $c_mapper->insert(Community::fromParams(['id' => $id, 'name' => $name]));
+        $communities = $c_mapper->findAll();
+        foreach($communities as $community) {
+            $found = false;
+            foreach($servers as $server) {
+                if ($server->getId() == $community->getServerId()) {
+                    $found = true;
+                }
+            }
+            if ($found == false) {
+                $this->logger->info(
+                    'Removing orphan community with id: ' . $community->getId()
+                );
+                $c_mapper->delete($community);
+            }
         }
     }
 

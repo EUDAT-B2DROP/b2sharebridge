@@ -1,51 +1,59 @@
 
-function saveAPIToken()
+function saveAPIToken(event)
 {
-    OC.msg.startSaving('#lostpassword .msg','Saving API token');
+    const server_id = event.target.id.split('_')[3];
+    OC.msg.startSaving('#lostpassword_'+server_id + ' .msg','Saving API token');
     result = {};
-    var post = $("#b2share_apitoken").serializeArray();
+    const post = $("#b2share_apitoken_"+server_id).serializeArray();
     $.ajax(
         {
             type: 'POST',
             url: OC.generateUrl('/apps/b2sharebridge/apitoken'),
-            data: {token: post[0].value, requesttoken:oc_requesttoken}
-        
+            data: {
+                requesttoken: oc_requesttoken,
+                token: post[0].value,
+                serverid: server_id
+            }
         }
     ).done(
         function (result) {
-            OC.msg.startAction('#lostpassword .msg', 'Saved!');
+            OC.msg.startAction('#lostpassword_'+server_id + ' .msg', 'Saved!');
         }
     ).fail(
         function (result) {
-                OC.msg.startAction('#lostpassword .msg', 'Something went wrong');
+            OC.msg.startAction('#lostpassword_'+server_id + ' .msg', 'Something went wrong');
         }
     );
-
 }
 
-function deleteAPIToken()
+function deleteAPIToken(event)
 {
-    OC.msg.startAction('#lostpassword .msg','Deleting API token');
+    const server_id = event.target.id.split('_')[3];
+    OC.msg.startAction('#lostpassword_'+server_id + ' .msg','Deleting API token');
     $.ajax(
         {
             type: 'DELETE',
-            url: OC.generateUrl('/apps/b2sharebridge/apitoken')
+            url: OC.generateUrl('/apps/b2sharebridge/apitoken/'+server_id)
         }
     ).done(
         function (result) {
-            OC.msg.startAction('#lostpassword .msg', "Deleted");
-            $("#b2share_apitoken").val('');
+            OC.msg.startAction('#lostpassword_'+server_id + ' .msg', "Deleted");
+            $("#b2share_apitoken_"+server_id).val('');
         }
     ).fail(
         function (result) {
-                OC.msg.startAction('#lostpassword .msg', result.responseJSON);
+            OC.msg.startAction('#lostpassword_'+server_id + ' .msg', result.responseJSON);
         }
     );
 }
 
 $(document).ready(
     function () {
-        $('#b2share_save_apitoken').click(saveAPIToken);
-        $('#b2share_delete_apitoken').click(deleteAPIToken);
+        const saveButtons = $('[id^=b2share_save_apitoken');
+        const deleteButtons = $('[id^=b2share_delete_apitoken');
+        for (let i=0; i<saveButtons.length; i++) {
+            $('#'+saveButtons[i].id).click(saveAPIToken);
+            $('#'+deleteButtons[i].id).click(deleteAPIToken);
+        }
     }
 );

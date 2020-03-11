@@ -32,7 +32,7 @@ class DepositFile extends Entity
     protected $depositStatusId;
     protected $fileid;
     protected $filename;
-    
+
     /**
      * Creates the actual database entity
      */

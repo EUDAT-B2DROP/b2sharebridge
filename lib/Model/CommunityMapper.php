@@ -57,19 +57,29 @@ class CommunityMapper extends Mapper
         return $this->findEntities($sql);
     }
 
+
+    /**
+     * Return all communities for server with id
+     *
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     *
+     * @return array(Entity)
+     */
+
+    public function findForServer($serverId) {
+        $sql = 'SELECT * FROM `' . $this->tableName  . '` WHERE server_id=' . $serverId;
+        return $this->findEntities($sql);
+    }
+
     /**
      * Return all communities as aray with id and name
      *
-     * @return array(string(id) => string(name))
+     * @return JsonResponse
      */
     public function getCommunityList()
     {
-        $communities_b2share = [];
-        foreach ($this->findAll() as $community) {
-            $communities_b2share[$community->getId()] = $community->getName();
-        }
-        asort($communities_b2share);
-        return $communities_b2share;
+        return $this->findAll();
     }
 
     /**
@@ -106,12 +116,12 @@ class CommunityMapper extends Mapper
      * @param string $id internal id of the Community
      * 
      * @return Communities
-     */    
+     */
     public function deleteCommunity($id)
     {
         $sql = 'DELETE FROM `' . $this->tableName
             . '` WHERE id = ?';
-        return $this->findEntities($sql, [$id]);    
+        return $this->findEntities($sql, [$id]);
     }
 
 }

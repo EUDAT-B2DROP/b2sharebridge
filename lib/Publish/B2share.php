@@ -123,7 +123,6 @@ class B2share implements Ipublish
         );
         curl_setopt_array($this->curl_client, $config);
         $response = curl_exec($this->curl_client);
-        \OC::$server->getLogger()->error($response);
         if (!$response) {
             return false;
         } else {
@@ -186,7 +185,6 @@ class B2share implements Ipublish
         curl_setopt_array($this->curl_client, $config2);
 
         $response = curl_exec($this->curl_client);
-        \OC::$server->getLogger()->info($response);
         curl_close($this->curl_client);
         if (!$response) {
             return false;

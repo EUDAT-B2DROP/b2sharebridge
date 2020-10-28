@@ -18,6 +18,8 @@ use OCP\AppFramework\Controller;
 use OCA\B2shareBridge\Model\Server;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCP\IRequest;
+use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
+
 
 class ServerController extends Controller {
     private $userId;
@@ -54,6 +56,10 @@ class ServerController extends Controller {
                 $this->mapper->insert($newServer);
             }
         }
+        // replace job to get communities instantly
+        \OC::$server->getJobList()->remove(B2ShareCommunityFetcher::class);
+        \OC::$server->getJobList()->add(B2ShareCommunityFetcher::class);
+
         return $this->mapper->findAll();
     }
 

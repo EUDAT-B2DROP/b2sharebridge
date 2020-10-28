@@ -27,21 +27,27 @@ class Test extends TestCase
                 [
                     'name' => 'Publish#publish',
                     'url' => '/publish',
-                    'verb' => 'POST'],
+                    'verb' => 'POST'
+                ],
                 [
                     'name' => 'View#depositList',
                     'url' => '/',
                     'verb' => 'GET'
                 ],
                 [
-                    'name' => 'View#set_token',
+                    'name' => 'View#setToken',
                     'url' => '/apitoken',
                     'verb' => 'POST'
                 ],
                 [
-                    'name' => 'View#delete_token',
-                    'url' => '/apitoken',
+                    'name' => 'View#deleteToken',
+                    'url' => '/apitoken/{id}',
                     'verb' => 'DELETE'
+                ],
+                [
+                    'name' => 'View#getTokens',
+                    'url' => '/apitoken',
+                    'verb' => 'GET'
                 ],
                 [
                     'name' => 'View#getTabViewContent',
@@ -53,6 +59,21 @@ class Test extends TestCase
                     'url' => '/initializeb2shareui',
                     'verb' => 'GET'
                 ],
+                [
+                    'name' => 'Server#listServers',
+                    'url' => '/servers',
+                    'verb' => 'GET'
+                ],
+                [
+                    'name' => 'Server#saveServers',
+                    'url' => '/servers',
+                    'verb' => 'POST'
+                ],
+                [
+                    'name' => 'Server#deleteServer',
+                    'url' => '/servers/{id}',
+                    'verb' => 'DELETE'
+                ]
             ]
         ];
         $this->assertSame($expected, $routes);

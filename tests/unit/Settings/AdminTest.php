@@ -32,9 +32,12 @@ class AdminTest extends TestCase
     public function setUp(): void
     {
         $this->config = $this->createMock(IConfig::class);
-
+        $this->serverMapper = $this->getMockBuilder('OCA\B2shareBridge\Model\ServerMapper')
+            ->disableOriginalConstructor()
+            ->getMock();
         $this->admin = new \OCA\B2shareBridge\Settings\Admin(
-            $this->config
+            $this->config,
+            $this->serverMapper
         );
         parent::setUp();
     }
@@ -42,9 +45,6 @@ class AdminTest extends TestCase
     public function formDataProvider() 
     {
         $params = [
-            'publish_baseurl' => $this->config->getAppValue(
-                'b2sharebridge', 'publish_baseurl'
-            ),
             'max_uploads' => $this->config->getAppValue(
                 'b2sharebridge', 'max_uploads'
             ),
@@ -54,11 +54,12 @@ class AdminTest extends TestCase
             'check_ssl' => $this->config->getAppValue(
                 'b2sharebridge', 'check_ssl'
             ),
+            'servers' => $this->serverMapper->findAll()
         ];
         return $params;
     }
 
-    public function testGetForm() 
+    public function testGetForm()
     {
         $params = $this->formDataProvider();
 

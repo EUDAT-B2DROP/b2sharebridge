@@ -75,7 +75,7 @@ class B2shareCommunityFetcher extends TimedJob
     protected function run($args)
     {
         $serverMapper =  new ServerMapper(\OC::$server->getDatabaseConnection());
-        $c_mapper = new CommunityMapper(\OC::$server->getDatabaseConnection());
+        $communityMapper = new CommunityMapper(\OC::$server->getDatabaseConnection());
         $servers = $serverMapper->findAll();
         foreach($servers as $server) {
             $b2share_communities_url = $server->getPublishUrl().'/api/communities/';
@@ -113,7 +113,7 @@ class B2shareCommunityFetcher extends TimedJob
             }
 
             $communities_b2drop = [];
-            foreach ($c_mapper->findForServer($server->getId()) as $community) {
+            foreach ($communityMapper->findForServer($server->getId()) as $community) {
                 $communities_b2drop[$community->getId()] = $community->getName();
             }
 
@@ -128,7 +128,7 @@ class B2shareCommunityFetcher extends TimedJob
                     ' and name: ' . $name . ' after synchronization with b2share',
                     ['app' => 'b2sharebridge']
                 );
-                $c_mapper->deleteCommunity($id);
+                $communityMapper->deleteCommunity($id);
             }
 
             // do we need to add a community?
@@ -139,13 +139,13 @@ class B2shareCommunityFetcher extends TimedJob
                     . $name . ' after synchronization with B2SHARE server ' . $server->getName(),
                     ['app' => 'b2sharebridge']
                 );
-                $c_mapper->insert(Community::fromParams(['id' => $id, 'name' => $name, 'serverId' => $server->getId()]));
+                $communityMapper->insert(Community::fromParams(['id' => $id, 'name' => $name, 'serverId' => $server->getId()]));
             }
         }
 
         // Remove orphans
 
-        $communities = $c_mapper->findAll();
+        $communities = $communityMapper->findAll();
         foreach($communities as $community) {
             $found = false;
             foreach($servers as $server) {
@@ -157,7 +157,7 @@ class B2shareCommunityFetcher extends TimedJob
                 $this->logger->info(
                     'Removing orphan community with id: ' . $community->getId()
                 );
-                $c_mapper->delete($community);
+                $communityMapper->delete($community);
             }
         }
     }

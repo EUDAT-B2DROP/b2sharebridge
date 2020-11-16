@@ -20,15 +20,27 @@ $(document).ready(
                 OC.AppConfig.setValue('b2sharebridge', $(this).attr('name'), value);
             }
         );
+
         function saveChanges() {
             var names = $('[id^="name"]');
             var publishUrls = $('[id^="url"]');
+            var regex = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/i;
             var data = [];
             for (i=0; i<names.length; i++) {
-                data.push({name: names[i].value, publishUrl: publishUrls[i].value})
+                var publishUrl = publishUrls[i].value
+                data.push({name: names[i].value, publishUrl})
                 id = names[i].id.split("_")[1]
                 if (id && id.length) {
                     data[i].id = id;
+                }
+                if (!regex.exec(publishUrl)) {
+                    OC.msg.finishedSaving('#saving .msg', {
+                        'status': 'failure',
+                        'data': {
+                            'message': `Invalid URL: ${publishUrl}`
+                        }
+                    })
+                    return;
                 }
             }
             OC.msg.startSaving('#saving .msg','Saving servers...');

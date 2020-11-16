@@ -73,13 +73,15 @@ class CommunityMapper extends Mapper
     }
 
     /**
-     * Return all communities as aray with id and name
+     * Return all communities sorted by name
      *
-     * @return JsonResponse
+     * @return array(Entity)
      */
     public function getCommunityList()
     {
-        return $this->findAll();
+        $communities = $this->findAll();
+        usort($communities, function($a, $b) { return strcmp($a->getName(), $b->getName()); });
+        return $communities;
     }
 
     /**

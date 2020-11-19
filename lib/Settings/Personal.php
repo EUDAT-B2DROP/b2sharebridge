@@ -18,6 +18,7 @@ namespace OCA\B2shareBridge\Settings;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
+use OCA\B2shareBridge\Model\ServerMapper;
 
 /**
  * Creates the personal settings for b2sharebirdge.
@@ -36,15 +37,17 @@ class Personal implements ISettings
      * @var IConfig
      */
     private $_config;
+    private $mapper;
 
     /**
      * Constructors construct.
      *
      * @param IConfig $config Nextcloud config container
      */
-    public function __construct(IConfig $config) 
+    public function __construct(IConfig $config, ServerMapper $mapper)
     {
         $this->_config = $config;
+        $this->mapper = $mapper;
     }
 
     /**
@@ -52,16 +55,17 @@ class Personal implements ISettings
      *
      * @return TemplateResponse
      */
-    public function getForm() 
+    public function getForm()
     {
         $userId = \OC::$server->getUserSession()->getUser()->getUID();
+        $serverEntities = $this->mapper->findAll();
+        $servers = [];
+        foreach($serverEntities as $i => $s) {
+            $servers[$i] = ['id' => $s->getId(), 'name' => $s->getName(), 'publishUrl' => $s->getPublishUrl(), 'token' => $this->_config->getUserValue(
+                $userId, 'b2sharebridge', 'token_' . $s->getId())];
+        }
         $params = [
-            'publish_baseurl' => $this->_config->getAppValue(
-                'b2sharebridge', 'publish_baseurl'
-            ),
-            'b2share_apitoken' => $this->_config->getUserValue(
-                $userId, 'b2sharebridge', 'token'
-            ),
+            'servers' => $servers
         ];
 
         return new TemplateResponse('b2sharebridge', 'settings-personal', $params);
@@ -82,7 +86,7 @@ class Personal implements ISettings
      *
      * @return int 0
      */
-    public function getPriority() 
+    public function getPriority()
     {
         return 0;
     }

@@ -33,7 +33,7 @@ interface IPublish
      *
      * @return null
      */
-    public function __construct($api_endpoint, $check_ssl);
+    public function __construct($check_ssl);
 
     /**
      * Placeholder for actually creating a deposit

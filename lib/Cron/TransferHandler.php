@@ -16,6 +16,7 @@ namespace OCA\B2shareBridge\Cron;
 
 use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
+use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Publish\IPublish;
 
 use OC\BackgroundJob\QueuedJob;
@@ -39,6 +40,7 @@ class TransferHandler extends QueuedJob
     private $_mapper;
     private $_publisher;
     private $_dfmapper;
+    private $_smapper;
 
     /**
      * Create the database mapper
@@ -50,14 +52,16 @@ class TransferHandler extends QueuedJob
     public function __construct(
         DepositStatusMapper $mapper = null,
         DepositFileMapper $dfmapper = null,
-        IPublish $publisher = null
+        IPublish $publisher = null,
+        ServerMapper $smapper = null
     ) {
-        if ($mapper === null || $publisher === null || $dfmapper === null) {
+        if ($mapper === null || $publisher === null || $dfmapper === null || $smapper === null) {
             $this->fixTransferForCron();
         } else {
             $this->_mapper = $mapper;
             $this->_dfmapper = $dfmapper;
             $this->_publisher = $publisher;
+            $this->_smapper = $smapper;
         }
     }
 
@@ -74,8 +78,8 @@ class TransferHandler extends QueuedJob
             ->query('DepositStatusMapper');
         $this->_dfmapper = $application->getContainer()
             ->query('DepositFileMapper');
-        
         $this->_publisher = $application->getContainer()->query('PublishBackend');
+        $this->_smapper = $application->getContainer()->query('ServerMapper');
     }
 
     /**
@@ -92,6 +96,7 @@ class TransferHandler extends QueuedJob
             || !array_key_exists('community', $args)
             || !array_key_exists('open_access', $args)
             || !array_key_exists('title', $args)
+            || !array_key_exists('serverId', $args)
         ) {
             \OC::$server->getLogger()->error(
                 'Can not handle w/o id, token, community, open_access, title',
@@ -104,37 +109,38 @@ class TransferHandler extends QueuedJob
         $fcStatus->setStatus(2); //status = processing
         $this->_mapper->update($fcStatus);
         $user = $fcStatus->getOwner();
+        $server = $this->_smapper->find($args['serverId']);
 
         $create_result = $this->_publisher->create(
             $args['token'],
             $args['community'],
             $args['open_access'],
-            $args['title']
+            $args['title'],
+            $server->getPublishUrl()
         );
-        
+
         if ($create_result) {
             $file_upload_link = $this->_publisher->getFileUploadUrlPart();
             Filesystem::init($user, '/');
             $view = Filesystem::getView();
-            $files 
-                = $this->_dfmapper->findAllForDeposit($fcStatus->getId());
+            $files = $this->_dfmapper->findAllForDeposit($fcStatus->getId());
             $upload_result = true;
-        
+
             foreach ($files as $file) {
                 $filename = $file->getFilename();
                 $fileid = $file->getFileid();
                 $path = Filesystem::getPath($fileid);
                 $has_access = Filesystem::isReadable($path);
                 if ($has_access) {
-                       $handle = $view->fopen($path, 'rb');
+                    $handle = $view->fopen($path, 'rb');
                     $size = $view->filesize($path);
                     $upload_url = $file_upload_link."/".urlencode($filename);
                     $upload_url = $upload_url.
                         "?access_token=".$args['token'];
-                    $upload_result = $upload_result && 
+                    $upload_result = $upload_result &&
                         $this->_publisher->upload(
                             $upload_url, $handle, $size
-                        );                    
+                        );
                 } else {
                     /*
                      * External error: during uploading file
@@ -143,7 +149,7 @@ class TransferHandler extends QueuedJob
                         "File not accesable".$file->getFilename(),
                         ['app' => 'b2sharebridge']
                     );
-                    $fcStatus->setStatus(3);    
+                    $fcStatus->setStatus(3);
                 }
             }
             if ($upload_result) {

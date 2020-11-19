@@ -18,6 +18,7 @@ namespace OCA\B2shareBridge\Settings;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
+use OCA\B2shareBridge\Model\ServerMapper;
 
 /**
  * Creates the admin settings for b2sharebirdge.
@@ -36,28 +37,29 @@ class Admin implements ISettings
      * @var IConfig
      */
     private $_config;
+    private $mapper;
 
     /**
      * Constructors construct.
      *
      * @param IConfig $config Nextcloud config container
      */
-    public function __construct(IConfig $config) 
+    public function __construct(IConfig $config, ServerMapper $mapper)
     {
         $this->_config = $config;
+        $this->mapper = $mapper;
     }
+
 
     /**
      * Create Admin menue content
      *
      * @return TemplateResponse
      */
-    public function getForm() 
+    public function getForm()
     {
+        $servers = $this->mapper->findAll();
         $params = [
-            'publish_baseurl' => $this->_config->getAppValue(
-                'b2sharebridge', 'publish_baseurl'
-            ),
             'max_uploads' => $this->_config->getAppValue(
                 'b2sharebridge', 'max_uploads'
             ),
@@ -67,6 +69,7 @@ class Admin implements ISettings
             'check_ssl' => $this->_config->getAppValue(
                 'b2sharebridge', 'check_ssl'
             ),
+            'servers' => $this->mapper->findAll()
         ];
 
         return new TemplateResponse('b2sharebridge', 'settings-admin', $params);

@@ -20,6 +20,7 @@ use OCA\B2shareBridge\Controller\ViewController;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
+use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
 use OCA\B2shareBridge\View\Navigation;
@@ -73,7 +74,14 @@ class Application extends App
                 );
             }
         );
-
+        $container->registerService(
+            'ServerMapper',
+            function () use ($server) {
+                return new ServerMapper(
+                    $server->getDatabaseConnection()
+                );
+            }
+        );
         $container->registerService(
             'StatusCodes',
             function () use ($server) {
@@ -107,6 +115,7 @@ class Application extends App
                     $c->query('DepositStatusMapper'),
                     $c->query('DepositFileMapper'),
                     $c->query('CommunityMapper'),
+                    $c->query('ServerMapper'),
                     $c->query('StatusCodes'),
                     $c->query('CurrentUID'),
                     $c->query('Navigation')
@@ -137,11 +146,9 @@ class Application extends App
             'PublishBackend',
             function () use ($server) {
                 $backend = 'OCA\B2shareBridge\Publish\B2share';
-                $baseurl = $server->getConfig()
-                    ->getAppValue('b2sharebridge', 'publish_baseurl');
                 $checkssl = $server->getConfig()
                     ->getAppValue('b2sharebridge', 'check_ssl', '1');
-                return new $backend($baseurl, $checkssl);
+                return new $backend($checkssl);
             }
         );
     }

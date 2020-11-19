@@ -84,8 +84,9 @@ class PublishController extends Controller
         $param = $this->request->getParams();
         //TODO what if token wasn't set? We couldn't have gotten here
         //but still a check seems in place.
+        $serverId = $param['server_id'];
         $_userId = \OC::$server->getUserSession()->getUser()->getUID();
-        $token = $this->config->getUserValue($_userId, $this->appName, "token");
+        $token = $this->config->getUserValue($_userId, $this->appName, "token_" . $serverId);
 
         $error = false;
         if (strlen($_userId) <= 0) {
@@ -104,7 +105,7 @@ class PublishController extends Controller
         if (!is_string($token)) {
             $error = 'Problems while parsing publishToken';
         }
-        
+
         if (($error)) {
             \OC::$server->getLogger()->error($error, ['app' => 'b2sharebridge']);
             return new JSONResponse(
@@ -147,6 +148,7 @@ class PublishController extends Controller
                 $fcStatus->setCreatedAt(time());
                 $fcStatus->setUpdatedAt(time());
                 $fcStatus->setTitle($title);
+                $fcStatus->setServerId($serverId);
                 $depositId = $this->mapper->insert($fcStatus);
                 foreach ($ids as $id) { 
                     $depositFile = new DepositFile();
@@ -155,11 +157,10 @@ class PublishController extends Controller
                     $depositFile->setDepositStatusId($depositId->getId());
                     \OC::$server->getLogger()->info(
                         $depositFile, ['app' => 'b2sharebridge']
-                    );               
+                    );
                     $this->dfmapper->insert($depositFile);
                 }
             } else {
-                
                 return new JSONResponse(
                     [
                         'message' => 'We currently only support 
@@ -182,13 +183,15 @@ class PublishController extends Controller
 
         // register transfer cron
         \OC::$server->getJobList()->add(
-            $job, [
+            $job,
+            [
                 'transferId' => $fcStatus->getId(),
                 'token' => $token,
                 '_userId' => $this->userId,
                 'community' => $community,
-            'open_access' => $open_access, 
-            'title' => $title
+                'open_access' => $open_access,
+                'title' => $title,
+                'serverId' => $serverId
             ]
         );
 

@@ -18,6 +18,7 @@ use OC\Files\Filesystem;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
+use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\View\Navigation;
 use OCP\AppFramework\Controller;
@@ -45,6 +46,7 @@ class ViewController extends Controller
     protected $fdmapper;
     protected $config;
     protected $cMapper;
+    protected $smapper;
     protected $navigation;
 
     /**
@@ -56,6 +58,7 @@ class ViewController extends Controller
      * @param DepositStatusMapper $mapper      whatever
      * @param DepositFileMapper   $fdmapper    ORM for DepositFile
      * @param CommunityMapper     $cMapper     a community mapper
+     * @param ServerMapper        $smapper     server mapper
      * @param StatusCodes         $statusCodes whatever
      * @param string              $userId      userid
      * @param Navigation          $navigation  navigation bar object
@@ -67,6 +70,7 @@ class ViewController extends Controller
         DepositStatusMapper $mapper,
         DepositFileMapper $fdmapper,
         CommunityMapper $cMapper,
+        ServerMapper $smapper,
         StatusCodes $statusCodes,
         $userId,
         Navigation $navigation
@@ -76,6 +80,7 @@ class ViewController extends Controller
         $this->mapper = $mapper;
         $this->cMapper = $cMapper;
         $this->fdmapper = $fdmapper;
+        $this->smapper = $smapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
         $this->navigation = $navigation;
@@ -109,7 +114,7 @@ class ViewController extends Controller
                 ) as $publication) {
                     $publications[] = $publication;
             }
-     
+
         } else {
             foreach (
                 array_reverse(
@@ -157,6 +162,7 @@ class ViewController extends Controller
             $error = 'Parameters gotten from UI are no array or they are missing';
         }
         $token = $param['token'];
+        $server_id = $param['serverid'];
 
         if (!is_string($token)) {
             $error = 'Problems while parsing fileid or publishToken';
@@ -179,7 +185,7 @@ class ViewController extends Controller
         \OC::$server->getLogger()->info(
             'saving API token', ['app' => 'b2sharebridge']
         );
-        $this->config->setUserValue($userId, $this->appName, "token", $token);
+        $this->config->setUserValue($userId, $this->appName, "token_" . $server_id, $token);
         return new JSONResponse(
             [
                 "data" => ["message" => "Saved"],
@@ -194,7 +200,7 @@ class ViewController extends Controller
      * @return          JSONResponse
      * @NoAdminRequired
      */
-    public function deleteToken()
+    public function deleteToken($id)
     {
         \OC::$server->getLogger()->info(
             'Deleting API token', ['app' => 'b2sharebridge']
@@ -211,7 +217,22 @@ class ViewController extends Controller
                 ]
             );
         }
-        $this->config->setUserValue($userId, $this->appName, 'token', '');
+        $this->config->setUserValue($userId, $this->appName, 'token_' . $id, '');
+    }
+    /**
+     * request endpoint for gettin users tokens
+     * @return JSONResponse
+     * @NoAdminRequired
+     */
+    public function getTokens() {
+        $userId = \OC::$server->getUserSession()->getUser()->getUID();
+        $ret = [];
+        $servers = $this->smapper->findAll();
+        foreach($servers as $server) {
+            $serverId = $server->getId();
+            $ret[$serverId] = $this->config->getUserValue($userId, $this->appName, 'token_'. $serverId);
+        };
+        return $ret;
     }
 
     /**
@@ -222,11 +243,11 @@ class ViewController extends Controller
      */
     public function getTabViewContent()
     {
-        
+
         return $this->cMapper->getCommunityList();
     }
-    
-    
+
+
     /**
      * XHR request endpoint for token state: disables or enables publish button
      *
@@ -240,7 +261,7 @@ class ViewController extends Controller
         \OC::$server->getLogger()->debug(
             'in func initUI', ['app' => 'b2sharebridge']
         );
-         $userId = \OC::$server->getUserSession()->getUser()->getUID();
+        $userId = \OC::$server->getUserSession()->getUser()->getUID();
         if (strlen($userId) <= 0) {
             \OC::$server->getLogger()->info(
                 'No user configured for session', ['app' => 'b2sharebridge']
@@ -255,20 +276,14 @@ class ViewController extends Controller
         \OC::$server->getLogger()->debug(
             'File ID: '.$id, ['app' => 'b2sharebridge']
         );
-        $filesize = $view->filesize(Filesystem::getPath($id));        
+        $filesize = $view->filesize(Filesystem::getPath($id));
         $fileName = basename(Filesystem::getPath($id));
         $is_dir = $view->is_dir(Filesystem::getPath($id));
         if ($is_dir) {
                $is_error = true;
                $error_msg .= "You can only publish a file to B2SHARE.<br>\n";
         }
-        $token = $this->config->getUserValue($userId, $this->appName, 'token');
-        if (!(strlen($token)>1)) {
-            $is_error = true;
-            $error_msg .= "Please set B2SHARE API token ".
-               "<a href=\"../../settings/user/additional\" ".
-               "style=\"text-decoration: underline; color:red;\">here</a><br>\n";
-        }
+
         $allowed_uploads = $this->config->getAppValue(
             'b2sharebridge',
             'max_uploads',

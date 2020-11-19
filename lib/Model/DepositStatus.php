@@ -28,7 +28,7 @@ use OCP\Util;
  */
 class DepositStatus extends Entity
 {
-  
+
     protected $status;
     protected $title;
     protected $owner;
@@ -38,7 +38,8 @@ class DepositStatus extends Entity
     protected $fileMapper;
     protected $fileCount;
     protected $errorMessage;
-    
+    protected $serverId;
+
     /**
      * Creates the actual database entity
      */
@@ -52,6 +53,7 @@ class DepositStatus extends Entity
         $this->addType('url', 'string');
         $this->addType('fileCount', 'integer');
         $this->addType('errorMessage', 'string');
+        $this->addType('serverId', 'integer');
     }
 
     /**
@@ -66,9 +68,8 @@ class DepositStatus extends Entity
         ' belonging to user:'.$this->getOwner().' deposited under title'.
         $this->getTitle();
     }
-    
 
-    
+
     /**
      * Return URL only if status = PUBLISHED
      *
@@ -77,12 +78,12 @@ class DepositStatus extends Entity
     public function getHyperlink()
     {
         $result = "N/A";
-        
+
         if ($this->getStatus()===0) {
             $result = '<a href="'.$this->getUrl()
                 .'" target="_blank">B2SHARE deposit</a>';
         }
-        
+
         return urldecode($result);
     }
 }

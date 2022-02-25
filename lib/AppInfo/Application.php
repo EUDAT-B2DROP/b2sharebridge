@@ -27,6 +27,9 @@ use OCA\B2shareBridge\View\Navigation;
 use OCP\AppFramework\App;
 use OCP\IContainer;
 use OCP\Util;
+use OCP\AppFramework\Bootstrap\IBootContext;
+use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\AppFramework\Bootstrap\IRegistrationContext;
 
 /**
  * Implement a ownCloud Application for our b2sharebridge
@@ -37,7 +40,7 @@ use OCP\Util;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class Application extends App
+class Application extends App implements IBootstrap
 {
     /**
      * Create a ownCloud application
@@ -217,4 +220,20 @@ class Application extends App
         Util::addStyle('b2sharebridge', 'b2sharebridgetabview');
         return;
     }
+
+    public function register(IRegistrationContext $context): void {
+        $context->registerEventListener(
+            LoadSidebar::class,
+            LoadSidebarListener::class
+        );
+    }
+
+    public function boot(IBootContext $context): void {
+         $this->registerNavigationEntry();
+         $this->loadScripts();
+         $this->registerSettings();
+         $this->registerJobs();
+    }
+
 }
+

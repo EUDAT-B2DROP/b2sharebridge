@@ -1,12 +1,11 @@
 var TEMPLATE =
-        '<div>' +
+    '<div>' +
         '<div id="b2sharebridgeTabView" class="dialogContainer">' +
         '<table><tr><td>Title:</td><td><input type="text" name="b2s_title" id="b2s_title"></input></td></tr>' +
-        '<tr><td>Server:</td><td>{{serverSelector}}</td></tr>' +
-        '<tr><td>Community:</td><td>{{communitySelector}}</td></tr>' +
+        '<tr><td>Server:</td><td><div id="serverSelector"></div></td></tr>' +
+        '<tr><td>Community:</td><td><div id="communitySelector"></div></td></tr>' +
         '<tr><td>Open access:</td><td><input type="checkbox" name="open_access" id="cbopen_access" /></td></tr>' +
         '<tr><td></td><td><input type="button" value="deposit" id="publish_button"/></td></tr></table>' +
         '<div class="errormsg" id="b2sharebridge_errormsg">ERROR3</div>' +
-        '</div>';
-
+    '</div>';
 export { TEMPLATE as default };

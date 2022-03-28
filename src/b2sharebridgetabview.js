@@ -157,7 +157,7 @@ import $ from "jquery";
         },
 
         getCommunitySelectorHTML: function() {
-            result = "";
+            var result = "";
             result = "<select id='ddCommunitySelector'>";
             $.each(
                 this.getCommunities().filter(function(community) {
@@ -175,7 +175,7 @@ import $ from "jquery";
             var url_path =
                 "/apps/b2sharebridge/servers?requesttoken=" +
                 encodeURIComponent(oc_requesttoken);
-            result = "";
+            var result = "";
             $.ajax({
                 type: 'GET',
                 url: OC.generateUrl(url_path),
@@ -270,8 +270,8 @@ import $ from "jquery";
                 "/apps/b2sharebridge/initializeb2shareui?requesttoken=" +
                 encodeURIComponent(oc_requesttoken) + "&file_id=" +
                 encodeURIComponent(fileInfo.id);
-            communities = [];
-            result = "";
+            var communities = [];
+            var result = "";
             var that = this;
             $.ajax({
                 type: 'GET',

@@ -1,4 +1,5 @@
 import TEMPLATE from './templates/template';
+import $ from "jquery";
 
 (function() {
 

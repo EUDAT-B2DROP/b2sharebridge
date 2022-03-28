@@ -9,4 +9,7 @@ module.exports = {
             filename: 'b2sharebridgetabview.js',
         },
     mode: 'production',
+    externals: {
+            jquery: 'jQuery'
+        },
 }

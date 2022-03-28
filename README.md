@@ -27,6 +27,8 @@ If a user wants to publish a file, this transfer is done via the B2DROP server i
 
 There are no formal requirements to participate. If there are questions, feel free to contact the authors mentioned in AUTHORS.md
 
+To work on the b2sharebridgetabview.js you need to use webpack and local jQuery installation.
+
 ## Testing
 
 For testing your php code against styleguides you need to install PHP_CodeSniffer, then run:

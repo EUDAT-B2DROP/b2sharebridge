@@ -28,9 +28,9 @@ import $ from "jquery";
             	fileInfo = e.data.param;
 				ids = [fileInfo.id];
 			}
-            selected_community = $(ddCommunitySelector).val();
-			open_access = $('input[name="open_access"]:checked').length > 0;
-			title = $(b2s_title).val();
+            var selected_community = $("#ddCommunitySelector").val();
+			var open_access = $('input[name="open_access"]:checked').length > 0;
+			var title = $("#b2s_title").val();
             $.post(
                 OC.generateUrl('/apps/b2sharebridge/publish'),
                 {
@@ -231,13 +231,13 @@ import $ from "jquery";
          */
         render: function() {
             this.$el.html(this.template());
-            $(serverSelector).html(this.getServerSelectorHTML());
-            $(communitySelector).html(this.getCommunitySelectorHTML());
+            $("#serverSelector").html(this.getServerSelectorHTML());
+            $("#communitySelector").html(this.getCommunitySelectorHTML());
             this.getTokens();
             $(serverSelector).change(this.onChangeServer.bind(this));
             $(publish_button).bind('click',{param: this.fileInfo}, publishAction);
 			$(publish_button).prop('disabled', this._publish_button_disabled);
-			$(b2s_title).val(this._b2s_title);
+			$("#b2s_title").val(this._b2s_title);
             this.delegateEvents();
 			$(b2sharebridge_errormsg).html(this._error_msg);
 			if (this._error_msg!=""){

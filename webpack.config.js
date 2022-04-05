@@ -12,4 +12,7 @@ module.exports = {
     externals: {
             jquery: 'jQuery'
         },
+    optimization: {
+            minimize: false
+        },
 }

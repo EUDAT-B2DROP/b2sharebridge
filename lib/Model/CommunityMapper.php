@@ -113,7 +113,7 @@ class CommunityMapper extends Mapper
     }
 
     /** 
-     * Return all communities as aray with id and name
+     * Return all communities as array with id and name
      * 
      * @param string $id internal id of the Community
      * 

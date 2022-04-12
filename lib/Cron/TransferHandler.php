@@ -186,7 +186,7 @@ class TransferHandler extends QueuedJob
          *
          * TODO: think of a fork alternative or make it possible to not loose
          * the database connection. also it is running only one Cron per cron run...
-         * TODO: we need to be carefull of zombies here!
+         * TODO: we need to be careful of zombies here!
          */
     }
 

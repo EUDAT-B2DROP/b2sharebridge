@@ -35,7 +35,7 @@ For testing your php code against styleguides you need to install PHP_CodeSniffe
 ```
 phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
 ```
-For unit tests you need to hava a php interpreter and [PHPUnit](http://phpunit.de/getting-started.html).
+For unit tests you need to have a php interpreter and [PHPUnit](http://phpunit.de/getting-started.html).
 These tests need a Nextcloud deployment, so execute:
 ```
 export CORE_BRANCH=stable12

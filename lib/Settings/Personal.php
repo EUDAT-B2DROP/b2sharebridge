@@ -51,7 +51,7 @@ class Personal implements ISettings
     }
 
     /**
-     * Create Admin menue content
+     * Create Admin menu content
      *
      * @return TemplateResponse
      */

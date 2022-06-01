@@ -16,21 +16,23 @@ import $ from "jquery";
 
         function publishAction(e){
 			$(publish_button).prop('disabled', true);
-			selectedFiles = FileList.getSelectedFiles();
+			const selectedFiles = FileList.getSelectedFiles();
 			// if selectedFiles is empty, use fileInfo
 			// otherwise create an array of files from the selection
+            let ids
+            let fileInfo
 			if (selectedFiles.length>0){
 				ids = []
-				for (index in selectedFiles){
+				for (let index in selectedFiles){
 					ids.push(selectedFiles[index].id)
 				}
 			} else {
             	fileInfo = e.data.param;
 				ids = [fileInfo.id];
 			}
-            var selected_community = $("#ddCommunitySelector").val();
-			var open_access = $('input[name="open_access"]:checked').length > 0;
-			var title = $("#b2s_title").val();
+            let selected_community = $("#ddCommunitySelector").val();
+            let open_access = $('input[name="open_access"]:checked').length > 0;
+            let title = $("#b2s_title").val();
             $.post(
                 OC.generateUrl('/apps/b2sharebridge/publish'),
                 {
@@ -148,7 +150,7 @@ import $ from "jquery";
                     async: false
                 }).done(function(data) {
                     that.communities = data;
-                }).fail(function(data){
+                }).fail(function(){
                     $(b2sharebridge_errormsg).html('Fetching B2SHARE communities failed!');
                     $(b2sharebridge_errormsg).show();
                 });
@@ -186,7 +188,7 @@ import $ from "jquery";
                     result = result + "<option value=\"" + value.id + "\">"+ value.name + "</option>";
                 });
                 result = result + "</select>"
-            }).fail(function(data){
+            }).fail(function(){
                 $(b2sharebridge_errormsg).html('Fetching B2SHARE servers failed!');
                 $(b2sharebridge_errormsg).show();
             });
@@ -240,7 +242,7 @@ import $ from "jquery";
 			$("#b2s_title").val(this._b2s_title);
             this.delegateEvents();
 			$(b2sharebridge_errormsg).html(this._error_msg);
-			if (this._error_msg!=""){
+			if (this._error_msg!==""){
 				$(b2sharebridge_errormsg).show();
 			} else {
                 this.checkToken();
@@ -270,8 +272,8 @@ import $ from "jquery";
                 "/apps/b2sharebridge/initializeb2shareui?requesttoken=" +
                 encodeURIComponent(oc_requesttoken) + "&file_id=" +
                 encodeURIComponent(fileInfo.id);
-            var communities = [];
-            var result = "";
+            //var communities = [];
+            //var result = "";
             var that = this;
             $.ajax({
                 type: 'GET',
@@ -279,7 +281,7 @@ import $ from "jquery";
                 async: false
             }).done(function(data){
                 that.processData(data);
-            }).fail(function(data){
+            }).fail(function(){
                 //if PHP not reachable, disable publish button
                 that._publish_button_disabled = true;
                 that._error_msg = "ERROR - Nextcloud server cannot be reached."

@@ -162,7 +162,7 @@ import $ from "jquery";
                 let result = "<select id='ddCommunitySelector'>";
                 const ddserver = $('#ddServerSelector');
                 if (ddserver == null) {
-                    alert("server is null");
+                    console.warn("Could not load ddServerSelector");
                     return result;
                 }
                 $.each(

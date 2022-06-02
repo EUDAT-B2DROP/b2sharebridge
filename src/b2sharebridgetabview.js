@@ -161,7 +161,7 @@ import $ from "jquery";
             getCommunitySelectorHTML: function () {
                 let result = "<select id='ddCommunitySelector'>";
                 const ddserver = $('#ddServerSelector');
-                if (ddserver == null) {
+                if (ddserver.length === 0) {
                     console.warn("Could not load ddServerSelector");
                     return result;
                 }

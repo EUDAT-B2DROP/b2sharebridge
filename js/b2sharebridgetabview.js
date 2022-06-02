@@ -216,8 +216,8 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
             getCommunitySelectorHTML: function () {
                 let result = "<select id='ddCommunitySelector'>";
                 const ddserver = external_jQuery_default()('#ddServerSelector');
-                if (ddserver == null) {
-                    alert("server is null");
+                if (ddserver.length === 0) {
+                    console.warn("Could not load ddServerSelector");
                     return result;
                 }
                 external_jQuery_default().each(

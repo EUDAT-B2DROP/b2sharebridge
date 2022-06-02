@@ -160,10 +160,18 @@ import $ from "jquery";
 
             getCommunitySelectorHTML: function () {
                 let result = "<select id='ddCommunitySelector'>";
-                const ddserver = $('#ddServerSelector');
+                let ddserver = $('#ddServerSelector');
                 if (ddserver.length === 0) {
                     console.warn("Could not load ddServerSelector");
-                    return result;
+                    if(this.getCommunities().length === 0) {
+                        console.warn("Could not find any communities");
+                        result = result + "</select>";
+                        return result;
+                    }
+                    else {
+                        console.warn("Selecting first community as default");
+                        ddserver = this.getCommunities()[0].server_id;
+                    }
                 }
                 $.each(
                     this.getCommunities().filter(function (community) {
@@ -173,7 +181,7 @@ import $ from "jquery";
                         result = result + "<option value=\"" + c.id + "\">" + c.name + "</option>";
                     }
                 );
-                result = result + "</select>"
+                result = result + "</select>";
                 return result;
             },
 

@@ -215,10 +215,18 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
 
             getCommunitySelectorHTML: function () {
                 let result = "<select id='ddCommunitySelector'>";
-                const ddserver = external_jQuery_default()('#ddServerSelector');
+                let ddserver = external_jQuery_default()('#ddServerSelector');
                 if (ddserver.length === 0) {
                     console.warn("Could not load ddServerSelector");
-                    return result;
+                    if(this.getCommunities().length === 0) {
+                        console.warn("Could not find any communities");
+                        result = result + "</select>";
+                        return result;
+                    }
+                    else {
+                        console.warn("Selecting first community as default");
+                        ddserver = this.getCommunities()[0].server_id;
+                    }
                 }
                 external_jQuery_default().each(
                     this.getCommunities().filter(function (community) {
@@ -228,7 +236,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                         result = result + "<option value=\"" + c.id + "\">" + c.name + "</option>";
                     }
                 );
-                result = result + "</select>"
+                result = result + "</select>";
                 return result;
             },
 

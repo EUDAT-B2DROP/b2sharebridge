@@ -178,7 +178,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                 if (!this.tokens) {
                     const url_path =
                         "/apps/b2sharebridge/apitoken?requesttoken=" +
-                        encodeURIComponent(oc_requesttoken);
+                        encodeURIComponent(OC.requestToken);
                     external_jQuery_default().ajax({
                         type: 'GET',
                         url: OC.generateUrl(url_path),
@@ -199,7 +199,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                 if (!this.communities.length) {
                     const url_path =
                         "/apps/b2sharebridge/gettabviewcontent?requesttoken=" +
-                        encodeURIComponent(oc_requesttoken);
+                        encodeURIComponent(OC.requestToken);
                     external_jQuery_default().ajax({
                         type: 'GET',
                         url: OC.generateUrl(url_path),
@@ -248,7 +248,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
             getServerSelectorHTML: function () {
                 const url_path =
                     "/apps/b2sharebridge/servers?requesttoken=" +
-                    encodeURIComponent(oc_requesttoken);
+                    encodeURIComponent(OC.requestToken);
                 let result = "";
                 external_jQuery_default().ajax({
                     type: 'GET',
@@ -350,7 +350,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
             initializeB2ShareUI: function (fileInfo) {
                 const url_path =
                     "/apps/b2sharebridge/initializeb2shareui?requesttoken=" +
-                    encodeURIComponent(oc_requesttoken) + "&file_id=" +
+                    encodeURIComponent(OC.requestToken) + "&file_id=" +
                     encodeURIComponent(fileInfo.id);
                 //var communities = [];
                 //var result = "";

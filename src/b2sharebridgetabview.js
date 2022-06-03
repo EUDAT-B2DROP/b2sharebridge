@@ -123,7 +123,7 @@ import $ from "jquery";
                 if (!this.tokens) {
                     const url_path =
                         "/apps/b2sharebridge/apitoken?requesttoken=" +
-                        encodeURIComponent(oc_requesttoken);
+                        encodeURIComponent(OC.requestToken);
                     $.ajax({
                         type: 'GET',
                         url: OC.generateUrl(url_path),
@@ -144,7 +144,7 @@ import $ from "jquery";
                 if (!this.communities.length) {
                     const url_path =
                         "/apps/b2sharebridge/gettabviewcontent?requesttoken=" +
-                        encodeURIComponent(oc_requesttoken);
+                        encodeURIComponent(OC.requestToken);
                     $.ajax({
                         type: 'GET',
                         url: OC.generateUrl(url_path),
@@ -193,7 +193,7 @@ import $ from "jquery";
             getServerSelectorHTML: function () {
                 const url_path =
                     "/apps/b2sharebridge/servers?requesttoken=" +
-                    encodeURIComponent(oc_requesttoken);
+                    encodeURIComponent(OC.requestToken);
                 let result = "";
                 $.ajax({
                     type: 'GET',
@@ -295,7 +295,7 @@ import $ from "jquery";
             initializeB2ShareUI: function (fileInfo) {
                 const url_path =
                     "/apps/b2sharebridge/initializeb2shareui?requesttoken=" +
-                    encodeURIComponent(oc_requesttoken) + "&file_id=" +
+                    encodeURIComponent(OC.requestToken) + "&file_id=" +
                     encodeURIComponent(fileInfo.id);
                 //var communities = [];
                 //var result = "";

@@ -170,7 +170,10 @@ import $ from "jquery";
                     }
                     else {
                         console.warn("Selecting first community as default");
-                        ddserver = this.getCommunities()[0].server_id;
+                        const community = this.getCommunities()[0];
+                        result = result + "<option value=\"" + community.id + "\">" + community.name + "</option>";
+                        result = result + "</select>";
+                        return result;
                     }
                 }
                 $.each(

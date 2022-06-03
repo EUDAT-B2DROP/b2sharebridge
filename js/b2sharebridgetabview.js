@@ -225,7 +225,10 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                     }
                     else {
                         console.warn("Selecting first community as default");
-                        ddserver = this.getCommunities()[0].server_id;
+                        const community = this.getCommunities()[0];
+                        result = result + "<option value=\"" + community.id + "\">" + community.name + "</option>";
+                        result = result + "</select>";
+                        return result;
                     }
                 }
                 external_jQuery_default().each(

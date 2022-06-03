@@ -186,8 +186,9 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                     }).done(function (data) {
                         that.tokens = data;
                     }).fail(function (data) {
-                        external_jQuery_default()(b2sharebridge_errormsg).html('Fetching tokens failed!');
-                        external_jQuery_default()(b2sharebridge_errormsg).show();
+                        let b2sharebridge_errormsg = external_jQuery_default()("#b2sharebridge_errormsg")
+                        b2sharebridge_errormsg.html('Fetching tokens failed!');
+                        b2sharebridge_errormsg.show();
                     });
                 }
                 return this.tokens;
@@ -206,8 +207,9 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                     }).done(function (data) {
                         that.communities = data;
                     }).fail(function () {
-                        external_jQuery_default()(b2sharebridge_errormsg).html('Fetching B2SHARE communities failed!');
-                        external_jQuery_default()(b2sharebridge_errormsg).show();
+                        let b2sharebridge_errormsg = external_jQuery_default()("#b2sharebridge_errormsg")
+                        b2sharebridge_errormsg.html('Fetching B2SHARE communities failed!');
+                        b2sharebridge_errormsg.show();
                     });
                 }
                 return this.communities;
@@ -259,8 +261,9 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                     });
                     result = result + "</select>"
                 }).fail(function () {
-                    external_jQuery_default()(b2sharebridge_errormsg).html('Fetching B2SHARE servers failed!');
-                    external_jQuery_default()(b2sharebridge_errormsg).show();
+                    let b2sharebridge_errormsg = external_jQuery_default()("#b2sharebridge_errormsg")
+                    b2sharebridge_errormsg.html('Fetching B2SHARE servers failed!');
+                    b2sharebridge_errormsg.show();
                 });
                 return result;
             },
@@ -285,16 +288,17 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
             },
 
             checkToken: function () {
+                let b2sharebridge_errormsg = external_jQuery_default()("#b2sharebridge_errormsg")
                 if (!this.tokens[external_jQuery_default()('#ddServerSelector').val()]) {
-                    external_jQuery_default()(b2sharebridge_errormsg).html('Please set B2SHARE API token in B2SHARE settings');
-                    external_jQuery_default()(b2sharebridge_errormsg).show();
+                    b2sharebridge_errormsg.html('Please set B2SHARE API token in B2SHARE settings');
+                    b2sharebridge_errormsg.show();
                 } else {
-                    external_jQuery_default()(b2sharebridge_errormsg).hide();
+                    b2sharebridge_errormsg.hide();
                 }
             },
 
             onChangeServer: function () {
-                external_jQuery_default()(communitySelector).html(this.getCommunitySelectorHTML());
+                external_jQuery_default()("#communitySelector").html(this.getCommunitySelectorHTML());
                 this.checkToken();
             },
 
@@ -303,17 +307,23 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
              */
             render: function () {
                 this.$el.html(this.template());
-                external_jQuery_default()("#serverSelector").html(this.getServerSelectorHTML());
+
+                let server_selector = external_jQuery_default()("#serverSelector")
+                server_selector.html(this.getServerSelectorHTML());
                 external_jQuery_default()("#communitySelector").html(this.getCommunitySelectorHTML());
                 this.getTokens();
-                external_jQuery_default()(serverSelector).change(this.onChangeServer.bind(this));
-                external_jQuery_default()(publish_button).bind('click', {param: this.fileInfo}, publishAction);
-                external_jQuery_default()(publish_button).prop('disabled', this._publish_button_disabled);
+                server_selector.change(this.onChangeServer.bind(this));
+
+                let publish_button = external_jQuery_default()("#publish_button")
+                publish_button.bind('click', {param: this.fileInfo}, publishAction);
+                publish_button.prop('disabled', this._publish_button_disabled);
                 external_jQuery_default()("#b2s_title").val(this._b2s_title);
                 this.delegateEvents();
-                external_jQuery_default()(b2sharebridge_errormsg).html(this._error_msg);
+
+                let b2sharebridge_errormsg = external_jQuery_default()("#b2sharebridge_errormsg")
+                b2sharebridge_errormsg.html(this._error_msg);
                 if (this._error_msg !== "") {
-                    external_jQuery_default()(b2sharebridge_errormsg).show();
+                    b2sharebridge_errormsg.show();
                 } else {
                     this.checkToken();
                 }

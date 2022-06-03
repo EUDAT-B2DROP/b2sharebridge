@@ -131,8 +131,9 @@ import $ from "jquery";
                     }).done(function (data) {
                         that.tokens = data;
                     }).fail(function (data) {
-                        $(b2sharebridge_errormsg).html('Fetching tokens failed!');
-                        $(b2sharebridge_errormsg).show();
+                        let b2sharebridge_errormsg = $("#b2sharebridge_errormsg")
+                        b2sharebridge_errormsg.html('Fetching tokens failed!');
+                        b2sharebridge_errormsg.show();
                     });
                 }
                 return this.tokens;
@@ -151,8 +152,9 @@ import $ from "jquery";
                     }).done(function (data) {
                         that.communities = data;
                     }).fail(function () {
-                        $(b2sharebridge_errormsg).html('Fetching B2SHARE communities failed!');
-                        $(b2sharebridge_errormsg).show();
+                        let b2sharebridge_errormsg = $("#b2sharebridge_errormsg")
+                        b2sharebridge_errormsg.html('Fetching B2SHARE communities failed!');
+                        b2sharebridge_errormsg.show();
                     });
                 }
                 return this.communities;
@@ -204,8 +206,9 @@ import $ from "jquery";
                     });
                     result = result + "</select>"
                 }).fail(function () {
-                    $(b2sharebridge_errormsg).html('Fetching B2SHARE servers failed!');
-                    $(b2sharebridge_errormsg).show();
+                    let b2sharebridge_errormsg = $("#b2sharebridge_errormsg")
+                    b2sharebridge_errormsg.html('Fetching B2SHARE servers failed!');
+                    b2sharebridge_errormsg.show();
                 });
                 return result;
             },
@@ -230,16 +233,17 @@ import $ from "jquery";
             },
 
             checkToken: function () {
+                let b2sharebridge_errormsg = $("#b2sharebridge_errormsg")
                 if (!this.tokens[$('#ddServerSelector').val()]) {
-                    $(b2sharebridge_errormsg).html('Please set B2SHARE API token in B2SHARE settings');
-                    $(b2sharebridge_errormsg).show();
+                    b2sharebridge_errormsg.html('Please set B2SHARE API token in B2SHARE settings');
+                    b2sharebridge_errormsg.show();
                 } else {
-                    $(b2sharebridge_errormsg).hide();
+                    b2sharebridge_errormsg.hide();
                 }
             },
 
             onChangeServer: function () {
-                $(communitySelector).html(this.getCommunitySelectorHTML());
+                $("#communitySelector").html(this.getCommunitySelectorHTML());
                 this.checkToken();
             },
 
@@ -248,17 +252,23 @@ import $ from "jquery";
              */
             render: function () {
                 this.$el.html(this.template());
-                $("#serverSelector").html(this.getServerSelectorHTML());
+
+                let server_selector = $("#serverSelector")
+                server_selector.html(this.getServerSelectorHTML());
                 $("#communitySelector").html(this.getCommunitySelectorHTML());
                 this.getTokens();
-                $(serverSelector).change(this.onChangeServer.bind(this));
-                $(publish_button).bind('click', {param: this.fileInfo}, publishAction);
-                $(publish_button).prop('disabled', this._publish_button_disabled);
+                server_selector.change(this.onChangeServer.bind(this));
+
+                let publish_button = $("#publish_button")
+                publish_button.bind('click', {param: this.fileInfo}, publishAction);
+                publish_button.prop('disabled', this._publish_button_disabled);
                 $("#b2s_title").val(this._b2s_title);
                 this.delegateEvents();
-                $(b2sharebridge_errormsg).html(this._error_msg);
+
+                let b2sharebridge_errormsg = $("#b2sharebridge_errormsg")
+                b2sharebridge_errormsg.html(this._error_msg);
                 if (this._error_msg !== "") {
-                    $(b2sharebridge_errormsg).show();
+                    b2sharebridge_errormsg.show();
                 } else {
                     this.checkToken();
                 }

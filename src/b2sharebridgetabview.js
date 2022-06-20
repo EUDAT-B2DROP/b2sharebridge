@@ -71,7 +71,8 @@ import $ from "jquery";
             _loading: false,
 
             _publish_button_disabled: false,
-
+            communities: [],
+            servers: [],
 
             initialize: function () {
                 OCA.Files.DetailTabView.prototype.initialize.apply(this, arguments);
@@ -83,7 +84,58 @@ import $ from "jquery";
                 this.collection.on('error', this._onError, this);
                 this._error_msg = "initializing";
                 this._b2s_title = "Deposit title here";
-                this.communities = [];
+                //this.communities = [];
+            },
+
+            setCommunities: function (data) {
+                this.communities = data;
+            },
+
+            setServers: function (data) {
+                this.servers = data;
+            },
+
+            loadCommunities: function () {
+                const url_path =
+                    "/apps/b2sharebridge/gettabviewcontent?requesttoken=" +
+                    encodeURIComponent(OC.requestToken);
+                let bview = this;
+                $.ajax({
+                    type: 'GET',
+                    url: OC.generateUrl(url_path),
+                    async: false,
+                    success: function (a, b, c)
+                    {
+                        bview.setCommunities(a)
+                    }
+                }).fail(this.createErrorCallback('Fetching B2SHARE communities failed!'));
+            },
+
+            loadServers: function () {
+                const url_path =
+                    "/apps/b2sharebridge/servers?requesttoken=" +
+                    encodeURIComponent(OC.requestToken);
+                let bview = this;
+                $.ajax({
+                    type: 'GET',
+                    url: OC.generateUrl(url_path),
+                    async: false,
+                    dataType: 'json',
+                    success: function (a, b, c)
+                    {
+                        bview.setServers(a)
+                    }
+                }).fail(this.createErrorCallback('Fetching B2SHARE servers failed!'));
+            },
+
+            createErrorCallback: function (message) {
+                function callback() {
+                    let b2sharebridge_errormsg = $("#b2sharebridge_errormsg")
+                    b2sharebridge_errormsg.html(message);
+                    b2sharebridge_errormsg.show();
+                }
+
+                return callback;
             },
 
             events: {},
@@ -140,22 +192,8 @@ import $ from "jquery";
             },
 
             getCommunities: function () {
-                let that = this;
                 if (!this.communities.length) {
-                    const url_path =
-                        "/apps/b2sharebridge/gettabviewcontent?requesttoken=" +
-                        encodeURIComponent(OC.requestToken);
-                    $.ajax({
-                        type: 'GET',
-                        url: OC.generateUrl(url_path),
-                        async: false
-                    }).done(function (data) {
-                        that.communities = data;
-                    }).fail(function () {
-                        let b2sharebridge_errormsg = $("#b2sharebridge_errormsg")
-                        b2sharebridge_errormsg.html('Fetching B2SHARE communities failed!');
-                        b2sharebridge_errormsg.show();
-                    });
+                    this.loadCommunities();
                 }
                 return this.communities;
             },
@@ -165,12 +203,11 @@ import $ from "jquery";
                 let ddserver = $('#ddServerSelector');
                 if (ddserver.length === 0) {
                     console.warn("Could not load ddServerSelector");
-                    if(this.getCommunities().length === 0) {
+                    if (this.getCommunities().length === 0) {
                         console.warn("Could not find any communities");
                         result = result + "</select>";
                         return result;
-                    }
-                    else {
+                    } else {
                         console.warn("Selecting first community as default");
                         const community = this.getCommunities()[0];
                         result = result + "<option value=\"" + community.id + "\">" + community.name + "</option>";
@@ -191,25 +228,11 @@ import $ from "jquery";
             },
 
             getServerSelectorHTML: function () {
-                const url_path =
-                    "/apps/b2sharebridge/servers?requesttoken=" +
-                    encodeURIComponent(OC.requestToken);
-                let result = "";
-                $.ajax({
-                    type: 'GET',
-                    url: OC.generateUrl(url_path),
-                    async: false
-                }).done(function (data) {
-                    result = "<select id='ddServerSelector'>";
-                    $.each(data, function (key, value) {
-                        result = result + "<option value=\"" + value.id + "\">" + value.name + "</option>";
-                    });
-                    result = result + "</select>"
-                }).fail(function () {
-                    let b2sharebridge_errormsg = $("#b2sharebridge_errormsg")
-                    b2sharebridge_errormsg.html('Fetching B2SHARE servers failed!');
-                    b2sharebridge_errormsg.show();
+                let result = "<select id='dd_server_selector' >";
+                this.servers.forEach(function (key, value) {
+                    result = result + "<option value=\"" + value.id + "\">" + value.name + "</option>";
                 });
+                result = result + "</select>";
                 return result;
             },
 
@@ -253,8 +276,12 @@ import $ from "jquery";
             render: function () {
                 this.$el.html(this.template());
 
+                this.loadServers();
+                this.loadCommunities();
+
                 let server_selector = $("#serverSelector")
-                server_selector.html(this.getServerSelectorHTML());
+                const server_selector_html = this.getServerSelectorHTML()
+                server_selector.html(server_selector_html);
                 $("#communitySelector").html(this.getCommunitySelectorHTML());
                 this.getTokens();
                 server_selector.change(this.onChangeServer.bind(this));
@@ -304,9 +331,7 @@ import $ from "jquery";
                     type: 'GET',
                     url: OC.generateUrl(url_path),
                     async: false
-                }).done(function (data) {
-                    that.processData(data);
-                }).fail(function () {
+                }).done(this.processData).fail(function () {
                     //if PHP not reachable, disable publish button
                     that._publish_button_disabled = true;
                     that._error_msg = "ERROR - Nextcloud server cannot be reached."

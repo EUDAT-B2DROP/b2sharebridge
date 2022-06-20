@@ -9,12 +9,15 @@ module.exports = {
         filename: 'b2sharebridgetabview.js',
     },
     mode: 'production',
-    plugins: [
+    externals: {
+        jquery: 'jQuery'
+    },
+    /*plugins: [
         new webpack.ProvidePlugin({
             $: "jquery",
             jQuery: "jquery"
         })
-    ],
+    ],*/
     optimization: {
         minimize: false
     },

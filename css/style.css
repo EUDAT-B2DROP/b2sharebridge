@@ -17,6 +17,7 @@
 .b2sharebridge table{
     margin-top: 20px;
     width: 100%;
+    table-layout: fixed /* fix a bug on firefox*/
 }
 
 .b2sharebridge .publish-queue-list th {

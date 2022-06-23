@@ -1,59 +1,104 @@
-/******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
-/******/ 	// The require scope
-/******/ 	var __webpack_require__ = {};
-/******/ 	
-/************************************************************************/
-/******/ 	/* webpack/runtime/compat get default export */
-/******/ 	(() => {
-/******/ 		// getDefaultExport function for compatibility with non-harmony modules
-/******/ 		__webpack_require__.n = (module) => {
-/******/ 			var getter = module && module.__esModule ?
-/******/ 				() => (module['default']) :
-/******/ 				() => (module);
-/******/ 			__webpack_require__.d(getter, { a: getter });
-/******/ 			return getter;
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
 /******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__webpack_require__.d = (exports, definition) => {
-/******/ 			for(var key in definition) {
-/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-/******/ 				}
-/******/ 			}
-/******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-/******/ 	})();
-/******/ 	
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "/js/";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ })
 /************************************************************************/
-var __webpack_exports__ = {};
+/******/ ([
+/* 0 */
+/***/ (function(module, exports) {
 
-;// CONCATENATED MODULE: ./src/templates/template
-var TEMPLATE =
-    '<div>' +
-        '<div id="b2sharebridgeTabView" class="dialogContainer">' +
-        '<table><tr><td>Title:</td><td><input type="text" name="b2s_title" id="b2s_title"></input></td></tr>' +
-        '<tr><td>Server:</td><td><div id="serverSelector"></div></td></tr>' +
-        '<tr><td>Community:</td><td><div id="communitySelector"></div></td></tr>' +
-        '<tr><td>Open access:</td><td><input type="checkbox" name="open_access" id="cbopen_access" /></td></tr>' +
-        '<tr><td></td><td><input type="button" value="deposit" id="publish_button"/></td></tr></table>' +
-        '<div class="errormsg" id="b2sharebridge_errormsg">ERROR3</div>' +
-    '</div>';
+module.exports = jQuery;
 
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-;// CONCATENATED MODULE: external "jQuery"
-const external_jQuery_namespaceObject = jQuery;
-var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery_namespaceObject);
-;// CONCATENATED MODULE: ./src/b2sharebridgetabview.js
-
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
+/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_0__);
+//import TEMPLATE from './templates/template';
 
 //import B2shareBridgeCollection from "b2sharebridgecollection.js";
 
@@ -71,7 +116,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
 //        '</div>';
 
     function publishAction(e) {
-        external_jQuery_default()(publish_button).prop('disabled', true);
+        jquery__WEBPACK_IMPORTED_MODULE_0___default()(publish_button).prop('disabled', true);
         const selectedFiles = FileList.getSelectedFiles();
         // if selectedFiles is empty, use fileInfo
         // otherwise create an array of files from the selection
@@ -86,17 +131,17 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
             fileInfo = e.data.param;
             ids = [fileInfo.id];
         }
-        let selected_community = external_jQuery_default()("#ddCommunitySelector").val();
-        let open_access = external_jQuery_default()('input[name="open_access"]:checked').length > 0;
-        let title = external_jQuery_default()("#b2s_title").val();
-        external_jQuery_default().post(
+        let selected_community = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#ddCommunitySelector").val();
+        let open_access = jquery__WEBPACK_IMPORTED_MODULE_0___default()('input[name="open_access"]:checked').length > 0;
+        let title = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#b2s_title").val();
+        jquery__WEBPACK_IMPORTED_MODULE_0___default.a.post(
             OC.generateUrl('/apps/b2sharebridge/publish'),
             {
                 ids: ids,
                 community: selected_community,
                 open_access: open_access,
                 title: title,
-                server_id: external_jQuery_default()('#ddServerSelector').val()
+                server_id: jquery__WEBPACK_IMPORTED_MODULE_0___default()('#ddServerSelector').val()
             },
             function (result) {
                 if (result && result.status === 'success') {
@@ -155,7 +200,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                     "/apps/b2sharebridge/gettabviewcontent?requesttoken=" +
                     encodeURIComponent(OC.requestToken);
                 let bview = this;
-                external_jQuery_default().ajax({
+                jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
                     type: 'GET',
                     url: OC.generateUrl(url_path),
                     async: false,
@@ -171,7 +216,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                     "/apps/b2sharebridge/servers?requesttoken=" +
                     encodeURIComponent(OC.requestToken);
                 let bview = this;
-                external_jQuery_default().ajax({
+                jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
                     type: 'GET',
                     url: OC.generateUrl(url_path),
                     async: false,
@@ -185,7 +230,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
 
             createErrorCallback: function (message) {
                 function callback() {
-                    let b2sharebridge_errormsg = external_jQuery_default()("#b2sharebridge_errormsg")
+                    let b2sharebridge_errormsg = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#b2sharebridge_errormsg")
                     b2sharebridge_errormsg.html(message);
                     b2sharebridge_errormsg.show();
                 }
@@ -231,14 +276,14 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                     const url_path =
                         "/apps/b2sharebridge/apitoken?requesttoken=" +
                         encodeURIComponent(OC.requestToken);
-                    external_jQuery_default().ajax({
+                    jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
                         type: 'GET',
                         url: OC.generateUrl(url_path),
                         async: false
                     }).done(function (data) {
                         that.tokens = data;
                     }).fail(function (data) {
-                        let b2sharebridge_errormsg = external_jQuery_default()("#b2sharebridge_errormsg")
+                        let b2sharebridge_errormsg = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#b2sharebridge_errormsg")
                         b2sharebridge_errormsg.html('Fetching tokens failed!');
                         b2sharebridge_errormsg.show();
                     });
@@ -255,7 +300,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
 
             getCommunitySelectorHTML: function () {
                 let result = "<select id='ddCommunitySelector'>";
-                let ddserver = external_jQuery_default()('#ddServerSelector');
+                let ddserver = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#ddServerSelector');
                 if (ddserver.length === 0) {
                     console.warn("Could not load ddServerSelector");
                     if (this.getCommunities().length === 0) {
@@ -264,13 +309,20 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                         return result;
                     } else {
                         console.warn("Selecting first community as default");
-                        const community = this.getCommunities()[0];
-                        result = result + "<option value=\"" + community.id + "\">" + community.name + "</option>";
+                        const first_community = this.getCommunities()[0];
+                        jquery__WEBPACK_IMPORTED_MODULE_0___default.a.each(
+                            this.getCommunities().filter(function (community) {
+                                return community.serverId.toString() === first_community.serverId.toString();
+                            }),
+                            function (i, c) {
+                                result = result + "<option value=\"" + c.id + "\">" + c.name + "</option>";
+                            }
+                        );
                         result = result + "</select>";
                         return result;
                     }
                 }
-                external_jQuery_default().each(
+                jquery__WEBPACK_IMPORTED_MODULE_0___default.a.each(
                     this.getCommunities().filter(function (community) {
                         return community.serverId.toString() === ddserver.val().toString();
                     }),
@@ -283,9 +335,9 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
             },
 
             getServerSelectorHTML: function () {
-                let result = "<select id='dd_server_selector' >";
-                this.servers.forEach(function (key, value) {
-                    result = result + "<option value=\"" + value.id + "\">" + value.name + "</option>";
+                let result = "<select id='ddServerSelector' >";
+                this.servers.forEach(function (data) {
+                    result = result + "<option value=\"" + data.id + "\">" + data.name + "</option>";
                 });
                 result = result + "</select>";
                 return result;
@@ -311,8 +363,8 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
             },
 
             checkToken: function () {
-                let b2sharebridge_errormsg = external_jQuery_default()("#b2sharebridge_errormsg")
-                if (!this.tokens[external_jQuery_default()('#ddServerSelector').val()]) {
+                let b2sharebridge_errormsg = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#b2sharebridge_errormsg")
+                if (!this.tokens[jquery__WEBPACK_IMPORTED_MODULE_0___default()('#ddServerSelector').val()]) {
                     b2sharebridge_errormsg.html('Please set B2SHARE API token in B2SHARE settings');
                     b2sharebridge_errormsg.show();
                 } else {
@@ -321,7 +373,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
             },
 
             onChangeServer: function () {
-                external_jQuery_default()("#communitySelector").html(this.getCommunitySelectorHTML());
+                jquery__WEBPACK_IMPORTED_MODULE_0___default()("#communitySelector").html(this.getCommunitySelectorHTML());
                 this.checkToken();
             },
 
@@ -329,31 +381,42 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
              * Renders this details view
              */
             render: function () {
-                this.$el.html(this.template());
-
                 this.loadServers();
                 this.loadCommunities();
 
-                let server_selector = external_jQuery_default()("#serverSelector")
-                const server_selector_html = this.getServerSelectorHTML()
-                server_selector.html(server_selector_html);
-                external_jQuery_default()("#communitySelector").html(this.getCommunitySelectorHTML());
-                this.getTokens();
-                server_selector.change(this.onChangeServer.bind(this));
+                let server_selector_html = this.getServerSelectorHTML();
+                let community_selector_html = this.getCommunitySelectorHTML();
+                let FILLED_TEMPLATE = '<div>' +
+                    '<div id="b2sharebridgeTabView" class="dialogContainer">' +
+                    '<table><tr><td>Title:</td><td><input type="text" name="b2s_title" id="b2s_title"></input></td></tr>' +
+                    '<tr><td>Server:</td><td><div id="serverSelector">' +
+                    server_selector_html + '</div></td></tr>' +
+                    '<tr><td>Community:</td><td><div id="communitySelector">' +
+                    community_selector_html + '</div></td></tr>' +
+                    '<tr><td>Open access:</td><td><input type="checkbox" name="open_access" id="cbopen_access" /></td></tr>' +
+                    '<tr><td></td><td><input type="button" value="deposit" id="publish_button"/></td></tr></table>' +
+                    '<div class="errormsg" id="b2sharebridge_errormsg">ERROR3</div>' +
+                    '</div>';
+                this.$el.html(FILLED_TEMPLATE);
+                this.$el.find
 
-                let publish_button = external_jQuery_default()("#publish_button")
+                this.getTokens();
+                this.$el.find("#serverSelector").change(this.onChangeServer.bind(this));
+
+                let publish_button = this.$el.find("#publish_button");
                 publish_button.bind('click', {param: this.fileInfo}, publishAction);
                 publish_button.prop('disabled', this._publish_button_disabled);
-                external_jQuery_default()("#b2s_title").val(this._b2s_title);
+                this.$el.find("#b2s_title").val(this._b2s_title);
                 this.delegateEvents();
 
-                let b2sharebridge_errormsg = external_jQuery_default()("#b2sharebridge_errormsg")
+                let b2sharebridge_errormsg = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#b2sharebridge_errormsg")
                 b2sharebridge_errormsg.html(this._error_msg);
                 if (this._error_msg !== "") {
                     b2sharebridge_errormsg.show();
                 } else {
                     this.checkToken();
                 }
+                let debug = this.$el.html();
             },
 
             /**
@@ -382,7 +445,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                 //var communities = [];
                 //var result = "";
                 let that = this;
-                external_jQuery_default().ajax({
+                jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
                     type: 'GET',
                     url: OC.generateUrl(url_path),
                     async: false
@@ -400,5 +463,6 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
 })();
 
 
-/******/ })()
-;
+
+/***/ })
+/******/ ]);

@@ -16,7 +16,7 @@ import $ from "jquery";
 //        '</div>';
 
     function publishAction(e) {
-        $(publish_button).prop('disabled', true);
+        this.$el.find("#publish_button").prop('disabled', true);
         const selectedFiles = FileList.getSelectedFiles();
         // if selectedFiles is empty, use fileInfo
         // otherwise create an array of files from the selection
@@ -31,9 +31,9 @@ import $ from "jquery";
             fileInfo = e.data.param;
             ids = [fileInfo.id];
         }
-        let selected_community = $("#ddCommunitySelector").val();
-        let open_access = $('input[name="open_access"]:checked').length > 0;
-        let title = $("#b2s_title").val();
+        let selected_community = this.$el.find("#ddCommunitySelector").val();
+        let open_access = this.$el.find('input[name="open_access"]:checked').length > 0;
+        let title = this.$el.find("#b2s_title").val();
         $.post(
             OC.generateUrl('/apps/b2sharebridge/publish'),
             {
@@ -41,7 +41,7 @@ import $ from "jquery";
                 community: selected_community,
                 open_access: open_access,
                 title: title,
-                server_id: $('#ddServerSelector').val()
+                server_id: this.$el.find('#ddServerSelector').val()
             },
             function (result) {
                 if (result && result.status === 'success') {
@@ -130,7 +130,7 @@ import $ from "jquery";
 
             createErrorCallback: function (message) {
                 function callback() {
-                    let b2sharebridge_errormsg = $("#b2sharebridge_errormsg")
+                    let b2sharebridge_errormsg = this.$el.find("#b2sharebridge_errormsg")
                     b2sharebridge_errormsg.html(message);
                     b2sharebridge_errormsg.show();
                 }
@@ -183,7 +183,7 @@ import $ from "jquery";
                     }).done(function (data) {
                         that.tokens = data;
                     }).fail(function (data) {
-                        let b2sharebridge_errormsg = $("#b2sharebridge_errormsg")
+                        let b2sharebridge_errormsg = this.$el.find("#b2sharebridge_errormsg")
                         b2sharebridge_errormsg.html('Fetching tokens failed!');
                         b2sharebridge_errormsg.show();
                     });
@@ -200,7 +200,7 @@ import $ from "jquery";
 
             getCommunitySelectorHTML: function () {
                 let result = "<select id='ddCommunitySelector'>";
-                let ddserver = $('#ddServerSelector');
+                let ddserver = this.$el.find('#ddServerSelector');
                 if (ddserver.length === 0) {
                     console.warn("Could not load ddServerSelector");
                     if (this.getCommunities().length === 0) {
@@ -209,8 +209,15 @@ import $ from "jquery";
                         return result;
                     } else {
                         console.warn("Selecting first community as default");
-                        const community = this.getCommunities()[0];
-                        result = result + "<option value=\"" + community.id + "\">" + community.name + "</option>";
+                        const first_community = this.getCommunities()[0];
+                        $.each(
+                            this.getCommunities().filter(function (community) {
+                                return community.serverId.toString() === first_community.serverId.toString();
+                            }),
+                            function (i, c) {
+                                result = result + "<option value=\"" + c.id + "\">" + c.name + "</option>";
+                            }
+                        );
                         result = result + "</select>";
                         return result;
                     }
@@ -229,8 +236,8 @@ import $ from "jquery";
 
             getServerSelectorHTML: function () {
                 let result = "<select id='dd_server_selector' >";
-                this.servers.forEach(function (key, value) {
-                    result = result + "<option value=\"" + value.id + "\">" + value.name + "</option>";
+                this.servers.forEach(function (data) {
+                    result = result + "<option value=\"" + data.id + "\">" + data.name + "</option>";
                 });
                 result = result + "</select>";
                 return result;
@@ -256,8 +263,8 @@ import $ from "jquery";
             },
 
             checkToken: function () {
-                let b2sharebridge_errormsg = $("#b2sharebridge_errormsg")
-                if (!this.tokens[$('#ddServerSelector').val()]) {
+                let b2sharebridge_errormsg = this.$el.find("#b2sharebridge_errormsg")
+                if (!this.tokens[this.$el.find('#ddServerSelector').val()]) {
                     b2sharebridge_errormsg.html('Please set B2SHARE API token in B2SHARE settings');
                     b2sharebridge_errormsg.show();
                 } else {
@@ -266,7 +273,7 @@ import $ from "jquery";
             },
 
             onChangeServer: function () {
-                $("#communitySelector").html(this.getCommunitySelectorHTML());
+                this.$el.find("#communitySelector").html(this.getCommunitySelectorHTML());
                 this.checkToken();
             },
 
@@ -274,25 +281,22 @@ import $ from "jquery";
              * Renders this details view
              */
             render: function () {
-                this.$el.html(this.template());
-
                 this.loadServers();
                 this.loadCommunities();
 
-                let server_selector = $("#serverSelector")
-                const server_selector_html = this.getServerSelectorHTML()
-                server_selector.html(server_selector_html);
-                $("#communitySelector").html(this.getCommunitySelectorHTML());
+                this.$el.html(this.template());
+                this.$el.find("#serverSelector").html(server_selector_html);
+                this.$el.find("#communitySelector").html(this.getCommunitySelectorHTML());
                 this.getTokens();
-                server_selector.change(this.onChangeServer.bind(this));
+                this.$el.find("#serverSelector").change(this.onChangeServer.bind(this));
 
-                let publish_button = $("#publish_button")
+                let publish_button = this.$el.find("#publish_button")
                 publish_button.bind('click', {param: this.fileInfo}, publishAction);
                 publish_button.prop('disabled', this._publish_button_disabled);
-                $("#b2s_title").val(this._b2s_title);
+                this.$el.find("#b2s_title").val(this._b2s_title);
                 this.delegateEvents();
 
-                let b2sharebridge_errormsg = $("#b2sharebridge_errormsg")
+                let b2sharebridge_errormsg = this.$el.find("#b2sharebridge_errormsg");
                 b2sharebridge_errormsg.html(this._error_msg);
                 if (this._error_msg !== "") {
                     b2sharebridge_errormsg.show();

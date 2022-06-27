@@ -95,10 +95,28 @@ module.exports = jQuery;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+// ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
-/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_0__);
-//import TEMPLATE from './templates/template';
+
+// CONCATENATED MODULE: ./src/templates/template
+var TEMPLATE =
+    '<div>' +
+        '<div id="b2sharebridgeTabView" class="dialogContainer">' +
+        '<table><tr><td>Title:</td><td><input type="text" name="b2s_title" id="b2s_title"></input></td></tr>' +
+        '<tr><td>Server:</td><td><div id="serverSelector"></div></td></tr>' +
+        '<tr><td>Community:</td><td><div id="communitySelector"></div></td></tr>' +
+        '<tr><td>Open access:</td><td><input type="checkbox" name="open_access" id="cbopen_access" /></td></tr>' +
+        '<tr><td></td><td><input type="button" value="deposit" id="publish_button"/></td></tr></table>' +
+        '<div class="errormsg" id="b2sharebridge_errormsg">ERROR3</div>' +
+    '</div>';
+
+
+// EXTERNAL MODULE: external "jQuery"
+var external_jQuery_ = __webpack_require__(0);
+var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery_);
+
+// CONCATENATED MODULE: ./src/b2sharebridgetabview.js
+
 
 //import B2shareBridgeCollection from "b2sharebridgecollection.js";
 
@@ -116,7 +134,7 @@ __webpack_require__.r(__webpack_exports__);
 //        '</div>';
 
     function publishAction(e) {
-        jquery__WEBPACK_IMPORTED_MODULE_0___default()(publish_button).prop('disabled', true);
+        external_jQuery_default()("#publish_button").prop('disabled', true);
         const selectedFiles = FileList.getSelectedFiles();
         // if selectedFiles is empty, use fileInfo
         // otherwise create an array of files from the selection
@@ -131,17 +149,17 @@ __webpack_require__.r(__webpack_exports__);
             fileInfo = e.data.param;
             ids = [fileInfo.id];
         }
-        let selected_community = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#ddCommunitySelector").val();
-        let open_access = jquery__WEBPACK_IMPORTED_MODULE_0___default()('input[name="open_access"]:checked').length > 0;
-        let title = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#b2s_title").val();
-        jquery__WEBPACK_IMPORTED_MODULE_0___default.a.post(
+        let selected_community = external_jQuery_default()("#ddCommunitySelector").val();
+        let open_access = external_jQuery_default()('input[name="open_access"]:checked').length > 0;
+        let title = external_jQuery_default()("#b2s_title").val();
+        external_jQuery_default.a.post(
             OC.generateUrl('/apps/b2sharebridge/publish'),
             {
                 ids: ids,
                 community: selected_community,
                 open_access: open_access,
                 title: title,
-                server_id: jquery__WEBPACK_IMPORTED_MODULE_0___default()('#ddServerSelector').val()
+                server_id: external_jQuery_default()('#ddServerSelector').val()
             },
             function (result) {
                 if (result && result.status === 'success') {
@@ -200,7 +218,7 @@ __webpack_require__.r(__webpack_exports__);
                     "/apps/b2sharebridge/gettabviewcontent?requesttoken=" +
                     encodeURIComponent(OC.requestToken);
                 let bview = this;
-                jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
+                external_jQuery_default.a.ajax({
                     type: 'GET',
                     url: OC.generateUrl(url_path),
                     async: false,
@@ -216,7 +234,7 @@ __webpack_require__.r(__webpack_exports__);
                     "/apps/b2sharebridge/servers?requesttoken=" +
                     encodeURIComponent(OC.requestToken);
                 let bview = this;
-                jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
+                external_jQuery_default.a.ajax({
                     type: 'GET',
                     url: OC.generateUrl(url_path),
                     async: false,
@@ -230,7 +248,7 @@ __webpack_require__.r(__webpack_exports__);
 
             createErrorCallback: function (message) {
                 function callback() {
-                    let b2sharebridge_errormsg = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#b2sharebridge_errormsg")
+                    let b2sharebridge_errormsg = this.$el.find("#b2sharebridge_errormsg")
                     b2sharebridge_errormsg.html(message);
                     b2sharebridge_errormsg.show();
                 }
@@ -276,14 +294,14 @@ __webpack_require__.r(__webpack_exports__);
                     const url_path =
                         "/apps/b2sharebridge/apitoken?requesttoken=" +
                         encodeURIComponent(OC.requestToken);
-                    jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
+                    external_jQuery_default.a.ajax({
                         type: 'GET',
                         url: OC.generateUrl(url_path),
                         async: false
                     }).done(function (data) {
                         that.tokens = data;
                     }).fail(function (data) {
-                        let b2sharebridge_errormsg = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#b2sharebridge_errormsg")
+                        let b2sharebridge_errormsg = this.$el.find("#b2sharebridge_errormsg")
                         b2sharebridge_errormsg.html('Fetching tokens failed!');
                         b2sharebridge_errormsg.show();
                     });
@@ -300,7 +318,7 @@ __webpack_require__.r(__webpack_exports__);
 
             getCommunitySelectorHTML: function () {
                 let result = "<select id='ddCommunitySelector'>";
-                let ddserver = jquery__WEBPACK_IMPORTED_MODULE_0___default()('#ddServerSelector');
+                let ddserver = this.$el.find('#ddServerSelector');
                 if (ddserver.length === 0) {
                     console.warn("Could not load ddServerSelector");
                     if (this.getCommunities().length === 0) {
@@ -310,7 +328,7 @@ __webpack_require__.r(__webpack_exports__);
                     } else {
                         console.warn("Selecting first community as default");
                         const first_community = this.getCommunities()[0];
-                        jquery__WEBPACK_IMPORTED_MODULE_0___default.a.each(
+                        external_jQuery_default.a.each(
                             this.getCommunities().filter(function (community) {
                                 return community.serverId.toString() === first_community.serverId.toString();
                             }),
@@ -322,7 +340,7 @@ __webpack_require__.r(__webpack_exports__);
                         return result;
                     }
                 }
-                jquery__WEBPACK_IMPORTED_MODULE_0___default.a.each(
+                external_jQuery_default.a.each(
                     this.getCommunities().filter(function (community) {
                         return community.serverId.toString() === ddserver.val().toString();
                     }),
@@ -335,7 +353,7 @@ __webpack_require__.r(__webpack_exports__);
             },
 
             getServerSelectorHTML: function () {
-                let result = "<select id='ddServerSelector' >";
+                let result = "<select id='dd_server_selector' >";
                 this.servers.forEach(function (data) {
                     result = result + "<option value=\"" + data.id + "\">" + data.name + "</option>";
                 });
@@ -363,8 +381,8 @@ __webpack_require__.r(__webpack_exports__);
             },
 
             checkToken: function () {
-                let b2sharebridge_errormsg = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#b2sharebridge_errormsg")
-                if (!this.tokens[jquery__WEBPACK_IMPORTED_MODULE_0___default()('#ddServerSelector').val()]) {
+                let b2sharebridge_errormsg = this.$el.find("#b2sharebridge_errormsg")
+                if (!this.tokens[this.$el.find('#ddServerSelector').val()]) {
                     b2sharebridge_errormsg.html('Please set B2SHARE API token in B2SHARE settings');
                     b2sharebridge_errormsg.show();
                 } else {
@@ -373,7 +391,7 @@ __webpack_require__.r(__webpack_exports__);
             },
 
             onChangeServer: function () {
-                jquery__WEBPACK_IMPORTED_MODULE_0___default()("#communitySelector").html(this.getCommunitySelectorHTML());
+                this.$el.find("#communitySelector").html(this.getCommunitySelectorHTML());
                 this.checkToken();
             },
 
@@ -384,39 +402,25 @@ __webpack_require__.r(__webpack_exports__);
                 this.loadServers();
                 this.loadCommunities();
 
-                let server_selector_html = this.getServerSelectorHTML();
-                let community_selector_html = this.getCommunitySelectorHTML();
-                let FILLED_TEMPLATE = '<div>' +
-                    '<div id="b2sharebridgeTabView" class="dialogContainer">' +
-                    '<table><tr><td>Title:</td><td><input type="text" name="b2s_title" id="b2s_title"></input></td></tr>' +
-                    '<tr><td>Server:</td><td><div id="serverSelector">' +
-                    server_selector_html + '</div></td></tr>' +
-                    '<tr><td>Community:</td><td><div id="communitySelector">' +
-                    community_selector_html + '</div></td></tr>' +
-                    '<tr><td>Open access:</td><td><input type="checkbox" name="open_access" id="cbopen_access" /></td></tr>' +
-                    '<tr><td></td><td><input type="button" value="deposit" id="publish_button"/></td></tr></table>' +
-                    '<div class="errormsg" id="b2sharebridge_errormsg">ERROR3</div>' +
-                    '</div>';
-                this.$el.html(FILLED_TEMPLATE);
-                this.$el.find
-
+                this.$el.html(this.template());
+                this.$el.find("#serverSelector").html(this.getServerSelectorHTML());
+                this.$el.find("#communitySelector").html(this.getCommunitySelectorHTML());
                 this.getTokens();
                 this.$el.find("#serverSelector").change(this.onChangeServer.bind(this));
 
-                let publish_button = this.$el.find("#publish_button");
+                let publish_button = this.$el.find("#publish_button")
                 publish_button.bind('click', {param: this.fileInfo}, publishAction);
                 publish_button.prop('disabled', this._publish_button_disabled);
                 this.$el.find("#b2s_title").val(this._b2s_title);
                 this.delegateEvents();
 
-                let b2sharebridge_errormsg = jquery__WEBPACK_IMPORTED_MODULE_0___default()("#b2sharebridge_errormsg")
+                let b2sharebridge_errormsg = this.$el.find("#b2sharebridge_errormsg");
                 b2sharebridge_errormsg.html(this._error_msg);
                 if (this._error_msg !== "") {
                     b2sharebridge_errormsg.show();
                 } else {
                     this.checkToken();
                 }
-                let debug = this.$el.html();
             },
 
             /**
@@ -445,7 +449,7 @@ __webpack_require__.r(__webpack_exports__);
                 //var communities = [];
                 //var result = "";
                 let that = this;
-                jquery__WEBPACK_IMPORTED_MODULE_0___default.a.ajax({
+                external_jQuery_default.a.ajax({
                     type: 'GET',
                     url: OC.generateUrl(url_path),
                     async: false

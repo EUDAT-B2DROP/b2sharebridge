@@ -16,7 +16,7 @@ import $ from "jquery";
 //        '</div>';
 
     function publishAction(e) {
-        this.$el.find("#publish_button").prop('disabled', true);
+        $("#publish_button").prop('disabled', true);
         const selectedFiles = FileList.getSelectedFiles();
         // if selectedFiles is empty, use fileInfo
         // otherwise create an array of files from the selection
@@ -31,9 +31,9 @@ import $ from "jquery";
             fileInfo = e.data.param;
             ids = [fileInfo.id];
         }
-        let selected_community = this.$el.find("#ddCommunitySelector").val();
-        let open_access = this.$el.find('input[name="open_access"]:checked').length > 0;
-        let title = this.$el.find("#b2s_title").val();
+        let selected_community = $("#ddCommunitySelector").val();
+        let open_access = $('input[name="open_access"]:checked').length > 0;
+        let title = $("#b2s_title").val();
         $.post(
             OC.generateUrl('/apps/b2sharebridge/publish'),
             {
@@ -41,7 +41,7 @@ import $ from "jquery";
                 community: selected_community,
                 open_access: open_access,
                 title: title,
-                server_id: this.$el.find('#ddServerSelector').val()
+                server_id: $('#ddServerSelector').val()
             },
             function (result) {
                 if (result && result.status === 'success') {
@@ -285,7 +285,7 @@ import $ from "jquery";
                 this.loadCommunities();
 
                 this.$el.html(this.template());
-                this.$el.find("#serverSelector").html(server_selector_html);
+                this.$el.find("#serverSelector").html(this.getServerSelectorHTML());
                 this.$el.find("#communitySelector").html(this.getCommunitySelectorHTML());
                 this.getTokens();
                 this.$el.find("#serverSelector").change(this.onChangeServer.bind(this));

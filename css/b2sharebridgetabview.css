@@ -6,6 +6,11 @@
 .b2shareBridgeTabView .clear-float {
     clear: both;
 }
+
+.b2shareBridgeTabView table {
+    width: 100%;
+}
+
 .b2shareBridgeTabView li {
     width: 100%;
     cursor: default;
@@ -67,5 +72,9 @@
 }
 
 .b2shareBridgeTabView select {
-    width:100%;
+    width: 100%;
+}
+
+#b2s_title {
+    width: 100%;
 }

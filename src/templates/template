@@ -1,6 +1,6 @@
 var TEMPLATE =
     '<div>' +
-        '<div id="b2sharebridgeTabView" class="dialogContainer">' +
+        '<div id="b2shareBridgeTabView" class="dialogContainer">' +
         '<table><tr><td>Title:</td><td><input type="text" name="b2s_title" id="b2s_title"></input></td></tr>' +
         '<tr><td>Server:</td><td><div id="serverSelector"></div></td></tr>' +
         '<tr><td>Community:</td><td><div id="communitySelector"></div></td></tr>' +

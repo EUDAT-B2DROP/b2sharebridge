@@ -79,6 +79,15 @@
     width: 100%;
 }
 
-#cbopen_access {
+#cbopen_access:hover {
     cursor: pointer;
+}
+
+#b2sharebridge_errormsg a{
+    color: blue;
+    text-decoration: underline;
+}
+
+#b2sharebridge_errormsg a:hover{
+    color: darkblue;
 }

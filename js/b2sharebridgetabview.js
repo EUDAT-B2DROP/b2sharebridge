@@ -176,7 +176,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
             _label: 'b2sharebridge',
 
             _loading: false,
-            _publish_button_disabled: false,
+            _error_detected: false,
 
             communities: [],
             servers: [],
@@ -199,7 +199,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                     this.fileInfo = fileInfo;
                     this.initializeB2ShareUI(fileInfo);
                     this.render();
-                    if(this._publish_button_disabled)
+                    if(this._error_detected)
                         this.do_ErrorCallback(this._error_msg)
                 }
             },
@@ -356,7 +356,6 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
 
             //OTHER
 
-
             template: function (data) {
                 return TEMPLATE;
             },
@@ -364,7 +363,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
             checkToken: function () {
                 let b2sharebridge_errormsg = this.$el.find("#b2sharebridge_errormsg")
                 if (!this.tokens[this.$el.find('#ddServerSelector').val()]) {
-                    throw 'Please set B2SHARE API token in B2SHARE settings';
+                    throw 'Please set B2SHARE API token in <a href="/settings/user/b2sharebridge">B2SHARE settings<a>';
                 }
                 b2sharebridge_errormsg.hide();
                 this.setPublishButtonDisabled(false);
@@ -435,7 +434,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
             },
 
             processData: function (data) {
-                this._publish_button_disabled = data['error'];
+                this._error_detected = data['error'];
                 this._error_msg = data['error_msg'];
                 this._b2s_title = data['title'];
             },
@@ -454,7 +453,7 @@ var external_jQuery_default = /*#__PURE__*/__webpack_require__.n(external_jQuery
                     async: false
                 }).done(this.processData).fail(function () {
                     //if PHP not reachable, disable publish button
-                    that._publish_button_disabled = true;
+                    that._error_detected = true;
                     that._error_msg = "ERROR - Nextcloud server cannot be reached."
                 });
             }

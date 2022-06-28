@@ -245,7 +245,7 @@ import $ from "jquery";
             checkToken: function () {
                 let b2sharebridge_errormsg = this.$el.find("#b2sharebridge_errormsg")
                 if (!this.tokens[this.$el.find('#ddServerSelector').val()]) {
-                    throw 'Please set B2SHARE API token in B2SHARE settings';
+                    throw 'Please set B2SHARE API token in <a href="/settings/user/b2sharebridge">B2SHARE settings<a>';
                 }
                 b2sharebridge_errormsg.hide();
                 this.setPublishButtonDisabled(false);

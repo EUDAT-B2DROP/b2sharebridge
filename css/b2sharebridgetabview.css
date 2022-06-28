@@ -64,6 +64,7 @@
 
 .b2shareBridgeTabView .errormsg {
     color: red;
+    text-align: center;
 }
 
 .b2shareBridgeTabView td {

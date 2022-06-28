@@ -10,7 +10,7 @@ function saveAPIToken(event)
             type: 'POST',
             url: OC.generateUrl('/apps/b2sharebridge/apitoken'),
             data: {
-                requesttoken: oc_requesttoken,
+                requesttoken: OC.requestToken,
                 token: post[0].value,
                 serverid: server_id
             }

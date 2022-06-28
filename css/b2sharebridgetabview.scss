@@ -6,6 +6,11 @@
 .b2shareBridgeTabView .clear-float {
     clear: both;
 }
+
+.b2shareBridgeTabView table {
+    width: 100%;
+}
+
 .b2shareBridgeTabView li {
     width: 100%;
     cursor: default;
@@ -59,7 +64,7 @@
 
 .b2shareBridgeTabView .errormsg {
     color: red;
-    display: none;
+    text-align: center;
 }
 
 .b2shareBridgeTabView td {
@@ -67,5 +72,22 @@
 }
 
 .b2shareBridgeTabView select {
-    width:100%;
+    width: 100%;
+}
+
+#b2s_title {
+    width: 100%;
+}
+
+#cbopen_access:hover {
+    cursor: pointer;
+}
+
+#b2sharebridge_errormsg a{
+    color: blue;
+    text-decoration: underline;
+}
+
+#b2sharebridge_errormsg a:hover{
+    color: darkblue;
 }

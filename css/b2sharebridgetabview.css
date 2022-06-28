@@ -77,3 +77,7 @@
 #b2s_title {
     width: 100%;
 }
+
+#cbopen_access {
+    cursor: pointer;
+}

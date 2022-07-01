@@ -21,7 +21,7 @@
         <database>sqlite</database>
         <database>mysql</database>
         <lib>curl</lib>
-        <nextcloud min-version="20" max-version="21" />
+        <nextcloud min-version="21" max-version="22" />
     </dependencies>
     <background-jobs>
         <job>OCA\B2shareBridge\Cron\B2ShareCommunityFetcher</job>

@@ -1,5 +1,7 @@
 .icon-filelist {
     @include icon-color('filelisticon', 'b2sharebridge', $color-white, 1, false);
+    max-width: 100%;
+    max-height: 100%;
 }
 
 

@@ -1,5 +1,6 @@
 .icon-filelist {
     @include icon-color('filelisticon', 'b2sharebridge', $color-white, 1, false);
+    background-size: contain;
 }
 
 

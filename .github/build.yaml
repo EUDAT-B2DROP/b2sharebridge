@@ -1,0 +1,60 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Webpack
+      run: |
+        npm install
+        npx webpack
+
+    - name: Before install
+      run: |
+        cd ../
+        git clone https://github.com/nextcloud/core.git --recursive --depth 1 -b stable23 nextcloud
+        mv b2sharebridge nextcloud/apps/
+
+    - name: Install
+      run: |
+        pear install pear/PHP_CodeSniffer
+        phpenv rehash
+        phpenv config-add nextcloud/apps/b2sharebridge/tests/travis/php.ini
+
+    - name: Setup MySQL
+      run: |
+        sudo systemctl start mysql.service
+        mysql -u root -e 'create database oc_autotest;';
+        mysql -u root -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';";
+        mysql -u root -e "grant all on oc_autotest.* to 'oc_autotest'@'localhost';";
+        
+    - name: Fill nextcloud configs
+      run: |
+        cd nextcloud
+        mkdir data
+        ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --admin-user admin --admin-pass admin --database mysql --database-pass=''
+        ./occ app:enable b2sharebridge
+    - name: Test
+      run: |
+        # nextcloud check-code
+        ./occ app:check-code b2sharebridge
+        php unit/lint checking
+        cd apps/b2sharebridge
+        phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
+        cd tests
+        phpunit -c phpunit.xml
+        phpunit -c phpunit.integration.xml

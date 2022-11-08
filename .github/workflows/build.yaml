@@ -13,8 +13,6 @@ jobs:
     strategy:
       matrix:
         node-version: [ 16.x ]
-        php-version: [ 7.4 ]  # TODO support php 8.x
-        nextcloud-version-branch: [ stable22, stable23 ]  # see https://github.com/nextcloud/server/branches
 
     steps:
       - uses: actions/checkout@v3
@@ -30,8 +28,14 @@ jobs:
           npx webpack 
 
   deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: [ 7.4 ]  # TODO support php 8.x
+        nextcloud-version-branch: [ stable22, stable23 ]  # see https://github.com/nextcloud/server/branches
+    name: Deploy b2sharebridge-app in a NC environment
+    needs: build
     steps:
-      - needs: build
       - name: Setup MySQL
         uses: mirromutth/mysql-action@v1.1
 

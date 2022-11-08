@@ -3,7 +3,7 @@ name: NodeJS with Webpack
 on:
   workflow_dispatch:  # Allow for manual trigger!
   push:
-    branches: [ $default-branch ]
+    branches: [ $default-branch, feature/gitlab-pipeline ]
   pull_request:
     branches: [ $default-branch ]
 

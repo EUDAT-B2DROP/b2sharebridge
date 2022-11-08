@@ -1,6 +1,7 @@
 name: NodeJS with Webpack
 
 on:
+  workflow_dispatch:  # Allow for manual trigger!
   push:
     branches: [ $default-branch ]
   pull_request:

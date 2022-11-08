@@ -70,6 +70,7 @@ jobs:
 
       - name: Configure NC
         run: |
+          ls -l
           cd nextcloud
           mkdir data
           ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --admin-user admin --admin-pass admin --database $DB --database-pass=''

@@ -65,13 +65,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-
-      - name: Configure PHP
-        run: |
-          sudo pear channel-update pear.php.net
-          sudo pear install pear/PHP_CodeSniffer
-          phpenv rehash
-          phpenv config-add nextcloud/apps/b2sharebridge/tests/travis/php.ini
+          ini-file: nextcloud/apps/b2sharebridge/tests/travis/php.ini
+          tools: phpunit, phpcs
 
       - name: Configure NC
         run: |
@@ -85,7 +80,7 @@ jobs:
 
       - name: Php Lint checking
         run: |
-          cd apps/b2sharebridge
+          cd nextcloud/apps/b2sharebridge
           phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
           cd tests
           phpunit -c phpunit.xml

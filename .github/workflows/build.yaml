@@ -1,4 +1,4 @@
-name: NodeJS with Webpack
+name: Build
 
 on:
   workflow_dispatch:  # Allow for manual trigger!

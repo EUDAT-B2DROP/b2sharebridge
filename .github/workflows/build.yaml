@@ -68,7 +68,8 @@ jobs:
 
       - name: Configure PHP
         run: |
-          pear install pear/PHP_CodeSniffer
+          sudo pear channel-update pear.php.net
+          sudo pear install pear/PHP_CodeSniffer
           phpenv rehash
           phpenv config-add nextcloud/apps/b2sharebridge/tests/travis/php.ini
 

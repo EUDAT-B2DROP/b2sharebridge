@@ -55,6 +55,7 @@ jobs:
           repository: nextcloud/server
           ref: ${{matrix.nextcloud-version-branch}}
           fetch-depth: 1
+          submodules: true  # 'Composer autoloader' is required in order to run the code check
 
       - uses: actions/checkout@v3
         name: Add b2sharebridge to nextcloud
@@ -70,7 +71,6 @@ jobs:
 
       - name: Configure NC
         run: |
-          ls -l
           mkdir data
           ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --admin-user admin --admin-pass admin --database $DB --database-pass=''
           ./occ app:enable b2sharebridge
@@ -80,7 +80,8 @@ jobs:
 
       - name: Php Lint checking
         run: |
-          cd apps/b2sharebridge
+          cd apps
+          ls -l
           phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
           cd tests
           phpunit -c phpunit.xml

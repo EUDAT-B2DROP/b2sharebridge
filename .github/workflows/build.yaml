@@ -79,6 +79,7 @@ jobs:
         run: ./occ app:check-code b2sharebridge
 
       - name: Php Lint checking
+        continue-on-error: true
         run: |
           cd apps/b2sharebridge
           phpcs --extensions=php --ignore=*/tests/*,*/templates/* .

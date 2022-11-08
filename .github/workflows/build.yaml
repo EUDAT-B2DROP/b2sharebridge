@@ -12,22 +12,22 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [16.x]
-        php-version: [7.4]  # TODO support php 8.x
-        nextcloud-version-branch: [stable22, stable23]  # see https://github.com/nextcloud/server/branches
+        node-version: [ 16.x ]
+        php-version: [ 7.4 ]  # TODO support php 8.x
+        nextcloud-version-branch: [ stable22, stable23 ]  # see https://github.com/nextcloud/server/branches
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
 
-    - name: Build
-      run: | # TODO check this
-        npm install
-        npx webpack 
+      - name: Build
+        run: | # TODO check this
+          npm install
+          npx webpack 
 
   deploy:
     steps:
@@ -63,7 +63,7 @@ jobs:
           mkdir data
           ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --admin-user admin --admin-pass admin --database $DB --database-pass=''
           ./occ app:enable b2sharebridge
-      
+
       - name: NC Check-code
         run: ./occ app:check-code b2sharebridge
 

@@ -37,16 +37,15 @@ jobs:
         nextcloud-version-branch: [ stable22, stable23 ]  # see https://github.com/nextcloud/server/branches
     name: Deploy b2sharebridge-app in a NC environment
     needs: build
+    env:
+      DB_DATABASE: oc_autotest
+      DB_USER: root
+      DB_PASSWORD: ''
     steps:
       - name: Setup MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          mysql user: 'developer'
-          mysql password: 'devpw'  # No secret required here
-
-      - name: Configure MySQL
-        run: |
-          mysql -u root -e 'create database oc_autotest;'
+        run:
+          sudo /etc/init.d/mysql start
+          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
           mysql -u root -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"
           mysql -u root -e "grant all on oc_autotest.* to 'oc_autotest'@'localhost';"
 

@@ -26,7 +26,7 @@ jobs:
 
       - name: Build
         run: | # TODO check this
-          npm install
+          npm ci
           npx webpack 
 
   deploy:

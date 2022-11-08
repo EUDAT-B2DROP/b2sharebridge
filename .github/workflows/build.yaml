@@ -39,13 +39,14 @@ jobs:
     needs: build
     env:
       DB_DATABASE: oc_autotest
+      DB_ROOT: root
     steps:
       - name: Setup MySQL
-        run:
+        run: |
           sudo /etc/init.d/mysql start
-          mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};'
-          mysql -u root -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"
-          mysql -u root -e "grant all on oc_autotest.* to 'oc_autotest'@'localhost';"
+          mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -e 'CREATE DATABASE ${{ env.DB_DATABASE }};'
+          mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"
+          mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -e "grant all on oc_autotest.* to 'oc_autotest'@'localhost';"
 
       - uses: actions/checkout@v3
         name: Checkout Nextcloud ${{matrix.nextcloud-version-branch}}

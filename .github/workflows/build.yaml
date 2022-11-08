@@ -72,7 +72,7 @@ jobs:
       - name: Configure NC
         run: |
           mkdir data
-          ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --admin-user admin --admin-pass admin --database $DB --database-pass=''
+          ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --admin-user admin --admin-pass admin --database $DB_DATABASE --database-pass=''
           ./occ app:enable b2sharebridge
 
       - name: NC Check-code

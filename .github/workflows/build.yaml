@@ -49,10 +49,17 @@ jobs:
           mysql -u root -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"
           mysql -u root -e "grant all on oc_autotest.* to 'oc_autotest'@'localhost';"
 
-      - name: Deploy on NC-${{matrix.nextcloud-version-branch}}
-        run: |
-          git clone https://github.com/nextcloud/server.git --recursive --depth 1 -b ${{matrix.nextcloud-version-branch}} nextcloud
-          mv b2sharebridge nextcloud/apps/
+      - uses: actions/checkout@v3
+        name: Checkout Nextcloud ${{matrix.nextcloud-version-branch}}
+        with:
+          repository: nextcloud/server
+          ref: ${{matrix.nextcloud-version-branch}}
+          fetch-depth: 1
+
+      - uses: actions/checkout@v3
+        name: Add b2sharebridge to nextcloud
+        with:
+          path: nextcloud/apps
 
       - name: Install PHP ${{ matrix.php-version }}
         uses: shivammathur/setup-php@v2

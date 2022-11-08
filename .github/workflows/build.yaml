@@ -72,6 +72,7 @@ jobs:
         run: |
           mkdir data
           ./occ maintenance:install --database-name $DB_DATABASE --database-user oc_autotest --admin-user admin --admin-pass admin --database mysql --database-pass=''
+          ls -l apps
           ./occ app:enable b2sharebridge
 
       - name: NC Check-code

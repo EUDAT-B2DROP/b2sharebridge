@@ -25,7 +25,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
 
     - name: Build
-      uses: actions/checkout@v2
       run: | # TODO check this
         npm install
         npx webpack 
@@ -35,6 +34,8 @@ jobs:
       - needs: build
       - name: Setup MySQL
         uses: mirromutth/mysql-action@v1.1
+
+      - name: Configure MySQL
         run: |
           mysql -u root -e 'create database oc_autotest;'
           mysql -u root -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"

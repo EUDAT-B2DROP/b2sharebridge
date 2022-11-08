@@ -1,0 +1,75 @@
+name: NodeJS with Webpack
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+        php-version: [7.4]  # TODO support php 8.x
+        nextcloud-version-branch: [stable22, stable23]  # see https://github.com/nextcloud/server/branches
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Build
+      uses: actions/checkout@v2
+      run: | # TODO check this
+        npm install
+        npx webpack 
+
+  deploy:
+    steps:
+      - needs: build
+      - name: Setup MySQL
+        uses: mirromutth/mysql-action@v1.1
+        run: |
+          mysql -u root -e 'create database oc_autotest;'
+          mysql -u root -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"
+          mysql -u root -e "grant all on oc_autotest.* to 'oc_autotest'@'localhost';"
+
+      - name: Deploy on NC-${{matrix.nextcloud-version-branch}}
+        run: |
+          git clone https://github.com/nextcloud/server.git --recursive --depth 1 -b ${{matrix.nextcloud-version-branch}} nextcloud
+          mv b2sharebridge nextcloud/apps/
+
+      - name: Install PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+
+      - name: Configure PHP
+        run: |
+          pear install pear/PHP_CodeSniffer
+          phpenv rehash
+          phpenv config-add nextcloud/apps/b2sharebridge/tests/travis/php.ini
+
+      - name: Configure NC
+        run: |
+          cd nextcloud
+          mkdir data
+          ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --admin-user admin --admin-pass admin --database $DB --database-pass=''
+          ./occ app:enable b2sharebridge
+      
+      - name: NC Check-code
+        run: ./occ app:check-code b2sharebridge
+
+      - name: Php Lint checking
+        run: |
+          cd apps/b2sharebridge
+          phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
+          cd tests
+          phpunit -c phpunit.xml
+          phpunit -c phpunit.integration.xml

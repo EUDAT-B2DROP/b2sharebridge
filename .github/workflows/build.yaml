@@ -80,8 +80,7 @@ jobs:
 
       - name: Php Lint checking
         run: |
-          cd apps
-          ls -l
+          cd apps/b2sharebridge
           phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
           cd tests
           phpunit -c phpunit.xml

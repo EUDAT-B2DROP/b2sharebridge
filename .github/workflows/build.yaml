@@ -82,7 +82,7 @@ jobs:
         continue-on-error: true
         run: |
           cd apps/b2sharebridge
-          phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
+          phpcs --extensions=php --ignore=*/tests/*,*/templates/*,*/Migration/* .
           cd tests
           phpunit -c phpunit.xml
           phpunit -c phpunit.integration.xml

@@ -40,6 +40,9 @@ jobs:
     steps:
       - name: Setup MySQL
         uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql user: 'developer'
+          mysql password: 'devpw'  # No secret required here
 
       - name: Configure MySQL
         run: |

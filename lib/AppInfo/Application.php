@@ -221,14 +221,16 @@ class Application extends App implements IBootstrap
         return;
     }
 
-    public function register(IRegistrationContext $context): void {
+    public function register(IRegistrationContext $context): void
+    {
         $context->registerEventListener(
             LoadSidebar::class,
             LoadSidebarListener::class
         );
     }
 
-    public function boot(IBootContext $context): void {
+    public function boot(IBootContext $context): void
+    {
          $this->registerNavigationEntry();
          $this->loadScripts();
          $this->registerSettings();

@@ -81,11 +81,11 @@ class B2share implements Ipublish
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
-     * @param string  $token        users access token
-     * @param string  $community    id of community metadata schema, defaults to EUDAT
-     * @param boolean $open_access  publish as open access, defaults to false
-     * @param string  $title        actual title of the deposit
-     * @param string  $api_endpoint api url 
+     * @param  string  $token        users access token
+     * @param  string  $community    id of community metadata schema, defaults to EUDAT
+     * @param  boolean $open_access  publish as open access, defaults to false
+     * @param  string  $title        actual title of the deposit
+     * @param  string  $api_endpoint api url 
      * @return null
      */
     public function create(

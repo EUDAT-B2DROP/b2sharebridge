@@ -62,7 +62,8 @@ class Personal implements ISettings
         $servers = [];
         foreach($serverEntities as $i => $s) {
             $servers[$i] = ['id' => $s->getId(), 'name' => $s->getName(), 'publishUrl' => $s->getPublishUrl(), 'token' => $this->_config->getUserValue(
-                $userId, 'b2sharebridge', 'token_' . $s->getId())];
+                $userId, 'b2sharebridge', 'token_' . $s->getId()
+            )];
         }
         $params = [
             'servers' => $servers

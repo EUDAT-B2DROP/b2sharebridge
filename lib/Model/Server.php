@@ -28,13 +28,15 @@ class Server extends Entity implements JsonSerializable
     protected $name;
     protected $publishUrl;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->addType('id', 'string');
         $this->addType('name', 'string');
         $this->addType('publishUrl', 'string');
     }
 
-    public function jsonSerialize() {
+    public function jsonSerialize()
+    {
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -42,7 +44,8 @@ class Server extends Entity implements JsonSerializable
         ];
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return "Server with id " . $this->id . " and name " . $this->name . " and publishUrl " . $this->publishUrl;
     }
 }

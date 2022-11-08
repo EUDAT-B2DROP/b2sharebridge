@@ -21,7 +21,8 @@ use OCP\IRequest;
 use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
 
 
-class ServerController extends Controller {
+class ServerController extends Controller
+{
     private $userId;
     private $mapper;
 
@@ -38,11 +39,13 @@ class ServerController extends Controller {
     /**
      * @NoAdminRequired
      * */
-    public function listServers() {
+    public function listServers()
+    {
         return $this->mapper->findAll();
     }
 
-    public function saveServers($servers) {
+    public function saveServers($servers)
+    {
         foreach($servers as $server) {
             if (array_key_exists('id', $server)) {
                 $old = $this->mapper->find($server['id']);
@@ -63,7 +66,8 @@ class ServerController extends Controller {
         return $this->mapper->findAll();
     }
 
-    public function deleteServer($id) {
+    public function deleteServer($id)
+    {
         $this->mapper->delete($this->mapper->find($id));
     }
 }

@@ -59,19 +59,18 @@ jobs:
       - uses: actions/checkout@v3
         name: Add b2sharebridge to nextcloud
         with:
-          path: nextcloud/apps
+          path: apps
 
       - name: Install PHP ${{ matrix.php-version }}
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          ini-file: nextcloud/apps/b2sharebridge/tests/travis/php.ini
+          ini-file: apps/b2sharebridge/tests/travis/php.ini
           tools: phpunit, phpcs
 
       - name: Configure NC
         run: |
           ls -l
-          cd nextcloud
           mkdir data
           ./occ maintenance:install --database-name oc_autotest --database-user oc_autotest --admin-user admin --admin-pass admin --database $DB --database-pass=''
           ./occ app:enable b2sharebridge
@@ -81,7 +80,7 @@ jobs:
 
       - name: Php Lint checking
         run: |
-          cd nextcloud/apps/b2sharebridge
+          cd apps/b2sharebridge
           phpcs --extensions=php --ignore=*/tests/*,*/templates/* .
           cd tests
           phpunit -c phpunit.xml

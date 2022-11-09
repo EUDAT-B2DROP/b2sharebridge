@@ -51,8 +51,8 @@ class ApplicationTest extends TestCase
 
     /**
      * @dataProvider queryData
-     * @param string $service
-     * @param string $expected
+     * @param        string $service
+     * @param        string $expected
      */
     public function testContainerQuery($service, $expected = null) 
     {

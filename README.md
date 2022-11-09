@@ -1,6 +1,6 @@
 # EUDAT B2SHARE integration app
 
-[![Build Status](https://travis-ci.com/EUDAT-B2DROP/b2sharebridge.svg?branch=master)](https://travis-ci.com/EUDAT-B2DROP/b2sharebridge)
+[![Build](https://github.com/EUDAT-B2DROP/b2sharebridge/actions/workflows/build.yaml/badge.svg)](https://github.com/EUDAT-B2DROP/b2sharebridge/actions/workflows/build.yaml)
 
 #### Table of Contents
 

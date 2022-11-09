@@ -1,0 +1,88 @@
+name: Build
+
+on:
+  workflow_dispatch:  # Allow for manual trigger!
+  push:
+    branches: [ $default-branch, feature/github-pipeline ]
+  pull_request:
+    branches: [ $default-branch ]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ 16.x ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Build
+        run: | # TODO check this
+          npm ci
+          npx webpack 
+
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: [ 7.4 ]  # TODO support php 8.x
+        nextcloud-version-branch: [ stable22, stable23 ]  # see https://github.com/nextcloud/server/branches
+    name: Deploy b2sharebridge-app in a NC environment
+    needs: build
+    env:
+      DB_DATABASE: oc_autotest
+      DB_ROOT: root
+    steps:
+      - name: Setup MySQL
+        run: |
+          sudo /etc/init.d/mysql start
+          mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -e 'CREATE DATABASE ${{ env.DB_DATABASE }};'
+          mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -e "CREATE USER 'oc_autotest'@'localhost' IDENTIFIED BY '';"
+          mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -e "grant all on oc_autotest.* to 'oc_autotest'@'localhost';"
+
+      - uses: actions/checkout@v3
+        name: Checkout Nextcloud ${{matrix.nextcloud-version-branch}}
+        with:
+          repository: nextcloud/server
+          ref: ${{matrix.nextcloud-version-branch}}
+          fetch-depth: 1
+          submodules: true  # 'Composer autoloader' is required in order to run the code check
+
+      - uses: actions/checkout@v3
+        name: Add b2sharebridge to nextcloud
+        with:
+          path: apps/b2sharebridge
+
+      - name: Install PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          ini-file: apps/b2sharebridge/tests/travis/php.ini
+          tools: phpunit, phpcs
+
+      - name: Configure NC
+        run: |
+          mkdir data
+          ./occ maintenance:install --database-name $DB_DATABASE --database-user oc_autotest --admin-user admin --admin-pass admin --database mysql --database-pass=''
+          ls -l apps
+          ./occ app:enable b2sharebridge
+
+      - name: NC Check-code
+        run: ./occ app:check-code b2sharebridge
+
+      - name: Php Lint checking
+        continue-on-error: true
+        run: |
+          cd apps/b2sharebridge
+          phpcs --extensions=php --ignore=*/tests/*,*/templates/*,*/Migration/* .
+          cd tests
+          phpunit -c phpunit.xml
+          phpunit -c phpunit.integration.xml

@@ -18,8 +18,10 @@ use OCP\AppFramework\Db\Mapper;
 use OCP\IDBConnection;
 use OCP\Util;
 
-class ServerMapper extends Mapper {
-    public function __construct(IDBConnection $db) {
+class ServerMapper extends Mapper
+{
+    public function __construct(IDBConnection $db)
+    {
         parent::__construct(
             $db,
             'b2sharebridge_server',
@@ -27,12 +29,14 @@ class ServerMapper extends Mapper {
         );
     }
 
-    public function find($id) {
+    public function find($id)
+    {
         $sql = 'SELECT * FROM `' . $this->tableName . '`WHERE `id` = ?';
         return $this->findEntity($sql, [$id]);
     }
 
-    public function findAll() {
+    public function findAll()
+    {
         $sql = 'SELECT * FROM ' . $this->tableName;
         return $this->findEntities($sql);
     }

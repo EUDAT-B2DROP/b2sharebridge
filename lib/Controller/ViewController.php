@@ -221,10 +221,12 @@ class ViewController extends Controller
     }
     /**
      * request endpoint for gettin users tokens
-     * @return JSONResponse
+     *
+     * @return          JSONResponse
      * @NoAdminRequired
      */
-    public function getTokens() {
+    public function getTokens()
+    {
         $userId = \OC::$server->getUserSession()->getUser()->getUID();
         $ret = [];
         $servers = $this->smapper->findAll();

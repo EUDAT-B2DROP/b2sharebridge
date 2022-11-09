@@ -67,7 +67,8 @@ class CommunityMapper extends Mapper
      * @return array(Entity)
      */
 
-    public function findForServer($serverId) {
+    public function findForServer($serverId)
+    {
         $sql = 'SELECT * FROM `' . $this->tableName  . '` WHERE server_id=' . $serverId;
         return $this->findEntities($sql);
     }
@@ -80,7 +81,11 @@ class CommunityMapper extends Mapper
     public function getCommunityList()
     {
         $communities = $this->findAll();
-        usort($communities, function($a, $b) { return strcmp($a->getName(), $b->getName()); });
+        usort(
+            $communities, function ($a, $b) {
+                return strcmp($a->getName(), $b->getName()); 
+            }
+        );
         return $communities;
     }
 

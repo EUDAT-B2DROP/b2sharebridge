@@ -25,14 +25,14 @@ class SectionTest extends TestCase
      */
     private $_section;
     /**
-     * @var  IURLGenerator|\PHPUnit_Framework_MockObject_MockObject 
+     * @var IURLGenerator|\PHPUnit_Framework_MockObject_MockObject 
      */
     private $_urlGenerator;
 
     /**
-     *  @var IL10N|\PHPUnit_Framework_MockObject_MockObject 
+     * @var IL10N|\PHPUnit_Framework_MockObject_MockObject 
      */
-	private $_l10n;
+    private $_l10n;
 
     public function setUp(): void
     {

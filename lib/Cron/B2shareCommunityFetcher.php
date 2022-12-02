@@ -14,7 +14,6 @@
 
 namespace OCA\B2shareBridge\Cron;
 
-use OC\BackgroundJob\TimedJob;
 use OCA\B2shareBridge\Model\Community;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
@@ -29,11 +28,11 @@ use OCA\B2shareBridge\Model\ServerMapper;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class B2shareCommunityFetcher extends TimedJob
+class B2shareCommunityFetcher
 {
 
-    protected $config;
-    protected $logger;
+    protected ?IConfig $config = null;
+    protected ?ILogger $logger = null;
 
     /**
      * Create cron that is fetching the b2share communities api
@@ -41,25 +40,18 @@ class B2shareCommunityFetcher extends TimedJob
      * @param IConfig $config we need a config
      * @param ILogger $logger having a logger is always good
      */
-    public function __construct(
-        IConfig $config = null,
-        ILogger $logger = null
-    ) {
-        if ($config === null || $logger === null) {
+    function __construct()
+    {
+        if ($this->config === null || $this->logger === null) {
             $this->fixDIForJobs();
-        } else {
-            $this->config = $config;
-            $this->logger = $logger;
         }
         $this->setInterval(86400); // 24hrs
     }
 
     /**
-     * Fix cron if no constructor parameters fiven
-     *
-     * @return null
+     * Fix cron if no constructor parameters given
      */
-    protected function fixDIForJobs()
+    function fixDIForJobs()
     {
         $this->config = \OC::$server->getConfig();
         $this->logger = \OC::$server->getLogger();
@@ -69,16 +61,14 @@ class B2shareCommunityFetcher extends TimedJob
      * Cron code to execute
      *
      * @param array(string) $args array of arguments
-     *
-     * @return null
      */
-    protected function run($args)
+    function run($args)
     {
-        $serverMapper =  new ServerMapper(\OC::$server->getDatabaseConnection());
+        $serverMapper = new ServerMapper(\OC::$server->getDatabaseConnection());
         $communityMapper = new CommunityMapper(\OC::$server->getDatabaseConnection());
         $servers = $serverMapper->findAll();
-        foreach($servers as $server) {
-            $b2share_communities_url = $server->getPublishUrl().'/api/communities/';
+        foreach ($servers as $server) {
+            $b2share_communities_url = $server->getPublishUrl() . '/api/communities/';
             $json = $this->_getUrlContent($b2share_communities_url);
             if (!$json) {
                 $this->logger->error(
@@ -101,14 +91,14 @@ class B2shareCommunityFetcher extends TimedJob
                 $this->logger->debug(
                     'Fetched community with id: ' . $community['id'] .
                     ' and name: ' . $community['name'] . ' fetched' .
-                    ' and restricted_submission: '. $community['restricted_submission'] . ' from server ' . $server->getName(),
+                    ' and restricted_submission: ' . $community['restricted_submission'] . ' from server ' . $server->getName(),
                     ['app' => 'b2sharebridge']
                 );
                 if ($community['restricted_submission'] !== true) {
                     $communities_b2share[$community['id']] = $community['name'];
                 } else {
                     $communities_b2share[$community['id']] = $community['name'] . ' ' .
-                    "\u{0001F512}";
+                        "\u{0001F512}";
                 }
             }
 
@@ -146,14 +136,14 @@ class B2shareCommunityFetcher extends TimedJob
         // Remove orphans
 
         $communities = $communityMapper->findAll();
-        foreach($communities as $community) {
+        foreach ($communities as $community) {
             $found = false;
-            foreach($servers as $server) {
+            foreach ($servers as $server) {
                 if ($server->getId() == $community->getServerId()) {
                     $found = true;
                 }
             }
-            if ($found == false) {
+            if (!$found) {
                 $this->logger->info(
                     'Removing orphan community with id: ' . $community->getId()
                 );
@@ -171,7 +161,7 @@ class B2shareCommunityFetcher extends TimedJob
      *
      * @NoAdminRequired
      */
-    private function _getUrlContent($url)
+    private function _getUrlContent(string $url)
     {
         $ch = curl_init();
         $config = array(
@@ -181,7 +171,7 @@ class B2shareCommunityFetcher extends TimedJob
             CURLOPT_REFERER => $url,
             CURLOPT_RETURNTRANSFER => true
         );
-        $check_ssl =  $this->config->getAppValue(
+        $check_ssl = $this->config->getAppValue(
             'b2sharebridge',
             'check_ssl',
             '1'

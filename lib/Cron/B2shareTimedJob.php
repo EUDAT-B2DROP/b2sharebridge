@@ -9,7 +9,7 @@ class B2shareTimedJob extends TimedJob {
 
     private B2shareCommunityFetcher $myService;
 
-    public function __construct(ITimeFactory $time, B2shareCommunityFetcher $service) {
+    function __construct(ITimeFactory $time, B2shareCommunityFetcher $service) {
         parent::__construct($time);
         $this->myService = $service;
 

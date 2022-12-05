@@ -45,7 +45,6 @@ class B2shareCommunityFetcher
         if ($this->config === null || $this->logger === null) {
             $this->fixDIForJobs();
         }
-        $this->setInterval(86400); // 24hrs
     }
 
     /**
@@ -155,9 +154,9 @@ class B2shareCommunityFetcher
     /**
      * Fetch url for json, opt-in to disable ssl
      *
-     * @param \string $url URL to fetch
+     * @param string $url URL to fetch
      *
-     * @return \string Response
+     * @return string Response
      *
      * @NoAdminRequired
      */

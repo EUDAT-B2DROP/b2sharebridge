@@ -17,7 +17,9 @@ namespace OCA\B2shareBridge\Cron;
 use OCA\B2shareBridge\Model\Community;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
-
+use OCP\IConfig;
+use OCP\ILogger;
+use OCP\IDBConnection;
 
 /**
  * Register a owncloud Job to regularly fetch b2share api to get communities list
@@ -31,29 +33,19 @@ use OCA\B2shareBridge\Model\ServerMapper;
 class B2shareCommunityFetcher
 {
 
-    protected ?IConfig $config = null;
-    protected ?ILogger $logger = null;
+    private IConfig $config;
+    private ILogger $logger;
+    private IDBConnection $dbconnection;
 
     /**
      * Create cron that is fetching the b2share communities api
-     *
-     * @param IConfig $config we need a config
-     * @param ILogger $logger having a logger is always good
+     * with dependency injection
      */
-    function __construct()
+    function __construct(ILogger $logger, IConfig $config, IDBConnection $dbconnection)
     {
-        if ($this->config === null || $this->logger === null) {
-            $this->fixDIForJobs();
-        }
-    }
-
-    /**
-     * Fix cron if no constructor parameters given
-     */
-    function fixDIForJobs()
-    {
-        $this->config = \OC::$server->getConfig();
-        $this->logger = \OC::$server->getLogger();
+        $this->config = $config;
+        $this->logger = $logger;
+        $this->dbconnection = $dbconnection;
     }
 
     /**
@@ -63,8 +55,8 @@ class B2shareCommunityFetcher
      */
     function run($args)
     {
-        $serverMapper = new ServerMapper(\OC::$server->getDatabaseConnection());
-        $communityMapper = new CommunityMapper(\OC::$server->getDatabaseConnection());
+        $serverMapper = new ServerMapper($this->dbconnection);
+        $communityMapper = new CommunityMapper($this->dbconnection);
         $servers = $serverMapper->findAll();
         foreach ($servers as $server) {
             $b2share_communities_url = $server->getPublishUrl() . '/api/communities/';

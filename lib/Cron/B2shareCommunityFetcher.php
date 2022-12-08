@@ -20,6 +20,7 @@ use OCA\B2shareBridge\Model\ServerMapper;
 use OCP\IConfig;
 use OCP\ILogger;
 use OCP\IDBConnection;
+use OCP\AppFramework\Utility\ITimeFactory;
 
 /**
  * Register a owncloud Job to regularly fetch b2share api to get communities list
@@ -30,7 +31,7 @@ use OCP\IDBConnection;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class B2shareCommunityFetcher
+class B2shareCommunityFetcher extends TimedJob
 {
 
     private IConfig $config;
@@ -41,11 +42,14 @@ class B2shareCommunityFetcher
      * Create cron that is fetching the b2share communities api
      * with dependency injection
      */
-    function __construct(ILogger $logger, IConfig $config, IDBConnection $dbconnection)
+    function __construct(ILogger $logger, IConfig $config, IDBConnection $dbconnection, ITimeFactory $time)
     {
+        parent::__construct($time);
         $this->config = $config;
         $this->logger = $logger;
         $this->dbconnection = $dbconnection;
+        // Run once an hour
+        $this->setInterval(3600);
     }
 
     /**

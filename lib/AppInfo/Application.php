@@ -22,7 +22,7 @@ use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
-use OCA\B2shareBridge\Cron\B2shareTimedJob;
+use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
 use OCA\B2shareBridge\View\Navigation;
 use OCP\AppFramework\App;
 use OCP\IContainer;
@@ -202,7 +202,7 @@ class Application extends App implements IBootstrap
         //\OCP\BackgroundJob::registerJob(
         //    'OCA\B2shareBridge\Cron\B2shareCommunityFetcher'
         //);
-        \OC::$server->getJoblist()->add(B2shareTimedJob::class);
+        \OC::$server->getJoblist()->add(B2shareCommunityFetcher::class);
         return;
     }
 

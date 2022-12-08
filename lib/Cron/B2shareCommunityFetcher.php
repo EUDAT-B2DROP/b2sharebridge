@@ -20,6 +20,7 @@ use OCA\B2shareBridge\Model\ServerMapper;
 use OCP\IConfig;
 use OCP\ILogger;
 use OCP\IDBConnection;
+use OCP\BackgroundJob\TimedJob;
 use OCP\AppFramework\Utility\ITimeFactory;
 
 /**

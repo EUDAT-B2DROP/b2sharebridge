@@ -67,18 +67,20 @@ class B2shareCommunityFetcher extends TimedJob
             $json = $this->_getUrlContent($b2share_communities_url);
             if (!$json) {
                 $this->logger->error(
-                    'Fetching the B2SHARE communities API was not possible.',
+                    'Fetching the B2SHARE communities API at ' . $b2share_communities_url .
+                    ' was not possible.',
                     ['app' => 'b2sharebridge']
                 );
-                return;
+                continue;
             }
             $communities_fetched = json_decode($json, true)['hits']['hits'];
             if ($communities_fetched === null) {
                 $this->logger->error(
-                    'Fetching the B2SHARE communities API did not return a valid JSON.',
+                    'Fetching the B2SHARE communities API at ' . $b2share_communities_url .
+                    ' did not return a valid JSON.',
                     ['app' => 'b2sharebridge']
                 );
-                return;
+                continue;
             }
 
             $communities_b2share = [];

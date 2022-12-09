@@ -202,7 +202,7 @@ class Application extends App implements IBootstrap
         //\OCP\BackgroundJob::registerJob(
         //    'OCA\B2shareBridge\Cron\B2shareCommunityFetcher'
         //);
-        \OC::$server->getJoblist()->add(B2ShareCommunityFetcher::class);
+        \OC::$server->getJoblist()->add(B2shareCommunityFetcher::class);
         return;
     }
 

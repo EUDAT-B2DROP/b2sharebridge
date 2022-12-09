@@ -60,8 +60,8 @@ class ServerController extends Controller
             }
         }
         // replace job to get communities instantly
-        \OC::$server->getJobList()->remove(B2ShareCommunityFetcher::class);
-        \OC::$server->getJobList()->add(B2ShareCommunityFetcher::class);
+        \OC::$server->getJobList()->remove(B2shareCommunityFetcher::class);
+        \OC::$server->getJobList()->add(B2shareCommunityFetcher::class);
 
         return $this->mapper->findAll();
     }

@@ -78,6 +78,11 @@ jobs:
       - name: NC Check-code
         run: ./occ app:check-code b2sharebridge
 
+      - name: Test Background Job
+        run: |
+          job_id=`mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -s -N -e "SELECT id FROM oc_jobs WHERE class LIKE '%B2shareCommunityFetcher'" ${{ env.DB_DATABASE }}`
+          ./occ background-job:execute $job_id
+
       - name: Php Lint checking
         continue-on-error: true
         run: |
@@ -86,3 +91,5 @@ jobs:
           cd tests
           phpunit -c phpunit.xml
           phpunit -c phpunit.integration.xml
+      
+

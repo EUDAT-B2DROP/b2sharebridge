@@ -79,10 +79,14 @@ jobs:
         run: ./occ app:check-code b2sharebridge
 
       - name: Test Background Job
-        if: ${{ matrix.nextcloud-version-branch != 'stable22' }}  # https://github.com/actions/runner/issues/1173
+        if: ${{ matrix.nextcloud-version-branch != 'stable22' }}  # https://github.com/actions/runner/issues/1173   # 'background-job'-cmd is only available since nc23
         run: |
+          mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -e "INSERT INTO oc_b2sharebridge_server (name, publish_url) VALUES ('EUDAT B2SHARE', 'https://b2share.eudat.eu')" ${{ env.DB_DATABASE }}
           job_id=`mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -s -N -e "SELECT id FROM oc_jobs WHERE class LIKE '%B2shareCommunityFetcher'" ${{ env.DB_DATABASE }}`
           ./occ background-job:execute $job_id
+          num_communities=`mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -s -N -e "SELECT COUNT(1) FROM oc_b2sharebridge_communities" ${{ env.DB_DATABASE }}`
+          echo "$num_communities communities fetched!"
+          exit $(($num_communities == 0))
 
       - name: Php Lint checking
         continue-on-error: true

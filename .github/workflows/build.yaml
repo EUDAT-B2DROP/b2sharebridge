@@ -79,6 +79,7 @@ jobs:
         run: ./occ app:check-code b2sharebridge
 
       - name: Test Background Job
+        if: ${{ matrix.nextcloud-version-branch != 'stable22' }}  # https://github.com/actions/runner/issues/1173
         run: |
           job_id=`mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -s -N -e "SELECT id FROM oc_jobs WHERE class LIKE '%B2shareCommunityFetcher'" ${{ env.DB_DATABASE }}`
           ./occ background-job:execute $job_id

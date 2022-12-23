@@ -128,10 +128,10 @@ class B2share implements Ipublish
         } else {
             $header_size = curl_getinfo($this->curl_client, CURLINFO_HEADER_SIZE);
             $body = substr($response, $header_size);
-            $results = json_decode(utf8_encode($body));
-            if (array_key_exists('links', $results)
-                and array_key_exists('self', $results->links)
-                and array_key_exists('files', $results->links)
+            $results = json_decode(utf8_encode($body), false);
+            if (property_exists($results, 'links')
+                and property_exists($results->links, 'self')
+                and property_exists($results->links, 'files')
             ) {
                 $this->file_upload_url
                     = $results->links->files;
@@ -142,7 +142,7 @@ class B2share implements Ipublish
                 );
             } else {
                 $this->error_message = "Something went wrong in uploading.";
-                if (array_key_exists('status', $results)) { 
+                if (property_exists($results, 'status')) {
                     if ($results->status==='403') {
                         $this->error_message = "403 - Authorization Required";
                     }

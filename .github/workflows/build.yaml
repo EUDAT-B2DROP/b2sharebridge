@@ -6,8 +6,10 @@ on:
     branches:
       - $default-branch,
       - '**pipeline'
-    pull_request:
-      branches: [ $default-branch ]
+  pull_request:
+    branches:
+      - '**'
+
 
 
 jobs:

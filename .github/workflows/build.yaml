@@ -86,6 +86,7 @@ jobs:
           ./occ app:enable b2sharebridge
 
       - name: NC Check-code
+        if: ${{ matrix.nextcloud-version-branch != 'stable25' }}
         run: ./occ app:check-code b2sharebridge
 
       - name: Test Background Job

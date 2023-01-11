@@ -87,7 +87,7 @@ class B2share implements Ipublish
      * @param string $title actual title of the deposit
      * @param string $api_endpoint api url
      *
-     * @return boolean
+     * @return string  file URL in b2access
      */
     public function create(
         $token,
@@ -95,7 +95,7 @@ class B2share implements Ipublish
         $open_access = false,
         $title = "Deposit title",
         $api_endpoint = "https://trng-b2share.eudat.eu"
-    ): ?bool
+    ): string
     {
         //now settype("false","boolean") evaluates to true, so:
         $b_open_access = false;
@@ -126,7 +126,7 @@ class B2share implements Ipublish
         curl_setopt_array($this->curl_client, $config);
         $response = curl_exec($this->curl_client);
         if (!$response) {
-            return false;
+            return "";
         } else {
             $header_size = curl_getinfo($this->curl_client, CURLINFO_HEADER_SIZE);
             $body = substr($response, $header_size);
@@ -149,7 +149,7 @@ class B2share implements Ipublish
                         $this->error_message = "403 - Authorization Required";
                     }
                 }
-                return false;
+                return "";
             }
         }
     }

@@ -3,9 +3,13 @@ name: Build
 on:
   workflow_dispatch:  # Allow for manual trigger!
   push:
-    branches: [ $default-branch, feature/github-pipeline ]
+    branches:
+      - $default-branch,
+      - '**pipeline'
   pull_request:
-    branches: [ $default-branch ]
+    branches:
+      - '**'
+
 
 
 jobs:
@@ -33,8 +37,20 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: [ 7.4 ]  # TODO support php 8.x
-        nextcloud-version-branch: [ stable22, stable23 ]  # see https://github.com/nextcloud/server/branches
+        php-version: [ 7.4, 8.0, 8.1 ]
+        nextcloud-version-branch: [ stable22, stable23, stable24 ]  # see https://github.com/nextcloud/server/branches
+        exclude:
+          - php-version: 7.4
+            nextcloud-version-branch: stable24
+          - php-version: 7.4
+            nextcloud-version-branch: stable25
+          - php-version: 8.0
+            nextcloud-version-branch: stable22
+          - php-version: 8.1
+            nextcloud-version-branch: stable22
+          - php-version: 8.1
+            nextcloud-version-branch: stable23
+
     name: Deploy b2sharebridge-app in a NC environment
     needs: build
     env:
@@ -76,6 +92,7 @@ jobs:
           ./occ app:enable b2sharebridge
 
       - name: NC Check-code
+        if: ${{ matrix.nextcloud-version-branch != 'stable25' }}
         run: ./occ app:check-code b2sharebridge
 
       - name: Test Background Job

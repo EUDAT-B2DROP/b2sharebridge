@@ -13,6 +13,7 @@
  */
 
 namespace OCA\B2shareBridge\Publish;
+
 use OCP\Util;
 
 /**
@@ -34,8 +35,7 @@ class B2share implements Ipublish
     /**
      * Create object for actual upload
      *
-     * @param string  $api_endpoint api endpoint baseurl for b2share
-     * @param boolean $check_ssl    whether to check security for https
+     * @param boolean $check_ssl whether to check security for https
      */
     public function __construct($check_ssl)
     {
@@ -55,8 +55,8 @@ class B2share implements Ipublish
     /**
      * Get the portion of the file upload URL
      * filename + access_token still need to be pasted
-     * 
-     * @return the file_upload_url for the files bucket
+     *
+     * @return string the file_upload_url for the files bucket
      */
     public function getFileUploadUrlPart()
     {
@@ -65,10 +65,10 @@ class B2share implements Ipublish
 
     /**
      * Get the error message from HTTP service
-     * 
-     * @return the error message from the http interaction
+     *
+     * @return string error message from the http interaction
      */
-    public function getErrorMessage()
+    public function getErrorMessage(): string
     {
         if (is_null($this->error_message)) {
             return '';
@@ -81,12 +81,13 @@ class B2share implements Ipublish
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
-     * @param  string  $token        users access token
-     * @param  string  $community    id of community metadata schema, defaults to EUDAT
-     * @param  boolean $open_access  publish as open access, defaults to false
-     * @param  string  $title        actual title of the deposit
-     * @param  string  $api_endpoint api url 
-     * @return null
+     * @param string  $token        users access token
+     * @param string  $community    id of community metadata schema, defaults to EUDAT
+     * @param boolean $open_access  publish as open access, defaults to false
+     * @param string  $title        actual title of the deposit
+     * @param string  $api_endpoint api url
+     *
+     * @return string  file URL in b2access
      */
     public function create(
         $token,
@@ -94,17 +95,17 @@ class B2share implements Ipublish
         $open_access = false,
         $title = "Deposit title",
         $api_endpoint = "https://trng-b2share.eudat.eu"
-    ) {
+    ): string {
         //now settype("false","boolean") evaluates to true, so:
         $b_open_access = false;
-        if ($open_access==="true") {
-               $b_open_access = true;
+        if ($open_access === "true") {
+            $b_open_access = true;
         }
         $data = json_encode(
             [
-                'community'   => $community,
-                'titles'      => [[
-                    'title'   => $title
+                'community' => $community,
+                'titles' => [[
+                    'title' => $title
                 ]],
                 'open_access' => $b_open_access
             ]
@@ -114,24 +115,24 @@ class B2share implements Ipublish
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_POSTREDIR => 3,
             CURLOPT_URL =>
-                $api_endpoint.'/api/records/?access_token='.$token,
+                $api_endpoint . '/api/records/?access_token=' . $token,
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_POSTFIELDS => $data,
             CURLOPT_HTTPHEADER => array(
                 'Content-Type: application/json',
-                'Content-Length: '.strlen($data))
+                'Content-Length: ' . strlen($data))
         );
         curl_setopt_array($this->curl_client, $config);
         $response = curl_exec($this->curl_client);
         if (!$response) {
-            return false;
+            return "";
         } else {
             $header_size = curl_getinfo($this->curl_client, CURLINFO_HEADER_SIZE);
             $body = substr($response, $header_size);
-            $results = json_decode(utf8_encode($body));
-            if (array_key_exists('links', $results)
-                and array_key_exists('self', $results->links)
-                and array_key_exists('files', $results->links)
+            $results = json_decode(utf8_encode($body), false);
+            if (property_exists($results, 'links')
+                and property_exists($results->links, 'self')
+                and property_exists($results->links, 'files')
             ) {
                 $this->file_upload_url
                     = $results->links->files;
@@ -142,12 +143,12 @@ class B2share implements Ipublish
                 );
             } else {
                 $this->error_message = "Something went wrong in uploading.";
-                if (array_key_exists('status', $results)) { 
-                    if ($results->status==='403') {
+                if (property_exists($results, 'status')) {
+                    if ($results->status === '403') {
                         $this->error_message = "403 - Authorization Required";
                     }
                 }
-                return false;
+                return "";
             }
         }
     }

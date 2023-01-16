@@ -98,7 +98,7 @@ jobs:
       - name: Unit Tests
         run: |
           cd apps/b2sharebridge
-          phpunit tests
+          phpunit --bootstrap tests/bootstrap.php tests
 
       - name: Test Background Job
         if: ${{ matrix.nextcloud-version-branch != 'stable22' }}  # https://github.com/actions/runner/issues/1173   # 'background-job'-cmd is only available since nc23

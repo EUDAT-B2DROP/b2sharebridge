@@ -15,7 +15,7 @@ namespace OCA\B2shareBridge\Tests\AppInfo;
 
 use PHPUnit\Framework\TestCase;
 
-class Test extends TestCase
+class RoutesTest extends TestCase
 {
     public function testFile() 
     {

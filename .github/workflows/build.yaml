@@ -97,8 +97,13 @@ jobs:
 
       - name: Unit Tests
         run: |
-          cd apps/b2sharebridge
-          phpunit --bootstrap tests/bootstrap.php tests
+          cd apps/b2sharebridge/tests
+          phpunit -c phpunit.xml unit
+
+      - name: Integration Tests
+        run: |
+          cd apps/b2sharebridge/tests
+          phpunit -c phpunit.integration.xml integration
 
       - name: Test Background Job
         if: ${{ matrix.nextcloud-version-branch != 'stable22' }}  # https://github.com/actions/runner/issues/1173   # 'background-job'-cmd is only available since nc23
@@ -115,8 +120,3 @@ jobs:
         run: |
           cd apps/b2sharebridge
           phpcs --extensions=php --ignore=*/tests/*,*/templates/*,*/Migration/* .
-          cd tests
-          phpunit -c phpunit.xml
-          phpunit -c phpunit.integration.xml
-      
-

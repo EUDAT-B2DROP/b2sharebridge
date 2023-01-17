@@ -1,8 +1,52 @@
 {
+  "name": "b2sharebridge",
+  "description": "An app to connect b2drop with b2share",
+  "version": "2.0.0",
+  "author": "EUDAT-B2DROP developers <info@eudat.eu>",
+  "repository": {
+    "url": "https://github.com/EUDAT-B2DROP/b2sharebridge",
+    "type": "git"
+  },
+  "homepage": "https://github.com/EUDAT-B2DROP/b2sharebridge",
+  "license": "GPLv3",
+  "private": true,
+  "scripts": {
+    "build": "webpack --node-env production --progress",
+    "dev": "webpack --node-env development --progress",
+    "watch": "webpack --node-env development --progress --watch",
+    "serve": "webpack --node-env development serve --progress",
+    "lint": "eslint --ext .js,.vue src",
+    "lint:fix": "eslint --ext .js,.vue src --fix",
+    "stylelint": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue",
+    "stylelint:fix": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue --fix"
+  },
   "dependencies": {
-    "jquery": "^3.6.0"
+    "@mdi/js": "^7.1.96",
+    "@nextcloud/axios": "^2.3.0",
+    "@nextcloud/dialogs": "^3.2.0",
+    "@nextcloud/router": "^2.0.1",
+    "@nextcloud/vue": "^7.4.0",
+    "bootstrap-vue": "^2.23.1",
+    "jquery": "^3.6.0",
+    "vee-validate": "^3.1.0",
+    "vue": "^2.7.14",
+    "vue-loader": "^15.10.1"
+  },
+  "browserslist": [
+    "extends @nextcloud/browserslist-config"
+  ],
+  "engines": {
+    "node": "^16.0.0",
+    "npm": "^7.0.0 || ^8.0.0"
   },
   "devDependencies": {
+    "@nextcloud/babel-config": "^1.0.0",
+    "@nextcloud/browserslist-config": "^2.3.0",
+    "@nextcloud/eslint-config": "^8.2.0",
+    "@nextcloud/stylelint-config": "^2.3.0",
+    "@nextcloud/webpack-vue-config": "^5.4.0",
+    "check-dependencies": "^1.1.0",
+    "webpack": "^5.75.0",
     "webpack-cli": "^4.10.0"
   }
 }

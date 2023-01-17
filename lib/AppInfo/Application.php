@@ -42,6 +42,7 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
  */
 class Application extends App implements IBootstrap
 {
+    public const APP_ID = 'b2sharebridge';
     /**
      * Create a ownCloud application
      *

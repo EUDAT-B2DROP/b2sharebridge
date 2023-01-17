@@ -28,6 +28,7 @@ use OCP\IConfig;
 use OCP\IRequest;
 use OCP\ILogger;
 use OCP\Util;
+use OCA\B2shareBridge\AppInfo\Application;
 
 /**
  * Implement a ownCloud AppFramework Controller
@@ -131,193 +132,19 @@ class ViewController extends Controller
                 $this->fdmapper->getFileCount($publication->getId())
             );
         }
-        $params = [
+        /*$params = [
             'user' => $this->userId,
             'publications' => $publications,
             'statuscodes' => $this->statusCodes,
             'appNavigation' => $this->navigation->getTemplate($filter),
             'filter' => $filter,
-        ];
+        ];*/
+
+        Util::addScript(Application::APP_ID, 'b2sharebridge-main');
 
         return new TemplateResponse(
-            $this->appName,
-            'body',
-            $params
+            Application::APP_ID,
+            'main',
         );
-    }
-
-    /**
-     * XHR request endpoint for token setter
-     *
-     * @return          JSONResponse
-     * @NoAdminRequired
-     */
-    public function setToken()
-    {
-        $param = $this->request->getParams();
-        $error = false;
-        if (!is_array($param)
-            || !array_key_exists('token', $param)
-        ) {
-            $error = 'Parameters gotten from UI are no array or they are missing';
-        }
-        $token = $param['token'];
-        $server_id = $param['serverid'];
-
-        if (!is_string($token)) {
-            $error = 'Problems while parsing fileid or publishToken';
-        }
-        $userId = \OC::$server->getUserSession()->getUser()->getUID();
-        if (strlen($userId) <= 0) {
-            $error = 'No user configured for session';
-        }
-        if (($error)) {
-            \OC::$server->getLogger()->error($error, ['app' => 'b2sharebridge']);
-            return new JSONResponse(
-                [
-                    'message'=>'Internal server error, contact the EUDAT helpdesk',
-                    'status' => 'error'
-                ]
-            );
-        }
-
-
-        \OC::$server->getLogger()->info(
-            'saving API token', ['app' => 'b2sharebridge']
-        );
-        $this->config->setUserValue($userId, $this->appName, "token_" . $server_id, $token);
-        return new JSONResponse(
-            [
-                "data" => ["message" => "Saved"],
-                "status" => "success"
-            ]
-        );
-    }
-
-    /**
-     * XHR request endpoint for token setter
-     *
-     * @return          JSONResponse
-     * @NoAdminRequired
-     */
-    public function deleteToken($id)
-    {
-        \OC::$server->getLogger()->info(
-            'Deleting API token', ['app' => 'b2sharebridge']
-        );
-        $userId = \OC::$server->getUserSession()->getUser()->getUID();
-        if (strlen($userId) <= 0) {
-            \OC::$server->getLogger()->info(
-                'No user configured for session', ['app' => 'b2sharebridge']
-            );
-            return new JSONResponse(
-                [
-                    'message'=>'Internal server error, contact the EUDAT helpdesk',
-                    'status' => 'error'
-                ]
-            );
-        }
-        $this->config->setUserValue($userId, $this->appName, 'token_' . $id, '');
-    }
-    /**
-     * request endpoint for gettin users tokens
-     *
-     * @return          JSONResponse
-     * @NoAdminRequired
-     */
-    public function getTokens()
-    {
-        $userId = \OC::$server->getUserSession()->getUser()->getUID();
-        $ret = [];
-        $servers = $this->smapper->findAll();
-        foreach($servers as $server) {
-            $serverId = $server->getId();
-            $ret[$serverId] = $this->config->getUserValue($userId, $this->appName, 'token_'. $serverId);
-        };
-        return $ret;
-    }
-
-    /**
-     * XHR request endpoint for getting communities list dropdown for tabview
-     *
-     * @return          array
-     * @NoAdminRequired
-     */
-    public function getTabViewContent()
-    {
-
-        return $this->cMapper->getCommunityList();
-    }
-
-
-    /**
-     * XHR request endpoint for token state: disables or enables publish button
-     *
-     * @return          JSONResponse
-     * @NoAdminRequired
-     */
-    public function initializeB2ShareUI()
-    {
-        $is_error = false;
-        $error_msg = "";
-        \OC::$server->getLogger()->debug(
-            'in func initUI', ['app' => 'b2sharebridge']
-        );
-        $userId = \OC::$server->getUserSession()->getUser()->getUID();
-        if (strlen($userId) <= 0) {
-            \OC::$server->getLogger()->info(
-                'No user configured for session', ['app' => 'b2sharebridge']
-            );
-            $is_error = true;
-            $error_msg .= "Authorization failure: login first.<br>\n";
-        }
-        $param = $this->request->getParams();
-        $id = (int) $param['file_id'];
-        Filesystem::init($this->userId, '/');
-        $view = Filesystem::getView();
-        \OC::$server->getLogger()->debug(
-            'File ID: '.$id, ['app' => 'b2sharebridge']
-        );
-        $filesize = $view->filesize(Filesystem::getPath($id));
-        $fileName = basename(Filesystem::getPath($id));
-        $is_dir = $view->is_dir(Filesystem::getPath($id));
-        if ($is_dir) {
-               $is_error = true;
-               $error_msg .= "You can only publish a file to B2SHARE.<br>\n";
-        }
-
-        $allowed_uploads = $this->config->getAppValue(
-            'b2sharebridge',
-            'max_uploads',
-            5
-        );
-        $allowed_filesize = $this->config->getAppValue(
-            'b2sharebridge',
-            'max_upload_filesize',
-            512
-        );
-        $active_uploads = count(
-            $this->mapper->findAllForUserAndStateString(
-                $this->userId,
-                'pending'
-            )
-        );
-        if ($active_uploads>$allowed_uploads) {
-               $is_error = true;
-               $error_msg .= "You already have ".$active_uploads.
-                   " active uploads. You are only allowed ".$allowed_uploads.
-                   " uploads. Please try again later.<br>\n";
-        }
-        if ($filesize>$allowed_filesize * 1024 * 1024) {
-            $is_error = true;
-            $error_msg .= "We currently only support files smaller then "
-                    . $allowed_filesize . " MB.<br>\n";
-        }
-        $result = [
-        "title" => $fileName,
-            "error" => $is_error,
-            "error_msg" => $error_msg
-        ];
-        return new JSONResponse($result);
     }
 }

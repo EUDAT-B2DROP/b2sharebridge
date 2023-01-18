@@ -203,10 +203,10 @@ class Application extends App implements IBootstrap
         // Register the composer autoloader for packages shipped by this app, if applicable
         include_once __DIR__ . '/../../vendor/autoload.php';
 
-        /*$context->registerEventListener(
+        $context->registerEventListener(
             LoadSidebar::class,
             LoadSidebarListener::class
-        );*/
+        );
     }
 
     public function boot(IBootContext $context): void

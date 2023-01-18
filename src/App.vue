@@ -77,8 +77,8 @@ export default {
    */
   async mounted() {
     try {
-      //const response = await axios.get(generateUrl('/apps/notestutorial/notes'); //TODO
-      //this.Deposits = response.data
+      const response = await axios.get(generateUrl('/apps/b2sharebridge/'); //TODO
+      this.Deposits = response.data
     } catch (e) {
       console.error(e)
       showError(t('b2sharebridge', 'Could not fetch deposits'))
@@ -87,3 +87,20 @@ export default {
   },
 }
 </script>
+<style scoped>
+#app-content > div {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+input[type='text'] {
+  width: 100%;
+}
+textarea {
+  flex-grow: 1;
+  width: 100%;
+}
+</style>

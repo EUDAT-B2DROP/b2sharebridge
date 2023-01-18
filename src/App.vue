@@ -2,7 +2,7 @@
   <div id="content" class="app-b2sharebridge">
     <NcAppNavigation>
       <NcAppNavigationNew v-if="!loading"
-                          :text="t('b2sharebridge', 'All Deposits')"
+                          :text="t('b2sharebridge', 'All DepositsTODORemoveTest')"
                           :disabled="false"
                           button-id="deposit-all-button"
                           button-class="icon-add"

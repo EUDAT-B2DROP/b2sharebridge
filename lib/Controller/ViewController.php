@@ -20,7 +20,6 @@ use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
-use OCA\B2shareBridge\View\Navigation;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -48,7 +47,6 @@ class ViewController extends Controller
     protected $config;
     protected $cMapper;
     protected $smapper;
-    protected $navigation;
 
     /**
      * Creates the AppFramwork Controller
@@ -62,7 +60,6 @@ class ViewController extends Controller
      * @param ServerMapper        $smapper     server mapper
      * @param StatusCodes         $statusCodes whatever
      * @param string              $userId      userid
-     * @param Navigation          $navigation  navigation bar object
      */
     public function __construct(
         $appName,
@@ -74,7 +71,6 @@ class ViewController extends Controller
         ServerMapper $smapper,
         StatusCodes $statusCodes,
         $userId,
-        Navigation $navigation
     ) {
         parent::__construct($appName, $request);
         $this->userId = $userId;
@@ -84,7 +80,6 @@ class ViewController extends Controller
         $this->smapper = $smapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
-        $this->navigation = $navigation;
     }
 
     /**

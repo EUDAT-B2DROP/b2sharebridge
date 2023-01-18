@@ -14,6 +14,8 @@
 
 namespace OCA\B2shareBridge\Publish;
 
+use OCA\B2shareBridge\AppInfo\Application;
+use OCP\IConfig;
 use OCP\Util;
 
 /**
@@ -35,9 +37,9 @@ class B2share implements Ipublish
     /**
      * Create object for actual upload
      *
-     * @param boolean $check_ssl whether to check security for https
+     * @param IConfig $check_ssl whether to check security for https
      */
-    public function __construct($check_ssl)
+    public function __construct(IConfig $config)
     {
         $this->curl_client = curl_init();
         $defaults = array(
@@ -45,7 +47,7 @@ class B2share implements Ipublish
             CURLOPT_TIMEOUT => 4,
             CURLOPT_HEADER => 1,
         );
-        if (!$check_ssl) {
+        if (!$config->getAppValue(Application::APP_ID, 'check_ssl', '1')) {
             $defaults[CURLOPT_SSL_VERIFYHOST] = 0;
             $defaults[CURLOPT_SSL_VERIFYPEER] = 0;
         }
@@ -81,11 +83,11 @@ class B2share implements Ipublish
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
-     * @param string  $token        users access token
-     * @param string  $community    id of community metadata schema, defaults to EUDAT
-     * @param boolean $open_access  publish as open access, defaults to false
-     * @param string  $title        actual title of the deposit
-     * @param string  $api_endpoint api url
+     * @param string $token users access token
+     * @param string $community id of community metadata schema, defaults to EUDAT
+     * @param boolean $open_access publish as open access, defaults to false
+     * @param string $title actual title of the deposit
+     * @param string $api_endpoint api url
      *
      * @return string  file URL in b2access
      */
@@ -95,7 +97,8 @@ class B2share implements Ipublish
         $open_access = false,
         $title = "Deposit title",
         $api_endpoint = "https://trng-b2share.eudat.eu"
-    ): string {
+    ): string
+    {
         //now settype("false","boolean") evaluates to true, so:
         $b_open_access = false;
         if ($open_access === "true") {
@@ -157,8 +160,8 @@ class B2share implements Ipublish
      * Create upload object but do not the upload here
      *
      * @param string $file_upload_url the upload_url for the files bucket
-     * @param string $filehandle      file handle
-     * @param string $filesize        local filename of file that should be submitted
+     * @param string $filehandle file handle
+     * @param string $filesize local filename of file that should be submitted
      *
      * @return boolean
      */

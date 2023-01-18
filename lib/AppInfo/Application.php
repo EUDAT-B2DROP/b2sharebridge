@@ -55,7 +55,7 @@ class Application extends App implements IBootstrap
      */
     public function __construct(array $urlParams = array())
     {
-        parent::__construct('b2sharebridge', $urlParams);
+        parent::__construct(self::APP_ID, $urlParams);
         $container = $this->getContainer();
 
         /**
@@ -200,6 +200,9 @@ class Application extends App implements IBootstrap
 
     public function register(IRegistrationContext $context): void
     {
+        // Register the composer autoloader for packages shipped by this app, if applicable
+        include_once __DIR__ . '/../../vendor/autoload.php';
+
         /*$context->registerEventListener(
             LoadSidebar::class,
             LoadSidebarListener::class

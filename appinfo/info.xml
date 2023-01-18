@@ -32,5 +32,11 @@
         <personal>OCA\B2shareBridge\Settings\Personal</personal>
         <personal-section>OCA\B2shareBridge\Settings\PersonalSection</personal-section>
     </settings>
+    <navigations>
+        <navigation>
+            <name>B2SHARE</name>
+            <route>b2sharebridge.view.depositList</route>
+        </navigation>
+    </navigations>
 </info>
 

@@ -77,7 +77,7 @@ export default {
    */
   async mounted() {
     try {
-      const response = await axios.get(generateUrl('/apps/b2sharebridge/'); //TODO
+      const response = await axios.get(generateUrl('/apps/b2sharebridge/')); //TODO
       this.Deposits = response.data
     } catch (e) {
       console.error(e)

@@ -1,73 +1,73 @@
 <template>
   <div>
-    <div id="b2shareBridgeTabView" class="dialogContainer">
-      <table>
-        <validation-observer ref="observer" v-slot="{ handleSubmit }">
-          <b-form @submit.stop.prevent="publishAction()">
-            <tr>
-              <td>
-                <validation-provider
-                    name="Name"
-                    :rules="{ required: true, min: 3 }"
-                    v-slot="validationContext"
-                >
-                  <b-form-input v-model="deposit_title" id="b2s_title" placeholder="Deposit title"></b-form-input>
-                </validation-provider>
-              </td>
-            </tr>
-            <tr>
-              <td>Server:</td>
-              <td>
-                <div>
+    <NcAppContent>
+      <div id="b2shareBridgeTabView" class="dialogContainer">
+        <table>
+          <validation-observer ref="observer" v-slot="{ handleSubmit }">
+            <b-form @submit.stop.prevent="publishAction()">
+              <tr>
+                <td>
+                  <validation-provider
+                      name="Name"
+                      :rules="{ required: true, min: 3 }"
+                      v-slot="validationContext"
+                  >
+                    <b-form-input v-model="deposit_title" id="b2s_title" placeholder="Deposit title"></b-form-input>
+                  </validation-provider>
+                </td>
+              </tr>
+              <tr>
+                <td>Server:</td>
+                <td>
+                  <div>
+                    <validation-provider
+                        name="Name"
+                        :rules="{ required: true }"
+                        v-slot="validationContext"
+                    >
+                      <b-form-select v-model="server_selected" :options="server_options"
+                                     @change="onChangeServer"></b-form-select>
+                    </validation-provider>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>Community:</td>
+                <td>
                   <validation-provider
                       name="Name"
                       :rules="{ required: true }"
                       v-slot="validationContext"
                   >
-                    <b-form-select v-model="server_selected" :options="server_options"
-                                   @change="onChangeServer"></b-form-select>
+                    <b-form-select v-model="community_selected" :options="community_options"></b-form-select>
                   </validation-provider>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <td>Community:</td>
-              <td>
-                <validation-provider
-                    name="Name"
-                    :rules="{ required: true }"
-                    v-slot="validationContext"
-                >
-                  <b-form-select v-model="community_selected" :options="community_options"></b-form-select>
-                </validation-provider>
-              </td>
-            </tr>
-            <tr>
-              <td>Open access:</td>
-              <td>
-                <b-form-checkbox v-model="checkbox_status" type="checkbox" name="open_access" id="cbopen_access"/>
-              </td>
-            </tr>
-            <tr>
-              <td></td>
-              <td>
-                <b-btn variant="outline-primary" type="submit" id="publish_button" @click="publishAction"/>
-              </td>
-            </tr>
-          </b-form>
-        </validation-observer>
-      </table>
-      <div v-if="tokens === null" class="errormsg" id="b2sharebridge_errormsg">Please set your B2SHARE API token <a
-          href="/settings/user/b2sharebridge">here</a>
+                </td>
+              </tr>
+              <tr>
+                <td>Open access:</td>
+                <td>
+                  <b-form-checkbox v-model="checkbox_status" type="checkbox" name="open_access" id="cbopen_access"/>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <b-btn variant="outline-primary" type="submit" id="publish_button" @click="publishAction"/>
+                </td>
+              </tr>
+            </b-form>
+          </validation-observer>
+        </table>
+        <div v-if="tokens === null" class="errormsg" id="b2sharebridge_errormsg">Please set your B2SHARE API token <a
+            href="/settings/user/b2sharebridge">here</a>
+        </div>
       </div>
-    </div>
+    </NcAppContent>
   </div>
 </template>
 <script>
-import {mdiCloudUpload} from '@mdi/js';
 import {
-  NcAppSidebar,
-  NcAppSidebarTab,
+  NcAppContent
 } from '@nextcloud/vue'
 import {generateOcsUrl} from "@nextcloud/router";
 import axios from "@nextcloud/axios";
@@ -75,9 +75,7 @@ import axios from "@nextcloud/axios";
 export default {
   name: "b2sharebridgeSidebar",
   components: {
-    mdiCloudUpload,
-    NcAppSidebar,
-    NcAppSidebarTab,
+    NcAppContent,
   },
   data() {
     return {

@@ -17,6 +17,7 @@ namespace OCA\B2shareBridge\AppInfo;
 
 use OCA\B2shareBridge\Controller\PublishController;
 use OCA\B2shareBridge\Controller\ViewController;
+use OCA\B2shareBridge\Controller\ServerController;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
@@ -135,6 +136,15 @@ class Application extends App implements IBootstrap
                 $c->get(CommunityMapper::class),
                 $c->get(ServerMapper::class),
                 $c->get(StatusCodes::class),
+                $c->get("UserId")
+            );
+        });
+
+        $container->registerService(ServerController::class, function (ContainerInterface $c): ServerController {
+            return new ServerController(
+                $c->get('appName'),
+                $c->get(IRequest::class),
+                $c->get(ServerMapper::class),
                 $c->get("UserId")
             );
         });

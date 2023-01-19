@@ -2,7 +2,7 @@
   <div>
     <NcAppContent>
       <div id="b2shareBridgeTabView" class="dialogContainer">
-        <b-form-group>
+        <div>
           <validation-observer ref="observer" v-slot="{ handleSubmit }">
             <b-form @submit.stop.prevent="publishAction()">
               <validation-provider
@@ -10,32 +10,39 @@
                   :rules="{ required: true, min: 3 }"
                   v-slot="validationContext"
               >
-                <b-form-input label="Deposit Title:" v-model="deposit_title" id="b2s_title"
-                              placeholder="Deposit title"></b-form-input>
+                <b-form-group label-cols="4" label-cols-lg="sm" label="Deposit Title:" label-for="b2s_title">
+                  <b-form-input v-model="deposit_title" id="b2s_title"
+                                placeholder="Deposit title"></b-form-input>
+                </b-form-group>
               </validation-provider>
               <validation-provider
                   name="Name"
                   :rules="{ required: true }"
                   v-slot="validationContext"
               >
-                <b-form-select label="Server:" v-model="server_selected" :options="server_options"
-                               @change="onChangeServer"></b-form-select>
+                <b-form-group label-cols="4" label-cols-lg="sm" label="Server:" label-for="b2s_server">
+                  <b-form-select v-model="server_selected" :options="server_options" id="b2s_server"
+                                 @change="onChangeServer"></b-form-select>
+                </b-form-group>
               </validation-provider>
               <validation-provider
                   name="Name"
                   :rules="{ required: true }"
                   v-slot="validationContext"
               >
-                <b-form-select label="Community:" v-model="community_selected"
-                               :options="community_options"></b-form-select>
+                <b-form-group label-cols="4" label-cols-lg="sm" label="Community:" label-for="b2s_community">
+                  <b-form-select label="Community:" v-model="community_selected" id="b2s_community"
+                                 :options="community_options"></b-form-select>
+                </b-form-group>
               </validation-provider>
-
-              <b-form-checkbox label="Open access:" v-model="checkbox_status" type="checkbox" name="open_access"
-                               id="cbopen_access"/>
+              <b-form-group label-cols="4" label-cols-lg="sm" label="Community:" label-for="cbopen_access">
+                <b-form-checkbox label="Open access:" v-model="checkbox_status" type="checkbox" name="open_access"
+                                 id="cbopen_access"/>
+              </b-form-group>
               <b-btn variant="outline-primary" type="submit" id="publish_button" @click="publishAction"/>
             </b-form>
           </validation-observer>
-        </b-form-group>
+        </div>
         <div v-if="tokens === null" class="errormsg" id="b2sharebridge_errormsg">Please set your B2SHARE API token <a
             href="/settings/user/b2sharebridge">here</a>
         </div>

@@ -69,7 +69,7 @@
 import {
   NcAppContent
 } from '@nextcloud/vue'
-import {generateOcsUrl} from "@nextcloud/router";
+import {generateOcsUrl, generateUrl} from "@nextcloud/router";
 import axios from "@nextcloud/axios";
 
 export default {
@@ -252,7 +252,7 @@ export default {
           encodeURIComponent(OC.requestToken) + "&file_id=" +
           encodeURIComponent(fileInfo.id);
       this.fileInfo = fileInfo;
-      axios.get(generateOcsUrl(url_path)); //TODO process errors with then
+      axios.get(generateUrl(url_path)); //TODO process errors with then
     },
 
     //VeeValidate

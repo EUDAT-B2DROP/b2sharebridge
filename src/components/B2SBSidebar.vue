@@ -56,11 +56,14 @@ import {
 } from '@nextcloud/vue'
 import {generateUrl} from "@nextcloud/router";
 import axios from "@nextcloud/axios";
+import {ValidationProvider, ValidationObserver} from "vee-validate";
 
 export default {
   name: "b2sharebridgeSidebar",
   components: {
     NcAppContent,
+    ValidationObserver,
+    ValidationProvider,
   },
   data() {
     return {
@@ -84,11 +87,11 @@ export default {
   async mounted() {
     this.loadServers();
     this.loadCommunities();
-    this.servers.forEach();
-    if (this.servers !== 0) {
+    if (this.servers.length !== 0) {
       this.server_options = Array.from(this.servers, function (server) {
         return {value: server.id, text: server.url};
       })
+      //TODO auto select if only one server is available
     }
     this.tokens = this.getTokens();
   },
@@ -211,11 +214,13 @@ export default {
     //Events
 
     onChangeServer: function () {
-      this.community_options = []
-      let community;
-      for (community in this.communities) {
-        if (community.serverId === this.server_selected.id)
-          this.community_options.push({value: community.id, text: community.name});
+      if (this.server_selected !== null) {
+        this.community_options = []
+        let community;
+        for (community in this.communities) {
+          if (community.serverId === this.server_selected.id)
+            this.community_options.push({value: community.id, text: community.name});
+        }
       }
     },
 

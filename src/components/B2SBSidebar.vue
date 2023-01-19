@@ -168,11 +168,13 @@ export default {
       return axios
           .get(generateUrl(url_path))
           .then((response) => {
+            console.log('Loaded servers:');
+            console.log(response);
             this.servers = response;
           })
           .catch((error) => {
-            console.log('Fetching B2SHARE servers failed!');
-            console.log(error);
+            console.error('Fetching B2SHARE servers failed!');
+            console.error(error);
           });
     },
 
@@ -184,11 +186,13 @@ export default {
       return axios
           .get(generateUrl(url_path))
           .then((response) => {
+            console.log('Loaded communities:');
+            console.log(response);
             this.communities = response;
           })
           .catch((error) => {
-            console.log('Fetching B2SHARE communities failed!');
-            console.log(error);
+            console.error('Fetching B2SHARE communities failed!');
+            console.error(error);
           });
     },
 
@@ -200,11 +204,12 @@ export default {
       return axios
           .get(generateUrl(url_path))
           .then((response) => {
+            console.log('Loaded tokens!');
             this.tokens = response;
           })
           .catch((error) => {
-            console.log('Fetching tokens failed!');
-            console.log(error);
+            console.error('Fetching tokens failed!');
+            console.error(error);
           })
     },
 

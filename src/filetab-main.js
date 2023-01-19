@@ -22,18 +22,19 @@ window.addEventListener('DOMContentLoaded', function() {
                     parent: context,
                 })
                 // Only mount after we have all the info we need
-                tabInstance.update(fileInfo)
+                tabInstance.initializeB2ShareUI(fileInfo)
                 tabInstance.$mount(el)
             },
             update(fileInfo) {
-                tabInstance.update(fileInfo)
+                tabInstance.initializeB2ShareUI(fileInfo)
             },
             destroy() {
                 tabInstance.$destroy()
                 tabInstance = null
             },
             enabled(fileInfo) {
-                return (fileInfo && !fileInfo.isDirectory());
+                //return (fileInfo && !fileInfo.isDirectory());
+                return true;
             },
         })
         OCA.Files.Sidebar.registerTab(b2sharebridgeTab)

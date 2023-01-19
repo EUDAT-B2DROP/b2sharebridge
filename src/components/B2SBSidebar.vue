@@ -85,15 +85,15 @@ export default {
   },
 
   async mounted() {
-    this.loadServers();
-    this.loadCommunities();
+    await this.loadServers();
+    await this.loadCommunities();
     if (this.servers.length !== 0) {
       this.server_options = Array.from(this.servers, function (server) {
-        return {value: server.id, text: server.url};
+        return {value: server.id, text: server.name};
       })
       //TODO auto select if only one server is available
     }
-    this.tokens = this.getTokens();
+    await this.loadTokens();
   },
 
   methods: {
@@ -118,7 +118,7 @@ export default {
         ids = [fileInfo.id];
       }
 
-      let $result = axios
+      let result = axios
           .post(generateUrl('/apps/b2sharebridge/publish'),
               {
                 ids: ids,
@@ -143,8 +143,7 @@ export default {
       this.collection.on('sync', this._onEndRequest, this);
       this.collection.on('update', this._onChange, this);
       this.collection.on('error', this._onError, this);
-    }
-    ,
+    },
 
     setFileInfo: function (fileInfo) {
       if (fileInfo) {
@@ -154,8 +153,7 @@ export default {
         if (this._error_detected)
           this.do_ErrorCallback(this._error_msg)
       }
-    }
-    ,
+    },
 
 //API stuff
     loadServers: function () {
@@ -163,7 +161,7 @@ export default {
           "/apps/b2sharebridge/servers?requesttoken=" +
           encodeURIComponent(OC.requestToken);
 
-      axios
+      return axios
           .get(generateUrl(url_path))
           .then((response) => {
             this.servers = response;
@@ -172,15 +170,14 @@ export default {
             console.log('Fetching B2SHARE servers failed!');
             console.log(error);
           });
-    }
-    ,
+    },
 
     loadCommunities: function () {
       const url_path =
           "/apps/b2sharebridge/gettabviewcontent?requesttoken=" +
           encodeURIComponent(OC.requestToken);
 
-      axios
+      return axios
           .get(generateUrl(url_path))
           .then((response) => {
             this.communities = response;
@@ -189,30 +186,25 @@ export default {
             console.log('Fetching B2SHARE communities failed!');
             console.log(error);
           });
-    }
-    ,
+    },
 
-    getTokens: function () {
-      if (!this.tokens) {
-        const url_path =
-            "/apps/b2sharebridge/apitoken?requesttoken=" +
-            encodeURIComponent(OC.requestToken);
+    loadTokens: function () {
+      const url_path =
+          "/apps/b2sharebridge/apitoken?requesttoken=" +
+          encodeURIComponent(OC.requestToken);
 
-        axios
-            .get(generateUrl(url_path))
-            .then((response) => {
-              this.tokens = response;
-            })
-            .catch((error) => {
-              console.log('Fetching tokens failed!');
-              console.log(error);
-            })
-      }
-      return this.tokens;
-    }
-    ,
-//Events
+      return axios
+          .get(generateUrl(url_path))
+          .then((response) => {
+            this.tokens = response;
+          })
+          .catch((error) => {
+            console.log('Fetching tokens failed!');
+            console.log(error);
+          })
+    },
 
+    //Events
     onChangeServer: function () {
       if (this.server_selected !== null) {
         this.community_options = []
@@ -222,8 +214,7 @@ export default {
             this.community_options.push({value: community.id, text: community.name});
         }
       }
-    }
-    ,
+    },
 
     /**
      * Returns true for files, false for folders.
@@ -235,8 +226,7 @@ export default {
         return false;
       }
       return !fileInfo.isDirectory();
-    }
-    ,
+    },
 
     initializeB2ShareUI: function (fileInfo) {
       const url_path =
@@ -245,14 +235,12 @@ export default {
           encodeURIComponent(fileInfo.id);
       this.fileInfo = fileInfo;
       axios.get(generateUrl(url_path)); //TODO process errors with then
-    }
-    ,
+    },
 
-//VeeValidate
+    //VeeValidate
     getValidationState({dirty, validated, valid = null}) {
       return dirty || validated ? valid : null;
-    }
-    ,
+    },
   }
 }
 </script>

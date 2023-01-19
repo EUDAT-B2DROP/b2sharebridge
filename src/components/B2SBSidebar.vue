@@ -88,9 +88,13 @@ export default {
     await this.loadServers();
     await this.loadCommunities();
     if (this.servers.length !== 0) {
-      this.server_options = Array.from(this.servers, function (server) {
-        return {value: server.id, text: server.name};
-      })
+      this.server_options = [];
+      this.servers.forEach(server => {
+        this.server_options.push(new Object({
+          value: server.id,
+          text: server.name
+        }));
+      });
       //TODO auto select if only one server is available
     }
     await this.loadTokens();
@@ -208,11 +212,10 @@ export default {
     onChangeServer: function () {
       if (this.server_selected !== null) {
         this.community_options = []
-        let community;
-        for (community in this.communities) {
+        this.communities.forEach((community) => {
           if (community.serverId === this.server_selected.id)
             this.community_options.push({value: community.id, text: community.name});
-        }
+        });
       }
     },
 

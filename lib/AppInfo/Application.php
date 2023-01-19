@@ -34,6 +34,8 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use Psr\Container\ContainerInterface;
+use OCA\Files\Event\LoadSidebar;
+use OCA\B2shareBridge\Events\LoadSidebarListener;
 
 /**
  * Implement a ownCloud Application for our b2sharebridge
@@ -190,12 +192,13 @@ class Application extends App implements IBootstrap
      */
     public static function loadScripts()
     {
-        Util::addScript('files', 'detailtabview');
-        Util::addScript('b2sharebridge', 'b2sharebridgecollection');
-        Util::addScript('b2sharebridge', 'b2sharebridgetabview');
-        Util::addScript('b2sharebridge', 'b2sharebridge');
-        Util::addStyle('b2sharebridge', 'b2sharebridgetabview');
-        return;
+        //Util::addScript('files', 'detailtabview');
+
+        Util::addScript(self::APP_ID, 'b2sharebridgecollection');
+        Util::addScript(self::APP_ID, 'b2sharebridgetabview');
+        Util::addScript(self::APP_ID, 'b2sharebridge');
+        Util::addStyle(self::APP_ID, 'b2sharebridgetabview');
+        Util::addScript(self::APP_ID, 'b2sbsidebar');
     }
 
     public function register(IRegistrationContext $context): void

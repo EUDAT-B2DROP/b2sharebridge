@@ -35,7 +35,6 @@
         <div v-else>
           <b-table striped hover :deposits="Deposits"></b-table>
         </div>
-        <B2SBSidebar/>
       </NcAppContent>
     </div>
   </NcContent>
@@ -55,12 +54,9 @@ import {
   NcAppNavigationNew
 } from '@nextcloud/vue'
 
-import B2SBSidebar from "./components/B2SBSidebar.vue";
-
 export default {
   name: 'App',
   components: {
-    B2SBSidebar,
     NcActionButton,
     NcAppContent,
     NcAppNavigation,

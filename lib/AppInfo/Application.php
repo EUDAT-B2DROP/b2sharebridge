@@ -25,6 +25,7 @@ use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
 use OCA\B2shareBridge\Publish\B2share;
 use OCP\AppFramework\App;
+use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IConfig;
 use OCP\IContainer;
 use OCP\IDBConnection;
@@ -34,8 +35,6 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use Psr\Container\ContainerInterface;
-use OCA\Files\Event\LoadSidebar;
-use OCA\B2shareBridge\Events\LoadSidebarListener;
 
 /**
  * Implement a ownCloud Application for our b2sharebridge
@@ -59,6 +58,12 @@ class Application extends App implements IBootstrap
     {
         parent::__construct(self::APP_ID, $urlParams);
         $container = $this->getContainer();
+
+        // Register files tab view
+        $dispatcher = $container->get(IEventDispatcher::class);
+        $dispatcher->addListener('OCA\Files::loadAdditionalScripts', function() {
+            Util::addScript(self::APP_ID, 'b2sharebridge-main');
+        });
 
         /**
          * Mappers
@@ -198,18 +203,12 @@ class Application extends App implements IBootstrap
         Util::addScript(self::APP_ID, 'b2sharebridgetabview');
         Util::addScript(self::APP_ID, 'b2sharebridge');
         Util::addStyle(self::APP_ID, 'b2sharebridgetabview');
-        Util::addScript(self::APP_ID, 'b2sbsidebar');
     }
 
     public function register(IRegistrationContext $context): void
     {
         // Register the composer autoloader for packages shipped by this app, if applicable
         //include_once __DIR__ . '/../../vendor/autoload.php';
-
-        $context->registerEventListener(
-            LoadSidebar::class,
-            LoadSidebarListener::class
-        );
     }
 
     public function boot(IBootContext $context): void

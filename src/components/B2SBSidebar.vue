@@ -165,10 +165,10 @@ export default {
 
       axios
           .get(generateUrl(url_path))
-          .then(function (response) {
+          .then((response) => {
             this.servers = response;
           })
-          .catch(function (error) {
+          .catch((error) => {
             console.log('Fetching B2SHARE servers failed!');
             console.log(error);
           });
@@ -182,10 +182,10 @@ export default {
 
       axios
           .get(generateUrl(url_path))
-          .then(function (response) {
+          .then((response) => {
             this.communities = response;
           })
-          .catch(function (error) {
+          .catch((error) => {
             console.log('Fetching B2SHARE communities failed!');
             console.log(error);
           });
@@ -200,10 +200,10 @@ export default {
 
         axios
             .get(generateUrl(url_path))
-            .then(function (response) {
+            .then((response) => {
               this.tokens = response;
             })
-            .catch(function (error) {
+            .catch((error) => {
               console.log('Fetching tokens failed!');
               console.log(error);
             })

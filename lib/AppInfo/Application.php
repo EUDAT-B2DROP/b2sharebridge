@@ -62,7 +62,7 @@ class Application extends App implements IBootstrap
         // Register files tab view
         $dispatcher = $container->get(IEventDispatcher::class);
         $dispatcher->addListener('OCA\Files::loadAdditionalScripts', function() {
-            Util::addScript(self::APP_ID, 'b2sharebridge-main');
+            Util::addScript(self::APP_ID, 'b2sharebridge-filetabmain');
         });
 
         /**
@@ -199,10 +199,12 @@ class Application extends App implements IBootstrap
     {
         //Util::addScript('files', 'detailtabview');
 
-        Util::addScript(self::APP_ID, 'b2sharebridgecollection');
+        /*Util::addScript(self::APP_ID, 'b2sharebridgecollection');
         Util::addScript(self::APP_ID, 'b2sharebridgetabview');
         Util::addScript(self::APP_ID, 'b2sharebridge');
-        Util::addStyle(self::APP_ID, 'b2sharebridgetabview');
+        Util::addStyle(self::APP_ID, 'b2sharebridgetabview');*/
+        Util::addScript(self::APP_ID, "b2sharebridge-settingsadmin");
+        Util::addScript(self::APP_ID, "b2sharebridge-settingspersonal");
     }
 
     public function register(IRegistrationContext $context): void

@@ -118,23 +118,23 @@ export default {
         ids = [fileInfo.id];
       }
 
-      $.post(
-          OC.generateUrl('/apps/b2sharebridge/publish'),
-          {
-            ids: ids,
-            community: this.community_selected.id,
-            open_access: this.checkbox_status,
-            title: this.deposit_title,
-            server_id: this.server_selected,
-          },
-          function (result) {
-            if (result && result.status === 'success') {
-              OC.dialogs.info(
-                  t('b2sharebridge', result.message),
-                  t('b2sharebridge', 'Info'));
-            }
-          });
+      let $result = axios
+          .post(generateUrl('/apps/b2sharebridge/publish'),
+              {
+                ids: ids,
+                community: this.community_selected.id,
+                open_access: this.checkbox_status,
+                title: this.deposit_title,
+                server_id: this.server_selected,
+              });
+
+      if (result && result.status === 'success') {
+        OC.dialogs.info(
+            t('b2sharebridge', result.message),
+            t('b2sharebridge', 'Info'));
+      }
     },
+
     initialize() {
       OCA.Files.DetailTabView.prototype.initialize.apply(this, arguments);
       this.collection = new OCA.B2shareBridge.B2shareBridgeCollection();
@@ -143,7 +143,8 @@ export default {
       this.collection.on('sync', this._onEndRequest, this);
       this.collection.on('update', this._onChange, this);
       this.collection.on('error', this._onError, this);
-    },
+    }
+    ,
 
     setFileInfo: function (fileInfo) {
       if (fileInfo) {
@@ -153,65 +154,64 @@ export default {
         if (this._error_detected)
           this.do_ErrorCallback(this._error_msg)
       }
-    },
+    }
+    ,
 
-    setCommunities: function (data) {
-      this.communities = data;
-    },
-
-    setServers: function (data) {
-      this.servers = data;
-    },
-
-    //API stuff
+//API stuff
     loadServers: function () {
       const url_path =
           "/apps/b2sharebridge/servers?requesttoken=" +
           encodeURIComponent(OC.requestToken);
-      let bview = this;
-      $.ajax({
-        type: 'GET',
-        url: OC.generateUrl(url_path),
-        async: false,
-        dataType: 'json',
-        success: function (a, b, c) {
-          bview.setServers(a)
-        }
-      }).fail(this.createErrorThrow('Fetching B2SHARE servers failed!'));
-    },
+
+      axios
+          .get(generateUrl(url_path))
+          .then(function (response) {
+            this.servers = response;
+          })
+          .catch(function (error) {
+            console.log('Fetching B2SHARE servers failed!');
+            console.log(error);
+          });
+    }
+    ,
 
     loadCommunities: function () {
       const url_path =
           "/apps/b2sharebridge/gettabviewcontent?requesttoken=" +
           encodeURIComponent(OC.requestToken);
-      let bview = this;
-      $.ajax({
-        type: 'GET',
-        url: OC.generateUrl(url_path),
-        async: false,
-        success: function (a, b, c) {
-          bview.setCommunities(a)
-        }
-      }).fail(this.createErrorThrow('Fetching B2SHARE communities failed!'));
-    },
+
+      axios
+          .get(generateUrl(url_path))
+          .then(function (response) {
+            this.communities = response;
+          })
+          .catch(function (error) {
+            console.log('Fetching B2SHARE communities failed!');
+            console.log(error);
+          });
+    }
+    ,
 
     getTokens: function () {
-      let that = this;
       if (!this.tokens) {
         const url_path =
             "/apps/b2sharebridge/apitoken?requesttoken=" +
             encodeURIComponent(OC.requestToken);
-        $.ajax({
-          type: 'GET',
-          url: OC.generateUrl(url_path),
-          async: false
-        }).done(function (data) {
-          that.tokens = data;
-        }).fail(this.createErrorThrow('Fetching tokens failed!'));
+
+        axios
+            .get(generateUrl(url_path))
+            .then(function (response) {
+              this.tokens = response;
+            })
+            .catch(function (error) {
+              console.log('Fetching tokens failed!');
+              console.log(error);
+            })
       }
       return this.tokens;
-    },
-    //Events
+    }
+    ,
+//Events
 
     onChangeServer: function () {
       if (this.server_selected !== null) {
@@ -222,7 +222,8 @@ export default {
             this.community_options.push({value: community.id, text: community.name});
         }
       }
-    },
+    }
+    ,
 
     /**
      * Returns true for files, false for folders.
@@ -234,7 +235,8 @@ export default {
         return false;
       }
       return !fileInfo.isDirectory();
-    },
+    }
+    ,
 
     initializeB2ShareUI: function (fileInfo) {
       const url_path =
@@ -243,12 +245,14 @@ export default {
           encodeURIComponent(fileInfo.id);
       this.fileInfo = fileInfo;
       axios.get(generateUrl(url_path)); //TODO process errors with then
-    },
+    }
+    ,
 
-    //VeeValidate
+//VeeValidate
     getValidationState({dirty, validated, valid = null}) {
       return dirty || validated ? valid : null;
-    },
+    }
+    ,
   }
 }
 </script>

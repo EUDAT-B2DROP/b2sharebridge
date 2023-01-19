@@ -170,7 +170,7 @@ export default {
           .then((response) => {
             console.log('Loaded servers:');
             console.log(response);
-            this.servers = response;
+            this.servers = response.data;
           })
           .catch((error) => {
             console.error('Fetching B2SHARE servers failed!');
@@ -188,7 +188,7 @@ export default {
           .then((response) => {
             console.log('Loaded communities:');
             console.log(response);
-            this.communities = response;
+            this.communities = response.data;
           })
           .catch((error) => {
             console.error('Fetching B2SHARE communities failed!');
@@ -205,7 +205,7 @@ export default {
           .get(generateUrl(url_path))
           .then((response) => {
             console.log('Loaded tokens!');
-            this.tokens = response;
+            this.tokens = response.data;
           })
           .catch((error) => {
             console.error('Fetching tokens failed!');

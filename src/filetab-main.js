@@ -1,8 +1,10 @@
 import Vue from 'vue'
-import { ValidationProvider } from 'vee-validate';
+import { ValidationProvider, ValidationObserver } from 'vee-validate';
+
 import B2SBSidebar from "./components/B2SBSidebar.vue";
 
 Vue.component('ValidationProvider', ValidationProvider);
+Vue.component('ValidationObserver', ValidationObserver);
 const View = Vue.extend(B2SBSidebar);
 let tabInstance = null;
 

@@ -69,7 +69,7 @@
 import {
   NcAppContent
 } from '@nextcloud/vue'
-import {generateOcsUrl, generateUrl} from "@nextcloud/router";
+import {generateUrl} from "@nextcloud/router";
 import axios from "@nextcloud/axios";
 
 export default {

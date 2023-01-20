@@ -300,8 +300,20 @@ export default {
 </script>
 
 <style scoped>
-#tab-sharerenamer {
+#tab-b2sharebridge {
   height: 100%;
   padding: 0;
+}
+
+b-form-input[state=false]{
+  outline-color: #ff0000;
+}
+
+b-form-select[state=false]{
+  outline-color: #ff0000;
+}
+
+b-form-invalid-feedback{
+  outline-color: #ff0000;
 }
 </style>

@@ -47,6 +47,9 @@ class PublishController extends Controller
     protected DepositFileMapper $dfmapper;
     protected StatusCodes $statusCodes;
     protected string $userId;
+    private ITimeFactory $time;
+    private B2share $publisher;
+    private ServerMapper $smapper;
 
     /**
      * Creates the AppFramwork Controller
@@ -66,6 +69,9 @@ class PublishController extends Controller
         DepositStatusMapper $mapper,
         DepositFileMapper $dfmapper,
         StatusCodes $statusCodes,
+        ITimeFactory $time,
+        B2share $publisher,
+        ServerMapper $smapper,
         string $userId
     ) {
         parent::__construct($appName, $request);
@@ -74,6 +80,9 @@ class PublishController extends Controller
         $this->dfmapper = $dfmapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
+        $this->time = $time;
+        $this->publisher = $publisher;
+        $this->smapper = $smapper;
     }
 
     /**
@@ -82,7 +91,7 @@ class PublishController extends Controller
      * @return          JSONResponse
      * @NoAdminRequired
      */
-    public function publish(ITimeFactory $time, B2share $publisher, ServerMapper $smapper)
+    public function publish()
     {
         $param = $this->request->getParams();
         //TODO what if token wasn't set? We couldn't have gotten here
@@ -144,7 +153,7 @@ class PublishController extends Controller
                 $filesize = $filesize + $view->filesize(Filesystem::getPath($id));
             }
             if ($filesize < $allowed_filesize * 1024 * 1024) {
-                $job = new TransferHandler($time, $this->mapper, $this->dfmapper, $publisher, $smapper);
+                $job = new TransferHandler($this->time, $this->mapper, $this->dfmapper, $this->publisher, $this->smapper);
                 $fcStatus = new DepositStatus();
                 $fcStatus->setOwner($this->userId);
                 $fcStatus->setStatus(1);

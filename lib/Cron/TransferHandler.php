@@ -18,6 +18,7 @@ use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
+use OCA\B2shareBridge\Publish\B2share;
 use OCA\B2shareBridge\Publish\IPublish;
 
 use OCP\AppFramework\Utility\ITimeFactory;
@@ -52,19 +53,23 @@ class TransferHandler extends QueuedJob
      * @param IPublish $publisher publishing backend to use
      */
     public function __construct(
-        ITimeFactory        $time,
-        DepositStatusMapper $mapper,
-        DepositFileMapper $dfmapper,
-        IPublish $publisher,
-        ServerMapper $smapper
+        ITimeFactory        $time = null,
+        DepositStatusMapper $mapper = null,
+        DepositFileMapper $dfmapper = null,
+        IPublish $publisher = null,
+        ServerMapper $smapper = null
     )
     {
-        parent::__construct($time);
-        //$this->fixTransferForCron();
-        $this->_mapper = $mapper;
-        $this->_dfmapper = $dfmapper;
-        $this->_publisher = $publisher;
-        $this->_smapper = $smapper;
+        if($time === null or $mapper === null or $publisher === null or $smapper === null)
+            $this->fixTransferForCron();
+        else{
+            parent::__construct($time);
+            $this->_mapper = $mapper;
+            $this->_dfmapper = $dfmapper;
+            $this->_publisher = $publisher;
+            $this->_smapper = $smapper;
+        }
+
     }
 
     /**
@@ -78,7 +83,7 @@ class TransferHandler extends QueuedJob
         $application = new Application();
         $this->_mapper = $application->getContainer()->get(DepositStatusMapper::class);
         $this->_dfmapper = $application->getContainer()->get(DepositFileMapper::class);
-        $this->_publisher = $application->getContainer()->get("PublishBackend");
+        $this->_publisher = $application->getContainer()->get(B2share::class);
         $this->_smapper = $application->getContainer()->get(ServerMapper::class);
         return;
     }

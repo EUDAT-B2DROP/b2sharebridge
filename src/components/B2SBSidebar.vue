@@ -61,7 +61,7 @@
                 <b-form-checkbox label="Open access:" v-model="checkbox_status" type="checkbox" name="open_access"
                                  id="cbopen_access"/>
               </b-form-group>
-              <b-btn variant="outline-primary" type="submit" id="publish_button" @click="publishAction"/>
+              <b-btn variant="primary" type="submit" id="publish_button" @click="publishAction">Publish</b-btn>
             </b-form>
           </validation-observer>
         </div>

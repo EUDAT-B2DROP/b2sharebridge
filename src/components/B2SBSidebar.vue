@@ -286,29 +286,45 @@ export default {
 
 input.is-valid {
   outline-color: rgb(37, 156, 64);
+  border: 2px solid rgb(37, 156, 64);
+}
+
+input.is-valid:focus {
   box-shadow: rgba(32, 134, 55, 0.25) 0 0 0 0.2rem;
 }
 
 input.is-invalid {
   outline-color: rgb(148, 26, 37);
+  border: 2px solid rgb(148, 26, 37);
+}
+
+input.is-invalid:focus {
   box-shadow: rgba(165, 29, 42, 0.25) 0 0 0 0.2rem;
 }
 
 select.is-valid {
   outline-color: rgb(37, 156, 64);
+  border: 2px solid rgb(37, 156, 64);
+}
+
+select.is-valid:focus {
   box-shadow: rgba(32, 134, 55, 0.25) 0 0 0 0.2rem;
 }
 
 select.is-invalid {
   outline-color: rgb(148, 26, 37);
+  border: 2px solid rgb(148, 26, 37);
+}
+
+select.is-invalid:focus {
   box-shadow: rgba(165, 29, 42, 0.25) 0 0 0 0.2rem;
 }
 
-.is-valid {
+div.is-valid {
   color: rgb(37, 156, 64);
 }
 
-.is-invalid {
+div.is-invalid {
   color: rgb(148, 26, 37);
 }
 

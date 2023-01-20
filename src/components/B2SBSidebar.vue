@@ -259,8 +259,9 @@ export default {
     onChangeServer: function () {
       if (this.server_selected !== null) {
         this.community_options = []
+        console.log(this.server_selected)
         this.communities.forEach((community) => {
-          if (community.hasOwnProperty("serverId") && community.serverId === parseInt(this.server_selected.id)) {
+          if (community.hasOwnProperty("serverId") && parseInt(community.serverId) === parseInt(this.server_selected.id)) {
             this.community_options.push(new Object({
               value: community.id,
               text: community.name

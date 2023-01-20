@@ -2,19 +2,17 @@ import Vue from 'vue'
 /**
  * Import Vee-Validate
  */
-import { ValidationProvider, ValidationObserver} from 'vee-validate';
-import VeeValidate from "vee-validate";
+import { ValidationProvider, ValidationObserver, configure} from 'vee-validate';
 
 Vue.component('ValidationProvider', ValidationProvider);
 Vue.component('ValidationObserver', ValidationObserver);
-Vue.use(VeeValidate, {
-    classes: true,
-    classNames: {
+
+configure({
+    classes: {
         valid: 'is-valid',
         invalid: 'is-invalid'
     }
-});
-
+})
 
 /**
  * Import Bootstrap

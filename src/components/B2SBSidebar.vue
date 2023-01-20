@@ -218,8 +218,11 @@ export default {
       if (this.server_selected !== null) {
         this.community_options = []
         this.communities.forEach((community) => {
-          if (community.serverId === this.server_selected.id)
-            this.community_options.push({value: community.id, text: community.name});
+          if (community.hasOwnProperty("serverId") && community.serverId === parseInt(this.server_selected.id))
+            this.community_options.push(new Object({
+              value: community.id,
+              text: community.name
+            }));
         });
       }
     },

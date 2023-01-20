@@ -20,9 +20,12 @@ use OCA\B2shareBridge\Model\DepositStatus;
 use OCA\B2shareBridge\Model\DepositFile;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
+use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
+use OCA\B2shareBridge\Publish\B2share;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\IConfig;
 use OCP\IRequest;
 use \OCP\ILogger;
@@ -79,7 +82,7 @@ class PublishController extends Controller
      * @return          JSONResponse
      * @NoAdminRequired
      */
-    public function publish()
+    public function publish(ITimeFactory $time, B2share $publisher, ServerMapper $smapper)
     {
         $param = $this->request->getParams();
         //TODO what if token wasn't set? We couldn't have gotten here
@@ -141,7 +144,7 @@ class PublishController extends Controller
                 $filesize = $filesize + $view->filesize(Filesystem::getPath($id));
             }
             if ($filesize < $allowed_filesize * 1024 * 1024) {
-                $job = new TransferHandler($this->mapper);
+                $job = new TransferHandler($time, $this->mapper, $this->dfmapper, $publisher, $smapper);
                 $fcStatus = new DepositStatus();
                 $fcStatus->setOwner($this->userId);
                 $fcStatus->setStatus(1);

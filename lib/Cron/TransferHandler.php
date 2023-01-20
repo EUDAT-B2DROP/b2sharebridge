@@ -53,10 +53,18 @@ class TransferHandler extends QueuedJob
      */
     public function __construct(
         ITimeFactory        $time,
+        DepositStatusMapper $mapper,
+        DepositFileMapper $dfmapper,
+        IPublish $publisher,
+        ServerMapper $smapper
     )
     {
         parent::__construct($time);
-        $this->fixTransferForCron();
+        //$this->fixTransferForCron();
+        $this->_mapper = $mapper;
+        $this->_dfmapper = $dfmapper;
+        $this->_publisher = $publisher;
+        $this->_smapper = $smapper;
     }
 
     /**

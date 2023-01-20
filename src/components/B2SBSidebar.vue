@@ -4,15 +4,21 @@
       <div id="b2shareBridgeTabView" class="dialogContainer">
         <div>
           <validation-observer ref="observer" v-slot="{ handleSubmit }">
-            <b-form @submit.stop.prevent="publishAction()">
+            <b-form @submit.stop.prevent="handleSubmit(publishAction)">
               <validation-provider
                   name="Name"
                   :rules="{ required: true, min: 3 }"
                   v-slot="validationContext"
               >
                 <b-form-group label-cols="auto" label-cols-lg="sm" label="Deposit Title:" label-for="b2s_title">
-                  <b-form-input v-model="deposit_title" id="b2s_title"
-                                placeholder="Deposit title"></b-form-input>
+                  <b-form-input v-model="deposit_title"
+                                id="b2s_title"
+                                placeholder="Deposit title"
+                                :state="getValidationState(validationContext)"></b-form-input>
+                  <b-form-invalid-feedback id="input-1-live-feedback">{{
+                      validationContext.errors[0]
+                    }}
+                  </b-form-invalid-feedback>
                 </b-form-group>
               </validation-provider>
               <validation-provider
@@ -21,8 +27,16 @@
                   v-slot="validationContext"
               >
                 <b-form-group label-cols="auto" label-cols-lg="sm" label="Server:" label-for="b2s_server">
-                  <b-form-select v-model="server_selected" :options="server_options" id="b2s_server"
-                                 @change="onChangeServer"></b-form-select>
+                  <b-form-select v-model="server_selected"
+                                 :options="server_options"
+                                 id="b2s_server"
+                                 @change="onChangeServer"
+                                 :state="getValidationState(validationContext)"
+                  ></b-form-select>
+                  <b-form-invalid-feedback id="input-2-live-feedback">{{
+                      validationContext.errors[0]
+                    }}
+                  </b-form-invalid-feedback>
                 </b-form-group>
               </validation-provider>
               <validation-provider
@@ -31,8 +45,16 @@
                   v-slot="validationContext"
               >
                 <b-form-group label-cols="auto" label-cols-lg="sm" label="Community:" label-for="b2s_community">
-                  <b-form-select label="Community:" v-model="community_selected" id="b2s_community"
-                                 :options="community_options"></b-form-select>
+                  <b-form-select label="Community:"
+                                 v-model="community_selected"
+                                 id="b2s_community"
+                                 :options="community_options"
+                                 :state="getValidationState(validationContext)"
+                  ></b-form-select>
+                  <b-form-invalid-feedback id="input-3-live-feedback">{{
+                      validationContext.errors[0]
+                    }}
+                  </b-form-invalid-feedback>
                 </b-form-group>
               </validation-provider>
               <b-form-group label-cols="auto" label-cols-lg="sm" label="Open access:" label-for="cbopen_access">
@@ -56,7 +78,27 @@ import {
 } from '@nextcloud/vue'
 import {generateUrl} from "@nextcloud/router";
 import axios from "@nextcloud/axios";
-import {ValidationProvider, ValidationObserver} from "vee-validate";
+import {ValidationProvider, ValidationObserver, extend} from "vee-validate";
+
+/**
+ * Validation rules
+ */
+extend('min', {
+  validate(value, args) {
+    return value.length >= args.length;
+  },
+  params: ['length']
+});
+
+extend('required', {
+  validate(value) {
+    return {
+      required: true,
+      valid: ['', null, undefined].indexOf(value) === -1
+    };
+  },
+  computesRequired: true
+});
 
 export default {
   name: "b2sharebridgeSidebar",

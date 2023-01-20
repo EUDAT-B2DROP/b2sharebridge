@@ -153,7 +153,7 @@ export default {
     /**
      * Submit deposit to B2SHARE
      */
-    publishAction() {
+    async publishAction() {
       const selectedFiles = FileList.getSelectedFiles();
 
       // if selectedFiles is empty, use fileInfo
@@ -170,13 +170,13 @@ export default {
 
       let result = axios
           .post(generateUrl('/apps/b2sharebridge/publish'),
-              JSON.stringify({
+              {
                 ids: ids,
                 community: this.community_selected,
                 open_access: this.checkbox_status,
                 title: this.deposit_title,
                 server_id: this.server_selected,
-              }))
+              })
           .catch((error) => {
             console.log(error)
           })

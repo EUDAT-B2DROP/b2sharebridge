@@ -176,8 +176,10 @@ export default {
                 open_access: this.checkbox_status,
                 title: this.deposit_title,
                 server_id: this.server_selected,
-              }));
-
+              }))
+          .catch((error) => {
+            console.log(error)
+          })
       if (result && result.status === 'success') {
         OC.dialogs.info(
             t('b2sharebridge', result.message),

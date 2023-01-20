@@ -168,7 +168,7 @@ export default {
           .post(generateUrl('/apps/b2sharebridge/publish'),
               {
                 ids: ids,
-                community: this.community_selected.id,
+                community: this.community_selected,
                 open_access: this.checkbox_status,
                 title: this.deposit_title,
                 server_id: this.server_selected,
@@ -261,7 +261,7 @@ export default {
         this.community_options = []
         console.log(this.server_selected)
         this.communities.forEach((community) => {
-          if (community.hasOwnProperty("serverId") && parseInt(community.serverId) === parseInt(this.server_selected.id)) {
+          if (community.hasOwnProperty("serverId") && parseInt(community.serverId) === this.server_selected) {
             this.community_options.push(new Object({
               value: community.id,
               text: community.name

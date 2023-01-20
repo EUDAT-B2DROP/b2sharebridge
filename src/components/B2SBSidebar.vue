@@ -289,7 +289,7 @@ input.is-valid, select.is-valid {
   border: 2px solid rgb(37, 156, 64);
 }
 
-input.is-valid:focus, select.is-valid:focus {
+input.is-valid:focus, input.is-invalid:hover, select.is-valid:focus {
   box-shadow: rgba(32, 134, 55, 0.25) 0 0 0 0.2rem;
   border-color: rgb(37, 156, 64);
 }

@@ -39,11 +39,11 @@ use OCP\Util;
  */
 class PublishController extends Controller
 {
-    protected $config;
-    protected $mapper;
-    protected $dfmapper;
-    protected $statusCodes;
-    protected $userId;
+    protected IConfig $config;
+    protected DepositStatusMapper $mapper;
+    protected DepositFileMapper $dfmapper;
+    protected StatusCodes $statusCodes;
+    protected string $userId;
 
     /**
      * Creates the AppFramwork Controller

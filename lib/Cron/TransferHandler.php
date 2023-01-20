@@ -53,38 +53,27 @@ class TransferHandler extends QueuedJob
      */
     public function __construct(
         ITimeFactory        $time,
-        DepositStatusMapper $mapper,
-        DepositFileMapper   $dfmapper,
-        IPublish            $publisher,
-        ServerMapper        $smapper
     )
     {
         parent::__construct($time);
-
-        $this->_mapper = $mapper;
-        $this->_dfmapper = $dfmapper;
-        $this->_publisher = $publisher;
-        $this->_smapper = $smapper;
+        $this->fixTransferForCron();
     }
 
     /**
      * A Cron that is executed in the background needs to create the Application
      * because its not coming form the user context
      *
-     * No it doesn't, it just needs to inject the dependencies
-     *
      * @return null
      */
-    /*protected function fixTransferForCron()
+    protected function fixTransferForCron()
     {
         $application = new Application();
-        $this->_mapper = $application->getContainer()
-            ->query('DepositStatusMapper');
-        $this->_dfmapper = $application->getContainer()
-            ->query('DepositFileMapper');
-        $this->_publisher = $application->getContainer()->query('PublishBackend');
-        $this->_smapper = $application->getContainer()->query('ServerMapper');
-    }*/
+        $this->_mapper = $application->getContainer()->get(DepositStatusMapper::class);
+        $this->_dfmapper = $application->getContainer()->get(DepositFileMapper::class);
+        $this->_publisher = $application->getContainer()->get("PublishBackend");
+        $this->_smapper = $application->getContainer()->get(ServerMapper::class);
+        return;
+    }
 
     /**
      * Check if current user is the requested user

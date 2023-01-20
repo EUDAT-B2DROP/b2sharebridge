@@ -87,7 +87,10 @@ extend('min', {
   validate(value, args) {
     return value.length >= args.length;
   },
-  params: ['length']
+  params: ['length'],
+  message: (fieldName, placeholders) => {
+    return `The ${fieldName} must have at least ${placeholders.length} characters`;
+  }
 });
 
 extend('required', {
@@ -97,7 +100,10 @@ extend('required', {
       valid: ['', null, undefined].indexOf(value) === -1
     };
   },
-  computesRequired: true
+  computesRequired: true,
+  message: (fieldName) => {
+    return `Please enter a valid ${fieldName}`;
+  }
 });
 
 export default {

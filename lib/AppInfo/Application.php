@@ -26,6 +26,7 @@ use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
 use OCA\B2shareBridge\Publish\B2share;
 use OCP\AppFramework\App;
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IConfig;
 use OCP\IContainer;
@@ -122,6 +123,9 @@ class Application extends App implements IBootstrap
                 $c->get(DepositStatusMapper::class),
                 $c->get(DepositFileMapper::class),
                 $c->get(StatusCodes::class),
+                $c->get(ITimeFactory::class),
+                $c->get(B2share::class),
+                $c->get(ServerMapper::class),
                 $c->get("UserId")
             );
         });

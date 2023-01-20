@@ -123,6 +123,7 @@ export default {
       checkbox_status: false,
       deposit_title: "",
       tokens: null,
+      fileInfo: null,
     }
   },
 
@@ -144,24 +145,21 @@ export default {
 
   methods: {
     /**
-     *
-     * @param e
+     * Submit deposit to B2SHARE
      */
-    publishAction(e) {
+    publishAction() {
       const selectedFiles = FileList.getSelectedFiles();
 
       // if selectedFiles is empty, use fileInfo
       // otherwise create an array of files from the selection
       let ids
-      let fileInfo
       if (selectedFiles.length > 0) {
         ids = []
         for (let index in selectedFiles) {
           ids.push(selectedFiles[index].id)
         }
       } else {
-        fileInfo = e.data.param;
-        ids = [fileInfo.id];
+        ids = [this.fileInfo.id];
       }
 
       let result = axios
@@ -178,26 +176,6 @@ export default {
         OC.dialogs.info(
             t('b2sharebridge', result.message),
             t('b2sharebridge', 'Info'));
-      }
-    },
-
-    initialize() {
-      OCA.Files.DetailTabView.prototype.initialize.apply(this, arguments);
-      this.collection = new OCA.B2shareBridge.B2shareBridgeCollection();
-      this.collection.setObjectType('files');
-      this.collection.on('request', this._onRequest, this);
-      this.collection.on('sync', this._onEndRequest, this);
-      this.collection.on('update', this._onChange, this);
-      this.collection.on('error', this._onError, this);
-    },
-
-    setFileInfo: function (fileInfo) {
-      if (fileInfo) {
-        this.fileInfo = fileInfo;
-        this.initializeB2ShareUI(fileInfo);
-        this.render();
-        if (this._error_detected)
-          this.do_ErrorCallback(this._error_msg)
       }
     },
 
@@ -304,6 +282,34 @@ export default {
 #tab-b2sharebridge {
   height: 100%;
   padding: 0;
+}
+
+input.is-valid {
+  outline-color: rgb(37, 156, 64);
+  box-shadow: rgba(32, 134, 55, 0.25) 0 0 0 0.2rem;
+}
+
+input.is-invalid {
+  outline-color: rgb(148, 26, 37);
+  box-shadow: rgba(165, 29, 42, 0.25) 0 0 0 0.2rem;
+}
+
+select.is-valid {
+  outline-color: rgb(37, 156, 64);
+  box-shadow: rgba(32, 134, 55, 0.25) 0 0 0 0.2rem;
+}
+
+select.is-invalid {
+  outline-color: rgb(148, 26, 37);
+  box-shadow: rgba(165, 29, 42, 0.25) 0 0 0 0.2rem;
+}
+
+.is-valid {
+  color: rgb(37, 156, 64);
+}
+
+.is-invalid {
+  color: rgb(148, 26, 37);
 }
 
 </style>

@@ -6,7 +6,7 @@
           <validation-observer ref="observer" v-slot="{ handleSubmit }">
             <b-form @submit.stop.prevent="handleSubmit(publishAction)">
               <validation-provider
-                  name="Name"
+                  name="Title"
                   :rules="{ required: true, min: 3 }"
                   v-slot="validationContext"
               >
@@ -22,7 +22,7 @@
                 </b-form-group>
               </validation-provider>
               <validation-provider
-                  name="Name"
+                  name="Server"
                   :rules="{ required: true }"
                   v-slot="validationContext"
               >
@@ -40,7 +40,7 @@
                 </b-form-group>
               </validation-provider>
               <validation-provider
-                  name="Name"
+                  name="Community"
                   :rules="{ required: true }"
                   v-slot="validationContext"
               >

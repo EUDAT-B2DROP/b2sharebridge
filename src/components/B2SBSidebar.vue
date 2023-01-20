@@ -284,47 +284,27 @@ export default {
   padding: 0;
 }
 
-input.is-valid {
+input.is-valid, select.is-valid {
   outline-color: rgb(37, 156, 64);
   border: 2px solid rgb(37, 156, 64);
 }
 
-input.is-valid:focus {
+input.is-valid:focus, select.is-valid:focus {
   box-shadow: rgba(32, 134, 55, 0.25) 0 0 0 0.2rem;
+  border-color: rgb(37, 156, 64);
 }
 
-input.is-invalid {
+input.is-invalid, select.is-invalid {
   outline-color: rgb(148, 26, 37);
   border: 2px solid rgb(148, 26, 37);
 }
 
-input.is-invalid:focus {
+input.is-invalid:focus, select.is-invalid:focus {
   box-shadow: rgba(165, 29, 42, 0.25) 0 0 0 0.2rem;
+  border-color: rgb(148, 26, 37);
 }
 
-select.is-valid {
-  outline-color: rgb(37, 156, 64);
-  border: 2px solid rgb(37, 156, 64);
-}
-
-select.is-valid:focus {
-  box-shadow: rgba(32, 134, 55, 0.25) 0 0 0 0.2rem;
-}
-
-select.is-invalid {
-  outline-color: rgb(148, 26, 37);
-  border: 2px solid rgb(148, 26, 37);
-}
-
-select.is-invalid:focus {
-  box-shadow: rgba(165, 29, 42, 0.25) 0 0 0 0.2rem;
-}
-
-div.is-valid {
-  color: rgb(37, 156, 64);
-}
-
-div.is-invalid {
+div.invalid-feedback {
   color: rgb(148, 26, 37);
 }
 

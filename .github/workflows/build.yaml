@@ -37,19 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: [ 7.4, 8.0, 8.1 ]
-        nextcloud-version-branch: [ stable22, stable23, stable24 ]  # see https://github.com/nextcloud/server/branches
-        exclude:
-          - php-version: 7.4
-            nextcloud-version-branch: stable24
-          - php-version: 7.4
-            nextcloud-version-branch: stable25
-          - php-version: 8.0
-            nextcloud-version-branch: stable22
-          - php-version: 8.1
-            nextcloud-version-branch: stable22
-          - php-version: 8.1
-            nextcloud-version-branch: stable23
+        php-version: [ 8.0, 8.1 ]
+        nextcloud-version-branch: [ stable25 ]  # see https://github.com/nextcloud/server/branches
 
     name: Deploy b2sharebridge-app in a NC environment
     needs: build

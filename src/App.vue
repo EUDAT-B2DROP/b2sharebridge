@@ -80,33 +80,35 @@ export default {
     this.loading = false
   },
 
-  loadDeposits(filter) {
-    return axios
-        .get('/apps/b2sharebridge/depositList', { params: filter})
-        .then((response) => {
-          this.Deposits = response.data
-        })
-        .catch((error) => {
-          console.error(error)
-          console.error("Could not load deposit List")
-        })
-  },
+  methods: {
+    loadDeposits(filter) {
+      return axios
+          .get('/apps/b2sharebridge/depositList', {params: filter})
+          .then((response) => {
+            this.Deposits = response.data
+          })
+          .catch((error) => {
+            console.error(error)
+            console.error("Could not load deposit List")
+          })
+    },
 
-  showAllDeposits() {
-    this.loadDeposits("all")
-  },
+    showAllDeposits() {
+      this.loadDeposits("all")
+    },
 
-  showPendingDeposits() {
-    this.loadDeposits("pending")
-  },
+    showPendingDeposits() {
+      this.loadDeposits("pending")
+    },
 
-  showPublishedDeposits() {
-    this.loadDeposits("published")
-  },
+    showPublishedDeposits() {
+      this.loadDeposits("published")
+    },
 
-  showFailedDeposits() {
-    this.loadDeposits("failed")
-  },
+    showFailedDeposits() {
+      this.loadDeposits("failed")
+    },
+  }
 }
 </script>
 <style scoped>

@@ -89,20 +89,43 @@ class ViewController extends Controller
      *          it up in the docs or you might create a security hole. This is
      *          basically the only required method to add this exemption, don't
      *          add it to any other method if you don't exactly know what it does
-     *
-     * @param string $filter filtering string
-     *
      * @return TemplateResponse
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     */
-    public function depositList($filter = 'all')
+     * */
+    public function index(): TemplateResponse
     {
-
-        Util::addStyle('b2sharebridge', 'style');
+        Util::addStyle(Application::APP_ID, 'style');
         Util::addStyle('files', 'files');
+        $params = [
+            'user' => $this->userId,
+            'statuscodes' => $this->statusCodes,
+        ];
 
+        Util::addScript(Application::APP_ID, 'b2sharebridge-main');
+
+        return new TemplateResponse(
+            Application::APP_ID,
+            'main',
+            $params
+        );
+    }
+
+    /**
+     * returns all deposits for a user with filter
+     * @param string $filter filtering string, possible filters:
+     *     'all': get all deposits
+     *     'pending': get pending deposits
+     *     'publish': get published deposits
+     *     'failed': get failed deposits
+     *
+     * @return JSONResponse
+     *
+     * @NoAdminRequired
+     */
+    public function depositList(string $filter = 'all'): JSONResponse
+    {
         $publications = [];
         if ($filter === 'all') {
             foreach (
@@ -128,19 +151,11 @@ class ViewController extends Controller
                 $this->fdmapper->getFileCount($publication->getId())
             );
         }
-        /*$params = [
-            'user' => $this->userId,
-            'publications' => $publications,
-            'statuscodes' => $this->statusCodes,
-            'appNavigation' => $this->navigation->getTemplate($filter),
-            'filter' => $filter,
-        ];*/
-
-        Util::addScript(Application::APP_ID, 'b2sharebridge-main');
-
-        return new TemplateResponse(
-            Application::APP_ID,
-            'main',
+        return new JSONResponse(
+            [
+                "data" => $publications,
+                "status" => "success"
+            ]
         );
     }
 
@@ -270,11 +285,11 @@ class ViewController extends Controller
             $error_msg .= "Authorization failure: login first.<br>\n";
         }
         $param = $this->request->getParams();
-        $id = (int) $param['file_id'];
+        $id = (int)$param['file_id'];
         Filesystem::init($this->userId, '/');
         $view = Filesystem::getView();
         \OC::$server->getLogger()->debug(
-            'File ID: '.$id, ['app' => 'b2sharebridge']
+            'File ID: ' . $id, ['app' => 'b2sharebridge']
         );
         $filesize = $view->filesize(Filesystem::getPath($id));
         $fileName = basename(Filesystem::getPath($id));
@@ -300,13 +315,13 @@ class ViewController extends Controller
                 'pending'
             )
         );
-        if ($active_uploads>$allowed_uploads) {
+        if ($active_uploads > $allowed_uploads) {
             $is_error = true;
-            $error_msg .= "You already have ".$active_uploads.
-                " active uploads. You are only allowed ".$allowed_uploads.
+            $error_msg .= "You already have " . $active_uploads .
+                " active uploads. You are only allowed " . $allowed_uploads .
                 " uploads. Please try again later.<br>\n";
         }
-        if ($filesize>$allowed_filesize * 1024 * 1024) {
+        if ($filesize > $allowed_filesize * 1024 * 1024) {
             $is_error = true;
             $error_msg .= "We currently only support files smaller then "
                 . $allowed_filesize . " MB.<br>\n";

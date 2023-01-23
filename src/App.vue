@@ -83,7 +83,7 @@ export default {
   methods: {
     loadDeposits(filter) {
       return axios
-          .get('/apps/b2sharebridge', {params: {'filter': filter}})
+          .get('/apps/b2sharebridge/depositList', {params: {'filter': filter}})
           .then((response) => {
             this.Deposits = response.data
           })

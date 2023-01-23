@@ -35,7 +35,7 @@
     <navigations>
         <navigation>
             <name>B2SHARE</name>
-            <route>b2sharebridge.view.depositList</route>
+            <route>b2sharebridge.view.index</route>
             <icon>appbrowsericon.svg</icon>
         </navigation>
     </navigations>

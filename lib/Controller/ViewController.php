@@ -23,6 +23,7 @@ use OCA\B2shareBridge\Model\StatusCodes;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 use OCP\IRequest;
@@ -121,15 +122,15 @@ class ViewController extends Controller
      *     'publish': get published deposits
      *     'failed': get failed deposits
      *
-     * @return JSONResponse
+     * @return DataResponse
      *
      * @NoAdminRequired
      */
-    public function depositList(): JSONResponse
+    public function depositList(): DataResponse
     {
         $param = $this->request->getParams();
         if (!array_key_exists('filter', $param)) {
-            return new JSONResponse(
+            return new DataResponse(
                 [
                     "message" => "missing argument: filter",
                     "status" => "error"
@@ -163,7 +164,7 @@ class ViewController extends Controller
                 $this->fdmapper->getFileCount($publication->getId())
             );
         }
-        return new JSONResponse($publications);
+        return new DataResponse($publications);
     }
 
     /**

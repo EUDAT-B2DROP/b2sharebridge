@@ -139,25 +139,12 @@ class ViewController extends Controller
             );
         }
         $filter = $param['filter'];
-        $publications = [];
         if ($filter === 'all') {
-            foreach (
-                array_reverse(
-                    $this->mapper->findAllForUser($this->userId)
-                ) as $publication) {
-                $publications[] = $publication;
-            }
-
+            $publications = $this->mapper->findAllForUser($this->userId);
         } else {
-            foreach (
-                array_reverse(
-                    $this->mapper->findAllForUserAndStateString(
-                        $this->userId,
-                        $filter
-                    )
-                ) as $publication) {
-                $publications[] = $publication;
-            }
+            $publications = $this->mapper->findAllForUserAndStateString(
+                $this->userId,
+                $filter);
         }
         foreach ($publications as $publication) {
             $publication->setFileCount(

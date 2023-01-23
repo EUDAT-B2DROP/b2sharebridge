@@ -34,8 +34,9 @@
     </settings>
     <navigations>
         <navigation>
+            <id>b2sharebridge</id>
             <name>B2SHARE</name>
-            <route>b2sharebridge.view.index</route>
+            <route>view#index</route>
             <icon>appbrowsericon.svg</icon>
         </navigation>
     </navigations>

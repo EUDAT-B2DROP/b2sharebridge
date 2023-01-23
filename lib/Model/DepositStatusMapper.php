@@ -14,8 +14,12 @@
 
 namespace OCA\B2shareBridge\Model;
 
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
-use OCP\AppFramework\Db\Mapper;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\AppFramework\Db\QBMapper;
+use OCP\DB\Exception;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
@@ -27,7 +31,7 @@ use OCP\IDBConnection;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class DepositStatusMapper extends Mapper
+class DepositStatusMapper extends QBMapper
 {
 
     /**
@@ -47,17 +51,21 @@ class DepositStatusMapper extends Mapper
     /**
      * Find a database entry for a file id
      *
-     * @param string $id id to find a transfer entry for
-     *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     * @param int $id id to find a transfer entry for
      *
      * @return Entity
+     * @throws MultipleObjectsReturnedException if more than one
+     * @throws DoesNotExistException if not found
+     * @throws Exception
      */
-    public function find($id)
+    public function find(int $id): Entity
     {
-        $sql = 'SELECT * FROM `' . $this->tableName . '` WHERE `id` = ?';
-        return $this->findEntity($sql, [$id]);
+        $qb = $this->db->getQueryBuilder();
+        //'SELECT * FROM `' . $this->tableName . '` WHERE `id` = ?';
+        $qb->select('*')->from($this->tableName)->where(
+            $qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
+        );
+        return $this->findEntity($qb);
     }
 
 
@@ -69,15 +77,16 @@ class DepositStatusMapper extends Mapper
     /**
      * Return all file transfers
      *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
-     *
      * @return array(Entity)
+     *
+     * @throws Exception
      */
-    public function findAll()
+    public function findAll(): array
     {
-        $sql = 'SELECT * FROM `' . $this->tableName  .'`';
-        return $this->findEntities($sql);
+        $qb = $this->db->getQueryBuilder();
+        //$sql = 'SELECT * FROM `' . $this->tableName  .'`';
+        $qb->select('*')->from($this->tableName);
+        return $this->findEntities($qb);
     }
 
 
@@ -86,52 +95,69 @@ class DepositStatusMapper extends Mapper
      *
      * @param string $user name of the user to search transfers for
      *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
-     *
      * @return array(Entities)
+     *
+     * @throws Exception if not found
      */
-    public function findAllForUser($user)
+    public function findAllForUser($user): array
     {
-        $sql = 'SELECT * FROM `' . $this->tableName . '` WHERE `owner` = ?';
-        return $this->findEntities($sql, [$user]);
+        $qb = $this->db->getQueryBuilder();
+        //$sql = 'SELECT * FROM `' . $this->tableName . '` WHERE `owner` = ?';
+        $qb->select('*')->from($this->tableName)->where(
+            $qb->expr()->eq('owner', $qb->createNamedParameter($user))
+        );
+        return $this->findEntities($qb);
     }
 
 
     /**
      * Return the number of currently queued file transfers for a given user
      *
-     * @param string  $user       name of the user to search transfers for
+     * @param string $user name of the user to search transfers for
      * @param integer $statuscode statuscode to search transfers for
      *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
-     *
      * @return int number of active publishs per user
+     *
+     * @throws Exception if not found
      */
-    public function findCountForUser($user, $statuscode)
+    public function findCountForUser(string $user, int $statuscode): int
     {
-        $sql = 'SELECT COUNT(*) FROM `' . $this->tableName
-            . '` WHERE owner = ? AND status = ?';
-        return $this->execute($sql, [$user, $statuscode])->fetchColumn();
+        $qb = $this->db->getQueryBuilder();
+        //$sql = 'SELECT COUNT(*) FROM `' . $this->tableName
+        //    . '` WHERE owner = ? AND status = ?';
+        $qb->selectAlias($qb->createFunction('COUNT(*)'), 'count')->from($this->tableName)->where(
+            $qb->expr()->eq('owner', $qb->createNamedParameter($user))
+        )->andWhere(
+            $qb->expr()->eq('status', $qb->createNamedParameter($statuscode, IQueryBuilder::PARAM_INT))
+        );
+        /** @noinspection PhpDeprecationInspection */
+        $cursor = $qb->execute();
+        $row = $cursor->fetch();
+        $cursor->closeCursor();
+        return $row['count'];
     }
 
     /**
      * Return all file transfers for current user with state
      *
-     * @param string $user  name of the user to search transfers for
-     * @param string $state styte type
-     *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     * @param string $user name of the user to search transfers for
+     * @param int $state state type
      *
      * @return array(Entities)
+     *
+     * @throws Exception if not found
      */
-    public function findAllForUserAndState($user, $state)
+    public function findAllForUserAndState(string $user, int $state): array
     {
-        $sql = 'SELECT * FROM `' . $this->tableName
-            . '` WHERE owner = ? AND status = ?';
-        return $this->findEntities($sql, [$user, $state]);
+        $qb = $this->db->getQueryBuilder();
+        //$sql = 'SELECT * FROM `' . $this->tableName
+        //    . '` WHERE owner = ? AND status = ?';
+        $qb->select('*')->from($this->tableName)->where(
+            $qb->expr()->eq('owner', $qb->createNamedParameter($user))
+        )->andWhere(
+            $qb->expr()->eq('status', $qb->createNamedParameter($state, IQueryBuilder::PARAM_INT))
+        );
+        return $this->findEntities($qb);
     }
 
     /**
@@ -140,12 +166,11 @@ class DepositStatusMapper extends Mapper
      * @param string $user  name of the user to search transfers for
      * @param string $state type
      *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
-     *
      * @return array(Entities)
+     *@throws Exception if more th one
+     *
      */
-    public function findAllForUserAndStateString($user, $state)
+    public function findAllForUserAndStateString(string $user, string $state): array
     {
         $nStates = $this->mapFilterToStates($state);
 
@@ -167,17 +192,13 @@ class DepositStatusMapper extends Mapper
      *
      * @return array containing integer status codes
      */
-    public function mapFilterToStates($filter)
+    public function mapFilterToStates(string $filter): array
     {
-        switch ($filter) {
-        case 'published':
-            return [0];
-        case 'pending':
-            return [1, 2];
-        case 'failed':
-            return [3, 4, 5];
-        default:
-            return [];
-        }
+        return match ($filter) {
+            'published' => [0],
+            'pending' => [1, 2],
+            'failed' => [3, 4, 5],
+            default => [],
+        };
     }
 }

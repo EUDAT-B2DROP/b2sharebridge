@@ -21,10 +21,13 @@ use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IRequest;
 use OCP\ILogger;
@@ -115,8 +118,8 @@ class ViewController extends Controller
     }
 
     /**
-     * returns all deposits for a user with filter
-     * @param string $filter filtering string, possible filters:
+     * returns all deposits for a user with the filter query parameter.
+     * possible filters:
      *     'all': get all deposits
      *     'pending': get pending deposits
      *     'publish': get published deposits
@@ -124,6 +127,9 @@ class ViewController extends Controller
      *
      * @return DataResponse
      *
+     * @throws Exception
+     * @throws DoesNotExistException
+     * @throws MultipleObjectsReturnedException
      * @NoAdminRequired
      */
     public function depositList(): DataResponse

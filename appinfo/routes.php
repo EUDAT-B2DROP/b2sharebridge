@@ -38,7 +38,7 @@ return [
         ],
         [
             'name' => 'View#depositList',
-            'url' => '/deposits/{filter}',
+            'url' => '/deposits',
             'verb' => 'GET'
         ],
         [

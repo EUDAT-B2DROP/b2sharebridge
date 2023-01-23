@@ -36,7 +36,8 @@
         <navigation>
             <id>b2sharebridge</id>
             <name>B2SHARE</name>
-            <route>view#index</route>
+            <order>100</order>
+            <route>b2sharebridge.View.index</route>
             <icon>appbrowsericon.svg</icon>
         </navigation>
     </navigations>

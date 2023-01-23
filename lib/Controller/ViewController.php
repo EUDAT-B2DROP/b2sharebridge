@@ -124,8 +124,18 @@ class ViewController extends Controller
      *
      * @NoAdminRequired
      */
-    public function depositList(string $filter = 'all'): JSONResponse
+    public function depositList(): JSONResponse
     {
+        $param = $this->request->getParams();
+        if (!array_key_exists('filter', $param)) {
+            return new JSONResponse(
+                [
+                    "message" => "missing argument: filter",
+                    "status" => "error"
+                ]
+            );
+        }
+        $filter = $param['filter'];
         $publications = [];
         if ($filter === 'all') {
             foreach (

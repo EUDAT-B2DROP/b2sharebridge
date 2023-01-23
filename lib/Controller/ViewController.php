@@ -21,6 +21,7 @@ use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
@@ -132,7 +133,8 @@ class ViewController extends Controller
                 [
                     "message" => "missing argument: filter",
                     "status" => "error"
-                ]
+                ],
+                Http::STATUS_INTERNAL_SERVER_ERROR
             );
         }
         $filter = $param['filter'];

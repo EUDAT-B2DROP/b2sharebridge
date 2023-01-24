@@ -37,6 +37,7 @@ class ApplicationTest extends TestCase
         parent::setUp();
         $this->app = new Application();
         $this->container = $this->app->getContainer();
+        $this->container->registerParameter("UserId", "testID");
     }
 
     public function testContainerAppName() 

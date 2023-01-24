@@ -49,11 +49,14 @@ class ApplicationTest extends TestCase
     public function testControllerAvailable()
     {
         try {
-            $this->container->get(PublishController::class);
-            $this->container->get(ViewController::class);
-            $this->container->get(ServerController::class);
+            $c1 = $this->container->get(PublishController::class);
+            $c2 = $this->container->get(ViewController::class);
+            $c3 = $this->container->get(ServerController::class);
         } catch (NotFoundExceptionInterface|ContainerExceptionInterface $error) {
             $this->fail("Container not found!". $error->getMessage());
         }
+        $this->assertInstanceOf("PublishController", $c1);
+        $this->assertInstanceOf("ViewController", $c2);
+        $this->assertInstanceOf("ServerController", $c3);
     }
 }

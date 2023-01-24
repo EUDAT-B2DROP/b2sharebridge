@@ -46,7 +46,7 @@ class TransferHandlerTest extends TestCase
             ->getMock();
 
         $server_mapper->method("find")
-            ->willReturn(0);  // this doesn't matter, because create is mocked away
+            ->willReturn($this);  // calls getPublishUrl on this
 
         $publisher->method("upload")
             ->willReturn(true);
@@ -77,6 +77,11 @@ class TransferHandlerTest extends TestCase
         $transferhandler_smapper = $transferhandler_refl->getProperty("_smapper");
         $transferhandler_smapper->setAccessible(true);
         $transferhandler_smapper->setValue($this->transferhandler, $server_mapper);
+    }
+
+    function getPublishUrl(): string
+    {
+        return "test_url";
     }
 
     function testRun()

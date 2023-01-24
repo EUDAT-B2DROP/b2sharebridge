@@ -55,8 +55,8 @@ class ApplicationTest extends TestCase
         } catch (NotFoundExceptionInterface|ContainerExceptionInterface $error) {
             $this->fail("Container not found!". $error->getMessage());
         }
-        $this->assertInstanceOf("PublishController", $c1);
-        $this->assertInstanceOf("ViewController", $c2);
-        $this->assertInstanceOf("ServerController", $c3);
+        $this->assertInstanceOf(PublishController::class, $c1);
+        $this->assertInstanceOf(ViewController::class, $c2);
+        $this->assertInstanceOf(ServerController::class, $c3);
     }
 }

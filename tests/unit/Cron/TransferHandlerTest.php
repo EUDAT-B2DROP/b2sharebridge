@@ -1,5 +1,6 @@
 <?php
 
+use OCA\B2shareBridge\Model\DepositStatus;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
@@ -19,6 +20,18 @@ class TransferHandlerTest extends TestCase
             ->setMethods(['findAllForUser', 'findAllForUserAndStateString'])
             ->disableOriginalConstructor()
             ->getMock();
+
+        $fcStatus = new DepositStatus();
+        $fcStatus->setOwner("testId");
+        $fcStatus->setStatus(0);
+        $fcStatus->setCreatedAt(time());
+        $fcStatus->setUpdatedAt(time());
+        $fcStatus->setTitle("test_title");
+        $fcStatus->setServerId(1);
+
+        $deposit_mapper->method("find")
+            ->willReturn($fcStatus);
+
         $deposit_file_mapper =
             $this->getMockBuilder(DepositFileMapper::class)
                 ->disableOriginalConstructor()
@@ -31,8 +44,14 @@ class TransferHandlerTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
+        $server_mapper->method("find")
+            ->willReturn(0);  // this doesn't matter, because create is mocked away
+
         $publisher->method("upload")
             ->willReturn(true);
+
+        $publisher->method("create")
+            ->willReturn("https://localhost:80/mockedaway");
 
 
         $this->transferhandler = new TransferHandler(null);//use cron environment explicitly!

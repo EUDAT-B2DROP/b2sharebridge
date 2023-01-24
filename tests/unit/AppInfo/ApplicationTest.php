@@ -15,7 +15,11 @@ namespace OCA\B2shareBridge\Tests\AppInfo;
 
 use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Controller\PublishController;
+use OCA\B2shareBridge\Controller\ServerController;
+use OCA\B2shareBridge\Controller\ViewController;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class ApplicationTest extends TestCase
 {
@@ -38,27 +42,17 @@ class ApplicationTest extends TestCase
     public function testContainerAppName() 
     {
         $this->app = new Application();
-        $this->assertEquals('b2sharebridge', $this->container->getAppName());
+        $this->assertEquals('b2sharebridge', $this->app::APP_ID);
     }
 
-    public function queryData() 
+    public function testControllerAvailable()
     {
-        return [
-            ['PublishController', PublishController::class],
-        ];
-
-    }
-
-    /**
-     * @dataProvider queryData
-     * @param        string $service
-     * @param        string $expected
-     */
-    public function testContainerQuery($service, $expected = null) 
-    {
-        if ($expected === null) {
-            $expected = $service;
+        try {
+            $this->container->get(PublishController::class);
+            $this->container->get(ViewController::class);
+            $this->container->get(ServerController::class);
+        } catch (NotFoundExceptionInterface|ContainerExceptionInterface $error) {
+            $this->fail("Container not found!". $error->getMessage());
         }
-        $this->assertTrue($this->container->query($service) instanceof $expected);
     }
 }

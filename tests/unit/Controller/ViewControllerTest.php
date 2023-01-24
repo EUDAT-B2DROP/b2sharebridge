@@ -98,7 +98,7 @@ class ViewControllerTest extends TestCase
         $filtered_data = array_filter($this->data, function (DepositStatus $entity) use ($filter) {
             return in_array($entity->getStatus(), $this->deposit_mapper->mapFilterToStates($filter));
         });
-
+        $filtered_data = array_values($filtered_data);  //reset index of array
         $this->deposit_mapper->method('findAllForUserAndStateString')
             ->willReturn($filtered_data);
     }

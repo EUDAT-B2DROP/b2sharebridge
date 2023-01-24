@@ -32,6 +32,7 @@ class ViewControllerTest extends TestCase
 
     public function setUp(): void
     {
+        parent::setUp();
         $this->request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();
         $this->deposit_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
@@ -85,7 +86,7 @@ class ViewControllerTest extends TestCase
     public function setFilter($filter)
     {
         $this->request->method('getParams')
-            ->willReturn($filter);
+            ->willReturn(["filter" => $filter]);
 
         $filtered_data = array_filter($this->data, function ($entity) use ($filter) {
             return in_array($entity->status, $this->deposit_mapper->mapFilterToStates($filter));

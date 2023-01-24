@@ -17,7 +17,7 @@ class TransferHandlerTest extends TestCase
         parent::setUp();
 
         $deposit_mapper = $this->getMockBuilder(DepositStatusMapper::class)
-            ->setMethods(['findAllForUser', 'findAllForUserAndStateString'])
+            ->setMethods(['findAllForUser', 'findAllForUserAndStateString', 'find'])
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -41,6 +41,7 @@ class TransferHandlerTest extends TestCase
                 ->disableOriginalConstructor()
                 ->getMock();
         $server_mapper = $this->getMockBuilder(ServerMapper::class)
+            ->setMethods(['find'])
             ->disableOriginalConstructor()
             ->getMock();
 

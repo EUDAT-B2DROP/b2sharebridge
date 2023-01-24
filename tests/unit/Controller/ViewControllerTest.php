@@ -88,8 +88,8 @@ class ViewControllerTest extends TestCase
         $this->request->method('getParams')
             ->willReturn(["filter" => $filter]);
 
-        $filtered_data = array_filter($this->data, function ($entity) use ($filter) {
-            return in_array($entity->status, $this->deposit_mapper->mapFilterToStates($filter));
+        $filtered_data = array_filter($this->data, function (DepositStatus $entity) use ($filter) {
+            return in_array($entity->getStatus(), $this->deposit_mapper->mapFilterToStates($filter));
         });
 
         $this->deposit_mapper->method('findAllForUserAndStateString')

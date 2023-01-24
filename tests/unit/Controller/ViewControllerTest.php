@@ -85,6 +85,13 @@ class ViewControllerTest extends TestCase
 
     public function setFilter($filter)
     {
+        if ($filter === null) {
+            $this->request->method('getParams')
+                ->willReturn([]);
+            $this->deposit_mapper->method('findAllForUserAndStateString')
+                ->willReturn([]);
+            return;
+        }
         $this->request->method('getParams')
             ->willReturn(["filter" => $filter]);
 
@@ -107,7 +114,7 @@ class ViewControllerTest extends TestCase
         $filter = 'all';
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
-        $this->assertEquals([], $result->getData());
+        $this->assertEquals($this->data, $result->getData());
     }
 
     public function testPublished()
@@ -115,31 +122,28 @@ class ViewControllerTest extends TestCase
         $filter = 'published';
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
-        $this->assertEquals([], $result->getData());
+        $this->assertEquals([$this->data[0]], $result->getData());
     }
 
     public function testPending()
     {
         $filter = 'pending';
-        $this->setFilter($filter);
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
-        $this->assertEquals([], $result->getData());
+        $this->assertEquals([$this->data[1], $this->data[2]], $result->getData());
     }
 
     public function testFailed()
     {
         $filter = 'failed';
-        $this->setFilter($filter);
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
-        $this->assertEquals([], $result->getData());
+        $this->assertEquals([$this->data[3], $this->data[4], $this->data[5]], $result->getData());
     }
 
     public function testNoFilter()
     {
         $filter = null;
-        $this->setFilter($filter);
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_INTERNAL_SERVER_ERROR, $result->getStatus());
     }

@@ -11,13 +11,14 @@
  * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
+
 namespace OCA\B2shareBridge\Tests\AppInfo;
 
 use PHPUnit\Framework\TestCase;
 
 class RoutesTest extends TestCase
 {
-    public function testFile() 
+    public function testFile()
     {
         $routes = include_once __DIR__ . '/../../../appinfo/routes.php';
 
@@ -25,13 +26,18 @@ class RoutesTest extends TestCase
         $expected = [
             'routes' => [
                 [
+                    'name' => 'View#index',
+                    'url' => '/',
+                    'verb' => 'GET'
+                ],
+                [
                     'name' => 'Publish#publish',
                     'url' => '/publish',
                     'verb' => 'POST'
                 ],
                 [
                     'name' => 'View#depositList',
-                    'url' => '/',
+                    'url' => '/deposits',
                     'verb' => 'GET'
                 ],
                 [
@@ -51,8 +57,8 @@ class RoutesTest extends TestCase
                 ],
                 [
                     'name' => 'View#getTabViewContent',
-                    'url'=>'/gettabviewcontent',
-                    'verb'=>'GET'
+                    'url' => '/gettabviewcontent',
+                    'verb' => 'GET'
                 ],
                 [
                     'name' => 'View#initializeB2ShareUI',

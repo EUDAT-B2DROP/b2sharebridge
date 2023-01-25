@@ -61,7 +61,7 @@
                 <b-form-checkbox label="Open access:" v-model="checkbox_status" type="checkbox" name="open_access"
                                  id="cbopen_access" size="lg"/>
               </b-form-group>
-              <b-btn variant="primary" type="submit" id="publish_button" @click="publishAction"
+              <b-btn variant="primary" type="submit" id="publish_button"
                      :disabled="publishDisabled">Publish
               </b-btn>
             </b-form>
@@ -309,7 +309,7 @@ export default {
   padding: 0;
 }
 
-.col-auto {
+label.col-auto {
   width: 25%;
 }
 

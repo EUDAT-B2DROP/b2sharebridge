@@ -32,7 +32,7 @@
         <h2 style="text-align: center;">{{ t('b2sharebridge', 'Create a deposit to get started') }}</h2>
       </div>
       <div v-else>
-        <b-table striped hover :deposits="Deposits"></b-table>
+        <b-table striped hover :items="Deposits"></b-table>
       </div>
     </NcAppContent>
   </div>
@@ -86,7 +86,7 @@ export default {
           .get(generateUrl('/apps/b2sharebridge/deposits?filter='+filter))
           .then((response) => {
             console.log(response.data)
-            this.Deposits = response.data
+            this.Deposits = response.data.forEach(JSON.parse)
           })
           .catch((error) => {
             console.error(error)

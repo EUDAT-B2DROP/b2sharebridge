@@ -3,8 +3,8 @@
     <NcAppContent>
       <div id="b2shareBridgeTabView" class="dialogContainer">
         <div>
-          <validation-observer ref="observer" v-slot="{ handleSubmit }">
-            <b-form @submit.stop.prevent="handleSubmit(publishAction)">
+          <validation-observer ref="observer" v-slot="{ publishDisabled }">
+            <b-form @submit.stop.prevent="publishAction">
               <validation-provider
                   name="Title"
                   :rules="{ required: true, min: 3 }"
@@ -62,7 +62,7 @@
                                  id="cbopen_access" size="lg"/>
               </b-form-group>
               <b-btn variant="primary" type="submit" id="publish_button" @click="publishAction"
-                     :disabled="!publishEnabled">Publish
+                     :disabled="publishDisabled">Publish
               </b-btn>
             </b-form>
           </validation-observer>
@@ -122,7 +122,7 @@ export default {
   },
   data() {
     return {
-      publishEnabled: true,
+      publishDisabled: true,
       communities: [],
       servers: [],
       server_selected: null,
@@ -186,7 +186,7 @@ export default {
                 server_id: this.server_selected,
               })
           .then(() => {
-            this.publishEnabled = false;
+            this.publishDisabled = true;
           })
           .catch((error) => {
             if (error.response) {
@@ -309,7 +309,7 @@ export default {
   padding: 0;
 }
 
-.col-form-label {
+.col-auto {
   width: 25%;
 }
 

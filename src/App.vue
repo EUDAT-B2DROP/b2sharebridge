@@ -28,8 +28,26 @@
     </NcAppNavigation>
     <NcAppContent>
       <div v-if="deposits.length === 0">
-        <div class="icon-file"/>
-        <h2 style="text-align: center;">{{ t('b2sharebridge', 'Create a deposit to get started') }}</h2>
+        <div v-if="tableStatus === 0">
+          <div class="icon-file"/>
+          <h2 style="text-align: center;">{{ t('b2sharebridge', 'Create a deposit to get started!') }}</h2>
+        </div>
+        <div v-else-if="tableStatus === 1">
+          <div class="icon-file"/>
+          <h2 style="text-align: center;">{{ t('b2sharebridge', 'No pending deposits!') }}</h2>
+        </div>
+        <div v-else-if="tableStatus === 2">
+          <div class="icon-file"/>
+          <h2 style="text-align: center;">{{ t('b2sharebridge', 'No published deposits!') }}</h2>
+        </div>
+        <div v-else-if="tableStatus === 3">
+          <div class="icon-file"/>
+          <h2 style="text-align: center;">{{ t('b2sharebridge', 'No failed deposits!') }}</h2>
+        </div>
+        <div v-else>
+          <div class="icon-file"/>
+          <h2 style="text-align: center;">{{ t('b2sharebridge', 'Unknown table status!') }}</h2>
+        </div>
       </div>
       <div v-else>
         <b-table id="deposit-table" striped hover
@@ -78,7 +96,7 @@ export default {
       deposits: [],
       fields: [],
       sortBy: 'createdAt',
-      sortDesc: false,
+      sortDesc: true,
       updating: false,
       loading: true,
       tableStatus: 0,
@@ -176,6 +194,10 @@ export default {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+}
+
+.icon-file {
+  height: 44px;
 }
 
 #deposit-table {

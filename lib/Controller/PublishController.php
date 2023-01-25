@@ -24,6 +24,7 @@ use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Publish\B2share;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\IConfig;
@@ -96,38 +97,37 @@ class PublishController extends Controller
         $param = $this->request->getParams();
         //TODO what if token wasn't set? We couldn't have gotten here
         //but still a check seems in place.
-        $serverId = $param['server_id'];
-        $_userId = \OC::$server->getUserSession()->getUser()->getUID();
-        $token = $this->config->getUserValue($_userId, $this->appName, "token_" . $serverId);
 
-        $error = false;
-        if (strlen($_userId) <= 0) {
-            $error = 'No user configured for session';
-        }
-        if (!is_array($param)
-            || !array_key_exists('ids', $param)
+        if (!array_key_exists('ids', $param)
             || !array_key_exists('community', $param)
+            || !array_key_exists('server_id', $param)
+            || !array_key_exists('title', $param)
+            || !array_key_exists('open_access', $param)
         ) {
-            $error = 'Parameters gotten from UI are no array or they are missing';
+            return new JSONResponse(
+                [
+                    'message'=> 'Missing parameters',
+                    'status' => 'error'
+                ],
+                Http::STATUS_BAD_REQUEST
+            );
         }
+        $serverId = $param['server_id'];
         $ids = $param['ids'];
         $community = $param['community'];
         $open_access = $param['open_access'];
         $title = $param['title'];
-        if (!is_string($token)) {
-            $error = 'Problems while parsing publishToken';
-        }
 
-        if (($error)) {
-            \OC::$server->getLogger()->error($error, ['app' => 'b2sharebridge']);
+        $token = $this->config->getUserValue($this->userId, $this->appName, "token_" . $serverId);
+        if (!is_string($token)) {
             return new JSONResponse(
                 [
-                    'message'=>'Internal server error, contact the EUDAT helpdesk',
+                    'message'=> 'Could not find token for user',
                     'status' => 'error'
-                ]
+                ],
+                Http::STATUS_INTERNAL_SERVER_ERROR
             );
         }
-
 
         $allowed_uploads = $this->config->getAppValue(
             'b2sharebridge',
@@ -178,7 +178,8 @@ class PublishController extends Controller
                         'message' => 'We currently only support 
                         files smaller then ' . $allowed_filesize . ' MB',
                         'status' => 'error'
-                    ]
+                    ],
+                    Http::STATUS_REQUEST_ENTITY_TOO_LARGE
                 );
             }
         } else {
@@ -187,7 +188,8 @@ class PublishController extends Controller
                     'message' => 'Until your ' . $active_uploads . ' deposits 
                         are done, you are not allowed to create further deposits.',
                     'status' => 'error'
-                ]
+                ],
+                Http::STATUS_TOO_MANY_REQUESTS
             );
         }
         // create the actual transfer Cron in the database

@@ -61,12 +61,16 @@
                 <b-form-checkbox label="Open access:" v-model="checkbox_status" type="checkbox" name="open_access"
                                  id="cbopen_access"/>
               </b-form-group>
-              <b-btn variant="primary" type="submit" id="publish_button" @click="publishAction">Publish</b-btn>
+              <b-btn variant="primary" type="submit" id="publish_button" @click="publishAction"
+                     :disabled="!publishEnabled">Publish
+              </b-btn>
             </b-form>
           </validation-observer>
         </div>
         <div v-if="tokens === null" class="errormsg" id="b2sharebridge_errormsg">Please set your B2SHARE API token <a
             href="/settings/user/b2sharebridge">here</a>
+        </div>
+        <div v-if="errormessage !== null" class="errormsg" id="b2sharebridge_errormsg">{{ errormessage }}
         </div>
       </div>
     </NcAppContent>
@@ -79,6 +83,9 @@ import {
 import {generateUrl} from "@nextcloud/router";
 import axios from "@nextcloud/axios";
 import {ValidationProvider, ValidationObserver, extend} from "vee-validate";
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/js/bootstrap.min.js'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 /**
  * Validation rules
@@ -115,7 +122,7 @@ export default {
   },
   data() {
     return {
-      publishEnabled: false,
+      publishEnabled: true,
       communities: [],
       servers: [],
       server_selected: null,
@@ -130,6 +137,7 @@ export default {
       deposit_title: "",
       tokens: null,
       fileInfo: null,
+      errormessage: null,
     }
   },
 
@@ -168,7 +176,7 @@ export default {
         ids = [this.fileInfo.id];
       }
 
-      let result = axios
+      let result = await axios
           .post(generateUrl('/apps/b2sharebridge/publish'),
               {
                 ids: ids,
@@ -177,7 +185,16 @@ export default {
                 title: this.deposit_title,
                 server_id: this.server_selected,
               })
+          .then(() => {
+            this.publishEnabled = false;
+          })
           .catch((error) => {
+            if (error.response) {
+              if (error.response.status === 413  //entity too large
+                  || error.response.status === 429) {//too many uploads
+                this.errormessage = error.response.data.message;
+              }
+            }
             console.log(error)
           })
       if (result && result.status === 'success') {

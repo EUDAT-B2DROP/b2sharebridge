@@ -59,7 +59,7 @@
               </validation-provider>
               <b-form-group label-cols="auto" label-cols-lg="sm" label="Open access:" label-for="cbopen_access">
                 <b-form-checkbox label="Open access:" v-model="checkbox_status" type="checkbox" name="open_access"
-                                 id="cbopen_access"/>
+                                 id="cbopen_access" size="lg"/>
               </b-form-group>
               <b-btn variant="primary" type="submit" id="publish_button" @click="publishAction"
                      :disabled="!publishEnabled">Publish
@@ -307,6 +307,15 @@ export default {
 #tab-b2sharebridge {
   height: 100%;
   padding: 0;
+}
+
+.col-form-label {
+  width: 25%;
+}
+
+#publish_button {
+  margin-left: 3px;
+  width: 25%;
 }
 
 input.is-valid, select.is-valid {

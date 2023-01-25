@@ -50,6 +50,7 @@
         </div>
       </div>
       <div v-else>
+        <h2 id="deposit-table-name" style="text-align: center;">{{ getTableName() }}</h2>
         <b-table id="deposit-table" striped hover
                  :items="deposits"
                  :fields="fields"
@@ -183,10 +184,30 @@ export default {
       ]
       return this.loadDeposits("failed")
     },
+
+    getTableName() {
+      switch (this.tableStatus) {
+        case 0:
+          return "All Deposits";
+        case 1:
+          return "Pending Deposits";
+        case 2:
+          return "Published Deposits";
+        case 3:
+          return "Failed Deposits";
+        default:
+          return "Error Table";
+      }
+
+    }
   }
 }
 </script>
 <style scoped>
+#deposit-table-name {
+  height: 50px;
+}
+
 #app-content > div {
   width: 100%;
   height: 100%;
@@ -197,7 +218,7 @@ export default {
 }
 
 .icon-file {
-  height: 44px;
+  height: 50px;
 }
 
 #deposit-table {

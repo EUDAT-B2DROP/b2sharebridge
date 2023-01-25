@@ -32,7 +32,7 @@
         <h2 style="text-align: center;">{{ t('b2sharebridge', 'Create a deposit to get started') }}</h2>
       </div>
       <div v-else>
-        <b-table striped hover :items="deposits" :fields="fields" :sort-by.sync="sortBy"
+        <b-table id="deposit-table" striped hover :items="deposits" :fields="fields" :sort-by.sync="sortBy"
                  :sort-desc.sync="sortDesc"></b-table>
       </div>
     </NcAppContent>
@@ -51,6 +51,8 @@ import {
   NcAppNavigationItem,
   NcAppNavigationNew
 } from '@nextcloud/vue'
+
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 export default {
   name: 'App',
@@ -159,6 +161,10 @@ export default {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+}
+
+#deposit-table {
+  width: 100%;
 }
 
 input[type='text'] {

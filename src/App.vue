@@ -2,26 +2,26 @@
   <div id="content" class="app-b2sharebridge">
     <NcAppNavigation>
       <NcAppNavigationNew v-if="!loading"
-                          :text="t('b2sharebridge', 'All DepositsTODORemoveTest')"
-                          :disabled="false"
+                          :text="t('b2sharebridge', 'All Deposits')"
+                          :disabled="tableStatus === 0"
                           button-id="deposit-all-button"
                           button-class="icon-add"
                           @click="showAllDeposits"/>
       <NcAppNavigationNew v-if="!loading"
                           :text="t('b2sharebridge', 'Pending Deposits')"
-                          :disabled="false"
+                          :disabled="tableStatus === 1"
                           button-id="deposit-pending-button"
                           button-class="icon-add"
                           @click="showPendingDeposits"/>
       <NcAppNavigationNew v-if="!loading"
                           :text="t('b2sharebridge', 'Published Deposits')"
-                          :disabled="false"
+                          :disabled="tableStatus === 2"
                           button-id="deposit-published-button"
                           button-class="icon-add"
                           @click="showPublishedDeposits"/>
       <NcAppNavigationNew v-if="!loading"
                           :text="t('b2sharebridge', 'Failed Deposits')"
-                          :disabled="false"
+                          :disabled="tableStatus === 3"
                           button-id="deposit-failed-button"
                           button-class="icon-add"
                           @click="showFailedDeposits"/>
@@ -32,8 +32,15 @@
         <h2 style="text-align: center;">{{ t('b2sharebridge', 'Create a deposit to get started') }}</h2>
       </div>
       <div v-else>
-        <b-table id="deposit-table" striped hover :items="deposits" :fields="fields" :sort-by.sync="sortBy"
-                 :sort-desc.sync="sortDesc"></b-table>
+        <b-table id="deposit-table" striped hover
+                 :items="deposits"
+                 :fields="fields"
+                 :sort-by.sync="sortBy"
+                 :sort-desc.sync="sortDesc"
+                 label-sort-asc=""
+                 label-sort-desc=""
+                 label-sort-clear="">
+        </b-table>
       </div>
     </NcAppContent>
   </div>
@@ -73,6 +80,7 @@ export default {
       sortDesc: false,
       updating: false,
       loading: true,
+      tableStatus: 0,
     }
   },
   /**
@@ -106,6 +114,7 @@ export default {
     },
 
     showAllDeposits() {
+      this.tableStatus = 0;
       this.fields = [
         {key: "status", sortable: true, thClass: "columnWidthInt"},
         {key: "title", sortable: true, thClass: "columnWidthTitle"},
@@ -119,6 +128,7 @@ export default {
     },
 
     showPendingDeposits() {
+      this.tableStatus = 1;
       this.fields = [
         {key: "title", sortable: true, thStyle: {width: "50%"}},
         {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
@@ -130,6 +140,7 @@ export default {
     },
 
     showPublishedDeposits() {
+      this.tableStatus = 2;
       this.fields = [
         {key: "title", sortable: true, thClass: "columnWidthTitle"},
         {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
@@ -142,6 +153,7 @@ export default {
     },
 
     showFailedDeposits() {
+      this.tableStatus = 3;
       this.fields = [
         {key: "title", sortable: true, thClass: "columnWidthTitle"},
         {key: "createdAt", sortable: true, thClass: "columnWidthDate"},

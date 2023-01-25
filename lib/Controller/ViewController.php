@@ -152,11 +152,14 @@ class ViewController extends Controller
                 $this->userId,
                 $filter);
         }
-        foreach ($publications as $publication) {
+        foreach ($publications as &$publication) {
             $publication->setFileCount(
                 $this->fdmapper->getFileCount($publication->getId())
             );
+            $publication = (array)$publication;  //Note this should be json encoded if a deposit would be deeply nested
         }
+
+
         return new DataResponse($publications);
     }
 

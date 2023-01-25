@@ -86,4 +86,21 @@ class DepositStatus extends Entity
 
         return urldecode($result);
     }
+
+    public function toJson()
+    {
+        $data = [
+            "status" => $this->status,
+            "title" => $this->title,
+            "owner" =>  $this->owner,
+            "createdAt" => $this->createdAt,
+            "updatedAt" =>  $this->updatedAt,
+            "url" =>  $this->url,
+            //"title" =>  $this->fileMapper,
+            "fileCount" =>  $this->fileCount,
+            "error" =>  $this->errorMessage,
+            "serverId" =>  $this->serverId,
+        ];
+        return json_encode($data);
+    }
 }

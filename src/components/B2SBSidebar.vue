@@ -338,7 +338,7 @@ input.is-invalid:focus, select.is-invalid:focus {
   border-color: rgb(148, 26, 37);
 }
 
-div.invalid-feedback {
+div.invalid-feedback div.errormsg{
   color: rgb(148, 26, 37);
 }
 

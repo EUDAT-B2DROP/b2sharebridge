@@ -125,7 +125,7 @@ class ViewController extends Controller
      *     'publish': get published deposits
      *     'failed': get failed deposits
      *
-     * @return JSONResponse
+     * @return DataResponse
      *
      * @throws Exception
      * @throws DoesNotExistException
@@ -136,7 +136,7 @@ class ViewController extends Controller
     {
         $param = $this->request->getParams();
         if (!array_key_exists('filter', $param)) {
-            return new JSONResponse(
+            return new DataResponse(
                 [
                     "message" => "missing argument: filter",
                     "status" => "error"
@@ -156,9 +156,11 @@ class ViewController extends Controller
             $publication->setFileCount(
                 $this->fdmapper->getFileCount($publication->getId())
             );
+            $publication = json_encode($publication);  //Note this should be json encoded if a deposit would be deeply nested
         }
 
-        return new JSONResponse(json_encode($publications));
+
+        return new DataResponse($publications);
     }
 
     /**

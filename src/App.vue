@@ -180,6 +180,25 @@ export default {
 
 #deposit-table {
   width: 100%;
+  border-top: 0;
+  border-bottom: 0;
+}
+
+table th td {
+  color: white;
+  text-align: left;
+}
+
+body .table.b-table > tfoot > tr > [aria-sort=none], body .table.b-table > thead > tr > th[aria-sort=none] {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
+}
+
+body .table.b-table > tfoot > tr > [aria-sort=ascending], body .table.b-table > thead > tr > th[aria-sort=ascending] {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
+}
+
+body .table.b-table.table-dark > tfoot > tr > [aria-sort=descending], body #app .table.b-table.table-dark > thead > tr > [aria-sort=descending], .table.b-table > .thead-dark > tr > [aria-sort=descending] {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
 }
 
 input[type='text'] {

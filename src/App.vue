@@ -27,12 +27,12 @@
                           @click="showFailedDeposits"/>
     </NcAppNavigation>
     <NcAppContent>
-      <div v-if="Deposits.length === 0">
+      <div v-if="deposits.length === 0">
         <div class="icon-file"/>
         <h2 style="text-align: center;">{{ t('b2sharebridge', 'Create a deposit to get started') }}</h2>
       </div>
       <div v-else>
-        <b-table striped hover :items="Deposits"></b-table>
+        <b-table striped hover :items="deposits"></b-table>
       </div>
     </NcAppContent>
   </div>
@@ -62,7 +62,7 @@ export default {
   },
   data() {
     return {
-      Deposits: [],
+      deposits: [],
       updating: false,
       loading: true,
     }
@@ -86,7 +86,10 @@ export default {
           .get(generateUrl('/apps/b2sharebridge/deposits?filter='+filter))
           .then((response) => {
             console.log(response.data)
-            this.Deposits = response.data.forEach(JSON.parse)
+            this.deposits = response.data
+            this.deposits.forEach(function (value, index, array) {
+              array[index] = JSON.parse(value);
+            })
           })
           .catch((error) => {
             console.error(error)

@@ -32,7 +32,8 @@
         <h2 style="text-align: center;">{{ t('b2sharebridge', 'Create a deposit to get started') }}</h2>
       </div>
       <div v-else>
-        <b-table striped hover :items="deposits"></b-table>
+        <b-table striped hover :items="deposits" :fields="fields" :sort-by.sync="sortBy"
+                 :sort-desc.sync="sortDesc"></b-table>
       </div>
     </NcAppContent>
   </div>
@@ -63,6 +64,9 @@ export default {
   data() {
     return {
       deposits: [],
+      fields: [],
+      sortBy: 'createdAt',
+      sortDesc: false,
       updating: false,
       loading: true,
     }
@@ -72,7 +76,7 @@ export default {
    */
   async mounted() {
     try {
-      await this.loadDeposits("all")
+      await this.showAllDeposits();
     } catch (e) {
       console.error(e)
       showError(t('b2sharebridge', 'Could not fetch deposits'))
@@ -83,7 +87,7 @@ export default {
   methods: {
     loadDeposits(filter) {
       return axios
-          .get(generateUrl('/apps/b2sharebridge/deposits?filter='+filter))
+          .get(generateUrl('/apps/b2sharebridge/deposits?filter=' + filter))
           .then((response) => {
             console.log(response.data)
             this.deposits = response.data
@@ -98,19 +102,51 @@ export default {
     },
 
     showAllDeposits() {
-      this.loadDeposits("all")
+      this.fields = [
+        {key: "status", sortable: true, thClass: "columnWidthInt"},
+        {key: "title", sortable: true, thClass: "columnWidthTitle"},
+        {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
+        {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
+        {key: "url", sortable: true, thStyle: {width: "20%"}},
+        {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
+        {key: "serverId", sortable: true, thClass: "columnWidthInt"},
+      ]
+      return this.loadDeposits("all")
     },
 
     showPendingDeposits() {
-      this.loadDeposits("pending")
+      this.fields = [
+        {key: "title", sortable: true, thStyle: {width: "50%"}},
+        {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
+        {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
+        {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
+        {key: "serverId", sortable: true, thClass: "columnWidthInt"},
+      ]
+      return this.loadDeposits("pending")
     },
 
     showPublishedDeposits() {
-      this.loadDeposits("published")
+      this.fields = [
+        {key: "title", sortable: true, thClass: "columnWidthTitle"},
+        {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
+        {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
+        {key: "url", sortable: true, thStyle: {width: "30%"}},
+        {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
+        {key: "serverId", sortable: true, thClass: "columnWidthInt"},
+      ]
+      return this.loadDeposits("published")
     },
 
     showFailedDeposits() {
-      this.loadDeposits("failed")
+      this.fields = [
+        {key: "title", sortable: true, thClass: "columnWidthTitle"},
+        {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
+        {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
+        {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
+        {key: "serverId", sortable: true, thClass: "columnWidthInt"},
+        {key: "error", sortable: false, thStyle: {width: "30%"}},
+      ]
+      return this.loadDeposits("failed")
     },
   }
 }
@@ -132,5 +168,17 @@ input[type='text'] {
 textarea {
   flex-grow: 1;
   width: 100%;
+}
+
+.columnWidthInt {
+  width: 10%
+}
+
+.columnWidthDate {
+  width: 15%
+}
+
+.columnWidthTitle {
+  width: 20%
 }
 </style>

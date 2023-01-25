@@ -10,7 +10,7 @@
                   :rules="{ required: true, min: 3 }"
                   v-slot="validationContext"
               >
-                <b-form-group label-cols="auto" label-cols-lg="sm" label="Deposit Title:" label-for="b2s_title">
+                <b-form-group label-cols="3" label-cols-lg="sm" label="Deposit Title:" label-for="b2s_title">
                   <b-form-input v-model="deposit_title"
                                 id="b2s_title"
                                 placeholder="Deposit title"
@@ -26,7 +26,7 @@
                   :rules="{ required: true }"
                   v-slot="validationContext"
               >
-                <b-form-group label-cols="auto" label-cols-lg="sm" label="Server:" label-for="b2s_server">
+                <b-form-group label-cols="3" label-cols-lg="sm" label="Server:" label-for="b2s_server">
                   <b-form-select v-model="server_selected"
                                  :options="server_options"
                                  id="b2s_server"
@@ -44,7 +44,7 @@
                   :rules="{ required: true }"
                   v-slot="validationContext"
               >
-                <b-form-group label-cols="auto" label-cols-lg="sm" label="Community:" label-for="b2s_community">
+                <b-form-group label-cols="3" label-cols-lg="sm" label="Community:" label-for="b2s_community">
                   <b-form-select label="Community:"
                                  v-model="community_selected"
                                  id="b2s_community"
@@ -57,7 +57,7 @@
                   </b-form-invalid-feedback>
                 </b-form-group>
               </ValidationProvider>
-              <b-form-group label-cols="auto" label-cols-lg="sm" label="Open access:" label-for="cbopen_access">
+              <b-form-group label-cols="3" label-cols-lg="sm" label="Open access:" label-for="cbopen_access">
                 <b-form-checkbox label="Open access:" v-model="checkbox_status" type="checkbox" name="open_access"
                                  id="cbopen_access" size="lg"/>
               </b-form-group>
@@ -122,7 +122,7 @@ export default {
   },
   data() {
     return {
-      publishDisabled: true,
+      publishDisabled: false,
       communities: [],
       servers: [],
       server_selected: null,

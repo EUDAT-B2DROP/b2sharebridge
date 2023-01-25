@@ -60,10 +60,11 @@ class TransferHandler extends QueuedJob
         ServerMapper $smapper = null
     )
     {
-        if($time === null or $mapper === null or $publisher === null or $smapper === null)
+        parent::__construct($time);
+        if($dfmapper === null or $mapper === null or $publisher === null or $smapper === null)
             $this->fixTransferForCron();
         else{
-            parent::__construct($time);
+
             $this->_mapper = $mapper;
             $this->_dfmapper = $dfmapper;
             $this->_publisher = $publisher;

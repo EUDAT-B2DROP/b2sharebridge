@@ -132,7 +132,7 @@ class ViewController extends Controller
      * @throws MultipleObjectsReturnedException
      * @NoAdminRequired
      */
-    public function depositList(): JSONResponse
+    public function depositList(): DataResponse
     {
         $param = $this->request->getParams();
         if (!array_key_exists('filter', $param)) {

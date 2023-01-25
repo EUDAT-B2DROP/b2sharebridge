@@ -3,9 +3,9 @@
     <NcAppContent>
       <div id="b2shareBridgeTabView" class="dialogContainer">
         <div>
-          <validation-observer ref="observer" v-slot="{ publishDisabled }">
-            <b-form @submit.stop.prevent="publishAction">
-              <validation-provider
+          <ValidationObserver ref="observer" v-slot="{ handleSubmit }">
+            <b-form @submit.stop.prevent="handleSubmit(publishAction)">
+              <ValidationProvider
                   name="Title"
                   :rules="{ required: true, min: 3 }"
                   v-slot="validationContext"
@@ -20,8 +20,8 @@
                     }}
                   </b-form-invalid-feedback>
                 </b-form-group>
-              </validation-provider>
-              <validation-provider
+              </ValidationProvider>
+              <ValidationProvider
                   name="Server"
                   :rules="{ required: true }"
                   v-slot="validationContext"
@@ -38,8 +38,8 @@
                     }}
                   </b-form-invalid-feedback>
                 </b-form-group>
-              </validation-provider>
-              <validation-provider
+              </ValidationProvider>
+              <ValidationProvider
                   name="Community"
                   :rules="{ required: true }"
                   v-slot="validationContext"
@@ -56,7 +56,7 @@
                     }}
                   </b-form-invalid-feedback>
                 </b-form-group>
-              </validation-provider>
+              </ValidationProvider>
               <b-form-group label-cols="auto" label-cols-lg="sm" label="Open access:" label-for="cbopen_access">
                 <b-form-checkbox label="Open access:" v-model="checkbox_status" type="checkbox" name="open_access"
                                  id="cbopen_access" size="lg"/>
@@ -65,7 +65,7 @@
                      :disabled="publishDisabled">Publish
               </b-btn>
             </b-form>
-          </validation-observer>
+          </ValidationObserver>
         </div>
         <div v-if="tokens === null" class="errormsg" id="b2sharebridge_errormsg">Please set your B2SHARE API token <a
             href="/settings/user/b2sharebridge">here</a>

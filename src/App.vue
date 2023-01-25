@@ -179,6 +179,7 @@ export default {
 }
 
 #deposit-table {
+  margin-top: 44px; /*move down due to navigation button being in the way*/
   width: 100%;
   border-top: 0;
   border-bottom: 0;

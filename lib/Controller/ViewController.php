@@ -156,7 +156,7 @@ class ViewController extends Controller
             $publication->setFileCount(
                 $this->fdmapper->getFileCount($publication->getId())
             );
-            $publication = json_encode($publication);  //Note this should be json encoded if a deposit would be deeply nested
+            $publication = json_encode((array)$publication);  //Note this should be json encoded if a deposit would be deeply nested
         }
 
 

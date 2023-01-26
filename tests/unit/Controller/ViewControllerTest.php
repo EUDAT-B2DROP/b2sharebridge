@@ -14,7 +14,7 @@ use OCA\B2shareBridge\Model\DepositStatus;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use PHPUnit\Framework\TestCase;
 
-use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http;
 
 class ViewControllerTest extends TestCase
@@ -103,7 +103,7 @@ class ViewControllerTest extends TestCase
             ->willReturn($filtered_data);
     }
 
-    public function createDeposit($filter): DataResponse
+    public function createDeposit($filter): JSONResponse
     {
         $this->setFilter($filter);
         return $this->controller->depositList();

@@ -129,10 +129,6 @@ export default {
       showError(t('b2sharebridge', 'Could not fetch deposits'))
     }
     this.loading = false
-    this.timer = setInterval(() => {
-      this.checkDepositUpdate()
-    }, 1000 * 60 * 2)  //every two minutes
-
   },
 
   beforeDestroy() {  // might need to switch to beforeUnmount in the future
@@ -141,6 +137,12 @@ export default {
 
   methods: {
     loadDeposits(filter) {
+      if (this.timer !== null) {
+        clearInterval(this.timer );
+      }
+      this.timer = setInterval(() => {
+        this.checkDepositUpdate()
+      }, 1000 * 60 * 2)  //every two minutes
       this.last_deposit_update = new Date();
       return axios
           .get(generateUrl('/apps/b2sharebridge/deposits?filter=' + filter))
@@ -148,7 +150,7 @@ export default {
             console.log(response.data)
             this.deposits = response.data
             this.deposits.forEach(function (value, index, array) {
-              array[index] = JSON.parse(value);
+              array[index] = this.translateDepositStatus(JSON.parse(value));
             })
           })
           .catch((error) => {
@@ -164,7 +166,7 @@ export default {
         {key: "title", sortable: true, thClass: "columnWidthTitle"},
         {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
         {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
-        {key: "url", sortable: true, thStyle: {width: "20%"}},
+        {key: "url", sortable: true, thStyle: {width: "20%", color: "blue"}},
         {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
       ]
@@ -189,7 +191,7 @@ export default {
         {key: "title", sortable: true, thClass: "columnWidthTitle"},
         {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
         {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
-        {key: "url", sortable: true, thStyle: {width: "30%"}},
+        {key: "url", sortable: true, thStyle: {width: "30%", color: "blue"}},
         {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
       ]
@@ -222,6 +224,24 @@ export default {
         default:
           return "Error Table";
       }
+    },
+
+    translateDepositStatus(deposit_status) {
+      if ("status" in deposit_status){
+        switch (deposit_status["status"]){
+          case 0:
+            deposit_status.status = DepositFilter.PUBLISHED.toUpperCase(); break;
+          case 1:
+          case 2:
+            deposit_status.status = DepositFilter.PENDING.toUpperCase(); break;
+          case 3:
+          case 4:
+          case 5:
+            deposit_status.status = DepositFilter.FAILED.toUpperCase(); break;
+          default: break;
+        }
+      }
+      //TODO query server id?
     },
 
     checkDepositUpdate() {

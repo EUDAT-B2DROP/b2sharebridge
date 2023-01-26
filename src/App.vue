@@ -242,6 +242,8 @@ export default {
         }
       }
       //TODO query server id?
+
+      return deposit_status;
     },
 
     checkDepositUpdate() {

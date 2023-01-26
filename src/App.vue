@@ -61,7 +61,7 @@
                  label-sort-clear=""
                  sort-icon-left>
           <template #cell(url)="url_data">
-            <a :href="url_data.value">{{url_data.value}}</a>
+            <a :href="url_data.value">{{ url_data.value }}</a>
           </template>
         </b-table>
       </div>
@@ -131,7 +131,7 @@ export default {
     this.loading = false
     this.timer = setInterval(() => {
       this.checkDepositUpdate()
-    }, 1000*30)  //thirty seconds
+    }, 1000 * 60 * 2)  //every two minutes
 
   },
 
@@ -180,7 +180,7 @@ export default {
         {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
       ]
-      return this.loadDeposits(this.filter )
+      return this.loadDeposits(this.filter)
     },
 
     showPublishedDeposits() {
@@ -193,7 +193,7 @@ export default {
         {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
       ]
-      return this.loadDeposits(this.filter )
+      return this.loadDeposits(this.filter)
     },
 
     showFailedDeposits() {
@@ -225,11 +225,9 @@ export default {
     },
 
     checkDepositUpdate() {
-      let currently = new Date();
-      if(currently.getMinutes()%10 === 0) {  //e.g: 13:00, 13:10, 13:20 ...
-        this.loadDeposits(this.filter)  //try to fetch update after transfer handler
-      }
-    }
+      console.log("Polling deposits")
+      this.loadDeposits(this.filter)  //try to fetch update after transfer handler
+    },
   }
 }
 </script>

@@ -60,6 +60,9 @@
                  label-sort-desc=""
                  label-sort-clear=""
                  sort-icon-left>
+          <template #cell(url)="url_data">
+            <a :href="url_data.value">{{url_data.value}}</a>
+          </template>
         </b-table>
       </div>
     </NcAppContent>

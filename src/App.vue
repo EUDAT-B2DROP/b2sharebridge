@@ -3,44 +3,44 @@
     <NcAppNavigation>
       <NcAppNavigationNew v-if="!loading"
                           :text="t('b2sharebridge', 'All Deposits')"
-                          :disabled="tableStatus === 0"
+                          :disabled="filter === DepositFilter.ALL"
                           button-id="deposit-all-button"
                           button-class="icon-add"
                           @click="showAllDeposits"/>
       <NcAppNavigationNew v-if="!loading"
                           :text="t('b2sharebridge', 'Pending Deposits')"
-                          :disabled="tableStatus === 1"
+                          :disabled="filter === DepositFilter.PENDING"
                           button-id="deposit-pending-button"
                           button-class="icon-add"
                           @click="showPendingDeposits"/>
       <NcAppNavigationNew v-if="!loading"
                           :text="t('b2sharebridge', 'Published Deposits')"
-                          :disabled="tableStatus === 2"
+                          :disabled="filter === DepositFilter.PUBLISHED"
                           button-id="deposit-published-button"
                           button-class="icon-add"
                           @click="showPublishedDeposits"/>
       <NcAppNavigationNew v-if="!loading"
                           :text="t('b2sharebridge', 'Failed Deposits')"
-                          :disabled="tableStatus === 3"
+                          :disabled="filter === DepositFilter.FAILED"
                           button-id="deposit-failed-button"
                           button-class="icon-add"
                           @click="showFailedDeposits"/>
     </NcAppNavigation>
     <NcAppContent>
       <div v-if="deposits.length === 0">
-        <div v-if="tableStatus === 0">
+        <div v-if="filter === DepositFilter.ALL">
           <div class="icon-file"/>
           <h2 style="text-align: center;">{{ t('b2sharebridge', 'Create a deposit to get started!') }}</h2>
         </div>
-        <div v-else-if="tableStatus === 1">
+        <div v-else-if="filter === DepositFilter.PENDING">
           <div class="icon-file"/>
           <h2 style="text-align: center;">{{ t('b2sharebridge', 'No pending deposits!') }}</h2>
         </div>
-        <div v-else-if="tableStatus === 2">
+        <div v-else-if="filter === DepositFilter.PUBLISHED">
           <div class="icon-file"/>
           <h2 style="text-align: center;">{{ t('b2sharebridge', 'No published deposits!') }}</h2>
         </div>
-        <div v-else-if="tableStatus === 3">
+        <div v-else-if="filter === DepositFilter.FAILED">
           <div class="icon-file"/>
           <h2 style="text-align: center;">{{ t('b2sharebridge', 'No failed deposits!') }}</h2>
         </div>
@@ -86,6 +86,13 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+const DepositFilter = {
+  ALL: 'all',
+  PENDING: 'pending',
+  PUBLISHED: 'published',
+  FAILED: 'failed'
+};
+
 export default {
   name: 'App',
   components: {
@@ -94,7 +101,9 @@ export default {
     NcAppNavigation,
     NcAppNavigationItem,
     NcAppNavigationNew,
+    DepositFilter,
   },
+
   data() {
     return {
       deposits: [],
@@ -103,7 +112,10 @@ export default {
       sortDesc: true,
       updating: false,
       loading: true,
-      tableStatus: 0,
+      filter: DepositFilter.ALL,
+      timer: null,
+      last_deposit_update: null,
+      DepositFilter,  //https://stackoverflow.com/questions/57538539/how-to-use-enums-or-const-in-vuejs
     }
   },
   /**
@@ -117,10 +129,19 @@ export default {
       showError(t('b2sharebridge', 'Could not fetch deposits'))
     }
     this.loading = false
+    this.timer = setInterval(() => {
+      this.checkDepositUpdate()
+    }, 1000*30)  //thirty seconds
+
+  },
+
+  beforeDestroy() {  // might need to switch to beforeUnmount in the future
+    clearInterval(this.timer)
   },
 
   methods: {
     loadDeposits(filter) {
+      this.last_deposit_update = new Date();
       return axios
           .get(generateUrl('/apps/b2sharebridge/deposits?filter=' + filter))
           .then((response) => {
@@ -137,7 +158,7 @@ export default {
     },
 
     showAllDeposits() {
-      this.tableStatus = 0;
+      this.filter = DepositFilter.ALL;
       this.fields = [
         {key: "status", sortable: true, thClass: "columnWidthInt"},
         {key: "title", sortable: true, thClass: "columnWidthTitle"},
@@ -147,11 +168,11 @@ export default {
         {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
       ]
-      return this.loadDeposits("all")
+      return this.loadDeposits(this.filter)
     },
 
     showPendingDeposits() {
-      this.tableStatus = 1;
+      this.filter = DepositFilter.PENDING;
       this.fields = [
         {key: "title", sortable: true, thStyle: {width: "50%"}},
         {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
@@ -159,11 +180,11 @@ export default {
         {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
       ]
-      return this.loadDeposits("pending")
+      return this.loadDeposits(this.filter )
     },
 
     showPublishedDeposits() {
-      this.tableStatus = 2;
+      this.filter = DepositFilter.PUBLISHED;
       this.fields = [
         {key: "title", sortable: true, thClass: "columnWidthTitle"},
         {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
@@ -172,11 +193,11 @@ export default {
         {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
       ]
-      return this.loadDeposits("published")
+      return this.loadDeposits(this.filter )
     },
 
     showFailedDeposits() {
-      this.tableStatus = 3;
+      this.filter = DepositFilter.FAILED;
       this.fields = [
         {key: "title", sortable: true, thClass: "columnWidthTitle"},
         {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
@@ -185,23 +206,29 @@ export default {
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
         {key: "error", sortable: false, thStyle: {width: "30%"}},
       ]
-      return this.loadDeposits("failed")
+      return this.loadDeposits(this.filter)
     },
 
     getTableName() {
-      switch (this.tableStatus) {
-        case 0:
+      switch (this.filter) {
+        case DepositFilter.ALL:
           return "All Deposits";
-        case 1:
+        case DepositFilter.PENDING:
           return "Pending Deposits";
-        case 2:
+        case DepositFilter.PUBLISHED:
           return "Published Deposits";
-        case 3:
+        case DepositFilter.FAILED:
           return "Failed Deposits";
         default:
           return "Error Table";
       }
+    },
 
+    checkDepositUpdate() {
+      let currently = new Date();
+      if(currently.getMinutes()%10 === 0) {  //e.g: 13:00, 13:10, 13:20 ...
+        this.loadDeposits(this.filter)  //try to fetch update after transfer handler
+      }
     }
   }
 }

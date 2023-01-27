@@ -149,7 +149,7 @@ export default {
           .then((response) => {
             console.log(response.data)
             this.deposits = response.data
-            this.deposits.forEach(function (value, index, array) {
+            this.deposits.forEach((value, index, array) => {
               array[index] = this.translateDepositStatus(JSON.parse(value));
             })
           })

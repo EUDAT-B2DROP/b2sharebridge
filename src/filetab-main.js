@@ -96,11 +96,15 @@ window.addEventListener('DOMContentLoaded', function () {
         if (OCA.Files.Sidebar) {
             const b2sharebridgeTab = new OCA.Files.Sidebar.Tab(b2sharebridgeMain);
             OCA.Files.Sidebar.registerTab(b2sharebridgeTab)
-
         }
-        if (OCA.Files.FileList) {
-            OCA.Files.FileList.registerDefaultView(b2sharebridgeMain);
-            //OC.Plugins.register('OCA.Files.FileList', b2sharebridgeMain);
+        if (OCA.Files.FileActions) {
+            OCA.Files.fileActions.register(
+                'all',
+                'RegularTest',
+                OC.PERMISSION_READ,
+                OC.imagePath('core', 'actions/shared'),
+                function () { alert("ALARM!")},
+            );
         }
     }
 })

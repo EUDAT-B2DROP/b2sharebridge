@@ -67,7 +67,7 @@ window.addEventListener('DOMContentLoaded', function () {
         let b2sharebridgeMain = {
             id: 'b2sharebridge',
             name: t('b2sharebridge', 'B2SHARE'),
-            icon: 'icon-rename',
+            icon: OC.imagePath('b2sharebridge', 'img/filelisticon'),
 
             mount(el, fileInfo, context) {
                 if (tabInstance) {
@@ -89,8 +89,7 @@ window.addEventListener('DOMContentLoaded', function () {
                 tabInstance = null
             },
             enabled(fileInfo) {
-                //return (fileInfo && !fileInfo.isDirectory());
-                return true;
+                return (fileInfo && !fileInfo.isDirectory());
             },
         };
         if (OCA.Files.Sidebar) {
@@ -100,10 +99,12 @@ window.addEventListener('DOMContentLoaded', function () {
         if (OCA.Files.FileActions) {
             OCA.Files.fileActions.register(
                 'all',
-                'RegularTest',
-                OC.PERMISSION_READ,
-                OC.imagePath('core', 'actions/shared'),
-                function () { alert("ALARM!")},
+                'B2SHARE',
+                OC.PERMISSION_ALL,
+                OC.imagePath('b2sharebridge', 'img/filelisticon'),
+                function () {
+                    OCA.Files.Sidebar.open();
+                },
             );
         }
     }

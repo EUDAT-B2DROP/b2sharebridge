@@ -97,13 +97,18 @@ window.addEventListener('DOMContentLoaded', function () {
             OCA.Files.Sidebar.registerTab(b2sharebridgeTab)
         }
         if (OCA.Files.FileActions) {
+            if (!OCA.Files.Sidebar) {
+                console.error("No sidebar available!")
+            }
             OCA.Files.fileActions.register(
                 'all',
                 'B2SHARE',
                 OC.PERMISSION_ALL,
-                OC.imagePath('b2sharebridge', 'img/filelisticon'),
+                OC.imagePath('b2sharebridge', 'filelisticon'),
                 function () {
+                    //Comes from apps/files/src/services/Sidebar.js
                     OCA.Files.Sidebar.open();
+                    OCA.Files.Sidebar.setActiveTab('b2sharebridge')
                 },
             );
         }

@@ -99,8 +99,8 @@ window.addEventListener('DOMContentLoaded', function () {
 
         }
         if (OCA.Files.FileList) {
-            const b2sharebridgeTab = new OCA.Files.FileList.registerDefaultView(b2sharebridgeMain);
-            OC.Plugins.register('OCA.Files.FileList', OCA.B2shareBridge.Util);
+            OCA.Files.FileList.registerDefaultView(b2sharebridgeMain);
+            //OC.Plugins.register('OCA.Files.FileList', b2sharebridgeMain);
         }
     }
 })

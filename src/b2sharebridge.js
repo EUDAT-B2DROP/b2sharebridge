@@ -26,11 +26,11 @@
                     permissions: OC.PERMISSION_READ,
                     icon: OC.imagePath('b2sharebridge', 'filelisticon'),
                     actionHandler: function (fileName) {
-                        fileList.showDetailsView(fileName, 'b2shareBridgeTabView');
+                        fileList.showDetailsView(fileName, 'filetab-main');
                     },
                 }
             );
-            fileList.registerTabView(new OCA.B2shareBridge.B2shareBridgeTabView('B2shareBridgeTabView',{order: -30}));
+            //fileList.registerTabView(new OCA.B2shareBridge.B2shareBridgeTabView('B2shareBridgeTabView',{order: -30}));
         }
     };
 

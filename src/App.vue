@@ -189,7 +189,7 @@ export default {
       this.filter = DepositFilter.PUBLISHED;
       this.fields = [
         {key: "title", sortable: true, thClass: "columnWidthTitle"},
-        {key: "url", sortable: true, thStyle: {width: "30%", color: "blue"}},
+        {key: "url", sortable: true, thStyle: {width: "30%"}},
         {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
         {key: "createdAt", sortable: true, thClass: "columnWidthDate"},

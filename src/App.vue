@@ -60,7 +60,7 @@
                  label-sort-desc=""
                  label-sort-clear=""
                  sort-icon-left>
-          <template #cell(url)="url_data">
+          <template #cell(url)="url_data" class="link-primary">
             <a :href="url_data.value">{{ url_data.value }}</a>
           </template>
         </b-table>
@@ -138,7 +138,7 @@ export default {
   methods: {
     loadDeposits(filter) {
       if (this.timer !== null) {
-        clearInterval(this.timer );
+        clearInterval(this.timer);
       }
       this.timer = setInterval(() => {
         this.checkDepositUpdate()
@@ -164,11 +164,11 @@ export default {
       this.fields = [
         {key: "status", sortable: true, thClass: "columnWidthInt"},
         {key: "title", sortable: true, thClass: "columnWidthTitle"},
-        {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
-        {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
-        {key: "url", sortable: true, thStyle: {width: "20%", color: "blue"}},
+        {key: "url", sortable: true, thStyle: {width: "20%"}},
         {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
+        {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
+        {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
       ]
       return this.loadDeposits(this.filter)
     },
@@ -177,10 +177,10 @@ export default {
       this.filter = DepositFilter.PENDING;
       this.fields = [
         {key: "title", sortable: true, thStyle: {width: "50%"}},
-        {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
-        {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
         {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
+        {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
+        {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
       ]
       return this.loadDeposits(this.filter)
     },
@@ -189,11 +189,11 @@ export default {
       this.filter = DepositFilter.PUBLISHED;
       this.fields = [
         {key: "title", sortable: true, thClass: "columnWidthTitle"},
-        {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
-        {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
         {key: "url", sortable: true, thStyle: {width: "30%", color: "blue"}},
         {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
+        {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
+        {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
       ]
       return this.loadDeposits(this.filter)
     },
@@ -202,11 +202,11 @@ export default {
       this.filter = DepositFilter.FAILED;
       this.fields = [
         {key: "title", sortable: true, thClass: "columnWidthTitle"},
-        {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
-        {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
         {key: "fileCount", sortable: true, thClass: "columnWidthInt"},
         {key: "serverId", sortable: true, thClass: "columnWidthInt"},
         {key: "error", sortable: false, thStyle: {width: "30%"}},
+        {key: "createdAt", sortable: true, thClass: "columnWidthDate"},
+        {key: "updatedAt", sortable: true, thClass: "columnWidthDate"},
       ]
       return this.loadDeposits(this.filter)
     },
@@ -226,30 +226,40 @@ export default {
       }
     },
 
+    capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    },
+
     translateDepositStatus(deposit_status) {
-      if ("status" in deposit_status){
-        switch (deposit_status["status"]){
+      if ("status" in deposit_status) {
+        switch (deposit_status["status"]) {
           case 0:
-            deposit_status.status = DepositFilter.PUBLISHED.toUpperCase(); break;
+            deposit_status.status = this.capitalizeFirstLetter(DepositFilter.PUBLISHED);
+            break;
           case 1:
           case 2:
-            deposit_status.status = DepositFilter.PENDING.toUpperCase(); break;
+            deposit_status.status = this.capitalizeFirstLetter(DepositFilter.PENDING);
+            break;
           case 3:
           case 4:
           case 5:
-            deposit_status.status = DepositFilter.FAILED.toUpperCase(); break;
-          default: break;
+            deposit_status.status = this.capitalizeFirstLetter(DepositFilter.FAILED);
+            break;
+          default:
+            break;
         }
       }
       //TODO query server id?
 
       return deposit_status;
-    },
+    }
+    ,
 
     checkDepositUpdate() {
       console.log("Polling deposits")
       this.loadDeposits(this.filter)  //try to fetch update after transfer handler
-    },
+    }
+    ,
   }
 }
 </script>
@@ -314,4 +324,5 @@ textarea {
 .columnWidthTitle {
   width: 20%
 }
+
 </style>

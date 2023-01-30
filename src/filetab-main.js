@@ -37,81 +37,81 @@ const View = Vue.extend(B2SBSidebar);
 let tabInstance = null;
 
 window.addEventListener('DOMContentLoaded', function () {
-    if (OCA.Files) {
-
-        let b2sharebridgeMain = {
-            id: 'b2sharebridge',
-            name: t('b2sharebridge', 'B2SHARE'),
-            icon: OC.imagePath('b2sharebridge', 'filelisticon'),
-
-            mount(el, fileInfo, context) {
-                if (tabInstance) {
-                    tabInstance.$destroy()
-                }
-                tabInstance = new View({
-                    // Better integration with vue parent component
-                    parent: context,
-                })
-                // Only mount after we have all the info we need
-                tabInstance.initializeB2ShareUI(fileInfo)
-                tabInstance.$mount(el)
-            },
-            update(fileInfo) {
-                tabInstance.initializeB2ShareUI(fileInfo)
-            },
-            destroy() {
-                tabInstance.$destroy()
-                tabInstance = null
-            },
-            enabled(fileInfo) {
-                return (fileInfo && !fileInfo.isDirectory());
-            },
-        };
-        if (OCA.Files.Sidebar) {
-            const b2sharebridgeTab = new OCA.Files.Sidebar.Tab(b2sharebridgeMain);
-            OCA.Files.Sidebar.registerTab(b2sharebridgeTab)
-        }
-        if (OCA.Files.FileActions) {
-            if (!OCA.Files.Sidebar) {
-                console.error("No sidebar available!");
-            }
-            console.debug("File Actions available");
-            OCA.Files.fileActions.registerAction({
-                    name: 'b2sharebridge-action',
-                    mime: 'all',
-                    displayName: t('b2sharebridge', 'B2SHARE'),
-                    permissions: OC.PERMISSION_READ,
-                    icon: function () { OC.imagePath('b2sharebridge', 'filelisticon')},
-                    actionHandler: function (fileName, context) {
-                        //Comes from apps/files/src/services/Sidebar.js
-                        // and apps/files/js/filelist.js#L677
-
-                        console.debug("action handler called");
-                        if (!(OCA.Files && OCA.Files.Sidebar)) {
-                            console.error('No sidebar available');
-                            return;
+        if (OCA.Files) {
+            if (OCA.Files.Sidebar) {
+                const b2sharebridgeTab = new OCA.Files.Sidebar.Tab({
+                    id: 'b2sharebridge',
+                    name: t('b2sharebridge', 'B2SHARE'),
+                    icon: OC.imagePath('b2sharebridge', 'filelisticon'),
+                    iconClass: 'icon-upload',
+                    mount(el, fileInfo, context) {
+                        if (tabInstance) {
+                            tabInstance.$destroy()
                         }
-
-                        if (!fileName && OCA.Files.Sidebar.close) {
-                            console.debug("Closing sidebar");
-                            OCA.Files.Sidebar.close();
-                            return;
-                        } else if (typeof fileName !== 'string') {
-                            fileName = '';
-                        }
-                        let path = context.dir + '/' + fileName;
-                        if (fileName !== '') {
-                            console.debug("Trying to open sidebar");
-                            console.debug("Path:" . path);
-                            OCA.Files.Sidebar.setActiveTab('b2sharebridge');
-                            OCA.Files.Sidebar.open(path.replace('//', '/'));
-
-                        } else {
-                            console.error("No file selected");
-                        }
+                        tabInstance = new View({
+                            // Better integration with vue parent component
+                            parent: context,
+                        })
+                        // Only mount after we have all the info we need
+                        tabInstance.initializeB2ShareUI(fileInfo)
+                        tabInstance.$mount(el)
                     },
+                    update(fileInfo) {
+                        tabInstance.initializeB2ShareUI(fileInfo)
+                    },
+                    destroy() {
+                        tabInstance.$destroy()
+                        tabInstance = null
+                    },
+                    enabled(fileInfo) {
+                        return (fileInfo && !fileInfo.isDirectory());
+                    }
+                });
+                OCA.Files.Sidebar.registerTab(b2sharebridgeTab)
+            }
+            if (OCA.Files.FileActions) {
+                if (!OCA.Files.Sidebar) {
+                    console.error("No sidebar available!");
                 }
-            );
+                console.debug("File Actions available");
+                OCA.Files.fileActions.registerAction({
+                        name: 'b2sharebridge-action',
+                        mime: 'all',
+                        displayName: t('b2sharebridge', 'B2SHARE'),
+                        permissions: OC.PERMISSION_READ,
+                        icon: OC.imagePath('b2sharebridge', 'filelisticon'),
+                        iconClass: 'icon-home',
+                        actionHandler: function (fileName, context) {
+                            //Comes from apps/files/src/services/Sidebar.js
+                            // and apps/files/js/filelist.js#L677
+
+                            console.debug("action handler called");
+                            if (!(OCA.Files && OCA.Files.Sidebar)) {
+                                console.error('No sidebar available');
+                                return;
+                            }
+
+                            if (!fileName && OCA.Files.Sidebar.close) {
+                                console.debug("Closing sidebar");
+                                OCA.Files.Sidebar.close();
+                                return;
+                            } else if (typeof fileName !== 'string') {
+                                fileName = '';
+                            }
+                            let path = context.dir + '/' + fileName;
+                            if (fileName !== '') {
+                                console.debug("Trying to open sidebar");
+                                console.debug("Path:".path);
+                                OCA.Files.Sidebar.setActiveTab('b2sharebridge');
+                                OCA.Files.Sidebar.open(path.replace('//', '/'));
+
+                            } else {
+                                console.error("No file selected");
+                            }
+                        },
+                    }
+                );
+            }
         }
     }
-})
+)

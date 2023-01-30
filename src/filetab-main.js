@@ -36,31 +36,6 @@ import B2SBSidebar from "./components/B2SBSidebar.vue";
 const View = Vue.extend(B2SBSidebar);
 let tabInstance = null;
 
-/**
- * Registers the action handler for the multi select actions menu.
- *
- * @param {Function} action Callback to the handler
- */
-export function registerMultiSelect(action) {
-    const actionObj = {
-        name: 'b2sharebridge_multi_action',
-        displayName: t('b2sharebridge_multi_action', 'B2SHARE'),
-        iconClass: 'icon-rename',
-        order: 1001,
-        action,
-    }
-
-    if (OCA.Files.App.fileList) {
-        OCA.Files.App.fileList.registerMultiSelectFileAction(actionObj)
-    } else {
-        OC.Plugins.register('OCA.Files.FileList', {
-            attach(fileList) {
-                fileList.registerMultiSelectFileAction(actionObj)
-            },
-        })
-    }
-}
-
 window.addEventListener('DOMContentLoaded', function () {
     if (OCA.Files) {
 
@@ -100,16 +75,40 @@ window.addEventListener('DOMContentLoaded', function () {
             if (!OCA.Files.Sidebar) {
                 console.error("No sidebar available!")
             }
-            OCA.Files.fileActions.register(
-                'all',
-                'B2SHARE',
-                OC.PERMISSION_ALL,
-                OC.imagePath('b2sharebridge', 'filelisticon'),
-                function () {
-                    //Comes from apps/files/src/services/Sidebar.js
-                    OCA.Files.Sidebar.open();
-                    OCA.Files.Sidebar.setActiveTab('b2sharebridge')
-                },
+            OCA.Files.fileActions.registerAction({
+                    name: 'b2sharebridge-action',
+                    mime: 'all',
+                    displayName: t('b2sharebridge', 'B2SHARE'),
+                    permissions: OC.PERMISSION_ALL,
+                    icon: OC.imagePath('b2sharebridge', 'filelisticon'),
+                    actionHandler: function (fileName, context) {
+                        //Comes from apps/files/src/services/Sidebar.js
+                        // and apps/files/js/filelist.js#L677
+                        if (!(OCA.Files && OCA.Files.Sidebar)) {
+                            console.error('No sidebar available');
+                            return;
+                        }
+
+                        if (!fileName && OCA.Files.Sidebar.close) {
+                            OCA.Files.Sidebar.close()
+                            return
+                        } else if (typeof fileName !== 'string') {
+                            fileName = ''
+                        }
+
+                        //TODO
+                        // this is the old (terrible) way of getting the context.
+                        // don't use it anywhere else. Just provide the full path
+                        // of the file to the sidebar service
+                        var tr = OCA.Files.FileList.findFileEl(fileName)
+                        var model = OCA.Files.FileList.getModelForFile(tr)
+                        var path = model.attributes.path + '/' + model.attributes.name
+                        if (typeof context === 'undefined' || !!context || (OCA.Files.Sidebar.file !== '')) {
+                            OCA.Files.Sidebar.open(path.replace('//', '/'))
+                            OCA.Files.Sidebar.setActiveTab('b2sharebridge')
+                        }
+                    },
+                }
             );
         }
     }

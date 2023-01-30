@@ -42,7 +42,7 @@ window.addEventListener('DOMContentLoaded', function () {
         let b2sharebridgeMain = {
             id: 'b2sharebridge',
             name: t('b2sharebridge', 'B2SHARE'),
-            icon: OC.imagePath('b2sharebridge', 'img/filelisticon'),
+            icon: OC.imagePath('b2sharebridge', 'filelisticon'),
 
             mount(el, fileInfo, context) {
                 if (tabInstance) {
@@ -81,7 +81,7 @@ window.addEventListener('DOMContentLoaded', function () {
                     mime: 'all',
                     displayName: t('b2sharebridge', 'B2SHARE'),
                     permissions: OC.PERMISSION_READ,
-                    icon: OC.imagePath('b2sharebridge', 'filelisticon'),
+                    icon: function () { OC.imagePath('b2sharebridge', 'filelisticon')},
                     actionHandler: function (fileName, context) {
                         //Comes from apps/files/src/services/Sidebar.js
                         // and apps/files/js/filelist.js#L677

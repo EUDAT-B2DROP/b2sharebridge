@@ -69,8 +69,6 @@
   </div>
 </template>
 <script>
-import '@nextcloud/dialogs/styles/toast.scss'
-import '../css/style.css'
 import axios from '@nextcloud/axios'
 import {generateUrl} from '@nextcloud/router'
 import {showError, showSuccess} from '@nextcloud/dialogs'
@@ -85,6 +83,8 @@ import {
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import '@nextcloud/dialogs/styles/toast.scss'
+import '../css/style.css'
 
 const DepositFilter = {
   ALL: 'all',
@@ -252,14 +252,12 @@ export default {
       //TODO query server id?
 
       return deposit_status;
-    }
-    ,
+    },
 
     checkDepositUpdate() {
       console.log("Polling deposits")
       this.loadDeposits(this.filter)  //try to fetch update after transfer handler
-    }
-    ,
+    },
   }
 }
 </script>

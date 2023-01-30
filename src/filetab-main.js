@@ -36,6 +36,8 @@ import B2SBSidebar from "./components/B2SBSidebar.vue";
 const View = Vue.extend(B2SBSidebar);
 let tabInstance = null;
 
+import '../css/fix-breadcrumbs.css'
+
 window.addEventListener('DOMContentLoaded', function () {
         if (OCA.Files) {
             if (OCA.Files.Sidebar) {

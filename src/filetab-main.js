@@ -93,16 +93,19 @@ window.addEventListener('DOMContentLoaded', function () {
                         }
 
                         if (!fileName && OCA.Files.Sidebar.close) {
+                            console.log("Closing sidebar");
                             OCA.Files.Sidebar.close();
                             return;
                         } else if (typeof fileName !== 'string') {
                             fileName = '';
                         }
                         let path = context.fileInfoModel.path + '/' + context.fileInfoModel.name;
-                        if (OCA.Files.Sidebar.file !== '') {
+                        if (fileName !== '') {
                             console.log("Trying to open sidebar");
                             OCA.Files.Sidebar.open(path.replace('//', '/'));
                             OCA.Files.Sidebar.setActiveTab('b2sharebridge');
+                        } else {
+                            console.error("No file selected");
                         }
                     },
                 }

@@ -80,8 +80,8 @@ window.addEventListener('DOMContentLoaded', function () {
                     name: 'b2sharebridge-action',
                     mime: 'all',
                     displayName: t('b2sharebridge', 'B2SHARE'),
-                    permissions: OC.PERMISSION_ALL,
-                    icon: OC.imagePath('b2sharebridge', 'filelisticon'),
+                    permissions: OC.PERMISSION_READ,
+                    iconUrl: OC.imagePath('b2sharebridge', 'filelisticon'),
                     actionHandler: function (fileName, context) {
                         //Comes from apps/files/src/services/Sidebar.js
                         // and apps/files/js/filelist.js#L677
@@ -102,6 +102,7 @@ window.addEventListener('DOMContentLoaded', function () {
                         let path = context.dir + '/' + fileName;
                         if (fileName !== '') {
                             console.log("Trying to open sidebar");
+                            console.log("Path:" . path);
                             OCA.Files.Sidebar.setActiveTab('b2sharebridge');
                             OCA.Files.Sidebar.open(path.replace('//', '/'));
 

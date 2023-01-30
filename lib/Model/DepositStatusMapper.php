@@ -191,7 +191,7 @@ class DepositStatusMapper extends QBMapper
     public function findLastUpdate(): int|null
     {
         $qb = $this->db->getQueryBuilder();
-        $statusTableNameWithPrefix = $qb->getTableName($this->tableName);
+        $statusTableNameWithPrefix = str_replace(["'", "`"], "", $qb->getTableName($this->tableName));  // remove quotes
         $qb->automaticTablePrefix(false);  //information schema is a meta table
         $qb->select('update_time')->from('information_schema.tables')->where(
             $qb->expr()->eq('table_name', $statusTableNameWithPrefix)

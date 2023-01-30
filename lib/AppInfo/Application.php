@@ -37,6 +37,7 @@ use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Implement a ownCloud Application for our b2sharebridge
@@ -79,7 +80,8 @@ class Application extends App implements IBootstrap
 
         $container->registerService(DepositStatusMapper::class, function (ContainerInterface $c): DepositStatusMapper {
             return new DepositStatusMapper(
-                $c->get(IDBConnection::class)
+                $c->get(IDBConnection::class),
+                $c->get(LoggerInterface::class)
             );
         });
 

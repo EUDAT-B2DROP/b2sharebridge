@@ -21,6 +21,7 @@ use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
+use Psr\Log\LoggerInterface;
 
 /**
  * Work on a database table
@@ -39,13 +40,16 @@ class DepositStatusMapper extends QBMapper
      *
      * @param IDBConnection $db the database connection to use
      */
-    public function __construct(IDBConnection $db)
+    private LoggerInterface $logger;
+
+    public function __construct(IDBConnection $db, LoggerInterface $logger)
     {
         parent::__construct(
             $db,
             'b2sharebridge_status',
-            '\OCA\B2shareBridge\Model\DepositStatus'
+            '\OCA\B2shareBridge\Model\DepositStatus',
         );
+        $this->logger = $logger;
     }
 
     /**
@@ -192,16 +196,18 @@ class DepositStatusMapper extends QBMapper
         $qb->select('update_time')->from('information_schema.tables')->where(
             $qb->expr()->eq('table_name', $statusTableNameWithPrefix)
         );
-        /** @noinspection PhpDeprecationInspection */
+
         try {
-            $cursor = $qb->execute();
+            $cursor = $qb->executeQuery();
             $row = $cursor->fetch();
             $cursor->closeCursor();
         } catch (Exception $e) {
+            $this->logger->error("Could not fetch update_time", ["error" => $e]);
             return null;
         }
         $time = strtotime($row['update_time']);
         if (is_bool($time)) {
+            $this->logger->error("Could not interprete database time", ["time" => $row['update_time']]);
             return null;
         }
         return $time;

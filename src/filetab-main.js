@@ -95,15 +95,8 @@ window.addEventListener('DOMContentLoaded', function () {
                         } else if (typeof fileName !== 'string') {
                             fileName = ''
                         }
-
-                        //TODO
-                        // this is the old (terrible) way of getting the context.
-                        // don't use it anywhere else. Just provide the full path
-                        // of the file to the sidebar service
-                        var tr = OCA.Files.FileList.findFileEl(fileName)
-                        var model = OCA.Files.FileList.getModelForFile(tr)
-                        var path = model.attributes.path + '/' + model.attributes.name
-                        if (typeof context === 'undefined' || !!context || (OCA.Files.Sidebar.file !== '')) {
+                        let path = context.fileInfoModel.path + '/' + context.fileInfoModel.name
+                        if (OCA.Files.Sidebar.file !== '') {
                             OCA.Files.Sidebar.open(path.replace('//', '/'))
                             OCA.Files.Sidebar.setActiveTab('b2sharebridge')
                         }

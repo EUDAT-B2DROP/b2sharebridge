@@ -194,7 +194,7 @@ class DepositStatusMapper extends QBMapper
         $statusTableNameWithPrefix = str_replace(["'", "`"], "", $qb->getTableName($this->tableName));  // remove quotes
         $qb->automaticTablePrefix(false);  //information schema is a meta table
         $qb->select('update_time')->from('information_schema.tables')->where(
-            $qb->expr()->eq('table_name', $statusTableNameWithPrefix)
+            $qb->expr()->eq('table_name', $qb->createNamedParameter($statusTableNameWithPrefix))
         );
 
         try {
@@ -202,7 +202,7 @@ class DepositStatusMapper extends QBMapper
             $row = $cursor->fetch();
             $cursor->closeCursor();
         } catch (Exception $e) {
-            $this->logger->error("Could not fetch update_time", ["error" => $e]);
+            $this->logger->error("Could not fetch update_time", ["error" => $e, "query" => $qb->]);
             return null;
         }
         $time = strtotime($row['update_time']);

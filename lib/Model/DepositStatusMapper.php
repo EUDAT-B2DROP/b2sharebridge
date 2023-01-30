@@ -202,7 +202,7 @@ class DepositStatusMapper extends QBMapper
             $row = $cursor->fetch();
             $cursor->closeCursor();
         } catch (Exception $e) {
-            $this->logger->error("Could not fetch update_time", ["error" => $e, "query" => $qb->]);
+            $this->logger->error("Could not fetch update_time", ["error" => $e]);
             return null;
         }
         $time = strtotime($row['update_time']);

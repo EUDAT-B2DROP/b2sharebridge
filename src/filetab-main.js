@@ -99,11 +99,12 @@ window.addEventListener('DOMContentLoaded', function () {
                         } else if (typeof fileName !== 'string') {
                             fileName = '';
                         }
-                        let path = context.fileInfoModel.path + '/' + context.fileInfoModel.name;
+                        let path = context.dir + '/' + fileName;
                         if (fileName !== '') {
                             console.log("Trying to open sidebar");
-                            OCA.Files.Sidebar.open(path.replace('//', '/'));
                             OCA.Files.Sidebar.setActiveTab('b2sharebridge');
+                            OCA.Files.Sidebar.open(path.replace('//', '/'));
+
                         } else {
                             console.error("No file selected");
                         }

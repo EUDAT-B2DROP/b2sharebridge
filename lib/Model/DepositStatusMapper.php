@@ -163,11 +163,11 @@ class DepositStatusMapper extends QBMapper
     /**
      * Return all file transfers for current user with state
      *
-     * @param string $user  name of the user to search transfers for
+     * @param string $user name of the user to search transfers for
      * @param string $state type
      *
      * @return array(Entities)
-     *@throws Exception if more th one
+     * @throws Exception if more th one
      *
      */
     public function findAllForUserAndStateString(string $user, string $state): array
@@ -187,20 +187,21 @@ class DepositStatusMapper extends QBMapper
     public function findLastUpdate(): int|null
     {
         $qb = $this->db->getQueryBuilder();
+        $statusTableNameWithPrefix = $qb->getTableName($this->tableName);
         $qb->automaticTablePrefix(false);  //information schema is a meta table
         $qb->select('update_time')->from('information_schema.tables')->where(
-            $qb->expr()->eq('table_name', $this->tableName)
+            $qb->expr()->eq('table_name', $statusTableNameWithPrefix)
         );
         /** @noinspection PhpDeprecationInspection */
         try {
             $cursor = $qb->execute();
+            $row = $cursor->fetch();
+            $cursor->closeCursor();
         } catch (Exception $e) {
             return null;
         }
-        $row = $cursor->fetch();
-        $cursor->closeCursor();
         $time = strtotime($row['update_time']);
-        if(is_bool($time)) {
+        if (is_bool($time)) {
             return null;
         }
         return $time;

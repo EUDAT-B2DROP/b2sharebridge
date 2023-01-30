@@ -75,25 +75,25 @@ window.addEventListener('DOMContentLoaded', function () {
             if (!OCA.Files.Sidebar) {
                 console.error("No sidebar available!");
             }
-            console.log("File Actions available");
+            console.debug("File Actions available");
             OCA.Files.fileActions.registerAction({
                     name: 'b2sharebridge-action',
                     mime: 'all',
                     displayName: t('b2sharebridge', 'B2SHARE'),
                     permissions: OC.PERMISSION_READ,
-                    iconUrl: OC.imagePath('b2sharebridge', 'filelisticon'),
+                    icon: OC.imagePath('b2sharebridge', 'filelisticon'),
                     actionHandler: function (fileName, context) {
                         //Comes from apps/files/src/services/Sidebar.js
                         // and apps/files/js/filelist.js#L677
 
-                        console.log("action handler called");
+                        console.debug("action handler called");
                         if (!(OCA.Files && OCA.Files.Sidebar)) {
                             console.error('No sidebar available');
                             return;
                         }
 
                         if (!fileName && OCA.Files.Sidebar.close) {
-                            console.log("Closing sidebar");
+                            console.debug("Closing sidebar");
                             OCA.Files.Sidebar.close();
                             return;
                         } else if (typeof fileName !== 'string') {
@@ -101,8 +101,8 @@ window.addEventListener('DOMContentLoaded', function () {
                         }
                         let path = context.dir + '/' + fileName;
                         if (fileName !== '') {
-                            console.log("Trying to open sidebar");
-                            console.log("Path:" . path);
+                            console.debug("Trying to open sidebar");
+                            console.debug("Path:" . path);
                             OCA.Files.Sidebar.setActiveTab('b2sharebridge');
                             OCA.Files.Sidebar.open(path.replace('//', '/'));
 

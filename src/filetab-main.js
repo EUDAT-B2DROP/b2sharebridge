@@ -73,8 +73,9 @@ window.addEventListener('DOMContentLoaded', function () {
         }
         if (OCA.Files.FileActions) {
             if (!OCA.Files.Sidebar) {
-                console.error("No sidebar available!")
+                console.error("No sidebar available!");
             }
+            console.log("File Actions available");
             OCA.Files.fileActions.registerAction({
                     name: 'b2sharebridge-action',
                     mime: 'all',
@@ -84,21 +85,24 @@ window.addEventListener('DOMContentLoaded', function () {
                     actionHandler: function (fileName, context) {
                         //Comes from apps/files/src/services/Sidebar.js
                         // and apps/files/js/filelist.js#L677
+
+                        console.log("action handler called");
                         if (!(OCA.Files && OCA.Files.Sidebar)) {
                             console.error('No sidebar available');
                             return;
                         }
 
                         if (!fileName && OCA.Files.Sidebar.close) {
-                            OCA.Files.Sidebar.close()
-                            return
+                            OCA.Files.Sidebar.close();
+                            return;
                         } else if (typeof fileName !== 'string') {
-                            fileName = ''
+                            fileName = '';
                         }
-                        let path = context.fileInfoModel.path + '/' + context.fileInfoModel.name
+                        let path = context.fileInfoModel.path + '/' + context.fileInfoModel.name;
                         if (OCA.Files.Sidebar.file !== '') {
-                            OCA.Files.Sidebar.open(path.replace('//', '/'))
-                            OCA.Files.Sidebar.setActiveTab('b2sharebridge')
+                            console.log("Trying to open sidebar");
+                            OCA.Files.Sidebar.open(path.replace('//', '/'));
+                            OCA.Files.Sidebar.setActiveTab('b2sharebridge');
                         }
                     },
                 }

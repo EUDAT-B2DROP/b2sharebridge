@@ -86,7 +86,7 @@ class ViewControllerTest extends TestCase
         return $fcStatus;
     }
 
-    public function setFilter($filter)
+    public function setParams($filter, $force)
     {
         if ($filter === null) {
             $this->request->method('getParams')
@@ -95,8 +95,12 @@ class ViewControllerTest extends TestCase
                 ->willReturn([]);
             return;
         }
+        $params = ["filter" => $filter];
+        if($force !== null) {
+            $params["force"] = "true";
+        }
         $this->request->method('getParams')
-            ->willReturn(["filter" => $filter]);
+            ->willReturn($params);
 
         $filtered_data = array_filter($this->data, function (DepositStatus $entity) use ($filter) {
             return in_array($entity->getStatus(), $this->deposit_mapper->mapFilterToStates($filter));
@@ -106,9 +110,9 @@ class ViewControllerTest extends TestCase
             ->willReturn($filtered_data);
     }
 
-    public function createDeposit($filter): JSONResponse
+    public function createDeposit($filter, $force="true"): JSONResponse
     {
-        $this->setFilter($filter);
+        $this->setParams($filter, $force);
         return $this->controller->depositList();
     }
 
@@ -155,5 +159,16 @@ class ViewControllerTest extends TestCase
         $filter = null;
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_INTERNAL_SERVER_ERROR, $result->getStatus());
+    }
+
+    public function testNotChanged()
+    {
+        $filter = 'all';
+        $force = null;
+        $result = $this->createDeposit($filter, $force);
+        $this->assertEquals(Http::STATUS_OK, $result->getStatus());
+
+        $result = $this->createDeposit($filter, $force);
+        $this->assertEquals(Http::STATUS_NOT_MODIFIED, $result->getStatus());
     }
 }

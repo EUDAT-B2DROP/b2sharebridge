@@ -53,6 +53,8 @@ class ViewController extends Controller
     protected $cMapper;
     protected $smapper;
 
+    private $lastUpdate;
+
     /**
      * Creates the AppFramwork Controller
      *
@@ -86,6 +88,7 @@ class ViewController extends Controller
         $this->smapper = $smapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
+        $this->lastUpdate = null;
     }
 
     /**
@@ -135,15 +138,36 @@ class ViewController extends Controller
     public function depositList(): JSONResponse
     {
         $param = $this->request->getParams();
+
+        //check filter param
         if (!array_key_exists('filter', $param)) {
             return new JSONResponse(
                 [
                     "message" => "missing argument: filter",
                     "status" => "error"
                 ],
-                Http::STATUS_INTERNAL_SERVER_ERROR
+                Http::STATUS_BAD_REQUEST
             );
         }
+
+        //check if force param exists
+        $force = false;
+        if (array_key_exists('force', $param)) {
+            $force = $param['force'] === "true";
+        }
+
+        $lastUpdate = $this->mapper->findLastUpdate();
+        if(!$force && $this->lastUpdate != null && $lastUpdate == $this->lastUpdate){
+            return new JSONResponse(
+                [
+                    "message" => "Nothing changed",
+                    "status" => "success"
+                ],
+                Http::STATUS_NOT_MODIFIED
+            );
+        }
+        $this->lastUpdate = $lastUpdate;
+
         $filter = $param['filter'];
         if ($filter === 'all') {
             $publications = $this->mapper->findAllForUser($this->userId);

@@ -184,6 +184,27 @@ class DepositStatusMapper extends QBMapper
         return $deposits;
     }
 
+    public function findLastUpdate(): int|null
+    {
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('update_time')->from('information_schema.tables')->where(
+            $qb->expr()->eq('table_name', $this->tableName)
+        );
+        /** @noinspection PhpDeprecationInspection */
+        try {
+            $cursor = $qb->execute();
+        } catch (Exception $e) {
+            return null;
+        }
+        $row = $cursor->fetch();
+        $cursor->closeCursor();
+        $time = strtotime($row['update_time']);
+        if(is_bool($time)) {
+            return null;
+        }
+        return $time;
+    }
+
 
     /**
      * Return status code numbers for several keywords

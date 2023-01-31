@@ -104,8 +104,14 @@ jobs:
           cd apps/b2sharebridge
           make stylelint
 
-      - name: Php Lint checking
+      - name: Js Lint checking
         continue-on-error: true
         run: |
           cd apps/b2sharebridge
           make lint
+
+      - name: Php Lint checking
+        continue-on-error: true
+        run: |
+          cd apps/b2sharebridge
+          phpcs --extensions=php --ignore=*/tests/*,*/templates/*,*/Migration/* .

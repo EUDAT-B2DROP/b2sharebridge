@@ -44,7 +44,7 @@ window.addEventListener('DOMContentLoaded', function() {
 			const b2sharebridgeTab = new OCA.Files.Sidebar.Tab({
 				id: 'b2sharebridge',
 				name: t('b2sharebridge', 'B2SHARE'),
-				iconClass: 'icon-b2share', // OC.imagePath('b2sharebridge', 'filelisticon'),
+				//iconClass: 'icon-b2share', // OC.imagePath('b2sharebridge', 'filelisticon'),
 				icon: 'icon-upload',
 				mount(el, fileInfo, context) {
 					if (tabInstance) {
@@ -81,8 +81,8 @@ window.addEventListener('DOMContentLoaded', function() {
 				mime: 'all',
 				displayName: t('b2sharebridge', 'B2SHARE'),
 				permissions: OC.PERMISSION_READ,
-				icon: 'icon-upload',
-				iconClass: 'icon-b2share', //
+				//icon: 'icon-upload',
+				iconClass: 'icon-upload', //
 				actionHandler(fileName, context) {
 					// Comes from apps/files/src/services/Sidebar.js
 					// and apps/files/js/filelist.js#L677

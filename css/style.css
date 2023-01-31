@@ -1,39 +1,39 @@
 .b2sharebridge {
-    width: 100%;
+	width: 100%;
 }
 
 .b2sharebridge h1 {
-    font-family: inherit;
-    font-weight: 500;
-    font-size: 36px;
-    line-height: 1.1;
-    color: inherit;
+	font-family: inherit;
+	font-weight: 500;
+	font-size: 36px;
+	line-height: 1.1;
+	color: inherit;
 }
 
 .b2sharebridge h1 small {
-    color: gray;
+	color: gray;
 }
 
 .b2sharebridge table{
-    margin-top: 20px;
-    width: 100%;
-    table-layout: fixed /* fix a bug on firefox*/
+	margin-top: 20px;
+	width: 100%;
+	table-layout: fixed /* fix a bug on firefox*/
 }
 
 .b2sharebridge .publish-queue-list th {
-    /*text-align: left;*/
+	/*text-align: left;*/
 }
 
 .icon-b2share:after{
-    content: '';
-    display: block;
-    height: 40px;  /*height of icon */
-    width: 40px;  /*width of icon */
-    position: absolute;
-    /*where to replace the icon */
-    top: 0;
-    left: -40px;
-    /*background */
-    background:url("../img/filelisticon.svg");
-    background:no-repeat;
+	content: '';
+	display: block;
+	height: 40px;  /*height of icon */
+	width: 40px;  /*width of icon */
+	position: absolute;
+	/*where to replace the icon */
+	top: 0;
+	left: -40px;
+	/*background */
+	background:url('../img/filelisticon.svg');
+	background:no-repeat;
 }

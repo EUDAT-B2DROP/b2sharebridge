@@ -3,11 +3,15 @@ var __webpack_exports__ = {};
 /*!**********************************!*\
   !*** ./src/settings-personal.js ***!
   \**********************************/
+/**
+ *
+ * @param event
+ */
 function saveAPIToken(event) {
   const server_id = event.target.id.split('_')[3];
   OC.msg.startSaving('#lostpassword_' + server_id + ' .msg', 'Saving API token');
   result = {};
-  const post = $("#b2share_apitoken_" + server_id).serializeArray();
+  const post = $('#b2share_apitoken_' + server_id).serializeArray();
   $.ajax({
     type: 'POST',
     url: OC.generateUrl('/apps/b2sharebridge/apitoken'),
@@ -22,6 +26,11 @@ function saveAPIToken(event) {
     OC.msg.startAction('#lostpassword_' + server_id + ' .msg', 'Something went wrong');
   });
 }
+
+/**
+ *
+ * @param event
+ */
 function deleteAPIToken(event) {
   const server_id = event.target.id.split('_')[3];
   OC.msg.startAction('#lostpassword_' + server_id + ' .msg', 'Deleting API token');
@@ -29,8 +38,8 @@ function deleteAPIToken(event) {
     type: 'DELETE',
     url: OC.generateUrl('/apps/b2sharebridge/apitoken/' + server_id)
   }).done(function (result) {
-    OC.msg.startAction('#lostpassword_' + server_id + ' .msg', "Deleted");
-    $("#b2share_apitoken_" + server_id).val('');
+    OC.msg.startAction('#lostpassword_' + server_id + ' .msg', 'Deleted');
+    $('#b2share_apitoken_' + server_id).val('');
   }).fail(function (result) {
     OC.msg.startAction('#lostpassword_' + server_id + ' .msg', result.responseJSON);
   });
@@ -45,4 +54,4 @@ $(document).ready(function () {
 });
 /******/ })()
 ;
-//# sourceMappingURL=b2sharebridge-settingspersonal.js.map?v=95099f5285dd4fe35f1c
+//# sourceMappingURL=b2sharebridge-settingspersonal.js.map?v=4e12781892a2a938b2cb

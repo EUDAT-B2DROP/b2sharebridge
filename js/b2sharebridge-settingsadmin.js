@@ -4,7 +4,7 @@ var __webpack_exports__ = {};
   !*** ./src/settings-admin.js ***!
   \*******************************/
 $(document).ready(function () {
-  var baseUrl = OC.generateUrl('/apps/b2sharebridge/servers');
+  const baseUrl = OC.generateUrl('/apps/b2sharebridge/servers');
   $('#maxB2shareUploads').change(function () {
     OC.AppConfig.setValue('b2sharebridge', $(this).attr('name'), $(this).val());
   });
@@ -12,32 +12,36 @@ $(document).ready(function () {
     OC.AppConfig.setValue('b2sharebridge', $(this).attr('name'), $(this).val());
   });
   $('#checkSsl').change(function () {
-    var value = '0';
+    let value = '0';
     if (this.checked) {
       value = '1';
     }
     OC.AppConfig.setValue('b2sharebridge', $(this).attr('name'), value);
   });
+
+  /**
+   *
+   */
   function saveChanges() {
-    var names = $('[id^="name"]');
-    var publishUrls = $('[id^="url"]');
-    var regex = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/i;
-    var data = [];
+    const names = $('[id^="name"]');
+    const publishUrls = $('[id^="url"]');
+    const regex = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/i;
+    const data = [];
     for (i = 0; i < names.length; i++) {
-      var publishUrl = publishUrls[i].value;
+      const publishUrl = publishUrls[i].value;
       data.push({
         name: names[i].value,
         publishUrl
       });
-      id = names[i].id.split("_")[1];
+      id = names[i].id.split('_')[1];
       if (id && id.length) {
         data[i].id = id;
       }
       if (!regex.exec(publishUrl)) {
         OC.msg.finishedSaving('#saving .msg', {
-          'status': 'failure',
-          'data': {
-            'message': `Invalid URL: ${publishUrl}`
+          status: 'failure',
+          data: {
+            message: `Invalid URL: ${publishUrl}`
           }
         });
         return;
@@ -61,24 +65,29 @@ $(document).ready(function () {
         $('#add-server').show();
       }
       OC.msg.finishedSaving('#saving .msg', {
-        'status': 'success',
-        'data': {
-          'message': 'Saved'
+        status: 'success',
+        data: {
+          message: 'Saved'
         }
       });
     }).fail(function (response) {
       OC.msg.finishedSaving('#saving .msg', {
-        'status': 'failure',
-        'data': {
-          'message': 'Saving failed!'
+        status: 'failure',
+        data: {
+          message: 'Saving failed!'
         }
       });
     });
   }
+
+  /**
+   *
+   * @param event
+   */
   function deleteServer(event) {
     const id = event.target.id.split('_')[1];
     if (id) {
-      if (!window.confirm("Are you sure you want to delete the server? This action is irreversible.")) {
+      if (!window.confirm('Are you sure you want to delete the server? This action is irreversible.')) {
         return;
       }
       OC.msg.startSaving('#saving .msg', 'Deleting...');
@@ -88,16 +97,16 @@ $(document).ready(function () {
       }).done(function (response) {
         $('#b2share_server_' + id).remove();
         OC.msg.finishedSaving('#saving .msg', {
-          'status': 'success',
-          'data': {
-            'message': 'Server deleted'
+          status: 'success',
+          data: {
+            message: 'Server deleted'
           }
         });
       }).fail(function (response) {
         OC.msg.finishedSaving('#saving .msg', {
-          'status': 'failure',
-          'data': {
-            'message': 'Deleting failed!'
+          status: 'failure',
+          data: {
+            message: 'Deleting failed!'
           }
         });
       });
@@ -128,4 +137,4 @@ $(document).ready(function () {
 });
 /******/ })()
 ;
-//# sourceMappingURL=b2sharebridge-settingsadmin.js.map?v=a97736ad07eda9d3d38f
+//# sourceMappingURL=b2sharebridge-settingsadmin.js.map?v=129d500e1d259189f6bd

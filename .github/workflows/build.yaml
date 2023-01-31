@@ -71,7 +71,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-version }}
           ini-file: apps/b2sharebridge/tests/travis/php.ini
-          tools: phpunit, phpcs
+          tools: phpunit, phpcs, phpcbf
 
       - name: Configure NC
         run: |

@@ -22,10 +22,11 @@ if (!defined('PHPUNIT_RUN')) {
     define('PHPUNIT_RUN', 1);
 }
 
-if (!getenv('NEXTCLOUD_ROOT'))
-    require_once __DIR__ . '/../../../lib/base.php';
-else
-    require_once getenv('NEXTCLOUD_ROOT') . '/lib/base.php';
+if (!getenv('NEXTCLOUD_ROOT')) {
+    include_once __DIR__ . '/../../../lib/base.php';
+} else {
+    include_once getenv('NEXTCLOUD_ROOT') . '/lib/base.php';
+}
 
 // Fix for "Autoload path not allowed: .../tests/lib/testcase.php"
 \OC::$loader->addValidRoot(OC::$SERVERROOT . '/tests');

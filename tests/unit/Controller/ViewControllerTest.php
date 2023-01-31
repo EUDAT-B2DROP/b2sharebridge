@@ -10,11 +10,14 @@
 
 namespace OCA\B2shareBridge\Controller;
 
+use OCA\B2shareBridge\Model\CommunityMapper;
+use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\DepositStatus;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
-use OCP\AppFramework\Db\DoesNotExistException;
-use OCP\AppFramework\Db\MultipleObjectsReturnedException;
-use OCP\DB\Exception;
+use OCA\B2shareBridge\Model\ServerMapper;
+use OCA\B2shareBridge\Model\StatusCodes;
+use OCP\IConfig;
+use OCP\IRequest;
 use PHPUnit\Framework\TestCase;
 
 use OCP\AppFramework\Http\JSONResponse;
@@ -36,23 +39,23 @@ class ViewControllerTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        $this->request = $this->getMockBuilder('OCP\IRequest')->getMock();
-        $config = $this->getMockBuilder('OCP\IConfig')->getMock();
-        $this->deposit_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
+        $this->request = $this->getMockBuilder(IRequest::class)->getMock();
+        $config = $this->getMockBuilder(IConfig::class)->getMock();
+        $this->deposit_mapper = $this->getMockBuilder(DepositStatusMapper::class)
             ->setMethods(['findAllForUser', 'findAllForUserAndStateString'])
             ->disableOriginalConstructor()
             ->getMock();
         $deposit_file_mapper =
-            $this->getMockBuilder('OCA\B2shareBridge\Model\DepositFileMapper')
-                ->disableOriginalConstructor()
-                ->getMock();
-        $community_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\CommunityMapper')
+            $this->getMockBuilder(DepositFileMapper::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $server_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\ServerMapper')
+        $community_mapper = $this->getMockBuilder(CommunityMapper::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->statusCodes = $this->getMockBuilder('OCA\B2shareBridge\Model\StatusCodes')
+        $server_mapper = $this->getMockBuilder(ServerMapper::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->statusCodes = $this->getMockBuilder(StatusCodes::class)
             ->getMock();
 
         $this->data = [
@@ -102,9 +105,11 @@ class ViewControllerTest extends TestCase
         $this->request->method('getParams')
             ->willReturn($params);
 
-        $filtered_data = array_filter($this->data, function (DepositStatus $entity) use ($filter) {
-            return in_array($entity->getStatus(), $this->deposit_mapper->mapFilterToStates($filter));
-        });
+        $filtered_data = array_filter(
+            $this->data, function (DepositStatus $entity) use ($filter) {
+                return in_array($entity->getStatus(), $this->deposit_mapper->mapFilterToStates($filter));
+            }
+        );
         $filtered_data = array_values($filtered_data);  //reset index of array
         $this->deposit_mapper->method('findAllForUserAndStateString')
             ->willReturn($filtered_data);
@@ -121,8 +126,9 @@ class ViewControllerTest extends TestCase
         $filter = 'all';
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
-        foreach ($this->data as $index => $entity)
+        foreach ($this->data as $index => $entity) {
             $this->assertEquals($entity->toJson(), $result->getData()[$index]);
+        }
     }
 
     public function testPublished()
@@ -140,8 +146,9 @@ class ViewControllerTest extends TestCase
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
         $this->assertTrue(sizeof($result->getData()) == 2);
-        for ($i = 0; $i < sizeof($result->getData()); $i++)
+        for ($i = 0; $i < sizeof($result->getData()); $i++) {
             $this->assertEquals($this->data[$i + 1]->toJson(), $result->getData()[$i]);
+        }
     }
 
     public function testFailed()
@@ -150,8 +157,9 @@ class ViewControllerTest extends TestCase
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
         $this->assertTrue(sizeof($result->getData()) == 3);
-        for ($i = 0; $i < sizeof($result->getData()); $i++)
+        for ($i = 0; $i < sizeof($result->getData()); $i++) {
             $this->assertEquals($this->data[$i + 3]->toJson(), $result->getData()[$i]);
+        }
     }
 
     public function testNoFilter()

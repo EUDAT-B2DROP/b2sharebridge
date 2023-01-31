@@ -59,47 +59,52 @@ class DepositStatus extends Entity
     /**
      * Get string representation
      *
-     * @return \string
+     * @return string
      */
     public function __toString()
     {
-        return 'Deposit with id: '. $this->getId().
-        ' and status:'.$this->getStatus().
-        ' belonging to user:'.$this->getOwner().' deposited under title'.
-        $this->getTitle();
+        return 'Deposit with id: ' . $this->getId() .
+            ' and status:' . $this->getStatus() .
+            ' belonging to user:' . $this->getOwner() . ' deposited under title' .
+            $this->getTitle();
     }
 
 
     /**
      * Return URL only if status = PUBLISHED
      *
-     * @return \string
+     * @return string
      */
     public function getHyperlink()
     {
         $result = "N/A";
 
-        if ($this->getStatus()===0) {
-            $result = '<a href="'.$this->getUrl()
-                .'" target="_blank">B2SHARE deposit</a>';
+        if ($this->getStatus() === 0) {
+            $result = '<a href="' . $this->getUrl()
+                . '" target="_blank">B2SHARE deposit</a>';
         }
 
         return urldecode($result);
     }
 
-    public function toJson()
+    /**
+     * return a json representation of an Entity
+     * Unfortunately json_encode($entity) only inserts the id
+     *
+     * @return bool|string
+     */
+    public function toJson(): bool|string
     {
         $data = [
             "status" => $this->status,
             "title" => $this->title,
-            "owner" =>  $this->owner,
+            "owner" => $this->owner,
             "createdAt" => date("Y-m-d H:i:s", $this->createdAt),
             "updatedAt" => date("Y-m-d H:i:s", $this->updatedAt),
-            "url" =>  $this->url,
-            //"title" =>  $this->fileMapper,
-            "fileCount" =>  $this->fileCount,
-            "error" =>  $this->errorMessage,
-            "serverId" =>  $this->serverId,
+            "url" => $this->url,
+            "fileCount" => $this->fileCount,
+            "error" => $this->errorMessage,
+            "serverId" => $this->serverId,
         ];
         return json_encode($data);
     }

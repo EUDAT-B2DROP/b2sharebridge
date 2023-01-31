@@ -108,7 +108,7 @@ jobs:
       - name: Fix Style Lint
         run: |
           cd apps/b2sharebridge
-          make styelint-fix
+          make stylelint-fix
 
       - name: Js Lint checking
         continue-on-error: true
@@ -120,7 +120,7 @@ jobs:
         continue-on-error: true
         run: |
           cd apps/b2sharebridge
-          make lint
+          make lint-fix
 
       - name: Php Lint checking
         continue-on-error: true

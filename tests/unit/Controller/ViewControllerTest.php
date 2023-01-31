@@ -70,9 +70,6 @@ class ViewControllerTest extends TestCase
         $this->deposit_mapper->method('findAllForUser')
             ->willReturn($this->data);
 
-        $this->deposit_mapper->method('findLastUpdate')
-            ->willReturn(1234);  // some time in ms
-
         $this->controller = new ViewController(
             'b2sharebridge', $this->request, $config, $this->deposit_mapper,
             $deposit_file_mapper, $community_mapper, $server_mapper,

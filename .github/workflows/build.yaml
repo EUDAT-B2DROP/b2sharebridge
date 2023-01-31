@@ -105,7 +105,18 @@ jobs:
           make npm-init
           make stylelint
 
+      - name: Fix Style Lint
+        run: |
+          cd apps/b2sharebridge
+          make styelint-fix
+
       - name: Js Lint checking
+        continue-on-error: true
+        run: |
+          cd apps/b2sharebridge
+          make lint
+
+      - name: Fix Js Lint
         continue-on-error: true
         run: |
           cd apps/b2sharebridge
@@ -115,4 +126,9 @@ jobs:
         continue-on-error: true
         run: |
           cd apps/b2sharebridge
-          phpcs --extensions=php --ignore=*/tests/*,*/templates/*,*/Migration/* .
+          make phplint
+
+      - name: Fix Php Lint
+        run: |
+          cd apps/b2sharebridge
+          make phplint-fix

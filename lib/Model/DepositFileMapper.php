@@ -14,10 +14,12 @@
 
 namespace OCA\B2shareBridge\Model;
 
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Entity;
-use OCP\AppFramework\Db\Mapper;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\AppFramework\Db\QBMapper;
+use OCP\DB\Exception;
 use OCP\IDBConnection;
-use OCP\Util;
 
 /**
  * Work on a database table
@@ -28,7 +30,7 @@ use OCP\Util;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class DepositFileMapper extends Mapper
+class DepositFileMapper extends QBMapper
 {
 
     /**
@@ -41,7 +43,7 @@ class DepositFileMapper extends Mapper
         parent::__construct(
             $db,
             'b2sharebridge_file',
-            '\OCA\B2shareBridge\Model\DepositFile'
+            DepositFile::class,
         );
     }
 
@@ -50,35 +52,31 @@ class DepositFileMapper extends Mapper
      *
      * @param string $id id to find a transfer entry for
      *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
-     *
      * @return Entity
+     * @throws Exception|MultipleObjectsReturnedException|DoesNotExistException
      */
-    public function find($id)
+    public function find(string $id)
     {
-        $sql = 'SELECT * FROM `' . $this->tableName . '` WHERE `id` = ?';
-        return $this->findEntity($sql, [$id]);
+        //$sql = 'SELECT * FROM `' . $this->tableName . '` WHERE `id` = ?';
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('*')->from($this->tableName)->where(
+            $qb->expr()->eq('id', $qb->createNamedParameter($id))
+        );
+        return $this->findEntity($qb);
     }
-
-
-    // public function findAll($limit=null, $offset=null) {
-    //     $sql = 'SELECT * FROM `*PREFIX*b2sharebridge_filecache_status`';
-    //     return $this->findEntities($sql, $limit, $offset);
-    // }
 
     /**
      * Return all file transfers
      *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
-     *
      * @return array(Entity)
+     * @throws Exception
      */
-    public function findAll()
+    public function findAll(): array
     {
-        $sql = 'SELECT * FROM `' . $this->tableName  .'`';
-        return $this->findEntities($sql);
+        //$sql = 'SELECT * FROM `' . $this->tableName . '`';
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('*')->from($this->tableName);
+        return $this->findEntities($qb);
     }
 
 
@@ -87,37 +85,36 @@ class DepositFileMapper extends Mapper
      *
      * @param string $depositId the id of the deposit to search transfers for
      *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @return array(Entities)
      * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
      *
-     * @return array(Entities)
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
      */
     public function findAllForDeposit($depositId)
     {
-        $sql = 'SELECT * FROM `' 
-            . $this->tableName 
+        $sql = 'SELECT * FROM `'
+            . $this->tableName
             . '` WHERE `deposit_status_id` = ?';
         return $this->findEntities($sql, [$depositId]);
     }
-    
+
     /**
      * Return file count for a deposit
      *
      * @param string $depositId the id of the deposit to search transfers for
      *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @return array(Entities)
      * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
      *
-     * @return array(Entities)
+     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
      */
     public function getFileCount($depositId)
     {
-        $sql = 'SELECT count(*) FROM `' 
-            . $this->tableName 
+        $sql = 'SELECT count(*) FROM `'
+            . $this->tableName
             . '` WHERE `deposit_status_id` = ?';
         return $this->execute($sql, [$depositId])->fetchColumn();
     }
-    
 
-  
+
 }

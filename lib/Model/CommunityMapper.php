@@ -14,7 +14,11 @@
 
 namespace OCA\B2shareBridge\Model;
 
-use OCP\AppFramework\Db\Mapper;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\AppFramework\Db\QBMapper;
+use OCP\DB\Exception;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
@@ -26,7 +30,7 @@ use OCP\IDBConnection;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class CommunityMapper extends Mapper
+class CommunityMapper extends QBMapper
 {
 
     /**
@@ -39,96 +43,94 @@ class CommunityMapper extends Mapper
         parent::__construct(
             $db,
             'b2sharebridge_communities',
-            '\OCA\B2shareBridge\Model\Community'
+            Community::class,
         );
     }
 
     /**
      * Return all communities
      *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
-     *
      * @return array(Entity)
+     *
+     * @throws Exception if not found
      */
-    public function findAll()
+    public function findAll(): array
     {
-        $sql = 'SELECT * FROM `' . $this->tableName  .'`';
-        return $this->findEntities($sql);
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('*')->from($this->tableName);
+        //$sql = 'SELECT * FROM `' . $this->tableName  .'`';
+        return $this->findEntities($qb);
     }
 
 
     /**
      * Return all communities for server with id
      *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
-     *
      * @return array(Entity)
+     * @throws Exception if more th one
+     *
      */
 
-    public function findForServer($serverId)
+    public function findForServer($serverId): array
     {
-        $sql = 'SELECT * FROM `' . $this->tableName  . '` WHERE server_id=' . $serverId;
-        return $this->findEntities($sql);
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('*')->from($this->tableName)->where(
+            $qb->expr()->eq('server_id', $qb->createNamedParameter($serverId, IQueryBuilder::PARAM_INT))
+        );
+        //$sql = 'SELECT * FROM `' . $this->tableName  . '` WHERE server_id=' . $serverId;
+        return $this->findEntities($qb);
     }
 
     /**
      * Return all communities sorted by name
      *
      * @return array(Entity)
+     * @throws Exception
      */
-    public function getCommunityList()
+    public function getCommunityList(): array
     {
         $communities = $this->findAll();
         usort(
             $communities, function ($a, $b) {
-                return strcmp($a->getName(), $b->getName()); 
-            }
+            return strcmp($a->getName(), $b->getName());
+        }
         );
         return $communities;
     }
 
     /**
-     * Returns Commnuityname by given id. 
+     * Returns community name by given id.
      *
      * @param string $uid internal uid of the Community
-     * 
+     *
      * @return Community
-     * @throws ClientNotFoundException
+     * @throws Exception|MultipleObjectsReturnedException|DoesNotExistException
      */
-    public function getByUid($uid)
+    public function getByUid(string $uid): Community
     {
         $qb = $this->db->getQueryBuilder();
-        $qb
-            ->select('*')
-            ->from($this->tableName)
-            ->where(
-                $qb->expr()->eq(
-                    'id', $qb->createNamedParameter($uid, IQueryBuilder::PARAM_INT)
-                )
-            );
-        $result = $qb->execute();
-        $row = $result->fetch();
-        $result->closeCursor();
-        if ($row === false) {
-            throw new CommunityNotFoundException();
-        }
-        return Client::fromRow($row);
+        $qb->select('*')->from($this->tableName)->where(
+            $qb->expr()->eq('id', $qb->createNamedParameter($uid, IQueryBuilder::PARAM_INT))
+        );
+        return $this->findEntity($qb);
     }
 
-    /** 
+    /**
      * Return all communities as aray with id and name
-     * 
+     *
      * @param string $id internal id of the Community
-     * 
-     * @return Communities
+     *
+     * @return int  number of deleted communities
+     * @throws Exception
      */
-    public function deleteCommunity($id)
+    public function deleteCommunity(string $id): int
     {
-        $sql = 'DELETE FROM `' . $this->tableName
-            . '` WHERE id = ?';
-        return $this->findEntities($sql, [$id]);
+        //$sql = 'DELETE FROM `' . $this->tableName
+        //    . '` WHERE id = ?';
+        $qb = $this->db->getQueryBuilder();
+        $qb->delete($this->tableName)->where(
+            $qb->expr()->eq('id', $qb->createNamedParameter($id))
+        );
+        return $qb->executeStatement();
     }
-
 }

@@ -47,7 +47,7 @@ class DepositStatusMapper extends QBMapper
         parent::__construct(
             $db,
             'b2sharebridge_status',
-            '\OCA\B2shareBridge\Model\DepositStatus',
+            DepositStatus::class,
         );
         $this->logger = $logger;
     }

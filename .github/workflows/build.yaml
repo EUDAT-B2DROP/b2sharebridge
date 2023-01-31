@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 16.x ]
+        node-version: [ 16.x, 18.x ]
 
     steps:
       - uses: actions/checkout@v3
@@ -29,9 +29,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Build
-        run: | # TODO check this
-          npm ci
-          npx webpack 
+        run: |
+          make npm-init
+          make build-js
 
   deploy:
     runs-on: ubuntu-latest
@@ -77,12 +77,7 @@ jobs:
         run: |
           mkdir data
           ./occ maintenance:install --database-name $DB_DATABASE --database-user oc_autotest --admin-user admin --admin-pass admin --database mysql --database-pass=''
-          ls -l apps
           ./occ app:enable b2sharebridge
-
-      - name: NC Check-code
-        if: ${{ matrix.nextcloud-version-branch != 'stable25' }}
-        run: ./occ app:check-code b2sharebridge
 
       - name: Unit Tests
         run: |
@@ -104,8 +99,13 @@ jobs:
           echo "$num_communities communities fetched!"
           exit $(($num_communities == 0))
 
+      - name: Style checking
+        run: |
+          cd apps/b2sharebridge
+          make stylelint
+
       - name: Php Lint checking
         continue-on-error: true
         run: |
           cd apps/b2sharebridge
-          phpcs --extensions=php --ignore=*/tests/*,*/templates/*,*/Migration/* .
+          make lint

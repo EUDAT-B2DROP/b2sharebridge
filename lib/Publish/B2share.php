@@ -83,11 +83,11 @@ class B2share implements Ipublish
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
-     * @param string $token users access token
-     * @param string $community id of community metadata schema, defaults to EUDAT
-     * @param boolean $open_access publish as open access, defaults to false
-     * @param string $title actual title of the deposit
-     * @param string $api_endpoint api url
+     * @param string  $token        users access token
+     * @param string  $community    id of community metadata schema, defaults to EUDAT
+     * @param boolean $open_access  publish as open access, defaults to false
+     * @param string  $title        actual title of the deposit
+     * @param string  $api_endpoint api url
      *
      * @return string  file URL in b2access
      */
@@ -97,8 +97,7 @@ class B2share implements Ipublish
         $open_access = false,
         $title = "Deposit title",
         $api_endpoint = "https://trng-b2share.eudat.eu"
-    ): string
-    {
+    ): string {
         //now settype("false","boolean") evaluates to true, so:
         $b_open_access = false;
         if ($open_access === "true") {
@@ -160,8 +159,8 @@ class B2share implements Ipublish
      * Create upload object but do not the upload here
      *
      * @param string $file_upload_url the upload_url for the files bucket
-     * @param string $filehandle file handle
-     * @param string $filesize local filename of file that should be submitted
+     * @param string $filehandle      file handle
+     * @param string $filesize        local filename of file that should be submitted
      *
      * @return boolean
      */

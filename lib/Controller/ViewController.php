@@ -58,15 +58,15 @@ class ViewController extends Controller
     /**
      * Creates the AppFramwork Controller
      *
-     * @param string $appName name of the app
-     * @param IRequest $request request object
-     * @param IConfig $config config object
-     * @param DepositStatusMapper $mapper whatever
-     * @param DepositFileMapper $fdmapper ORM for DepositFile
-     * @param CommunityMapper $cMapper a community mapper
-     * @param ServerMapper $smapper server mapper
-     * @param StatusCodes $statusCodes whatever
-     * @param string $userId userid
+     * @param string              $appName     name of the app
+     * @param IRequest            $request     request object
+     * @param IConfig             $config      config object
+     * @param DepositStatusMapper $mapper      whatever
+     * @param DepositFileMapper   $fdmapper    ORM for DepositFile
+     * @param CommunityMapper     $cMapper     a community mapper
+     * @param ServerMapper        $smapper     server mapper
+     * @param StatusCodes         $statusCodes whatever
+     * @param string              $userId      userid
      */
     public function __construct(
         $appName,
@@ -78,8 +78,7 @@ class ViewController extends Controller
         ServerMapper $smapper,
         StatusCodes $statusCodes,
         $userId,
-    )
-    {
+    ) {
         parent::__construct($appName, $request);
         $this->userId = $userId;
         $this->mapper = $mapper;
@@ -97,6 +96,7 @@ class ViewController extends Controller
      *          it up in the docs or you might create a security hole. This is
      *          basically the only required method to add this exemption, don't
      *          add it to any other method if you don't exactly know what it does
+     *
      * @return TemplateResponse
      *
      * @NoAdminRequired
@@ -130,9 +130,9 @@ class ViewController extends Controller
      *
      * @return JSONResponse
      *
-     * @throws Exception
-     * @throws DoesNotExistException
-     * @throws MultipleObjectsReturnedException
+     * @throws          Exception
+     * @throws          DoesNotExistException
+     * @throws          MultipleObjectsReturnedException
      * @NoAdminRequired
      */
     public function depositList(): JSONResponse
@@ -156,7 +156,8 @@ class ViewController extends Controller
         } else {
             $publications = $this->mapper->findAllForUserAndStateString(
                 $this->userId,
-                $filter);
+                $filter
+            );
         }
         foreach ($publications as &$publication) {
             $publication->setFileCount(

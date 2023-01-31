@@ -58,6 +58,12 @@ stylelint:
 stylelint-fix:
 	npm run stylelint:fix
 
+phplint:
+	phpcs --extensions=php --ignore=*/tests/*,*/templates/*,*/Migration/*,*/node_modules/*,*/vendor/* .
+
+phplint-fix:
+	phpcbf --extensions=php --ignore=*/tests/*,*/templates/*,*/Migration/*,*/node_modules/*,*/vendor/* .
+
 # Cleaning
 clean:
 	rm -rf js/*

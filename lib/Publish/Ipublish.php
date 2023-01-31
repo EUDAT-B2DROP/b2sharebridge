@@ -39,7 +39,7 @@ interface IPublish
     /**
      * Placeholder for actually creating a deposit
      *
-     * @param string $token users access token
+     * @param string $token    users access token
      * @param string $filename local filename of file that should be submitted
      *
      * @return null
@@ -50,8 +50,8 @@ interface IPublish
      * Placeholder for upload
      *
      * @param string $file_upload_url url invenio files bucket URL
-     * @param string $filehandle users access token
-     * @param string $filesize local filename of file that should be submitted
+     * @param string $filehandle      users access token
+     * @param string $filesize        local filename of file that should be submitted
      *
      * @return null
      */

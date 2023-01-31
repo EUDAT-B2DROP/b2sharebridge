@@ -117,7 +117,7 @@ class DepositStatusMapper extends QBMapper
     /**
      * Return the number of currently queued file transfers for a given user
      *
-     * @param string $user name of the user to search transfers for
+     * @param string  $user       name of the user to search transfers for
      * @param integer $statuscode statuscode to search transfers for
      *
      * @return int number of active publishs per user
@@ -134,7 +134,9 @@ class DepositStatusMapper extends QBMapper
         )->andWhere(
             $qb->expr()->eq('status', $qb->createNamedParameter($statuscode, IQueryBuilder::PARAM_INT))
         );
-        /** @noinspection PhpDeprecationInspection */
+        /**
+ * @noinspection PhpDeprecationInspection 
+*/
         $cursor = $qb->execute();
         $row = $cursor->fetch();
         $cursor->closeCursor();
@@ -144,8 +146,8 @@ class DepositStatusMapper extends QBMapper
     /**
      * Return all file transfers for current user with state
      *
-     * @param string $user name of the user to search transfers for
-     * @param int $state state type
+     * @param string $user  name of the user to search transfers for
+     * @param int    $state state type
      *
      * @return array(Entities)
      *
@@ -167,12 +169,11 @@ class DepositStatusMapper extends QBMapper
     /**
      * Return all file transfers for current user with state
      *
-     * @param string $user name of the user to search transfers for
+     * @param string $user  name of the user to search transfers for
      * @param string $state type
      *
      * @return array(Entities)
      * @throws Exception if more th one
-     *
      */
     public function findAllForUserAndStateString(string $user, string $state): array
     {

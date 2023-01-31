@@ -150,24 +150,6 @@ class ViewController extends Controller
             );
         }
 
-        //check if force param exists
-        $force = false;
-        if (array_key_exists('force', $param)) {
-            $force = $param['force'] === "true";
-        }
-
-        $lastUpdate = $this->mapper->findLastUpdate();
-        if(!$force && $this->lastUpdate != null && $lastUpdate == $this->lastUpdate){
-            return new JSONResponse(
-                [
-                    "message" => "Nothing changed",
-                    "status" => "success"
-                ],
-                Http::STATUS_NOT_MODIFIED
-            );
-        }
-        $this->lastUpdate = $lastUpdate;
-
         $filter = $param['filter'];
         if ($filter === 'all') {
             $publications = $this->mapper->findAllForUser($this->userId);

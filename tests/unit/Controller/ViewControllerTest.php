@@ -39,7 +39,7 @@ class ViewControllerTest extends TestCase
         $this->request = $this->getMockBuilder('OCP\IRequest')->getMock();
         $config = $this->getMockBuilder('OCP\IConfig')->getMock();
         $this->deposit_mapper = $this->getMockBuilder('OCA\B2shareBridge\Model\DepositStatusMapper')
-            ->setMethods(['findAllForUser', 'findAllForUserAndStateString'])
+            ->setMethods(['findAllForUser', 'findAllForUserAndStateString', 'findLastUpdate'])
             ->disableOriginalConstructor()
             ->getMock();
         $deposit_file_mapper =
@@ -67,6 +67,9 @@ class ViewControllerTest extends TestCase
         $this->deposit_mapper->method('findAllForUser')
             ->willReturn($this->data);
 
+        $this->deposit_mapper->method('findLastUpdate')
+            ->willReturn(1234);  // some time in ms
+
         $this->controller = new ViewController(
             'b2sharebridge', $this->request, $config, $this->deposit_mapper,
             $deposit_file_mapper, $community_mapper, $server_mapper,
@@ -86,7 +89,7 @@ class ViewControllerTest extends TestCase
         return $fcStatus;
     }
 
-    public function setParams($filter, $force)
+    public function setParams($filter)
     {
         if ($filter === null) {
             $this->request->method('getParams')
@@ -96,9 +99,6 @@ class ViewControllerTest extends TestCase
             return;
         }
         $params = ["filter" => $filter];
-        if($force !== null) {
-            $params["force"] = "true";
-        }
         $this->request->method('getParams')
             ->willReturn($params);
 
@@ -110,9 +110,9 @@ class ViewControllerTest extends TestCase
             ->willReturn($filtered_data);
     }
 
-    public function createDeposit($filter, $force="true"): JSONResponse
+    public function createDeposit($filter): JSONResponse
     {
-        $this->setParams($filter, $force);
+        $this->setParams($filter);
         return $this->controller->depositList();
     }
 
@@ -158,17 +158,6 @@ class ViewControllerTest extends TestCase
     {
         $filter = null;
         $result = $this->createDeposit($filter);
-        $this->assertEquals(Http::STATUS_INTERNAL_SERVER_ERROR, $result->getStatus());
-    }
-
-    public function testNotChanged()
-    {
-        $filter = 'all';
-        $force = null;
-        $result = $this->createDeposit($filter, $force);
-        $this->assertEquals(Http::STATUS_OK, $result->getStatus());
-
-        $result = $this->createDeposit($filter, $force);
-        $this->assertEquals(Http::STATUS_NOT_MODIFIED, $result->getStatus());
+        $this->assertEquals(Http::STATUS_BAD_REQUEST, $result->getStatus());
     }
 }

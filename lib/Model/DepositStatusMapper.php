@@ -188,36 +188,6 @@ class DepositStatusMapper extends QBMapper
         return $deposits;
     }
 
-    public function findLastUpdate(): int|null
-    {
-        $qb = $this->db->getQueryBuilder();
-        $statusTableNameWithPrefix = str_replace(["'", "`"], "", $qb->getTableName($this->tableName));  // remove quotes
-        $qb->automaticTablePrefix(false);  //information schema is a meta table
-        $qb->selectAlias('update_time', 'time')->from('information_schema.tables')->where(
-            $qb->expr()->eq('table_name', $qb->createNamedParameter($statusTableNameWithPrefix))
-        );
-
-        try {
-            $cursor = $qb->executeQuery();
-            $row = $cursor->fetch();
-            $cursor->closeCursor();
-        } catch (Exception $e) {
-            $this->logger->error("Could not fetch update_time", ["error" => $e]);
-            return null;
-        }
-        if(!$row || !$row['time']) {
-            $this->logger->info("Table never received an update");
-            return null;
-        }
-        $time = strtotime($row['time']);
-        if (is_bool($time)) {
-            $this->logger->error("Could not interpret database time", ["time" => $row['time']]);
-            return null;
-        }
-        return $time;
-    }
-
-
     /**
      * Return status code numbers for several keywords
      *

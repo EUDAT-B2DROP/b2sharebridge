@@ -23,17 +23,3 @@
 .b2sharebridge .publish-queue-list th {
 	/*text-align: left;*/
 }
-
-.icon-b2share:after{
-	content: '';
-	display: block;
-	height: 40px;  /*height of icon */
-	width: 40px;  /*width of icon */
-	position: absolute;
-	/*where to replace the icon */
-	top: 0;
-	left: -40px;
-	/*background */
-	background:url('../img/filelisticon.svg');
-	background:no-repeat;
-}

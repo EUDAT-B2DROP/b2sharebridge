@@ -102,6 +102,7 @@ jobs:
       - name: Style checking
         run: |
           cd apps/b2sharebridge
+          make npm-init
           make stylelint
 
       - name: Js Lint checking

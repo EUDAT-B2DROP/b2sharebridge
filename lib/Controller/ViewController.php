@@ -250,14 +250,17 @@ class ViewController extends Controller
      * @return          array
      * @NoAdminRequired
      */
-    public function getTokens()
+    public function getTokens(): array
     {
         $userId = \OC::$server->getUserSession()->getUser()->getUID();
         $ret = [];
         $servers = $this->smapper->findAll();
         foreach ($servers as $server) {
             $serverId = $server->getId();
-            $ret[$serverId] = $this->config->getUserValue($userId, $this->appName, 'token_' . $serverId);
+            $token = $this->config->getUserValue($userId, $this->appName, 'token_' . $serverId, null);
+            if($token) {
+                $ret[$serverId] = $token;
+            }
         };
         return $ret;
     }

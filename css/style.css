@@ -23,3 +23,8 @@
 .b2sharebridge .publish-queue-list th {
 	/*text-align: left;*/
 }
+
+.b2share-modal-header, btn .btn-primary {
+	background-color: rgb(26, 48, 99);
+	color: white;
+}

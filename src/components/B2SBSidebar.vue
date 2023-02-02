@@ -167,11 +167,11 @@ export default {
 			servers: [],
 			server_selected: null,
 			server_options: [
-				{ value: null, text: 'No servers found!' },
+				{ value: null, text: 'Please select a server', disabled: true },
 			],
 			community_selected: null,
 			community_options: [
-				{ value: null, text: 'No communities found!' },
+				{ value: null, text: 'Please select a community', disabled: true },
 			],
 			checkbox_status: false,
 			deposit_title: '',
@@ -186,14 +186,18 @@ export default {
 		await this.loadServers()
 		await this.loadCommunities()
 		if (this.servers.length !== 0) {
-			this.server_options = []
+			this.server_options = [{ value: null, text: 'Please select a server', disabled: true }]
 			this.servers.forEach(server => {
 				this.server_options.push(new Object({
 					value: server.id,
 					text: server.name,
 				}))
 			})
-			// TODO auto select if only one server is available
+			if(this.servers.length === 1) {
+        console.debug("Selected server automatically")
+        this.server_selected = this.servers[0].id
+        this.onChangeServer()  // update communities
+      }
 		}
 		await this.loadTokens()
 		this.loaded_sidebar = true
@@ -310,14 +314,18 @@ export default {
 		// Events
 		onChangeServer() {
 			if (this.server_selected !== null) {
-				this.community_options = []
+				this.community_options = [{ value: null, text: 'Please select a community', disabled: true }]
 				console.log(this.server_selected)
-				this.communities.forEach((community) => {
+				this.communities.forEach((community, index) => {
 					if (community.hasOwnProperty('serverId') && parseInt(community.serverId) === parseInt(this.server_selected)) {
 						this.community_options.push(new Object({
 							value: community.id,
 							text: community.name,
 						}))
+            if(community.name === 'EUDAT') {  //TODO make this configurable
+              console.debug("Automatically selected EUDAT as community")
+              this.community_selected = community.id
+            }
 					}
 				})
 			}

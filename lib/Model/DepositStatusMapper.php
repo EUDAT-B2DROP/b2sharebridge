@@ -34,14 +34,13 @@ use Psr\Log\LoggerInterface;
  */
 class DepositStatusMapper extends QBMapper
 {
+    private LoggerInterface $logger;
 
     /**
      * Create the database mapper
      *
      * @param IDBConnection $db the database connection to use
      */
-    private LoggerInterface $logger;
-
     public function __construct(IDBConnection $db, LoggerInterface $logger)
     {
         parent::__construct(
@@ -103,7 +102,7 @@ class DepositStatusMapper extends QBMapper
      *
      * @throws Exception if not found
      */
-    public function findAllForUser($user): array
+    public function findAllForUser(string $user): array
     {
         $qb = $this->db->getQueryBuilder();
         //$sql = 'SELECT * FROM `' . $this->tableName . '` WHERE `owner` = ?';
@@ -134,10 +133,8 @@ class DepositStatusMapper extends QBMapper
         )->andWhere(
             $qb->expr()->eq('status', $qb->createNamedParameter($statuscode, IQueryBuilder::PARAM_INT))
         );
-        /**
- * @noinspection PhpDeprecationInspection 
-*/
-        $cursor = $qb->execute();
+
+        $cursor = $qb->executeQuery();
         $row = $cursor->fetch();
         $cursor->closeCursor();
         return $row['count'];

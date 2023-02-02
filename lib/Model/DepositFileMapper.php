@@ -19,6 +19,7 @@ use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Db\QBMapper;
 use OCP\DB\Exception;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
 /**
@@ -86,35 +87,42 @@ class DepositFileMapper extends QBMapper
      * @param string $depositId the id of the deposit to search transfers for
      *
      * @return array(Entities)
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
      *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws Exception
      */
-    public function findAllForDeposit($depositId)
+    public function findAllForDeposit(string $depositId): array
     {
-        $sql = 'SELECT * FROM `'
-            . $this->tableName
-            . '` WHERE `deposit_status_id` = ?';
-        return $this->findEntities($sql, [$depositId]);
+        //$sql = 'SELECT * FROM `'
+        //    . $this->tableName
+        //    . '` WHERE `deposit_status_id` = ?';
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('*')->from($this->tableName)->where(
+            $qb->expr()->eq('deposit_status_id', $qb->createNamedParameter($depositId))
+        );
+        return $this->findEntities($qb);
     }
 
     /**
      * Return file count for a deposit
      *
-     * @param string $depositId the id of the deposit to search transfers for
+     * @param int $depositId the id of the deposit to search transfers for
      *
-     * @return array(Entities)
-     * @throws \OCP\AppFramework\Db\MultipleObjectsReturnedException if more th one
+     * @return int
      *
-     * @throws \OCP\AppFramework\Db\DoesNotExistException if not found
+     * @throws Exception
      */
-    public function getFileCount($depositId)
+    public function getFileCount(int $depositId): int
     {
-        $sql = 'SELECT count(*) FROM `'
-            . $this->tableName
-            . '` WHERE `deposit_status_id` = ?';
-        return $this->execute($sql, [$depositId])->fetchColumn();
+        //$sql = 'SELECT count(*) FROM `'
+        //    . $this->tableName
+        //    . '` WHERE `deposit_status_id` = ?';
+        $qb = $this->db->getQueryBuilder();
+        $qb->selectAlias($qb->createFunction('COUNT(*)'), 'count')->from($this->tableName)->where(
+            $qb->expr()->eq('deposit_status_id', $qb->createNamedParameter($depositId, IQueryBuilder::PARAM_INT))
+        );
+        $cursor = $qb->executeQuery();
+        $row = $cursor->fetch();
+        $cursor->closeCursor();
+        return $row['count'];
     }
-
-
 }

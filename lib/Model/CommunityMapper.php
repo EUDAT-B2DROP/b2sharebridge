@@ -68,7 +68,6 @@ class CommunityMapper extends QBMapper
      *
      * @return array(Entity)
      * @throws Exception if more th one
-     *
      */
 
     public function findForServer($serverId): array
@@ -92,8 +91,8 @@ class CommunityMapper extends QBMapper
         $communities = $this->findAll();
         usort(
             $communities, function ($a, $b) {
-            return strcmp($a->getName(), $b->getName());
-        }
+                return strcmp($a->getName(), $b->getName());
+            }
         );
         return $communities;
     }

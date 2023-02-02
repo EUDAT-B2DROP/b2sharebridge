@@ -17,8 +17,9 @@ namespace OCA\B2shareBridge\Cron;
 use OCA\B2shareBridge\Model\Community;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
+use OCP\DB\Exception;
 use OCP\IConfig;
-use OCP\ILogger;
+use Psr\Log\LoggerInterface;
 use OCP\IDBConnection;
 use OCP\BackgroundJob\TimedJob;
 use OCP\AppFramework\Utility\ITimeFactory;
@@ -36,14 +37,14 @@ class B2shareCommunityFetcher extends TimedJob
 {
 
     private IConfig $config;
-    private ILogger $logger;
+    private LoggerInterface $logger;
     private IDBConnection $dbconnection;
 
     /**
      * Create cron that is fetching the b2share communities api
      * with dependency injection
      */
-    function __construct(ILogger $logger, IConfig $config, IDBConnection $dbconnection, ITimeFactory $time)
+    function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $dbconnection, ITimeFactory $time)
     {
         parent::__construct($time);
         $this->config = $config;
@@ -56,7 +57,8 @@ class B2shareCommunityFetcher extends TimedJob
     /**
      * Cron code to execute
      *
-     * @param array(string) $args array of arguments
+     * @param array $args array of arguments
+     * @throws Exception
      */
     function run($args)
     {
@@ -155,11 +157,11 @@ class B2shareCommunityFetcher extends TimedJob
      *
      * @param string $url URL to fetch
      *
-     * @return string Response
+     * @return bool|string Response
      *
      * @NoAdminRequired
      */
-    private function _getUrlContent(string $url)
+    private function _getUrlContent(string $url): bool|string
     {
         $ch = curl_init();
         $config = array(

@@ -27,6 +27,7 @@ use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
 use OCA\B2shareBridge\Publish\B2share;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\BackgroundJob\IJobList;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IConfig;
 use OCP\IContainer;
@@ -120,7 +121,8 @@ class Application extends App implements IBootstrap
         $container->registerService(
             B2share::class, function (ContainerInterface $c): B2share {
                 return new B2share(
-                    $c->get(IConfig::class)
+                    $c->get(IConfig::class),
+                    $c->get(LoggerInterface::class)
                 );
             }
         );
@@ -143,6 +145,8 @@ class Application extends App implements IBootstrap
                     $c->get(ITimeFactory::class),
                     $c->get(B2share::class),
                     $c->get(ServerMapper::class),
+                    $c->get(LoggerInterface::class),
+                    $c->get(IJobList::class),
                     $c->get("UserId")
                 );
             }
@@ -218,14 +222,14 @@ class Application extends App implements IBootstrap
      *
      * @return null
      */
-    public function registerJobs()
+    /*public function registerJobs()
     {
         //\OCP\BackgroundJob::registerJob(
         //    'OCA\B2shareBridge\Cron\B2shareCommunityFetcher'
         //);
         \OC::$server->getJoblist()->add(B2shareCommunityFetcher::class);
         return;
-    }
+    }*/
 
     /**
      * Load additional javascript files
@@ -255,7 +259,7 @@ class Application extends App implements IBootstrap
         //$this->registerNavigationEntry();
         $this->loadScripts();
         $this->registerSettings();
-        $this->registerJobs();
+        //$this->registerJobs();
     }
 
 }

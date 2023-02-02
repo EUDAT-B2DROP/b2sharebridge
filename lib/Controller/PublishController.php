@@ -27,10 +27,11 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\BackgroundJob\IJobList;
+use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IRequest;
-use \OCP\ILogger;
-use OCP\Util;
+use Psr\Log\LoggerInterface;
 
 /**
  * Implement a ownCloud AppFramework Controller
@@ -48,9 +49,11 @@ class PublishController extends Controller
     protected DepositFileMapper $dfmapper;
     protected StatusCodes $statusCodes;
     protected string $userId;
+    protected LoggerInterface $logger;
     private ITimeFactory $time;
     private B2share $publisher;
     private ServerMapper $smapper;
+    private IJobList $jobList;
 
     /**
      * Creates the AppFramwork Controller
@@ -73,6 +76,8 @@ class PublishController extends Controller
         ITimeFactory $time,
         B2share $publisher,
         ServerMapper $smapper,
+        LoggerInterface $logger,
+        IJobList $jobList,
         string $userId
     ) {
         parent::__construct($appName, $request);
@@ -84,6 +89,8 @@ class PublishController extends Controller
         $this->time = $time;
         $this->publisher = $publisher;
         $this->smapper = $smapper;
+        $this->logger = $logger;
+        $this->jobList = $jobList;
     }
 
     /**
@@ -91,8 +98,9 @@ class PublishController extends Controller
      *
      * @return          JSONResponse
      * @NoAdminRequired
+     * @throws Exception
      */
-    public function publish()
+    public function publish(): JSONResponse
     {
         $param = $this->request->getParams();
         //TODO what if token wasn't set? We couldn't have gotten here
@@ -153,7 +161,7 @@ class PublishController extends Controller
                 $filesize = $filesize + $view->filesize(Filesystem::getPath($id));
             }
             if ($filesize < $allowed_filesize * 1024 * 1024) {
-                $job = new TransferHandler($this->time, $this->mapper, $this->dfmapper, $this->publisher, $this->smapper);
+                $job = new TransferHandler($this->time, $this->mapper, $this->dfmapper, $this->publisher, $this->smapper, $this->logger);
                 $fcStatus = new DepositStatus();
                 $fcStatus->setOwner($this->userId);
                 $fcStatus->setStatus(1);
@@ -167,7 +175,7 @@ class PublishController extends Controller
                     $depositFile->setFilename(basename(Filesystem::getPath($id)));
                     $depositFile->setFileid($id);
                     $depositFile->setDepositStatusId($depositId->getId());
-                    \OC::$server->getLogger()->info(
+                    $this->logger->info(
                         $depositFile, ['app' => 'b2sharebridge']
                     );
                     $this->dfmapper->insert($depositFile);
@@ -196,7 +204,7 @@ class PublishController extends Controller
 
 
         // register transfer cron
-        \OC::$server->getJobList()->add(
+        $this->jobList->add(
             $job,
             [
                 'transferId' => $fcStatus->getId(),

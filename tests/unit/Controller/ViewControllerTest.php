@@ -134,7 +134,7 @@ class ViewControllerTest extends TestCase
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
         foreach ($this->data as $index => $entity) {
-            $this->assertEquals(json_encode($entity), $result->getData()[$index]);
+            $this->assertEquals($entity, $result->getData()[$index]);
         }
     }
 
@@ -144,7 +144,7 @@ class ViewControllerTest extends TestCase
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
         $this->assertTrue(sizeof($result->getData()) == 1);
-        $this->assertEquals(json_encode($this->data[0]), $result->getData()[0]);
+        $this->assertEquals($this->data[0], $result->getData()[0]);
     }
 
     public function testPending()
@@ -154,7 +154,7 @@ class ViewControllerTest extends TestCase
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
         $this->assertTrue(sizeof($result->getData()) == 2);
         for ($i = 0; $i < sizeof($result->getData()); $i++) {
-            $this->assertEquals(json_encode($this->data[$i + 1]), $result->getData()[$i]);
+            $this->assertEquals($this->data[$i + 1], $result->getData()[$i]);
         }
     }
 
@@ -165,7 +165,7 @@ class ViewControllerTest extends TestCase
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
         $this->assertTrue(sizeof($result->getData()) == 3);
         for ($i = 0; $i < sizeof($result->getData()); $i++) {
-            $this->assertEquals(json_encode($this->data[$i + 3]), $result->getData()[$i]);
+            $this->assertEquals($this->data[$i + 3], $result->getData()[$i]);
         }
     }
 

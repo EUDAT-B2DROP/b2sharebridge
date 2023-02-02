@@ -2,7 +2,10 @@
 	<div>
 		<NcAppContent>
 			<div id="b2shareBridgeTabView" class="dialogContainer">
-				<div>
+				<div v-if="tokens === null && loaded_sidebar" id="b2sharebridge_errormsg" style="color: red;">
+					Please set your B2SHARE API token <a href="/settings/user/b2sharebridge">here</a>
+				</div>
+				<div v-else-if="loaded_sidebar">
 					<ValidationObserver ref="observer" v-slot="{ handleSubmit }">
 						<b-form @submit.stop.prevent="handleSubmit(publishAction)">
 							<ValidationProvider v-slot="validationContext"
@@ -73,7 +76,6 @@
 									size="lg" />
 							</b-form-group>
 							<b-btn id="publish_button"
-								variant="primary"
 								type="submit"
 								:disabled="publishDisabled">
 								Publish
@@ -81,14 +83,34 @@
 						</b-form>
 					</ValidationObserver>
 				</div>
-				<div v-if="tokens === null" id="b2sharebridge_errormsg" class="errormsg">
-					Please set your B2SHARE API token <a href="/settings/user/b2sharebridge">here</a>
-				</div>
-				<div v-if="errormessage !== null" id="b2sharebridge_errormsg" class="errormsg">
-					{{ errormessage }}
-				</div>
 			</div>
 		</NcAppContent>
+		<b-modal v-if="errormessage !== null"
+			id="error_modal"
+			v-model="showErrorModal"
+			title="B2SHARE"
+			ok-only
+			header-bg-variant="danger"
+			header-text-variant="light">
+			<div>
+				<span v-html="errormessage" />
+			</div>
+		</b-modal>
+		<b-modal id="published_modal"
+			v-model="showPublishedModal"
+			title="B2SHARE"
+			ok-only
+			header-class="b2share-modal-header">
+			<div>
+				<p class="my-4">
+					Transferring file to B2SHARE in the background.
+				</p>
+				<p>
+					Click <a href="/apps/b2sharebridge">here</a> to review the deposit status or edit your draft after the
+					transfer.
+				</p>
+			</div>
+		</b-modal>
 	</div>
 </template>
 <script>
@@ -98,6 +120,7 @@ import {
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate'
+import '../../css/style.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -138,6 +161,8 @@ export default {
 	data() {
 		return {
 			publishDisabled: false,
+			showPublishedModal: false,
+			showErrorModal: false,
 			communities: [],
 			servers: [],
 			server_selected: null,
@@ -153,6 +178,7 @@ export default {
 			tokens: null,
 			fileInfo: null,
 			errormessage: null,
+			loaded_sidebar: false,
 		}
 	},
 
@@ -170,6 +196,11 @@ export default {
 			// TODO auto select if only one server is available
 		}
 		await this.loadTokens()
+		this.loaded_sidebar = true
+		if (this.tokens === null) {
+			this.errormessage = 'Please set your B2SHARE API token <a href="/settings/user/b2sharebridge">here</a>'
+			this.showErrorModal = true
+		}
 	},
 
 	methods: {
@@ -177,6 +208,7 @@ export default {
 		 * Submit deposit to B2SHARE
 		 */
 		async publishAction() {
+			this.publishDisabled = true
 			const selectedFiles = FileList.getSelectedFiles()
 
 			// if selectedFiles is empty, use fileInfo
@@ -191,7 +223,7 @@ export default {
 				ids = [this.fileInfo.id]
 			}
 
-			const result = await axios
+			axios
 				.post(generateUrl('/apps/b2sharebridge/publish'),
 					{
 						ids,
@@ -201,22 +233,19 @@ export default {
 						server_id: this.server_selected,
 					})
 				.then(() => {
-					this.publishDisabled = true
+					this.showPublishedModal = true
 				})
 				.catch((error) => {
 					if (error.response) {
 						if (error.response.status === 413 // entity too large
                   || error.response.status === 429) { // too many uploads
-							this.errormessage = error.response.data.message
+							this.errormessage = '<p>' + error.response.data.message + '</p>'
+							this.showErrorModal = true
 						}
 					}
+					this.publishDisabled = false
 					console.log(error)
 				})
-			if (result && result.status === 'success') {
-				OC.dialogs.info(
-					t('b2sharebridge', result.message),
-					t('b2sharebridge', 'Info'))
-			}
 		},
 
 		// API stuff
@@ -264,8 +293,13 @@ export default {
 			return axios
 				.get(generateUrl(url_path))
 				.then((response) => {
-					console.log('Loaded tokens!')
-					this.tokens = response.data
+					console.log('Successfully requested tokens!')
+					console.log(response.data)
+					if (response.data) {
+						this.tokens = response.data
+					} else {
+						console.info('No token set!')
+					}
 				})
 				.catch((error) => {
 					console.error('Fetching tokens failed!')
@@ -332,6 +366,8 @@ label.col-auto {
 #publish_button {
 	margin-left: 3px;
 	width: 25%;
+	background-color: rgb(26, 48, 99);
+	color: white;
 }
 
 input.is-valid, select.is-valid {
@@ -354,7 +390,7 @@ input.is-invalid:focus, select.is-invalid:focus {
 	border-color: rgb(148, 26, 37);
 }
 
-div.invalid-feedback div.errormsg{
+div.invalid-feedback {
 	color: rgb(148, 26, 37);
 }
 

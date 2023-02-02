@@ -173,7 +173,7 @@ class ViewController extends Controller
      *
      * @return          JSONResponse
      * @NoAdminRequired
-     * @throws PreConditionNotMetException
+     * @throws          PreConditionNotMetException
      */
     public function setToken(): JSONResponse
     {
@@ -218,9 +218,9 @@ class ViewController extends Controller
     /**
      * XHR request endpoint for token setter
      *
-     * @param $id
+     * @param           $id
      * @return          JSONResponse
-     * @throws PreConditionNotMetException
+     * @throws          PreConditionNotMetException
      * @NoAdminRequired
      */
     public function deleteToken($id): JSONResponse
@@ -254,7 +254,7 @@ class ViewController extends Controller
      *
      * @return          array
      * @NoAdminRequired
-     * @throws Exception
+     * @throws          Exception
      */
     public function getTokens(): array
     {
@@ -276,7 +276,7 @@ class ViewController extends Controller
      *
      * @return          array
      * @NoAdminRequired
-     * @throws Exception
+     * @throws          Exception
      */
     public function getTabViewContent(): array
     {
@@ -289,7 +289,7 @@ class ViewController extends Controller
      *
      * @return          JSONResponse
      * @NoAdminRequired
-     * @throws Exception
+     * @throws          Exception
      */
     public function initializeB2ShareUI(): JSONResponse
     {

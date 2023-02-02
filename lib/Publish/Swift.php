@@ -93,7 +93,7 @@ class Swift implements IPublish
      * Create upload object but do not the upload here
      *
      * @param  string $file_upload_url users access token
-     * @param  mixed $filehandle      local filename of file that should be submitted
+     * @param  mixed  $filehandle      local filename of file that should be submitted
      * @param  string $filesize
      * @return bool
      */

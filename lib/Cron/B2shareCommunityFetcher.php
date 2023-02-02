@@ -57,7 +57,7 @@ class B2shareCommunityFetcher extends TimedJob
     /**
      * Cron code to execute
      *
-     * @param array $args array of arguments
+     * @param  array $args array of arguments
      * @throws Exception
      */
     function run($args)

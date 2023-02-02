@@ -51,12 +51,12 @@ class TransferHandler extends QueuedJob
     /**
      * Create the database mapper
      *
-     * @param ITimeFactory|null $time
-     * @param DepositStatusMapper|null $mapper the database mapper for transfers
-     * @param DepositFileMapper|null $dfmapper ORM for DepositFile
-     * @param IPublish|null $publisher publishing backend to use
-     * @param ServerMapper|null $smapper
-     * @param LoggerInterface|null $logger
+     * @param ITimeFactory|null        $time
+     * @param DepositStatusMapper|null $mapper    the database mapper for transfers
+     * @param DepositFileMapper|null   $dfmapper  ORM for DepositFile
+     * @param IPublish|null            $publisher publishing backend to use
+     * @param ServerMapper|null        $smapper
+     * @param LoggerInterface|null     $logger
      */
     public function __construct(
         ITimeFactory        $time = null,
@@ -65,8 +65,7 @@ class TransferHandler extends QueuedJob
         IPublish            $publisher = null,
         ServerMapper        $smapper = null,
         LoggerInterface     $logger = null
-    )
-    {
+    ) {
         parent::__construct($time);
         if ($dfmapper === null or $mapper === null or $publisher === null or $smapper === null or $logger === null) {
             $this->fixTransferForCron();

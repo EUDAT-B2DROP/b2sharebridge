@@ -98,7 +98,7 @@ class PublishController extends Controller
      *
      * @return          JSONResponse
      * @NoAdminRequired
-     * @throws Exception
+     * @throws          Exception
      */
     public function publish(): JSONResponse
     {

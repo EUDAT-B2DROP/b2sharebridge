@@ -159,7 +159,7 @@ class B2share implements IPublish
      * Create upload object but do not the upload here
      *
      * @param string $file_upload_url the upload_url for the files bucket
-     * @param mixed $filehandle      file handle
+     * @param mixed  $filehandle      file handle
      * @param string $filesize        local filename of file that should be submitted
      *
      * @return bool

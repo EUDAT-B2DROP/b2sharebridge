@@ -93,11 +93,11 @@ class Swift implements IPublish
      * Create upload object but do not the upload here
      *
      * @param  string $file_upload_url users access token
-     * @param  string $filehandle      local filename of file that should be submitted
+     * @param  mixed $filehandle      local filename of file that should be submitted
      * @param  string $filesize
      * @return bool
      */
-    public function upload(string $file_upload_url, string $filehandle, string $filesize): bool
+    public function upload(string $file_upload_url, mixed $filehandle, string $filesize): bool
     {
         curl_setopt($this->curl_client, CURLOPT_URL, $file_upload_url);
         curl_setopt($this->curl_client, CURLOPT_INFILE, $filehandle);

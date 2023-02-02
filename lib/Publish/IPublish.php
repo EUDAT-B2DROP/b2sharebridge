@@ -54,10 +54,10 @@ interface IPublish
      * Placeholder for upload
      *
      * @param string $file_upload_url url invenio files bucket URL
-     * @param string $filehandle      users access token
+     * @param mixed $filehandle      users access token
      * @param string $filesize        local filename of file that should be submitted
      *
      * @return bool success of the upload
      */
-    public function upload(string $file_upload_url, string $filehandle, string $filesize): bool;
+    public function upload(string $file_upload_url, mixed $filehandle, string $filesize): bool;
 }

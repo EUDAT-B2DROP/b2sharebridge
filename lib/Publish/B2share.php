@@ -159,12 +159,12 @@ class B2share implements IPublish
      * Create upload object but do not the upload here
      *
      * @param string $file_upload_url the upload_url for the files bucket
-     * @param string $filehandle      file handle
+     * @param mixed $filehandle      file handle
      * @param string $filesize        local filename of file that should be submitted
      *
      * @return bool
      */
-    public function upload(string $file_upload_url, string $filehandle, string $filesize): bool
+    public function upload(string $file_upload_url, mixed $filehandle, string $filesize): bool
     {
         $this->curl_client = curl_init();
 

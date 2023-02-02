@@ -205,6 +205,7 @@ class TransferHandler extends QueuedJob
              */
         } catch (MultipleObjectsReturnedException|DoesNotExistException|Exception $e) {
             $fcStatus?->setStatus(5);
+            $fcStatus?->setErrorMessage("Internal Server Error!");
             $this->logger->error(
                 $e->getMessage(),
                 ['app' => 'b2sharebridge']

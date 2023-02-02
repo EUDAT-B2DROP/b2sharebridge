@@ -161,7 +161,7 @@ export default {
 			return axios
 				.get(generateUrl('/apps/b2sharebridge/deposits?filter=' + filter))
 				.then((response) => {
-					console.log(response.data)
+					console.debug(response.data)
 					this.deposits = response.data
 					this.deposits.forEach((value, index, array) => {
 						array[index] = this.translateDepositStatus(value)

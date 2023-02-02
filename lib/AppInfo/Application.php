@@ -159,6 +159,7 @@ class Application extends App implements IBootstrap
                     $c->get(CommunityMapper::class),
                     $c->get(ServerMapper::class),
                     $c->get(StatusCodes::class),
+                    $c->get(LoggerInterface::class),
                     $c->get("UserId")
                 );
             }

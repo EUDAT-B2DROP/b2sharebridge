@@ -22,6 +22,7 @@ use PHPUnit\Framework\TestCase;
 
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http;
+use Psr\Log\LoggerInterface;
 
 class ViewControllerTest extends TestCase
 {
@@ -47,6 +48,7 @@ class ViewControllerTest extends TestCase
             ->getMock();
         $deposit_file_mapper =
             $this->getMockBuilder(DepositFileMapper::class)
+            ->setMethods(['getFileCount'])
             ->disableOriginalConstructor()
             ->getMock();
         $community_mapper = $this->getMockBuilder(CommunityMapper::class)
@@ -56,6 +58,10 @@ class ViewControllerTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
         $this->statusCodes = $this->getMockBuilder(StatusCodes::class)
+            ->getMock();
+
+        $logger = $this->getMockBuilder(LoggerInterface::class)
+            ->disableOriginalConstructor()
             ->getMock();
 
         $this->data = [
@@ -70,16 +76,20 @@ class ViewControllerTest extends TestCase
         $this->deposit_mapper->method('findAllForUser')
             ->willReturn($this->data);
 
+        $deposit_file_mapper->method('getFileCount')
+            ->willReturn(1);
+
         $this->controller = new ViewController(
             'b2sharebridge', $this->request, $config, $this->deposit_mapper,
             $deposit_file_mapper, $community_mapper, $server_mapper,
-            $this->statusCodes, $this->userId
+            $this->statusCodes, $logger, $this->userId
         );
     }
 
     public function createDepositStatus($owner, $status, $title, $serverId): DepositStatus
     {
         $fcStatus = new DepositStatus();
+        $fcStatus->setId(1);
         $fcStatus->setOwner($owner);
         $fcStatus->setStatus($status);
         $fcStatus->setCreatedAt(time());

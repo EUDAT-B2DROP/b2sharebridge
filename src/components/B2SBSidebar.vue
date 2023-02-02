@@ -244,7 +244,7 @@ export default {
 						}
 					}
 					this.publishDisabled = false
-					console.log(error)
+					console.error(error)
 				})
 		},
 
@@ -258,7 +258,7 @@ export default {
 				.get(generateUrl(url_path))
 				.then((response) => {
 					console.log('Loaded servers:')
-					console.log(response)
+					console.debug(response)
 					this.servers = response.data
 				})
 				.catch((error) => {
@@ -276,7 +276,7 @@ export default {
 				.get(generateUrl(url_path))
 				.then((response) => {
 					console.log('Loaded communities:')
-					console.log(response)
+					console.debug(response)
 					this.communities = response.data
 				})
 				.catch((error) => {
@@ -294,7 +294,7 @@ export default {
 				.get(generateUrl(url_path))
 				.then((response) => {
 					console.log('Successfully requested tokens!')
-					console.log(response.data)
+					console.debug(response.data)
 					if (response.data) {
 						this.tokens = response.data
 					} else {
@@ -311,7 +311,6 @@ export default {
 		onChangeServer() {
 			if (this.server_selected !== null) {
 				this.community_options = []
-				console.log(this.server_selected)
 				this.communities.forEach((community) => {
 					if (community.hasOwnProperty('serverId') && parseInt(community.serverId) === parseInt(this.server_selected)) {
 						this.community_options.push(new Object({

@@ -29,6 +29,7 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IRequest;
+use OCP\PreConditionNotMetException;
 use OCP\Util;
 use OCA\B2shareBridge\AppInfo\Application;
 use Psr\Log\LoggerInterface;
@@ -163,7 +164,7 @@ class ViewController extends Controller
             $publication->setFileCount(
                 $this->fdmapper->getFileCount($publication->getId())
             );
-            $publication = $publication->toJson();
+            $publication = json_encode($publication);
         }
 
 
@@ -175,8 +176,9 @@ class ViewController extends Controller
      *
      * @return          JSONResponse
      * @NoAdminRequired
+     * @throws PreConditionNotMetException
      */
-    public function setToken()
+    public function setToken(): JSONResponse
     {
         $param = $this->request->getParams();
         $error = false;
@@ -219,10 +221,12 @@ class ViewController extends Controller
     /**
      * XHR request endpoint for token setter
      *
+     * @param $id
      * @return          JSONResponse
+     * @throws PreConditionNotMetException
      * @NoAdminRequired
      */
-    public function deleteToken($id)
+    public function deleteToken($id): JSONResponse
     {
         $this->logger->info(
             'Deleting API token', ['app' => 'b2sharebridge']
@@ -240,6 +244,12 @@ class ViewController extends Controller
             );
         }
         $this->config->setUserValue($this->userId, $this->appName, 'token_' . $id, '');
+        return new JSONResponse(
+            [
+                'message' => 'Ok',
+                'status' => 'success'
+            ]
+        );
     }
 
     /**
@@ -247,6 +257,7 @@ class ViewController extends Controller
      *
      * @return          array
      * @NoAdminRequired
+     * @throws Exception
      */
     public function getTokens(): array
     {
@@ -268,8 +279,9 @@ class ViewController extends Controller
      *
      * @return          array
      * @NoAdminRequired
+     * @throws Exception
      */
-    public function getTabViewContent()
+    public function getTabViewContent(): array
     {
 
         return $this->cMapper->getCommunityList();
@@ -280,6 +292,7 @@ class ViewController extends Controller
      *
      * @return          JSONResponse
      * @NoAdminRequired
+     * @throws Exception
      */
     public function initializeB2ShareUI(): JSONResponse
     {

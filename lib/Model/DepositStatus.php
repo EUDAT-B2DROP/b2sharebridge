@@ -14,6 +14,7 @@
 
 namespace OCA\B2shareBridge\Model;
 
+use JsonSerializable;
 use OCP\AppFramework\Db\Entity;
 use OCP\Util;
 
@@ -26,7 +27,7 @@ use OCP\Util;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class DepositStatus extends Entity
+class DepositStatus extends Entity implements JsonSerializable
 {
 
     protected $status;
@@ -87,15 +88,9 @@ class DepositStatus extends Entity
         return urldecode($result);
     }
 
-    /**
-     * return a json representation of an Entity
-     * Unfortunately json_encode($entity) only inserts the id
-     *
-     * @return bool|string
-     */
-    public function toJson(): bool|string
+    public function jsonSerialize(): array
     {
-        $data = [
+        return [
             "status" => $this->status,
             "title" => $this->title,
             "owner" => $this->owner,
@@ -106,6 +101,5 @@ class DepositStatus extends Entity
             "error" => $this->errorMessage,
             "serverId" => $this->serverId,
         ];
-        return json_encode($data);
     }
 }

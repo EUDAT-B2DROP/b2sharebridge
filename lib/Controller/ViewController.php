@@ -25,12 +25,10 @@ use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IRequest;
-use OCP\ILogger;
 use OCP\Util;
 use OCA\B2shareBridge\AppInfo\Application;
 use Psr\Log\LoggerInterface;
@@ -67,7 +65,7 @@ class ViewController extends Controller
      * @param CommunityMapper     $cMapper     a community mapper
      * @param ServerMapper        $smapper     server mapper
      * @param StatusCodes         $statusCodes whatever
-     * @param string $userId      userid
+     * @param string              $userId      userid
      */
     public function __construct(
         $appName,

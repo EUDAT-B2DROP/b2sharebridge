@@ -164,10 +164,7 @@ class ViewController extends Controller
             $publication->setFileCount(
                 $this->fdmapper->getFileCount($publication->getId())
             );
-            $publication = json_encode($publication);
         }
-
-
         return new JSONResponse($publications);
     }
 

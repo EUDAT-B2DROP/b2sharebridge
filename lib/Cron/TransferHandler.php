@@ -21,11 +21,13 @@ use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Publish\B2share;
 use OCA\B2shareBridge\Publish\IPublish;
 
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\QueuedJob;
 use OC\Files\Filesystem;
-use OCP\ILogger;
-use OCP\Util;
+use OCP\DB\Exception;
+use Psr\Log\LoggerInterface;
 
 
 /**
@@ -44,23 +46,28 @@ class TransferHandler extends QueuedJob
     private IPublish $_publisher;
     private DepositFileMapper $_dfmapper;
     private ServerMapper $_smapper;
+    protected LoggerInterface $logger;
 
     /**
      * Create the database mapper
      *
-     * @param DepositStatusMapper $mapper    the database mapper for transfers
-     * @param DepositFileMapper   $dfmapper  ORM for DepositFile
-     * @param IPublish            $publisher publishing backend to use
+     * @param ITimeFactory|null        $time
+     * @param DepositStatusMapper|null $mapper    the database mapper for transfers
+     * @param DepositFileMapper|null   $dfmapper  ORM for DepositFile
+     * @param IPublish|null            $publisher publishing backend to use
+     * @param ServerMapper|null        $smapper
+     * @param LoggerInterface|null     $logger
      */
     public function __construct(
         ITimeFactory        $time = null,
         DepositStatusMapper $mapper = null,
         DepositFileMapper $dfmapper = null,
         IPublish $publisher = null,
-        ServerMapper $smapper = null
+        ServerMapper $smapper = null,
+        LoggerInterface $logger = null
     ) {
         parent::__construct($time);
-        if($dfmapper === null or $mapper === null or $publisher === null or $smapper === null) {
+        if($dfmapper === null or $mapper === null or $publisher === null or $smapper === null or $logger === null) {
             $this->fixTransferForCron();
         } else{
 
@@ -68,6 +75,7 @@ class TransferHandler extends QueuedJob
             $this->_dfmapper = $dfmapper;
             $this->_publisher = $publisher;
             $this->_smapper = $smapper;
+            $this->logger = $logger;
         }
 
     }
@@ -75,8 +83,6 @@ class TransferHandler extends QueuedJob
     /**
      * A Cron that is executed in the background needs to create the Application
      * because its not coming form the user context
-     *
-     * @return null
      */
     protected function fixTransferForCron()
     {
@@ -85,15 +91,18 @@ class TransferHandler extends QueuedJob
         $this->_dfmapper = $application->getContainer()->get(DepositFileMapper::class);
         $this->_publisher = $application->getContainer()->get(B2share::class);
         $this->_smapper = $application->getContainer()->get(ServerMapper::class);
-        return;
+        $this->logger = $application->getContainer()->get(LoggerInterface::class);
     }
 
     /**
      * Check if current user is the requested user
      *
-     * @param array(string) $args array of arguments
+     * @param array $args array of arguments
      *
      * @return null
+     * @throws DoesNotExistException
+     * @throws MultipleObjectsReturnedException
+     * @throws Exception
      */
     public function run($args)
     {
@@ -104,7 +113,7 @@ class TransferHandler extends QueuedJob
             || !array_key_exists('title', $args)
             || !array_key_exists('serverId', $args)
         ) {
-            \OC::$server->getLogger()->error(
+            $this->logger->error(
                 'Can not handle w/o id, token, community, open_access, title',
                 ['app' => 'b2sharebridge']
             );
@@ -151,8 +160,8 @@ class TransferHandler extends QueuedJob
                     /*
                      * External error: during uploading file
                      */
-                    \OC::$server->getLogger()->error(
-                        "File not accesable" . $file->getFilename(),
+                    $this->logger->error(
+                        "File not accessible" . $file->getFilename(),
                         ['app' => 'b2sharebridge']
                     );
                     $fcStatus->setStatus(3);
@@ -165,7 +174,7 @@ class TransferHandler extends QueuedJob
                 /*
                  * External error: during uploading file
                  */
-                \OC::$server->getLogger()->error(
+                $this->logger->error(
                     'No upload_result', ['app' => 'b2sharebridge']
                 );
                 $fcStatus->setStatus(3);
@@ -174,7 +183,7 @@ class TransferHandler extends QueuedJob
             /*
              * External error: during creating deposit
              */
-            \OC::$server->getLogger()->error(
+            $this->logger->error(
                 "No create result, there was an error during deposit creation",
                 ['app' => 'b2sharebridge']
             );
@@ -183,7 +192,7 @@ class TransferHandler extends QueuedJob
         }
         $fcStatus->setUpdatedAt(time());
         $this->_mapper->update($fcStatus);
-        \OC::$server->getLogger()->info(
+        $this->logger->info(
             "Job completed, depositStatusId: " . $fcStatus->getId(),
             ['app' => 'b2sharebridge']
         );
@@ -203,7 +212,7 @@ class TransferHandler extends QueuedJob
      *
      * @return boolean
      */
-    public function isPublishingUser($userId)
+    public function isPublishingUser(string $userId): bool
     {
         return is_array($this->argument) &&
             array_key_exists('userId', $this->argument) &&
@@ -213,9 +222,9 @@ class TransferHandler extends QueuedJob
     /**
      * Get actual filename for fileId
      *
-     * @return \string
+     * @return string
      */
-    public function getFilename()
+    public function getFilename(): string
     {
         Filesystem::init($this->argument['userId'], '/');
         return Filesystem::getPath($this->argument['fileId']);
@@ -224,9 +233,9 @@ class TransferHandler extends QueuedJob
     /**
      * Check if current user is the requested user
      *
-     * @return \boolean
+     * @return string
      */
-    public function getRequestDate()
+    public function getRequestDate(): string
     {
         return $this->argument['requestDate'];
     }

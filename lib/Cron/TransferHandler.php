@@ -51,25 +51,26 @@ class TransferHandler extends QueuedJob
     /**
      * Create the database mapper
      *
-     * @param ITimeFactory|null        $time
-     * @param DepositStatusMapper|null $mapper    the database mapper for transfers
-     * @param DepositFileMapper|null   $dfmapper  ORM for DepositFile
-     * @param IPublish|null            $publisher publishing backend to use
-     * @param ServerMapper|null        $smapper
-     * @param LoggerInterface|null     $logger
+     * @param ITimeFactory|null $time
+     * @param DepositStatusMapper|null $mapper the database mapper for transfers
+     * @param DepositFileMapper|null $dfmapper ORM for DepositFile
+     * @param IPublish|null $publisher publishing backend to use
+     * @param ServerMapper|null $smapper
+     * @param LoggerInterface|null $logger
      */
     public function __construct(
         ITimeFactory        $time = null,
         DepositStatusMapper $mapper = null,
-        DepositFileMapper $dfmapper = null,
-        IPublish $publisher = null,
-        ServerMapper $smapper = null,
-        LoggerInterface $logger = null
-    ) {
+        DepositFileMapper   $dfmapper = null,
+        IPublish            $publisher = null,
+        ServerMapper        $smapper = null,
+        LoggerInterface     $logger = null
+    )
+    {
         parent::__construct($time);
-        if($dfmapper === null or $mapper === null or $publisher === null or $smapper === null or $logger === null) {
+        if ($dfmapper === null or $mapper === null or $publisher === null or $smapper === null or $logger === null) {
             $this->fixTransferForCron();
-        } else{
+        } else {
 
             $this->_mapper = $mapper;
             $this->_dfmapper = $dfmapper;
@@ -100,9 +101,6 @@ class TransferHandler extends QueuedJob
      * @param array $args array of arguments
      *
      * @return null
-     * @throws DoesNotExistException
-     * @throws MultipleObjectsReturnedException
-     * @throws Exception
      */
     public function run($args)
     {
@@ -119,90 +117,99 @@ class TransferHandler extends QueuedJob
             );
             return;
         }
-        // get the file transfer object for current Cron
-        $fcStatus = $this->_mapper->find($args['transferId']);
-        $fcStatus->setStatus(2); //status = processing
-        $this->_mapper->update($fcStatus);
-        $user = $fcStatus->getOwner();
-        $server = $this->_smapper->find($args['serverId']);
+        $fcStatus = null;
+        try {
+            // get the file transfer object for current Cron
+            $fcStatus = $this->_mapper->find($args['transferId']);
+            $fcStatus->setStatus(2); //status = processing
+            $this->_mapper->update($fcStatus);
+            $user = $fcStatus->getOwner();
+            $server = $this->_smapper->find($args['serverId']);
 
-        $create_result = $this->_publisher->create(
-            $args['token'],
-            $args['community'],
-            $args['open_access'],
-            $args['title'],
-            $server->getPublishUrl()
-        );
+            $create_result = $this->_publisher->create(
+                $args['token'],
+                $args['community'],
+                $args['open_access'],
+                $args['title'],
+                $server->getPublishUrl()
+            );
 
-        if ($create_result) {
-            $file_upload_link = $this->_publisher->getFileUploadUrlPart();
-            Filesystem::init($user, '/');
-            $view = Filesystem::getView();
-            $files = $this->_dfmapper->findAllForDeposit($fcStatus->getId());
-            $upload_result = true;
+            if ($create_result) {
+                $file_upload_link = $this->_publisher->getFileUploadUrlPart();
+                Filesystem::init($user, '/');
+                $view = Filesystem::getView();
+                $files = $this->_dfmapper->findAllForDeposit($fcStatus->getId());
+                $upload_result = true;
 
-            foreach ($files as $file) {
-                $filename = $file->getFilename();
-                $fileid = $file->getFileid();
-                $path = Filesystem::getPath($fileid);
-                $has_access = Filesystem::isReadable($path);
-                if ($has_access) {
-                    $handle = $view->fopen($path, 'rb');
-                    $size = $view->filesize($path);
-                    $upload_url = $file_upload_link . "/" . urlencode($filename);
-                    $upload_url = $upload_url .
-                        "?access_token=" . $args['token'];
-                    $upload_result = $upload_result &&
-                        $this->_publisher->upload(
-                            $upload_url, $handle, $size
+                foreach ($files as $file) {
+                    $filename = $file->getFilename();
+                    $fileid = $file->getFileid();
+                    $path = Filesystem::getPath($fileid);
+                    $has_access = Filesystem::isReadable($path);
+                    if ($has_access) {
+                        $handle = $view->fopen($path, 'rb');
+                        $size = $view->filesize($path);
+                        $upload_url = $file_upload_link . "/" . urlencode($filename);
+                        $upload_url = $upload_url .
+                            "?access_token=" . $args['token'];
+                        $upload_result = $upload_result &&
+                            $this->_publisher->upload(
+                                $upload_url, $handle, $size
+                            );
+                    } else {
+                        /*
+                         * External error: during uploading file
+                         */
+                        $this->logger->error(
+                            "File not accessible" . $file->getFilename(),
+                            ['app' => 'b2sharebridge']
                         );
+                        $fcStatus->setStatus(3);
+                    }
+                }
+                if ($upload_result) {
+                    $fcStatus->setStatus(0);//status = published
+                    $fcStatus->setUrl($create_result);
                 } else {
                     /*
                      * External error: during uploading file
                      */
                     $this->logger->error(
-                        "File not accessible" . $file->getFilename(),
-                        ['app' => 'b2sharebridge']
+                        'No upload_result', ['app' => 'b2sharebridge']
                     );
                     $fcStatus->setStatus(3);
                 }
-            }
-            if ($upload_result) {
-                $fcStatus->setStatus(0);//status = published
-                $fcStatus->setUrl($create_result);
             } else {
                 /*
-                 * External error: during uploading file
+                 * External error: during creating deposit
                  */
                 $this->logger->error(
-                    'No upload_result', ['app' => 'b2sharebridge']
+                    "No create result, there was an error during deposit creation",
+                    ['app' => 'b2sharebridge']
                 );
-                $fcStatus->setStatus(3);
+                $fcStatus->setErrorMessage($this->_publisher->getErrorMessage());
+                $fcStatus->setStatus(4);
             }
-        } else {
-            /*
-             * External error: during creating deposit
-             */
-            $this->logger->error(
-                "No create result, there was an error during deposit creation",
+            $fcStatus->setUpdatedAt(time());
+            $this->_mapper->update($fcStatus);
+            $this->logger->info(
+                "Job completed, depositStatusId: " . $fcStatus->getId(),
                 ['app' => 'b2sharebridge']
             );
-            $fcStatus->setErrorMessage($this->_publisher->getErrorMessage());
-            $fcStatus->setStatus(4);
-        }
-        $fcStatus->setUpdatedAt(time());
-        $this->_mapper->update($fcStatus);
-        $this->logger->info(
-            "Job completed, depositStatusId: " . $fcStatus->getId(),
-            ['app' => 'b2sharebridge']
-        );
 
-        /*
-         *
-         * TODO: think of a fork alternative or make it possible to not loose
-         * the database connection. also it is running only one Cron per cron run...
-         * TODO: we need to be carefull of zombies here!
-         */
+            /*
+             *
+             * TODO: think of a fork alternative or make it possible to not loose
+             * the database connection. also it is running only one Cron per cron run...
+             * TODO: we need to be carefull of zombies here!
+             */
+        } catch (MultipleObjectsReturnedException|DoesNotExistException|Exception $e) {
+            $fcStatus?->setStatus(5);
+            $this->logger->error(
+                $e->getMessage(),
+                ['app' => 'b2sharebridge']
+            );
+        }
     }
 
     /**

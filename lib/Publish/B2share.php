@@ -14,9 +14,10 @@
 
 namespace OCA\B2shareBridge\Publish;
 
+use CurlHandle;
 use OCA\B2shareBridge\AppInfo\Application;
 use OCP\IConfig;
-use OCP\Util;
+use Psr\Log\LoggerInterface;
 
 /**
  * Implement a backend that is able to move data from owncloud to B2SHARE
@@ -27,19 +28,20 @@ use OCP\Util;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class B2share implements Ipublish
+class B2share implements IPublish
 {
-    protected $api_endpoint;
-    protected $curl_client;
-    protected $file_upload_url;
-    protected $error_message;
+    protected LoggerInterface $logger;
+    protected CurlHandle $curl_client;
+    protected string $file_upload_url;
+    protected string $error_message;
 
     /**
      * Create object for actual upload
      *
-     * @param IConfig $check_ssl whether to check security for https
+     * @param IConfig $config
+     * @param LoggerInterface $logger
      */
-    public function __construct(IConfig $config)
+    public function __construct(IConfig $config, LoggerInterface $logger)
     {
         $this->curl_client = curl_init();
         $defaults = array(
@@ -52,6 +54,7 @@ class B2share implements Ipublish
             $defaults[CURLOPT_SSL_VERIFYPEER] = 0;
         }
         curl_setopt_array($this->curl_client, $defaults);
+        $this->logger = $logger;
     }
 
     /**
@@ -60,7 +63,7 @@ class B2share implements Ipublish
      *
      * @return string the file_upload_url for the files bucket
      */
-    public function getFileUploadUrlPart()
+    public function getFileUploadUrlPart(): string
     {
         return $this->file_upload_url;
     }
@@ -72,9 +75,6 @@ class B2share implements Ipublish
      */
     public function getErrorMessage(): string
     {
-        if (is_null($this->error_message)) {
-            return '';
-        }
         return $this->error_message;
     }
 
@@ -83,20 +83,20 @@ class B2share implements Ipublish
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
-     * @param string  $token        users access token
-     * @param string  $community    id of community metadata schema, defaults to EUDAT
-     * @param boolean $open_access  publish as open access, defaults to false
-     * @param string  $title        actual title of the deposit
-     * @param string  $api_endpoint api url
+     * @param string $token users access token
+     * @param string $community id of community metadata schema, defaults to EUDAT
+     * @param string $open_access publish as open access, defaults to false
+     * @param string $title actual title of the deposit
+     * @param string $api_endpoint api url
      *
      * @return string  file URL in b2access
      */
     public function create(
-        $token,
-        $community = "e9b9792e-79fb-4b07-b6b4-b9c2bd06d095",
-        $open_access = false,
-        $title = "Deposit title",
-        $api_endpoint = "https://trng-b2share.eudat.eu"
+        string $token,
+        string $community,
+        string $open_access,
+        string $title,
+        string $api_endpoint
     ): string {
         //now settype("false","boolean") evaluates to true, so:
         $b_open_access = false;
@@ -162,9 +162,9 @@ class B2share implements Ipublish
      * @param string $filehandle      file handle
      * @param string $filesize        local filename of file that should be submitted
      *
-     * @return boolean
+     * @return bool
      */
-    public function upload($file_upload_url, $filehandle, $filesize)
+    public function upload(string $file_upload_url, string $filehandle, string $filesize): bool
     {
         $this->curl_client = curl_init();
 
@@ -173,7 +173,6 @@ class B2share implements Ipublish
             CURLOPT_URL => $file_upload_url,
             CURLOPT_INFILE => $filehandle,
             CURLOPT_INFILESIZE => $filesize,
-            CURLOPT_BINARYTRANSFER => true,
             CURLOPT_PUT => true,
             CURLOPT_CUSTOMREQUEST => 'PUT',
             CURLOPT_RETURNTRANSFER => 1,

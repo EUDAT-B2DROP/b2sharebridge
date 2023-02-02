@@ -14,6 +14,10 @@
 
 namespace OCA\B2shareBridge\Publish;
 
+use CurlHandle;
+use OCP\IConfig;
+use Psr\Log\LoggerInterface;
+
 /**
  * Implement a backend that is able to move data from owncloud to OpenStack Swift
  *
@@ -23,21 +27,17 @@ namespace OCA\B2shareBridge\Publish;
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
-class Swift implements Ipublish
+class Swift implements IPublish
 {
-    protected $api_endpoint;
-    protected $curl_client;
-    protected $result;
+    protected CurlHandle $curl_client;
+    protected array $result;
 
     /**
      * Create object for actual upload
      *
-     * @param string  $api_endpoint api endpoint baseurl for b2share
-     * @param boolean $check_ssl    whether to check security for https
      */
-    public function __construct($api_endpoint, $check_ssl)
+    public function __construct(IConfig $config, LoggerInterface $logger)
     {
-        $this->api_endpoint = $api_endpoint;
         $this->curl_client = curl_init();
     }
 
@@ -45,14 +45,16 @@ class Swift implements Ipublish
      * Publish to url via put, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
-     * @param string $token    users access token
-     * @param string $filename local filename of file that should be submitted
-     *
-     * @return null
+     * @param string $token users access token
+     * @param string $community local filename of file that should be submitted
+     * @param string $open_access
+     * @param string $title
+     * @param string $api_endpoint
+     * @return string
      */
-    public function create($token, $filename)
+    public function create(string $token, string $community, string $open_access, string $title, string $api_endpoint): string
     {
-        $this->result['url'] = $this->api_endpoint.'/'.uniqid();
+        $this->result['url'] = $api_endpoint.'/'.uniqid();
         curl_setopt($this->curl_client, CURLOPT_URL, $this->result['url']);
         curl_setopt(
             $this->curl_client,
@@ -62,15 +64,15 @@ class Swift implements Ipublish
                 'Expect:'
             )
         );
-        return;
+        return $this->result['url'];  // I don't know, untestable
     }
 
     /**
      * Finalize file upload by actually doing it
      *
-     * @return null
+     * @return mixed
      */
-    public function finalize()
+    protected function finalize(): mixed
     {
         $tmp = curl_exec($this->curl_client);
         $response_code = curl_getinfo($this->curl_client)['http_code'];
@@ -91,18 +93,20 @@ class Swift implements Ipublish
     /**
      * Create upload object but do not the upload here
      *
-     * @param string $filehandle users access token
-     * @param string $filesize   local filename of file that should be submitted
-     *
-     * @return null
+     * @param string $file_upload_url users access token
+     * @param string $filehandle local filename of file that should be submitted
+     * @param string $filesize
+     * @return bool
      */
-    public function upload($filehandle, $filesize)
+    public function upload(string $file_upload_url, string $filehandle, string $filesize): bool
     {
+        curl_setopt($this->curl_client, CURLOPT_URL, $file_upload_url);
         curl_setopt($this->curl_client, CURLOPT_INFILE, $filehandle);
         curl_setopt($this->curl_client, CURLOPT_INFILESIZE, $filesize);
         curl_setopt($this->curl_client, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->curl_client, CURLOPT_PUT, true);
         curl_setopt($this->curl_client, CURLOPT_FORBID_REUSE, 1);
-        return;
+        $res = $this->finalize();
+        return $res['status'] == 'success';
     }
 }

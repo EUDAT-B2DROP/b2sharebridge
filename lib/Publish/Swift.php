@@ -34,7 +34,6 @@ class Swift implements IPublish
 
     /**
      * Create object for actual upload
-     *
      */
     public function __construct(IConfig $config, LoggerInterface $logger)
     {
@@ -45,11 +44,11 @@ class Swift implements IPublish
      * Publish to url via put, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
-     * @param string $token users access token
-     * @param string $community local filename of file that should be submitted
-     * @param string $open_access
-     * @param string $title
-     * @param string $api_endpoint
+     * @param  string $token        users access token
+     * @param  string $community    local filename of file that should be submitted
+     * @param  string $open_access
+     * @param  string $title
+     * @param  string $api_endpoint
      * @return string
      */
     public function create(string $token, string $community, string $open_access, string $title, string $api_endpoint): string
@@ -93,9 +92,9 @@ class Swift implements IPublish
     /**
      * Create upload object but do not the upload here
      *
-     * @param string $file_upload_url users access token
-     * @param string $filehandle local filename of file that should be submitted
-     * @param string $filesize
+     * @param  string $file_upload_url users access token
+     * @param  string $filehandle      local filename of file that should be submitted
+     * @param  string $filesize
      * @return bool
      */
     public function upload(string $file_upload_url, string $filehandle, string $filesize): bool

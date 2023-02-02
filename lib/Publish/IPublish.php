@@ -31,7 +31,7 @@ interface IPublish
     /**
      * Placeholder for actually creating a deposit
      *
-     * @param IConfig $config access to nextcloud configuration
+     * @param IConfig         $config access to nextcloud configuration
      * @param LoggerInterface $logger a logger
      *
      * @return null
@@ -41,11 +41,11 @@ interface IPublish
     /**
      * Placeholder for actually creating a deposit
      *
-     * @param string $token users access token
-     * @param string $community
-     * @param string $open_access
-     * @param string $title
-     * @param string $api_endpoint
+     * @param  string $token        users access token
+     * @param  string $community
+     * @param  string $open_access
+     * @param  string $title
+     * @param  string $api_endpoint
      * @return string
      */
     public function create(string $token, string $community, string $open_access, string $title, string $api_endpoint): string;

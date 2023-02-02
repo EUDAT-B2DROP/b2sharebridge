@@ -38,7 +38,7 @@ class B2share implements IPublish
     /**
      * Create object for actual upload
      *
-     * @param IConfig $config
+     * @param IConfig         $config
      * @param LoggerInterface $logger
      */
     public function __construct(IConfig $config, LoggerInterface $logger)
@@ -83,10 +83,10 @@ class B2share implements IPublish
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
-     * @param string $token users access token
-     * @param string $community id of community metadata schema, defaults to EUDAT
-     * @param string $open_access publish as open access, defaults to false
-     * @param string $title actual title of the deposit
+     * @param string $token        users access token
+     * @param string $community    id of community metadata schema, defaults to EUDAT
+     * @param string $open_access  publish as open access, defaults to false
+     * @param string $title        actual title of the deposit
      * @param string $api_endpoint api url
      *
      * @return string  file URL in b2access

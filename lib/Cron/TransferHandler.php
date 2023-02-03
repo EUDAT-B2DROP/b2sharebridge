@@ -112,7 +112,7 @@ class TransferHandler extends QueuedJob
         ) {
             $this->logger->error(
                 'Can not handle w/o id, token, community, open_access, title',
-                ['app' => 'b2sharebridge']
+                ['app' => Application::APP_ID]
             );
             return;
         }
@@ -161,7 +161,7 @@ class TransferHandler extends QueuedJob
                          */
                         $this->logger->error(
                             "File not accessible" . $file->getFilename(),
-                            ['app' => 'b2sharebridge']
+                            ['app' => Application::APP_ID]
                         );
                         $fcStatus->setStatus(3);
                     }
@@ -174,7 +174,7 @@ class TransferHandler extends QueuedJob
                      * External error: during uploading file
                      */
                     $this->logger->error(
-                        'No upload_result', ['app' => 'b2sharebridge']
+                        'No upload_result', ['app' => Application::APP_ID]
                     );
                     $fcStatus->setStatus(3);
                 }
@@ -184,7 +184,7 @@ class TransferHandler extends QueuedJob
                  */
                 $this->logger->error(
                     "No create result, there was an error during deposit creation",
-                    ['app' => 'b2sharebridge']
+                    ['app' => Application::APP_ID]
                 );
                 $fcStatus->setErrorMessage($this->_publisher->getErrorMessage());
                 $fcStatus->setStatus(4);
@@ -193,7 +193,7 @@ class TransferHandler extends QueuedJob
             $this->_mapper->update($fcStatus);
             $this->logger->info(
                 "Job completed, depositStatusId: " . $fcStatus->getId(),
-                ['app' => 'b2sharebridge']
+                ['app' => Application::APP_ID]
             );
 
             /*
@@ -207,7 +207,7 @@ class TransferHandler extends QueuedJob
             $fcStatus?->setErrorMessage("Internal Server Error!");
             $this->logger->error(
                 $e->getMessage(),
-                ['app' => 'b2sharebridge']
+                ['app' => Application::APP_ID]
             );
         }
     }

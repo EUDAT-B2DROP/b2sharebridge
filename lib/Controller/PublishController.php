@@ -15,6 +15,7 @@
 namespace OCA\B2shareBridge\Controller;
 
 use OC\Files\Filesystem;
+use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Cron\TransferHandler;
 use OCA\B2shareBridge\Model\DepositStatus;
 use OCA\B2shareBridge\Model\DepositFile;
@@ -138,12 +139,12 @@ class PublishController extends Controller
         }
 
         $allowed_uploads = $this->config->getAppValue(
-            'b2sharebridge',
+            Application::APP_ID,
             'max_uploads',
             5
         );
         $allowed_filesize = $this->config->getAppValue(
-            'b2sharebridge',
+            Application::APP_ID,
             'max_upload_filesize',
             512
         );
@@ -176,7 +177,7 @@ class PublishController extends Controller
                     $depositFile->setFileid($id);
                     $depositFile->setDepositStatusId($depositId->getId());
                     $this->logger->debug(
-                        "Inserting " . $depositFile->getFilename(), ['app' => 'b2sharebridge']
+                        "Inserting " . $depositFile->getFilename(), ['app' => Application::APP_ID]
                     );
                     $this->dfmapper->insert($depositFile);
                 }

@@ -82,6 +82,6 @@ class PersonalSection implements IIconSection
       */
     public function getIcon(): string
     {
-        return $this->_url->imagePath('b2sharebridge', 'eudat_logo.png');
+        return $this->_url->imagePath(Application::APP_ID, 'eudat_logo.png');
     }
 }

@@ -192,7 +192,7 @@ class ViewController extends Controller
             $error = 'No user configured for session';
         }
         if (($error)) {
-            $this->logger->error($error, ['app' => 'b2sharebridge']);
+            $this->logger->error($error, ['app' => Application::APP_ID]);
             return new JSONResponse(
                 [
                     'message' => 'Internal server error, contact the EUDAT helpdesk',
@@ -204,7 +204,7 @@ class ViewController extends Controller
 
 
         $this->logger->info(
-            'saving API token', ['app' => 'b2sharebridge']
+            'saving API token', ['app' => Application::APP_ID]
         );
         $this->config->setUserValue($this->userId, $this->appName, "token_" . $server_id, $token);
         return new JSONResponse(
@@ -226,11 +226,11 @@ class ViewController extends Controller
     public function deleteToken($id): JSONResponse
     {
         $this->logger->info(
-            'Deleting API token', ['app' => 'b2sharebridge']
+            'Deleting API token', ['app' => Application::APP_ID]
         );
         if (strlen($this->userId) <= 0) {
             $this->logger->info(
-                'No user configured for session', ['app' => 'b2sharebridge']
+                'No user configured for session', ['app' => Application::APP_ID]
             );
             return new JSONResponse(
                 [
@@ -296,11 +296,11 @@ class ViewController extends Controller
         $error_msg = "";
         $status_code = Http::STATUS_OK;
         $this->logger->debug(
-            'in func initUI', ['app' => 'b2sharebridge']
+            'in func initUI', ['app' => Application::APP_ID]
         );
         if (strlen($this->userId) <= 0) {
             $this->logger->info(
-                'No user configured for session', ['app' => 'b2sharebridge']
+                'No user configured for session', ['app' => Application::APP_ID]
             );
             $error_msg .= "Authorization failure: login first.<br>\n";
             $status_code = Http::STATUS_UNAUTHORIZED;
@@ -310,7 +310,7 @@ class ViewController extends Controller
         Filesystem::init($this->userId, '/');
         $view = Filesystem::getView();
         $this->logger->debug(
-            'File ID: ' . $id, ['app' => 'b2sharebridge']
+            'File ID: ' . $id, ['app' => Application::APP_ID]
         );
         $filesize = $view->filesize(Filesystem::getPath($id));
         $fileName = basename(Filesystem::getPath($id));
@@ -321,12 +321,12 @@ class ViewController extends Controller
         }
 
         $allowed_uploads = $this->config->getAppValue(
-            'b2sharebridge',
+            Application::APP_ID,
             'max_uploads',
             5
         );
         $allowed_filesize = $this->config->getAppValue(
-            'b2sharebridge',
+            Application::APP_ID,
             'max_upload_filesize',
             512
         );

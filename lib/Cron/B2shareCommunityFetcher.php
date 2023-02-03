@@ -14,6 +14,7 @@
 
 namespace OCA\B2shareBridge\Cron;
 
+use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Model\Community;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
@@ -72,7 +73,7 @@ class B2shareCommunityFetcher extends TimedJob
                 $this->logger->error(
                     'Fetching the B2SHARE communities API at ' . $b2share_communities_url .
                     ' was not possible.',
-                    ['app' => 'b2sharebridge']
+                    ['app' => Application::APP_ID]
                 );
                 continue;
             }
@@ -81,7 +82,7 @@ class B2shareCommunityFetcher extends TimedJob
                 $this->logger->error(
                     'Fetching the B2SHARE communities API at ' . $b2share_communities_url .
                     ' did not return a valid JSON.',
-                    ['app' => 'b2sharebridge']
+                    ['app' => Application::APP_ID]
                 );
                 continue;
             }
@@ -92,7 +93,7 @@ class B2shareCommunityFetcher extends TimedJob
                     'Fetched community with id: ' . $community['id'] .
                     ' and name: ' . $community['name'] . ' fetched' .
                     ' and restricted_submission: ' . $community['restricted_submission'] . ' from server ' . $server->getName(),
-                    ['app' => 'b2sharebridge']
+                    ['app' => Application::APP_ID]
                 );
                 if ($community['restricted_submission'] !== true) {
                     $communities_b2share[$community['id']] = $community['name'];
@@ -116,7 +117,7 @@ class B2shareCommunityFetcher extends TimedJob
                 $this->logger->info(
                     'Removing community with id: ' . $id .
                     ' and name: ' . $name . ' after synchronization with b2share',
-                    ['app' => 'b2sharebridge']
+                    ['app' => Application::APP_ID]
                 );
                 $communityMapper->deleteCommunity($id);
             }
@@ -127,7 +128,7 @@ class B2shareCommunityFetcher extends TimedJob
                 $this->logger->info(
                     'Adding community with id: ' . $id . ' and name: '
                     . $name . ' after synchronization with B2SHARE server ' . $server->getName(),
-                    ['app' => 'b2sharebridge']
+                    ['app' => Application::APP_ID]
                 );
                 $communityMapper->insert(Community::fromParams(['id' => $id, 'name' => $name, 'serverId' => $server->getId()]));
             }
@@ -172,7 +173,7 @@ class B2shareCommunityFetcher extends TimedJob
             CURLOPT_RETURNTRANSFER => true
         );
         $check_ssl = $this->config->getAppValue(
-            'b2sharebridge',
+            Application::APP_ID,
             'check_ssl',
             '1'
         );

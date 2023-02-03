@@ -48,7 +48,7 @@ class ViewControllerTest extends TestCase
             ->getMock();
         $deposit_file_mapper =
             $this->getMockBuilder(DepositFileMapper::class)
-            ->setMethods(['getFileCount'])
+            ->onlyMethods(['getFileCount'])
             ->disableOriginalConstructor()
             ->getMock();
         $community_mapper = $this->getMockBuilder(CommunityMapper::class)

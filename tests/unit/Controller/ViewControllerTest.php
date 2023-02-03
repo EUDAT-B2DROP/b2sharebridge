@@ -43,7 +43,7 @@ class ViewControllerTest extends TestCase
         $this->request = $this->getMockBuilder(IRequest::class)->getMock();
         $config = $this->getMockBuilder(IConfig::class)->getMock();
         $this->deposit_mapper = $this->getMockBuilder(DepositStatusMapper::class)
-            ->setMethods(['findAllForUser', 'findAllForUserAndStateString'])
+            ->onlyMethods(['findAllForUser', 'findAllForUserAndStateString'])
             ->disableOriginalConstructor()
             ->getMock();
         $deposit_file_mapper =

@@ -40,9 +40,9 @@ class Personal implements ISettings
     /**
      * Constructors construct.
      *
-     * @param IConfig $config Nextcloud config container
+     * @param IConfig      $config Nextcloud config container
      * @param ServerMapper $mapper
-     * @param string $userId
+     * @param string       $userId
      */
     public function __construct(IConfig $config, ServerMapper $mapper, string $userId)
     {

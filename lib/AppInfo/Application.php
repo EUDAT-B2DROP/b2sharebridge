@@ -59,7 +59,7 @@ class Application extends App implements IBootstrap
     /**
      * Create a ownCloud application
      *
-     * @param array $urlParams a list of url parameters
+     * @param  array $urlParams a list of url parameters
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
@@ -73,8 +73,9 @@ class Application extends App implements IBootstrap
 
         $dispatcher->addListener(
             'OCA\Files::loadAdditionalScripts', function () {
-            Util::addScript(self::APP_ID, 'b2sharebridge-filetabmain');
-        });
+                Util::addScript(self::APP_ID, 'b2sharebridge-filetabmain');
+            }
+        );
     }
 
     /**
@@ -96,35 +97,35 @@ class Application extends App implements IBootstrap
         //Note: Why do they all show as deprecated?
         $context->registerService(
             CommunityMapper::class, function (ContainerInterface $c): CommunityMapper {
-            return new CommunityMapper(
-                $c->get(IDBConnection::class)
-            );
-        }
+                return new CommunityMapper(
+                    $c->get(IDBConnection::class)
+                );
+            }
         );
 
         $context->registerService(
             DepositStatusMapper::class, function (ContainerInterface $c): DepositStatusMapper {
-            return new DepositStatusMapper(
-                $c->get(IDBConnection::class),
-                $c->get(LoggerInterface::class)
-            );
-        }
+                return new DepositStatusMapper(
+                    $c->get(IDBConnection::class),
+                    $c->get(LoggerInterface::class)
+                );
+            }
         );
 
         $context->registerService(
             DepositFileMapper::class, function (ContainerInterface $c): DepositFileMapper {
-            return new DepositFileMapper(
-                $c->get(IDBConnection::class)
-            );
-        }
+                return new DepositFileMapper(
+                    $c->get(IDBConnection::class)
+                );
+            }
         );
 
         $context->registerService(
             ServerMapper::class, function (ContainerInterface $c): ServerMapper {
-            return new ServerMapper(
-                $c->get(IDBConnection::class)
-            );
-        }
+                return new ServerMapper(
+                    $c->get(IDBConnection::class)
+                );
+            }
         );
 
         /**
@@ -133,78 +134,80 @@ class Application extends App implements IBootstrap
         //Note: does this qualify as a service?
         $context->registerService(
             StatusCodes::class, function (): StatusCodes {
-            return new StatusCodes();
-        }
+                return new StatusCodes();
+            }
         );
 
         $context->registerService(
             B2share::class, function (ContainerInterface $c): B2share {
-            return new B2share(
-                $c->get(IConfig::class),
-                $c->get(LoggerInterface::class)
-            );
-        }
+                return new B2share(
+                    $c->get(IConfig::class),
+                    $c->get(LoggerInterface::class)
+                );
+            }
         );
 
         //Note: this is done for backwards compatability
         //$context->registerAlias(B2share::class, "PublishBackend");
 
-        $context->registerService(Personal::class, function (ContainerInterface $c): Personal {
-            return new Personal(
-                $c->get(IConfig::class),
-                $c->get(ServerMapper::class),
-                $c->get("UserId")
-            );
-        });
+        $context->registerService(
+            Personal::class, function (ContainerInterface $c): Personal {
+                return new Personal(
+                    $c->get(IConfig::class),
+                    $c->get(ServerMapper::class),
+                    $c->get("UserId")
+                );
+            }
+        );
 
         /**
          * Controller
          */
         $context->registerService(
             PublishController::class, function (ContainerInterface $c): PublishController {
-            return new PublishController(
-                $c->get('appName'),
-                $c->get(IRequest::class),
-                $c->get(IConfig::class),
-                $c->get(DepositStatusMapper::class),
-                $c->get(DepositFileMapper::class),
-                $c->get(StatusCodes::class),
-                $c->get(ITimeFactory::class),
-                $c->get(B2share::class),
-                $c->get(ServerMapper::class),
-                $c->get(LoggerInterface::class),
-                $c->get(IJobList::class),
-                $c->get("UserId")
-            );
-        }
+                return new PublishController(
+                    $c->get('appName'),
+                    $c->get(IRequest::class),
+                    $c->get(IConfig::class),
+                    $c->get(DepositStatusMapper::class),
+                    $c->get(DepositFileMapper::class),
+                    $c->get(StatusCodes::class),
+                    $c->get(ITimeFactory::class),
+                    $c->get(B2share::class),
+                    $c->get(ServerMapper::class),
+                    $c->get(LoggerInterface::class),
+                    $c->get(IJobList::class),
+                    $c->get("UserId")
+                );
+            }
         );
 
         $context->registerService(
             ViewController::class, function (ContainerInterface $c): ViewController {
-            return new ViewController(
-                $c->get('appName'),
-                $c->get(IRequest::class),
-                $c->get(IConfig::class),
-                $c->get(DepositStatusMapper::class),
-                $c->get(DepositFileMapper::class),
-                $c->get(CommunityMapper::class),
-                $c->get(ServerMapper::class),
-                $c->get(StatusCodes::class),
-                $c->get(LoggerInterface::class),
-                $c->get("UserId")
-            );
-        }
+                return new ViewController(
+                    $c->get('appName'),
+                    $c->get(IRequest::class),
+                    $c->get(IConfig::class),
+                    $c->get(DepositStatusMapper::class),
+                    $c->get(DepositFileMapper::class),
+                    $c->get(CommunityMapper::class),
+                    $c->get(ServerMapper::class),
+                    $c->get(StatusCodes::class),
+                    $c->get(LoggerInterface::class),
+                    $c->get("UserId")
+                );
+            }
         );
 
         $context->registerService(
             ServerController::class, function (ContainerInterface $c): ServerController {
-            return new ServerController(
-                $c->get('appName'),
-                $c->get(IRequest::class),
-                $c->get(ServerMapper::class),
-                $c->get("UserId")
-            );
-        }
+                return new ServerController(
+                    $c->get('appName'),
+                    $c->get(IRequest::class),
+                    $c->get(ServerMapper::class),
+                    $c->get("UserId")
+                );
+            }
         );
     }
 

@@ -1,18 +1,19 @@
 .regexstatus {
-    display: inline-block;
-    height: 16px;
-    width: 16px;
-    vertical-align: text-bottom;
+	display: inline-block;
+	height: 16px;
+	width: 16px;
+	vertical-align: text-bottom;
 }
+
 .regexstatus.success {
-    border-radius: 50%;
+	border-radius: 50%;
 }
 
 span.success {
-    background: #37ce02;
-    border-radius: 3px;
+	background: #37ce02;
+	border-radius: 3px;
 }
 
 span.error {
-    background: #ce3702;
+	background: #ce3702;
 }

@@ -22,14 +22,18 @@ if (!defined('PHPUNIT_RUN')) {
     define('PHPUNIT_RUN', 1);
 }
 
-require_once __DIR__.'/../../../lib/base.php';
+if (!getenv('NEXTCLOUD_ROOT')) {
+    include_once __DIR__ . '/../../../lib/base.php';
+} else {
+    include_once getenv('NEXTCLOUD_ROOT') . '/lib/base.php';
+}
 
 // Fix for "Autoload path not allowed: .../tests/lib/testcase.php"
 \OC::$loader->addValidRoot(OC::$SERVERROOT . '/tests');
 
 \OC_App::loadApp('b2sharebridge');
 
-if(!class_exists('\PHPUnit\Framework\TestCase')) {
+if (!class_exists('\PHPUnit\Framework\TestCase')) {
     include_once 'PHPUnit/Autoload.php';
 }
 

@@ -14,9 +14,11 @@
 
 namespace OCA\B2shareBridge\Publish;
 
+use OCP\IConfig;
+
 /**
  * Create a interface that must be implemented by publishing backends
- * 
+ *
  * @category Owncloud
  * @package  B2shareBridge
  * @author   EUDAT <b2drop-devel@postit.csc.fi>
@@ -28,12 +30,11 @@ interface IPublish
     /**
      * Placeholder for actually creating a deposit
      *
-     * @param string  $api_endpoint url of the b2access server
-     * @param boolean $check_ssl    whether to check security for https
+     * @param IConfig $config access to nextcloud configuration
      *
      * @return null
      */
-    public function __construct($check_ssl);
+    public function __construct(IConfig $config);
 
     /**
      * Placeholder for actually creating a deposit

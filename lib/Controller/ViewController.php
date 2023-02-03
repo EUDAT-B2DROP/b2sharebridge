@@ -20,14 +20,19 @@ use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
-use OCA\B2shareBridge\View\Navigation;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
+use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IRequest;
 use OCP\ILogger;
 use OCP\Util;
+use OCA\B2shareBridge\AppInfo\Application;
 
 /**
  * Implement a ownCloud AppFramework Controller
@@ -47,7 +52,8 @@ class ViewController extends Controller
     protected $config;
     protected $cMapper;
     protected $smapper;
-    protected $navigation;
+
+    private $lastUpdate;
 
     /**
      * Creates the AppFramwork Controller
@@ -61,7 +67,6 @@ class ViewController extends Controller
      * @param ServerMapper        $smapper     server mapper
      * @param StatusCodes         $statusCodes whatever
      * @param string              $userId      userid
-     * @param Navigation          $navigation  navigation bar object
      */
     public function __construct(
         $appName,
@@ -73,7 +78,6 @@ class ViewController extends Controller
         ServerMapper $smapper,
         StatusCodes $statusCodes,
         $userId,
-        Navigation $navigation
     ) {
         parent::__construct($appName, $request);
         $this->userId = $userId;
@@ -83,7 +87,7 @@ class ViewController extends Controller
         $this->smapper = $smapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
-        $this->navigation = $navigation;
+        $this->lastUpdate = null;
     }
 
     /**
@@ -93,57 +97,77 @@ class ViewController extends Controller
      *          basically the only required method to add this exemption, don't
      *          add it to any other method if you don't exactly know what it does
      *
-     * @param string $filter filtering string
-     *
      * @return TemplateResponse
      *
      * @NoAdminRequired
      * @NoCSRFRequired
-     */
-    public function depositList($filter = 'all')
+     * */
+    public function index(): TemplateResponse
     {
-
-        Util::addStyle('b2sharebridge', 'style');
+        Util::addStyle(Application::APP_ID, 'style');
         Util::addStyle('files', 'files');
+        $params = [
+            'user' => $this->userId,
+            'statuscodes' => $this->statusCodes,
+        ];
 
-        $publications = [];
-        if ($filter === 'all') {
-            foreach (
-                array_reverse(
-                    $this->mapper->findAllForUser($this->userId)
-                ) as $publication) {
-                    $publications[] = $publication;
-            }
+        Util::addScript(Application::APP_ID, 'b2sharebridge-main');
 
-        } else {
-            foreach (
-                array_reverse(
-                    $this->mapper->findAllForUserAndStateString(
-                        $this->userId,
-                        $filter
-                    )
-                ) as $publication) {
-                    $publications[] = $publication;
-            }
+        return new TemplateResponse(
+            Application::APP_ID,
+            'main',
+            $params
+        );
+    }
+
+    /**
+     * returns all deposits for a user with the filter query parameter.
+     * possible filters:
+     *     'all': get all deposits
+     *     'pending': get pending deposits
+     *     'publish': get published deposits
+     *     'failed': get failed deposits
+     *
+     * @return JSONResponse
+     *
+     * @throws          Exception
+     * @throws          DoesNotExistException
+     * @throws          MultipleObjectsReturnedException
+     * @NoAdminRequired
+     */
+    public function depositList(): JSONResponse
+    {
+        $param = $this->request->getParams();
+
+        //check filter param
+        if (!array_key_exists('filter', $param)) {
+            return new JSONResponse(
+                [
+                    "message" => "missing argument: filter",
+                    "status" => "error"
+                ],
+                Http::STATUS_BAD_REQUEST
+            );
         }
-        foreach ($publications as $publication) {
+
+        $filter = $param['filter'];
+        if ($filter === 'all') {
+            $publications = $this->mapper->findAllForUser($this->userId);
+        } else {
+            $publications = $this->mapper->findAllForUserAndStateString(
+                $this->userId,
+                $filter
+            );
+        }
+        foreach ($publications as &$publication) {
             $publication->setFileCount(
                 $this->fdmapper->getFileCount($publication->getId())
             );
+            $publication = $publication->toJson();
         }
-        $params = [
-            'user' => $this->userId,
-            'publications' => $publications,
-            'statuscodes' => $this->statusCodes,
-            'appNavigation' => $this->navigation->getTemplate($filter),
-            'filter' => $filter,
-        ];
 
-        return new TemplateResponse(
-            $this->appName,
-            'body',
-            $params
-        );
+
+        return new JSONResponse($publications);
     }
 
     /**
@@ -175,7 +199,7 @@ class ViewController extends Controller
             \OC::$server->getLogger()->error($error, ['app' => 'b2sharebridge']);
             return new JSONResponse(
                 [
-                    'message'=>'Internal server error, contact the EUDAT helpdesk',
+                    'message' => 'Internal server error, contact the EUDAT helpdesk',
                     'status' => 'error'
                 ]
             );
@@ -212,27 +236,31 @@ class ViewController extends Controller
             );
             return new JSONResponse(
                 [
-                    'message'=>'Internal server error, contact the EUDAT helpdesk',
+                    'message' => 'Internal server error, contact the EUDAT helpdesk',
                     'status' => 'error'
                 ]
             );
         }
         $this->config->setUserValue($userId, $this->appName, 'token_' . $id, '');
     }
+
     /**
      * request endpoint for gettin users tokens
      *
-     * @return          JSONResponse
+     * @return          array
      * @NoAdminRequired
      */
-    public function getTokens()
+    public function getTokens(): array
     {
         $userId = \OC::$server->getUserSession()->getUser()->getUID();
         $ret = [];
         $servers = $this->smapper->findAll();
-        foreach($servers as $server) {
+        foreach ($servers as $server) {
             $serverId = $server->getId();
-            $ret[$serverId] = $this->config->getUserValue($userId, $this->appName, 'token_'. $serverId);
+            $token = $this->config->getUserValue($userId, $this->appName, 'token_' . $serverId, null);
+            if($token) {
+                $ret[$serverId] = $token;
+            }
         };
         return $ret;
     }
@@ -248,7 +276,6 @@ class ViewController extends Controller
 
         return $this->cMapper->getCommunityList();
     }
-
 
     /**
      * XHR request endpoint for token state: disables or enables publish button
@@ -272,18 +299,18 @@ class ViewController extends Controller
             $error_msg .= "Authorization failure: login first.<br>\n";
         }
         $param = $this->request->getParams();
-        $id = (int) $param['file_id'];
+        $id = (int)$param['file_id'];
         Filesystem::init($this->userId, '/');
         $view = Filesystem::getView();
         \OC::$server->getLogger()->debug(
-            'File ID: '.$id, ['app' => 'b2sharebridge']
+            'File ID: ' . $id, ['app' => 'b2sharebridge']
         );
         $filesize = $view->filesize(Filesystem::getPath($id));
         $fileName = basename(Filesystem::getPath($id));
         $is_dir = $view->is_dir(Filesystem::getPath($id));
         if ($is_dir) {
-               $is_error = true;
-               $error_msg .= "You can only publish a file to B2SHARE.<br>\n";
+            $is_error = true;
+            $error_msg .= "You can only publish a file to B2SHARE.<br>\n";
         }
 
         $allowed_uploads = $this->config->getAppValue(
@@ -302,19 +329,19 @@ class ViewController extends Controller
                 'pending'
             )
         );
-        if ($active_uploads>$allowed_uploads) {
-               $is_error = true;
-               $error_msg .= "You already have ".$active_uploads.
-                   " active uploads. You are only allowed ".$allowed_uploads.
-                   " uploads. Please try again later.<br>\n";
+        if ($active_uploads > $allowed_uploads) {
+            $is_error = true;
+            $error_msg .= "You already have " . $active_uploads .
+                " active uploads. You are only allowed " . $allowed_uploads .
+                " uploads. Please try again later.<br>\n";
         }
-        if ($filesize>$allowed_filesize * 1024 * 1024) {
+        if ($filesize > $allowed_filesize * 1024 * 1024) {
             $is_error = true;
             $error_msg .= "We currently only support files smaller then "
-                    . $allowed_filesize . " MB.<br>\n";
+                . $allowed_filesize . " MB.<br>\n";
         }
         $result = [
-        "title" => $fileName,
+            "title" => $fileName,
             "error" => $is_error,
             "error_msg" => $error_msg
         ];

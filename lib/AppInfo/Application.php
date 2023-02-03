@@ -17,19 +17,27 @@ namespace OCA\B2shareBridge\AppInfo;
 
 use OCA\B2shareBridge\Controller\PublishController;
 use OCA\B2shareBridge\Controller\ViewController;
+use OCA\B2shareBridge\Controller\ServerController;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
-use OCA\B2shareBridge\View\Navigation;
+use OCA\B2shareBridge\Publish\B2share;
 use OCP\AppFramework\App;
+use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\EventDispatcher\IEventDispatcher;
+use OCP\IConfig;
 use OCP\IContainer;
+use OCP\IDBConnection;
+use OCP\IRequest;
 use OCP\Util;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
 use OCP\AppFramework\Bootstrap\IRegistrationContext;
+use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Implement a ownCloud Application for our b2sharebridge
@@ -42,6 +50,8 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
  */
 class Application extends App implements IBootstrap
 {
+    public const APP_ID = 'b2sharebridge';
+
     /**
      * Create a ownCloud application
      *
@@ -49,109 +59,119 @@ class Application extends App implements IBootstrap
      */
     public function __construct(array $urlParams = array())
     {
-        parent::__construct('b2sharebridge', $urlParams);
+        parent::__construct(self::APP_ID, $urlParams);
         $container = $this->getContainer();
-        $server = $container->getServer();
 
+        // Register files tab view
+        $dispatcher = $container->get(IEventDispatcher::class);
+        $dispatcher->addListener(
+            'OCA\Files::loadAdditionalScripts', function () {
+                Util::addScript(self::APP_ID, 'b2sharebridge-filetabmain');
+            }
+        );
+
+        /**
+         * Mappers
+         */
+        //Note: Why do they all show as deprecated?
         $container->registerService(
-            'CommunityMapper',
-            function () use ($server) {
+            CommunityMapper::class, function (ContainerInterface $c): CommunityMapper {
                 return new CommunityMapper(
-                    $server->getDatabaseConnection()
+                    $c->get(IDBConnection::class)
                 );
             }
         );
+
         $container->registerService(
-            'DepositStatusMapper',
-            function () use ($server) {
+            DepositStatusMapper::class, function (ContainerInterface $c): DepositStatusMapper {
                 return new DepositStatusMapper(
-                    $server->getDatabaseConnection()
+                    $c->get(IDBConnection::class),
+                    $c->get(LoggerInterface::class)
                 );
             }
         );
+
         $container->registerService(
-            'DepositFileMapper',
-            function () use ($server) {
+            DepositFileMapper::class, function (ContainerInterface $c): DepositFileMapper {
                 return new DepositFileMapper(
-                    $server->getDatabaseConnection()
+                    $c->get(IDBConnection::class)
                 );
             }
         );
+
         $container->registerService(
-            'ServerMapper',
-            function () use ($server) {
+            ServerMapper::class, function (ContainerInterface $c): ServerMapper {
                 return new ServerMapper(
-                    $server->getDatabaseConnection()
-                );
-            }
-        );
-        $container->registerService(
-            'StatusCodes',
-            function () use ($server) {
-                return new StatusCodes(
+                    $c->get(IDBConnection::class)
                 );
             }
         );
 
+        /**
+         * Services
+         */
+        //Note: does this qualify as a service?
         $container->registerService(
-            'PublishController',
-            function (IContainer $c) use ($server) {
+            StatusCodes::class, function (): StatusCodes {
+                return new StatusCodes();
+            }
+        );
+
+        $container->registerService(
+            B2share::class, function (ContainerInterface $c): B2share {
+                return new B2share(
+                    $c->get(IConfig::class)
+                );
+            }
+        );
+
+        //Note: this is done for backwards compatability
+        $container->registerAlias(B2share::class, "PublishBackend");
+
+        /**
+         * Controller
+         */
+        $container->registerService(
+            PublishController::class, function (ContainerInterface $c): PublishController {
                 return new PublishController(
-                    $c->query('AppName'),
-                    $server->getRequest(),
-                    $server->getConfig(),
-                    $c->query('DepositStatusMapper'),
-                    $c->query('DepositFileMapper'),
-                    $c->query('StatusCodes'),
-                    $c->query('CurrentUID')
+                    $c->get('appName'),
+                    $c->get(IRequest::class),
+                    $c->get(IConfig::class),
+                    $c->get(DepositStatusMapper::class),
+                    $c->get(DepositFileMapper::class),
+                    $c->get(StatusCodes::class),
+                    $c->get(ITimeFactory::class),
+                    $c->get(B2share::class),
+                    $c->get(ServerMapper::class),
+                    $c->get("UserId")
                 );
             }
         );
 
         $container->registerService(
-            'ViewController',
-            function (IContainer $c) use ($server) {
+            ViewController::class, function (ContainerInterface $c): ViewController {
                 return new ViewController(
-                    $c->query('AppName'),
-                    $c->query('Request'),
-                    $server->getConfig(),
-                    $c->query('DepositStatusMapper'),
-                    $c->query('DepositFileMapper'),
-                    $c->query('CommunityMapper'),
-                    $c->query('ServerMapper'),
-                    $c->query('StatusCodes'),
-                    $c->query('CurrentUID'),
-                    $c->query('Navigation')
+                    $c->get('appName'),
+                    $c->get(IRequest::class),
+                    $c->get(IConfig::class),
+                    $c->get(DepositStatusMapper::class),
+                    $c->get(DepositFileMapper::class),
+                    $c->get(CommunityMapper::class),
+                    $c->get(ServerMapper::class),
+                    $c->get(StatusCodes::class),
+                    $c->get("UserId")
                 );
             }
         );
 
         $container->registerService(
-            'Navigation',
-            function (IContainer $c) {
-                $server = $c->query('ServerContainer');
-
-                return new Navigation(
-                    $server->getURLGenerator()
+            ServerController::class, function (ContainerInterface $c): ServerController {
+                return new ServerController(
+                    $c->get('appName'),
+                    $c->get(IRequest::class),
+                    $c->get(ServerMapper::class),
+                    $c->get("UserId")
                 );
-            }
-        );
-
-        $container->registerService(
-            'CurrentUID',
-            function () use ($server) {
-                $user = $server->getUserSession()->getUser();
-                return ($user) ? $user->getUID() : '';
-            }
-        );
-
-        $container->registerService(
-            'PublishBackend',
-            function () use ($server) {
-                $backend = 'OCA\B2shareBridge\Publish\B2share';
-                $checkssl = $server->getConfig()
-                    ->getAppValue('b2sharebridge', 'check_ssl', '1');
-                return new $backend($checkssl);
             }
         );
     }
@@ -162,7 +182,7 @@ class Application extends App implements IBootstrap
      *
      * @return null
      */
-    public function registerNavigationEntry()
+    /*public function registerNavigationEntry()
     {
         $c = $this->getContainer();
         $server = $c->getServer();
@@ -180,7 +200,7 @@ class Application extends App implements IBootstrap
         };
         $server->getNavigationManager()->add($navigationEntry);
         return;
-    }
+    }*/
 
     /**
      * Register Settings pages
@@ -213,28 +233,28 @@ class Application extends App implements IBootstrap
      */
     public static function loadScripts()
     {
-        Util::addScript('files', 'detailtabview');
-        Util::addScript('b2sharebridge', 'b2sharebridgecollection');
-        Util::addScript('b2sharebridge', 'b2sharebridgetabview');
-        Util::addScript('b2sharebridge', 'b2sharebridge');
-        Util::addStyle('b2sharebridge', 'b2sharebridgetabview');
-        return;
+        //Util::addScript('files', 'detailtabview');
+
+        /*Util::addScript(self::APP_ID, 'b2sharebridgecollection');
+        Util::addScript(self::APP_ID, 'b2sharebridgetabview');
+        Util::addScript(self::APP_ID, 'b2sharebridge');
+        Util::addStyle(self::APP_ID, 'b2sharebridgetabview');*/
+        Util::addScript(self::APP_ID, "b2sharebridge-settingsadmin");
+        Util::addScript(self::APP_ID, "b2sharebridge-settingspersonal");
     }
 
     public function register(IRegistrationContext $context): void
     {
-        $context->registerEventListener(
-            LoadSidebar::class,
-            LoadSidebarListener::class
-        );
+        // Register the composer autoloader for packages shipped by this app, if applicable
+        //include_once __DIR__ . '/../../vendor/autoload.php';
     }
 
     public function boot(IBootContext $context): void
     {
-         $this->registerNavigationEntry();
-         $this->loadScripts();
-         $this->registerSettings();
-         $this->registerJobs();
+        //$this->registerNavigationEntry();
+        $this->loadScripts();
+        $this->registerSettings();
+        $this->registerJobs();
     }
 
 }

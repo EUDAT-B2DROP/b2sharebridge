@@ -16,17 +16,20 @@ namespace OCA\B2shareBridge\Cron;
 
 use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
+use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
+use OCA\B2shareBridge\Publish\B2share;
 use OCA\B2shareBridge\Publish\IPublish;
 
-use OC\BackgroundJob\QueuedJob;
+use OCP\AppFramework\Utility\ITimeFactory;
+use OCP\BackgroundJob\QueuedJob;
 use OC\Files\Filesystem;
 use OCP\ILogger;
 use OCP\Util;
 
 
 /**
- * Create a owncloud QueuedJob to transfer files int he background
+ * Create an owncloud QueuedJob to transfer files in the background
  *
  * @category Owncloud
  * @package  B2shareBridge
@@ -37,10 +40,10 @@ use OCP\Util;
 class TransferHandler extends QueuedJob
 {
 
-    private $_mapper;
-    private $_publisher;
-    private $_dfmapper;
-    private $_smapper;
+    private DepositStatusMapper $_mapper;
+    private IPublish $_publisher;
+    private DepositFileMapper $_dfmapper;
+    private ServerMapper $_smapper;
 
     /**
      * Create the database mapper
@@ -50,19 +53,23 @@ class TransferHandler extends QueuedJob
      * @param IPublish            $publisher publishing backend to use
      */
     public function __construct(
+        ITimeFactory        $time = null,
         DepositStatusMapper $mapper = null,
         DepositFileMapper $dfmapper = null,
         IPublish $publisher = null,
         ServerMapper $smapper = null
     ) {
-        if ($mapper === null || $publisher === null || $dfmapper === null || $smapper === null) {
+        parent::__construct($time);
+        if($dfmapper === null or $mapper === null or $publisher === null or $smapper === null) {
             $this->fixTransferForCron();
-        } else {
+        } else{
+
             $this->_mapper = $mapper;
             $this->_dfmapper = $dfmapper;
             $this->_publisher = $publisher;
             $this->_smapper = $smapper;
         }
+
     }
 
     /**
@@ -74,12 +81,11 @@ class TransferHandler extends QueuedJob
     protected function fixTransferForCron()
     {
         $application = new Application();
-        $this->_mapper = $application->getContainer()
-            ->query('DepositStatusMapper');
-        $this->_dfmapper = $application->getContainer()
-            ->query('DepositFileMapper');
-        $this->_publisher = $application->getContainer()->query('PublishBackend');
-        $this->_smapper = $application->getContainer()->query('ServerMapper');
+        $this->_mapper = $application->getContainer()->get(DepositStatusMapper::class);
+        $this->_dfmapper = $application->getContainer()->get(DepositFileMapper::class);
+        $this->_publisher = $application->getContainer()->get(B2share::class);
+        $this->_smapper = $application->getContainer()->get(ServerMapper::class);
+        return;
     }
 
     /**
@@ -134,9 +140,9 @@ class TransferHandler extends QueuedJob
                 if ($has_access) {
                     $handle = $view->fopen($path, 'rb');
                     $size = $view->filesize($path);
-                    $upload_url = $file_upload_link."/".urlencode($filename);
-                    $upload_url = $upload_url.
-                        "?access_token=".$args['token'];
+                    $upload_url = $file_upload_link . "/" . urlencode($filename);
+                    $upload_url = $upload_url .
+                        "?access_token=" . $args['token'];
                     $upload_result = $upload_result &&
                         $this->_publisher->upload(
                             $upload_url, $handle, $size
@@ -146,7 +152,7 @@ class TransferHandler extends QueuedJob
                      * External error: during uploading file
                      */
                     \OC::$server->getLogger()->error(
-                        "File not accesable".$file->getFilename(),
+                        "File not accesable" . $file->getFilename(),
                         ['app' => 'b2sharebridge']
                     );
                     $fcStatus->setStatus(3);
@@ -178,7 +184,7 @@ class TransferHandler extends QueuedJob
         $fcStatus->setUpdatedAt(time());
         $this->_mapper->update($fcStatus);
         \OC::$server->getLogger()->info(
-            "Job completed, depositStatusId: ".$fcStatus->getId(),
+            "Job completed, depositStatusId: " . $fcStatus->getId(),
             ['app' => 'b2sharebridge']
         );
 
@@ -200,8 +206,8 @@ class TransferHandler extends QueuedJob
     public function isPublishingUser($userId)
     {
         return is_array($this->argument) &&
-        array_key_exists('userId', $this->argument) &&
-        $this->argument['userId'] === $userId;
+            array_key_exists('userId', $this->argument) &&
+            $this->argument['userId'] === $userId;
     }
 
     /**

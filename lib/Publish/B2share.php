@@ -14,6 +14,8 @@
 
 namespace OCA\B2shareBridge\Publish;
 
+use OCA\B2shareBridge\AppInfo\Application;
+use OCP\IConfig;
 use OCP\Util;
 
 /**
@@ -35,9 +37,9 @@ class B2share implements Ipublish
     /**
      * Create object for actual upload
      *
-     * @param boolean $check_ssl whether to check security for https
+     * @param IConfig $check_ssl whether to check security for https
      */
-    public function __construct($check_ssl)
+    public function __construct(IConfig $config)
     {
         $this->curl_client = curl_init();
         $defaults = array(
@@ -45,7 +47,7 @@ class B2share implements Ipublish
             CURLOPT_TIMEOUT => 4,
             CURLOPT_HEADER => 1,
         );
-        if (!$check_ssl) {
+        if (!$config->getAppValue(Application::APP_ID, 'check_ssl', '1')) {
             $defaults[CURLOPT_SSL_VERIFYHOST] = 0;
             $defaults[CURLOPT_SSL_VERIFYPEER] = 0;
         }

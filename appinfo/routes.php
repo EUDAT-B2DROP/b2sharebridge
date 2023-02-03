@@ -27,13 +27,18 @@ namespace OCA\B2sharebridge\AppInfo;
 return [
     'routes' => [
         [
+            'name' => 'View#index',
+            'url' => '/',
+            'verb' => 'GET'
+        ],
+        [
             'name' => 'Publish#publish',
             'url' => '/publish',
             'verb' => 'POST'
         ],
         [
             'name' => 'View#depositList',
-            'url' => '/',
+            'url' => '/deposits',
             'verb' => 'GET'
         ],
         [

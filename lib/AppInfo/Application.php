@@ -25,6 +25,7 @@ use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
 use OCA\B2shareBridge\Publish\B2share;
+use OCA\B2shareBridge\Settings\Personal;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\IJobList;
@@ -129,6 +130,14 @@ class Application extends App implements IBootstrap
 
         //Note: this is done for backwards compatability
         $container->registerAlias(B2share::class, "PublishBackend");
+
+        $container->registerService(Personal::class, function (ContainerInterface $c): Personal {
+            return new Personal(
+                $c->get(IConfig::class),
+                $c->get(ServerMapper::class),
+                $c->get("UserId")
+            );
+        });
 
         /**
          * Controller

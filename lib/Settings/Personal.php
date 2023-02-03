@@ -15,7 +15,9 @@
 
 namespace OCA\B2shareBridge\Settings;
 
+use OCA\B2shareBridge\AppInfo\Application;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
 use OCA\B2shareBridge\Model\ServerMapper;
@@ -31,45 +33,44 @@ use OCA\B2shareBridge\Model\ServerMapper;
  */
 class Personal implements ISettings
 {
-    /**
-     * Nextcloud config container
-     *
-     * @var IConfig
-     */
-    private $_config;
-    private $mapper;
+    private IConfig $_config;
+    private ServerMapper $mapper;
+    private string $userId;
 
     /**
      * Constructors construct.
      *
      * @param IConfig $config Nextcloud config container
+     * @param ServerMapper $mapper
+     * @param string $userId
      */
-    public function __construct(IConfig $config, ServerMapper $mapper)
+    public function __construct(IConfig $config, ServerMapper $mapper, string $userId)
     {
         $this->_config = $config;
         $this->mapper = $mapper;
+        $this->userId = $userId;
     }
 
     /**
-     * Create Admin menue content
+     * Create Admin menu content
      *
      * @return TemplateResponse
+     * @throws Exception
      */
-    public function getForm()
+    public function getForm(): TemplateResponse
     {
-        $userId = \OC::$server->getUserSession()->getUser()->getUID();
         $serverEntities = $this->mapper->findAll();
         $servers = [];
         foreach($serverEntities as $i => $s) {
             $servers[$i] = ['id' => $s->getId(), 'name' => $s->getName(), 'publishUrl' => $s->getPublishUrl(), 'token' => $this->_config->getUserValue(
-                $userId, 'b2sharebridge', 'token_' . $s->getId()
+                $this->userId, Application::APP_ID, 'token_' . $s->getId()
             )];
         }
         $params = [
             'servers' => $servers
         ];
 
-        return new TemplateResponse('b2sharebridge', 'settings-personal', $params);
+        return new TemplateResponse(Application::APP_ID, 'settings-personal', $params);
     }
 
     /**
@@ -77,7 +78,7 @@ class Personal implements ISettings
      *
      * @return string the section, 'b2sharebridge'
      */
-    public function getSection() 
+    public function getSection(): string
     {
         return 'b2sharebridge';
     }
@@ -87,7 +88,7 @@ class Personal implements ISettings
      *
      * @return int 0
      */
-    public function getPriority()
+    public function getPriority(): int
     {
         return 0;
     }

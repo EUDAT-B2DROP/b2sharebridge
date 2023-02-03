@@ -13,6 +13,7 @@
  */
 namespace OCA\B2shareBridge\Settings;
 
+use OCA\B2shareBridge\AppInfo\Application;
 use OCP\IL10N;
 use OCP\IURLGenerator;
 use OCP\Settings\IIconSection;
@@ -28,19 +29,9 @@ use OCP\Settings\IIconSection;
  */
 class AdminSection implements IIconSection
 {
-    /** 
-     * Different language support
-     *
-     * @var IL10N
-     */
-    private $_l;
+    private IL10N $_l;
 
-    /**
-     * URL generator
-     *
-     * @var IURLGenerator 
-     * */
-    private $_url;
+    private IURLGenerator $_url;
 
     /**
      * {@inheritdoc}
@@ -59,15 +50,15 @@ class AdminSection implements IIconSection
      *
      * @return string the app id, 'b2sharebridge'
      */
-    public function getID() 
+    public function getID(): string
     {
-        return 'b2sharebridge';
+        return Application::APP_ID;
     }
 
     /**
      * {@inheritdoc}
      *
-     * @return string the section, 'b2sharebridge'
+     * @return string the name, 'EUDAT'
      */
     public function getName() 
     {
@@ -79,7 +70,7 @@ class AdminSection implements IIconSection
      *
      * @return int the arrang priority, 75
      */
-    public function getPriority() 
+    public function getPriority(): int
     {
         return 75;
     }
@@ -87,10 +78,10 @@ class AdminSection implements IIconSection
      /**
       * {@inheritdoc}
       *
-      * @return URL of the icon shown in the admin settings
+      * @return string Url of the icon shown in the admin settings
       */
-    public function getIcon()
+    public function getIcon(): string
     {
-        return $this->_url->imagePath('b2sharebridge', 'eudat_logo.png');
+        return $this->_url->imagePath(Application::APP_ID, 'eudat_logo.png');
     }
 }

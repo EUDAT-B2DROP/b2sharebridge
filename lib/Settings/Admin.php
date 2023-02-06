@@ -57,8 +57,8 @@ class Admin implements ISettings
      */
     public function getForm(): TemplateResponse
     {
-        //$servers = $this->mapper->findAll();
-        $params = [
+        $this->mapper->findAll();
+        /*$params = [
             'max_uploads' => $this->_config->getAppValue(
                 Application::APP_ID, 'max_uploads'
             ),
@@ -69,9 +69,9 @@ class Admin implements ISettings
                 Application::APP_ID, 'check_ssl'
             ),
             'servers' => $this->mapper->findAll()
-        ];
+        ];*/
 
-        return new TemplateResponse(Application::APP_ID, 'settings-admin', $params);
+        return new TemplateResponse(Application::APP_ID, 'settings-admin');
     }
 
     /**
@@ -81,7 +81,7 @@ class Admin implements ISettings
      */
     public function getSection(): string
     {
-        return 'b2sharebridge';
+        return Application::APP_ID . "_admin";
     }
 
     /**

@@ -22,6 +22,7 @@ Vue.use(IconsPlugin)
 
 Vue.extend(AdminSettings)
 
+Vue.mixin({ methods: { t, n } })
 export default new Vue({
     el: '#admin-settings',
     render: h => h(AdminSettings),

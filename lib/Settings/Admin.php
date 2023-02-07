@@ -81,7 +81,7 @@ class Admin implements ISettings
      */
     public function getSection(): string
     {
-        return Application::APP_ID . "_admin";
+        return Application::APP_ID;
     }
 
     /**

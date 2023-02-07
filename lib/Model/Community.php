@@ -28,8 +28,12 @@ use JsonSerializable;
  */
 class Community extends Entity implements JsonSerializable
 {
+    /**
+     * DO NOT ADD TYPE HINTS TO THIS
+     */
     protected $name;
     protected $serverId;
+
     /**
      * Creates the actual database entity
      */
@@ -43,15 +47,15 @@ class Community extends Entity implements JsonSerializable
     /**
      * Get string representation
      *
-     * @return \string
+     * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
-        return 'Community with id: '. $this->getId().
-        ' and name: '.$this->getName();
+        return 'Community with id: ' . $this->getId() .
+            ' and name: ' . $this->getName();
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return [
             'id' => $this->getId(),

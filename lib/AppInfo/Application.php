@@ -219,6 +219,7 @@ class Application extends App implements IBootstrap
                     $c->get(IRequest::class),
                     $c->get(ServerMapper::class),
                     $c->get(IJobList::class),
+                    $c->get(LoggerInterface::class),
                     $c->get("UserId")
                 );
             }

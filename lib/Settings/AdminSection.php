@@ -52,7 +52,7 @@ class AdminSection implements IIconSection
      */
     public function getID(): string
     {
-        return Application::APP_ID . '_admin';
+        return Application::APP_ID;
     }
 
     /**

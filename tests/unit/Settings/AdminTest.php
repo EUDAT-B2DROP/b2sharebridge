@@ -61,9 +61,9 @@ class AdminTest extends TestCase
 
     public function testGetForm()
     {
-        $params = $this->formDataProvider();
+        //$params = $this->formDataProvider();
 
-        $expected = new TemplateResponse('b2sharebridge', 'settings-admin', $params);
+        $expected = new TemplateResponse('b2sharebridge', 'settings-admin');
         $this->assertEquals($expected, $this->admin->getForm());
     }
 

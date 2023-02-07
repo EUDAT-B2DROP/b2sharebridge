@@ -78,13 +78,6 @@ class Version030000Date20230203105446 extends SimpleMigrationStep {
             'notnull' => true,
             'default' => false,
         ]);
-
-        $table->addColumn('server_name', \OCP\DB\Types::STRING, [
-            'notnull' => true,
-            'length' => 64,
-            'default' => '',
-        ]);
-
         return $schema;
 	}
 
@@ -94,9 +87,5 @@ class Version030000Date20230203105446 extends SimpleMigrationStep {
 	 * @param array $options
 	 */
 	public function postSchemaChange(IOutput $output, Closure $schemaClosure, array $options): void {
-        $query = $this->db->getQueryBuilder();
-        $query->update('b2sharebridge_server')
-            ->set('server_name', 'name');  //nextcloud has problems with a name property
-        $query->execute();
 	}
 }

@@ -28,16 +28,19 @@ use JsonSerializable;
  */
 class Server extends Entity implements JsonSerializable
 {
-    protected string $serverName;
-    protected string $publishUrl;
-    protected int $maxUploads;
-    protected int $maxUploadFilesize;
-    protected int $checkSsl;
+    /**
+     * DO NOT ADD TYPE HINTS TO THIS
+     */
+    protected $name;
+    protected $publishUrl;
+    protected $maxUploads;
+    protected $maxUploadFilesize;
+    protected $checkSsl;
 
     public function __construct()
     {
         $this->addType('id', 'string');
-        $this->addType('serverName', 'string');
+        $this->addType('name', 'string');
         $this->addType('publishUrl', 'string');
         $this->addType('maxUploads', 'integer');
         $this->addType('maxUploadFilesize', 'integer');
@@ -51,7 +54,7 @@ class Server extends Entity implements JsonSerializable
     {
         return [
             'id' => $this->id,
-            'name' => $this->getServerName(),
+            'name' => $this->getName(),
             'publishUrl' => $this->getPublishUrl(),
             'maxUploads' => $this->getMaxUploads(),
             'maxUploadFilesize' => $this->getMaxUploadFilesize(),
@@ -59,8 +62,8 @@ class Server extends Entity implements JsonSerializable
         ];
     }
 
-    public function __toString()
+    public function __toString(): string
     {
-        return "Server with id " . $this->id . " and name " . $this->getServerName() . " and publishUrl " . $this->getPublishUrl();
+        return "Server with id " . $this->id . " and name " . $this->getName() . " and publishUrl " . $this->getPublishUrl();
     }
 }

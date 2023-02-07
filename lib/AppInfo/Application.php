@@ -218,6 +218,7 @@ class Application extends App implements IBootstrap
                     $c->get('appName'),
                     $c->get(IRequest::class),
                     $c->get(ServerMapper::class),
+                    $c->get(IJobList::class),
                     $c->get("UserId")
                 );
             }

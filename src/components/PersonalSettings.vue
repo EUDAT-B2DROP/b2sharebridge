@@ -92,9 +92,9 @@ export default {
 
 <style scoped>
 div.servers {
-  margin-top: 10px;
-  background: rgba(128, 128, 128, 0.1);
-  padding: 10px;
-  border-radius: 20px;
+	margin-top: 10px;
+	background: rgba(128, 128, 128, 0.1);
+	padding: 10px;
+	border-radius: 20px;
 }
 </style>

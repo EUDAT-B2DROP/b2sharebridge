@@ -43,8 +43,7 @@ class ServerController extends Controller
         IJobList $jobList,
         LoggerInterface $logger,
         $userId
-    )
-    {
+    ) {
         parent::__construct($appName, $request);
         $this->mapper = $mapper;
         $this->userId = $userId;
@@ -92,12 +91,15 @@ class ServerController extends Controller
         // update props
         $server_entity->setName($server['name']);
         $server_entity->setPublishUrl($server['publishUrl']);
-        if (array_key_exists("maxUploads", $server))
+        if (array_key_exists("maxUploads", $server)) {
             $server_entity->setMaxUploads($server['maxUploads']);
-        if (array_key_exists("maxUploadFilesize", $server))
+        }
+        if (array_key_exists("maxUploadFilesize", $server)) {
             $server_entity->setMaxUploadFilesize($server['maxUploadFilesize']);
-        if (array_key_exists("checkSsl", $server))
+        }
+        if (array_key_exists("checkSsl", $server)) {
             $server_entity->setCheckSsl($server['checkSsl']);
+        }
 
         // update database
         if ($server_exists) {
@@ -124,9 +126,9 @@ class ServerController extends Controller
 
     /**
      * @depreacted use saveServer instead
-     * @throws MultipleObjectsReturnedException
-     * @throws DoesNotExistException
-     * @throws Exception
+     * @throws     MultipleObjectsReturnedException
+     * @throws     DoesNotExistException
+     * @throws     Exception
      */
     public function saveServers($servers): array
     {

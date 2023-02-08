@@ -127,9 +127,9 @@ export default {
 
 <style scoped>
 div.server_form {
-  background: rgba(128, 128, 128, 0.1);
-  padding: 10px;
-  border-radius: 20px;
-  margin-top: 2px;
+	background: rgba(128, 128, 128, 0.1);
+	padding: 10px;
+	border-radius: 20px;
+	margin-top: 2px;
 }
 </style>

@@ -148,29 +148,29 @@ export default {
 <style scoped>
 
 .validation-bootstrap-limit {
-@import (less) "bootstrap/dist/css/bootstrap.min.css";
+	@import (less) 'bootstrap/dist/css/bootstrap.min.css';
 }
 
 div.token_form {
-  background: rgba(128, 128, 128, 0.1);
-  padding: 10px;
-  border-radius: 20px;
-  margin-top: 2px;
+	background: rgba(128, 128, 128, 0.1);
+	padding: 10px;
+	border-radius: 20px;
+	margin-top: 2px;
 }
 
 input.publish_url {
-  background: rgba(128, 128, 128, 0.1);
+	background: rgba(128, 128, 128, 0.1);
 }
 
 em.validation {
-  align-self: center;
-  grid-column: 2;
+	align-self: center;
+	grid-column: 2;
 }
 
 span.validation {
-  display: grid;
-  column-gap: 7px;
-  grid-template-columns: 400px;
+	display: grid;
+	column-gap: 7px;
+	grid-template-columns: 400px;
 }
 
 </style>

@@ -1,31 +1,31 @@
 /*https://stackoverflow.com/questions/60012016/importing-bootstrap-css-in-app-js-breaks-current-styles-vuejs*/
 /* required:*/
-@import "bootstrap/scss/_functions.scss";
-@import "bootstrap/scss/_variables.scss";
-@import "bootstrap/scss/_mixins.scss";
+@import 'bootstrap/scss/_functions';
+@import 'bootstrap/scss/_variables';
+@import 'bootstrap/scss/_mixins';
 /* optional*/
-@import "bootstrap/scss/_root.scss";
+@import 'bootstrap/scss/_root';
 /*@import "bootstrap/scss/_reboot";*/
-@import "bootstrap/scss/_images.scss";
-@import "bootstrap/scss/_grid.scss";
+@import 'bootstrap/scss/_images';
+@import 'bootstrap/scss/_grid';
 
-@import "bootstrap/scss/_forms.scss";
-@import "bootstrap/scss/_buttons.scss";
-@import "bootstrap/scss/_dropdown.scss";
-@import "bootstrap/scss/_transitions.scss";
-@import "bootstrap/scss/_button-group.scss";
-@import "bootstrap/scss/_input-group.scss";
-@import "bootstrap/scss/_transitions.scss";
-@import "bootstrap/scss/_dropdown.scss";
-@import "bootstrap/scss/_button-group.scss";
-@import "bootstrap/scss/_input-group.scss";
-@import "bootstrap/scss/_alert.scss";
-@import "bootstrap/scss/_list-group.scss";
-@import "bootstrap/scss/_utilities.scss";
+@import 'bootstrap/scss/_forms';
+@import 'bootstrap/scss/_buttons';
+@import 'bootstrap/scss/_dropdown';
+@import 'bootstrap/scss/_transitions';
+@import 'bootstrap/scss/_button-group';
+@import 'bootstrap/scss/_input-group';
+@import 'bootstrap/scss/_transitions';
+@import 'bootstrap/scss/_dropdown';
+@import 'bootstrap/scss/_button-group';
+@import 'bootstrap/scss/_input-group';
+@import 'bootstrap/scss/_alert';
+@import 'bootstrap/scss/_list-group';
+@import 'bootstrap/scss/_utilities';
 
 /*marked as not working but required*/
-@import "bootstrap/scss/_tables.scss";
-@import "bootstrap/scss/_custom-forms.scss";
+@import 'bootstrap/scss/_tables';
+@import 'bootstrap/scss/_custom-forms';
 
 .b2sharebridge {
 	width: 100%;

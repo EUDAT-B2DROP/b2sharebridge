@@ -59,18 +59,7 @@ class Personal implements ISettings
      */
     public function getForm(): TemplateResponse
     {
-        $serverEntities = $this->mapper->findAll();
-        $servers = [];
-        foreach($serverEntities as $i => $s) {
-            $servers[$i] = ['id' => $s->getId(), 'name' => $s->getName(), 'publishUrl' => $s->getPublishUrl(), 'token' => $this->_config->getUserValue(
-                $this->userId, Application::APP_ID, 'token_' . $s->getId()
-            )];
-        }
-        $params = [
-            'servers' => $servers
-        ];
-
-        return new TemplateResponse(Application::APP_ID, 'settings-personal', $params);
+        return new TemplateResponse(Application::APP_ID, 'settings-personal');
     }
 
     /**

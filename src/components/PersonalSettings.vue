@@ -31,6 +31,7 @@ export default {
   data() {
     return {
       servers: [],
+      tokens: [],
       loaded: false,
     }
   },

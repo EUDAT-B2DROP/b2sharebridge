@@ -1,0 +1,71 @@
+/*https://stackoverflow.com/questions/60012016/importing-bootstrap-css-in-app-js-breaks-current-styles-vuejs*/
+/* required:*/
+@import "bootstrap/scss/_functions.scss";
+@import "bootstrap/scss/_variables.scss";
+@import "bootstrap/scss/_mixins.scss";
+/* optional*/
+@import "bootstrap/scss/_root.scss";
+/*@import "bootstrap/scss/_reboot";*/
+@import "bootstrap/scss/_images.scss";
+@import "bootstrap/scss/_grid.scss";
+
+@import "bootstrap/scss/_forms.scss";
+@import "bootstrap/scss/_buttons.scss";
+@import "bootstrap/scss/_dropdown.scss";
+@import "bootstrap/scss/_transitions.scss";
+@import "bootstrap/scss/_button-group.scss";
+@import "bootstrap/scss/_input-group.scss";
+@import "bootstrap/scss/_transitions.scss";
+@import "bootstrap/scss/_dropdown.scss";
+@import "bootstrap/scss/_button-group.scss";
+@import "bootstrap/scss/_input-group.scss";
+@import "bootstrap/scss/_alert.scss";
+@import "bootstrap/scss/_list-group.scss";
+@import "bootstrap/scss/_utilities.scss";
+
+/*marked as not working but required*/
+@import "bootstrap/scss/_tables.scss";
+@import "bootstrap/scss/_custom-forms.scss";
+
+.b2sharebridge {
+	width: 100%;
+}
+
+.b2sharebridge h1 {
+	font-family: inherit;
+	font-weight: 500;
+	font-size: 36px;
+	line-height: 1.1;
+	color: inherit;
+}
+
+.b2sharebridge h1 small {
+	color: gray;
+}
+
+.b2sharebridge table{
+	margin-top: 20px;
+	width: 100%;
+	table-layout: fixed /* fix a bug on firefox*/
+}
+
+.b2sharebridge .publish-queue-list th {
+	/*text-align: left;*/
+}
+
+.b2share-modal-header, btn .btn-primary {
+	background-color: rgb(26, 48, 99);
+	color: white;
+}
+
+p {
+	margin-bottom: 0;
+}
+
+h2 {
+	font-size: 20px;
+}
+
+h3 {
+	font-size: 16px;
+}

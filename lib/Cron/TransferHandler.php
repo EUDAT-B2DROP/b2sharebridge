@@ -98,8 +98,6 @@ class TransferHandler extends QueuedJob
      * Check if current user is the requested user
      *
      * @param array $args array of arguments
-     *
-     * @return null
      */
     public function run($args)
     {

@@ -267,7 +267,7 @@ class ViewController extends Controller
             if($token) {
                 $ret[$serverId] = $token;
             }
-        };
+        }
         return $ret;
     }
 

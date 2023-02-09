@@ -68,7 +68,7 @@ class AdminSection implements IIconSection
     /**
      * {@inheritdoc}
      *
-     * @return int the arrang priority, 75
+     * @return int the arrangement priority, 75
      */
     public function getPriority(): int
     {

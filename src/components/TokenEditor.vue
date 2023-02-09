@@ -147,10 +147,6 @@ export default {
 </script>
 <style scoped>
 
-.validation-bootstrap-limit {
-	@import (less) 'bootstrap/dist/css/bootstrap.min.css';
-}
-
 div.token_form {
 	background: rgba(128, 128, 128, 0.1);
 	padding: 10px;

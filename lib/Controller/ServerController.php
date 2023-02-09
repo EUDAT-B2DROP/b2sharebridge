@@ -83,9 +83,9 @@ class ServerController extends Controller
 
     /**
      * @depreacted use saveServer instead
-     * @throws MultipleObjectsReturnedException
-     * @throws DoesNotExistException
-     * @throws Exception
+     * @throws     MultipleObjectsReturnedException
+     * @throws     DoesNotExistException
+     * @throws     Exception
      */
     public function saveServers($servers): array
     {

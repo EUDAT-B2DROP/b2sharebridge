@@ -160,7 +160,7 @@ class ViewController extends Controller
                 $filter
             );
         }
-        foreach ($publications as &$publication) {
+        foreach ($publications as $publication) {
             $publication->setFileCount(
                 $this->fdmapper->getFileCount($publication->getId())
             );
@@ -320,33 +320,6 @@ class ViewController extends Controller
             $status_code = Http::STATUS_BAD_REQUEST;
         }
 
-        $allowed_uploads = $this->config->getAppValue(
-            Application::APP_ID,
-            'max_uploads',
-            5
-        );
-        $allowed_filesize = $this->config->getAppValue(
-            Application::APP_ID,
-            'max_upload_filesize',
-            512
-        );
-        $active_uploads = count(
-            $this->mapper->findAllForUserAndStateString(
-                $this->userId,
-                'pending'
-            )
-        );
-        if ($active_uploads > $allowed_uploads) {
-            $error_msg .= "You already have " . $active_uploads .
-                " active uploads. You are only allowed " . $allowed_uploads .
-                " uploads. Please try again later.<br>\n";
-            $status_code = Http::STATUS_SERVICE_UNAVAILABLE; //can't server user due to overload
-        }
-        if ($filesize > $allowed_filesize * 1024 * 1024) {
-            $error_msg .= "We currently only support files smaller than "
-                . $allowed_filesize . " MB.<br>\n";
-            $status_code = Http::STATUS_REQUEST_ENTITY_TOO_LARGE;
-        }
         $result = [
             "title" => $fileName,
         ];

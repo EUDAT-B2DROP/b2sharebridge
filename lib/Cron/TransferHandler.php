@@ -124,6 +124,7 @@ class TransferHandler extends QueuedJob
             $this->_mapper->update($fcStatus);
             $user = $fcStatus->getOwner();
             $server = $this->_smapper->find($args['serverId']);
+            $this->_publisher->setCheckSSL($server->getCheckSsl());
 
             $create_result = $this->_publisher->create(
                 $args['token'],

@@ -16,6 +16,8 @@ namespace OCA\B2shareBridge\Publish;
 
 use CurlHandle;
 use OCA\B2shareBridge\AppInfo\Application;
+use OCA\B2shareBridge\Model\Server;
+use OCA\B2shareBridge\Model\ServerMapper;
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
 
@@ -35,26 +37,29 @@ class B2share implements IPublish
     protected string $file_upload_url;
     protected string $error_message;
 
+
     /**
      * Create object for actual upload
      *
-     * @param IConfig         $config
      * @param LoggerInterface $logger
      */
     public function __construct(IConfig $config, LoggerInterface $logger)
     {
+        $this->logger = $logger;
         $this->curl_client = curl_init();
+    }
+
+    public function setCheckSSL(bool $checkSsl) {
         $defaults = array(
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,
             CURLOPT_HEADER => 1,
         );
-        if (!$config->getAppValue(Application::APP_ID, 'check_ssl', '1')) {
+        if (!$checkSsl) {
             $defaults[CURLOPT_SSL_VERIFYHOST] = 0;
             $defaults[CURLOPT_SSL_VERIFYPEER] = 0;
         }
         curl_setopt_array($this->curl_client, $defaults);
-        $this->logger = $logger;
     }
 
     /**

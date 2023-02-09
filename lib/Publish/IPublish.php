@@ -41,6 +41,7 @@ interface IPublish
 
     /**
      * Set SSL parameters
+     *
      * @param bool $checkSsl
      */
     public function setCheckSSL(bool $checkSsl);

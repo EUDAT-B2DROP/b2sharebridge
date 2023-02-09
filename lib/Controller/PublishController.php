@@ -102,7 +102,7 @@ class PublishController extends Controller
      * @return          JSONResponse
      * @NoAdminRequired
      * @throws          Exception
-     * @throws MultipleObjectsReturnedException
+     * @throws          MultipleObjectsReturnedException
      */
     public function publish(): JSONResponse
     {

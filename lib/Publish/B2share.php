@@ -49,7 +49,8 @@ class B2share implements IPublish
         $this->curl_client = curl_init();
     }
 
-    public function setCheckSSL(bool $checkSsl) {
+    public function setCheckSSL(bool $checkSsl)
+    {
         $defaults = array(
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,

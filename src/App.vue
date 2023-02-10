@@ -29,31 +29,26 @@
 		<NcAppContent>
 			<div v-if="deposits.length === 0">
 				<div v-if="filter === DepositFilter.ALL">
-					<div class="icon-file" />
 					<h2 style="text-align: center;">
 						{{ t('b2sharebridge', 'Create a deposit to get started!') }}
 					</h2>
 				</div>
 				<div v-else-if="filter === DepositFilter.PENDING">
-					<div class="icon-file" />
 					<h2 style="text-align: center;">
 						{{ t('b2sharebridge', 'No pending deposits!') }}
 					</h2>
 				</div>
 				<div v-else-if="filter === DepositFilter.PUBLISHED">
-					<div class="icon-file" />
 					<h2 style="text-align: center;">
 						{{ t('b2sharebridge', 'No published deposits!') }}
 					</h2>
 				</div>
 				<div v-else-if="filter === DepositFilter.FAILED">
-					<div class="icon-file" />
 					<h2 style="text-align: center;">
 						{{ t('b2sharebridge', 'No failed deposits!') }}
 					</h2>
 				</div>
 				<div v-else>
-					<div class="icon-file" />
 					<h2 style="text-align: center;">
 						{{ t('b2sharebridge', 'Unknown table status!') }}
 					</h2>
@@ -94,11 +89,12 @@ import {
 	NcAppNavigationNew,
 } from '@nextcloud/vue'
 
-import 'bootstrap/dist/css/bootstrap.min.css'
+
+//import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import '@nextcloud/dialogs/styles/toast.scss'
-import '../css/style.css'
+import '../css/style.scss'
 
 const DepositFilter = {
 	ALL: 'all',

@@ -98,8 +98,6 @@ class TransferHandler extends QueuedJob
      * Check if current user is the requested user
      *
      * @param array $args array of arguments
-     *
-     * @return null
      */
     public function run($args)
     {
@@ -124,6 +122,7 @@ class TransferHandler extends QueuedJob
             $this->_mapper->update($fcStatus);
             $user = $fcStatus->getOwner();
             $server = $this->_smapper->find($args['serverId']);
+            $this->_publisher->setCheckSSL($server->getCheckSsl());
 
             $create_result = $this->_publisher->create(
                 $args['token'],
@@ -200,7 +199,7 @@ class TransferHandler extends QueuedJob
              *
              * TODO: think of a fork alternative or make it possible to not loose
              * the database connection. also it is running only one Cron per cron run...
-             * TODO: we need to be carefull of zombies here!
+             * TODO: we need to be careful of zombies here!
              */
         } catch (MultipleObjectsReturnedException|DoesNotExistException|Exception $e) {
             $fcStatus?->setStatus(5);

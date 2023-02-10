@@ -25,6 +25,8 @@ use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Publish\B2share;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Utility\ITimeFactory;
@@ -100,6 +102,7 @@ class PublishController extends Controller
      * @return          JSONResponse
      * @NoAdminRequired
      * @throws          Exception
+     * @throws          MultipleObjectsReturnedException
      */
     public function publish(): JSONResponse
     {
@@ -138,30 +141,33 @@ class PublishController extends Controller
             );
         }
 
-        $allowed_uploads = $this->config->getAppValue(
-            Application::APP_ID,
-            'max_uploads',
-            5
-        );
-        $allowed_filesize = $this->config->getAppValue(
-            Application::APP_ID,
-            'max_upload_filesize',
-            512
-        );
+        try {
+            $server = $this->smapper->find($serverId);
+        } catch (DoesNotExistException $e) {
+            return new JSONResponse(
+                [
+                    'message'=> 'Invalid server id',
+                    'status' => 'error'
+                ],
+                Http::STATUS_BAD_REQUEST
+            );
+        }
+        $this->publisher->setCheckSSL($server->getCheckSsl());
+
         $active_uploads = count(
             $this->mapper->findAllForUserAndStateString(
                 $this->userId,
                 'pending'
             )
         );
-        if ($active_uploads < $allowed_uploads) {
+        if ($active_uploads < $server->getMaxUploads()) {
             Filesystem::init($this->userId, '/');
             $view = Filesystem::getView();
             $filesize = 0;
             foreach ($ids as $id) {
                 $filesize = $filesize + $view->filesize(Filesystem::getPath($id));
             }
-            if ($filesize < $allowed_filesize * 1024 * 1024) {
+            if ($filesize < $server->getMaxUploadFilesize() * 1024 * 1024) {
                 $job = new TransferHandler($this->time, $this->mapper, $this->dfmapper, $this->publisher, $this->smapper, $this->logger);
                 $fcStatus = new DepositStatus();
                 $fcStatus->setOwner($this->userId);
@@ -185,7 +191,7 @@ class PublishController extends Controller
                 return new JSONResponse(
                     [
                         'message' => 'We currently only support 
-                        files smaller then ' . $allowed_filesize . ' MB',
+                        files smaller then ' . $server->getMaxUploadFilesize() . ' MB',
                         'status' => 'error'
                     ],
                     Http::STATUS_REQUEST_ENTITY_TOO_LARGE
@@ -194,7 +200,7 @@ class PublishController extends Controller
         } else {
             return new JSONResponse(
                 [
-                    'message' => 'Until your ' . $active_uploads . ' deposits 
+                    'message' => 'Until your ' . $server->getMaxUploads() . ' deposits 
                         are done, you are not allowed to create further deposits.',
                     'status' => 'error'
                 ],

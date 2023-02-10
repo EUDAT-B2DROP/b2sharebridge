@@ -29,7 +29,9 @@ use OCP\Util;
  */
 class DepositStatus extends Entity implements JsonSerializable
 {
-
+    /**
+     * DO NOT ADD TYPE HINTS TO THIS
+     */
     protected $status;
     protected $title;
     protected $owner;
@@ -62,7 +64,7 @@ class DepositStatus extends Entity implements JsonSerializable
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return 'Deposit with id: ' . $this->getId() .
             ' and status:' . $this->getStatus() .
@@ -76,7 +78,7 @@ class DepositStatus extends Entity implements JsonSerializable
      *
      * @return string
      */
-    public function getHyperlink()
+    public function getHyperlink(): string
     {
         $result = "N/A";
 

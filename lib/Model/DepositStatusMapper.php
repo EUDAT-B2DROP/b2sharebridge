@@ -117,9 +117,9 @@ class DepositStatusMapper extends QBMapper
      * Return the number of currently queued file transfers for a given user
      *
      * @param string  $user       name of the user to search transfers for
-     * @param integer $statuscode statuscode to search transfers for
+     * @param integer $statuscode status-code to search transfers for
      *
-     * @return int number of active publishs per user
+     * @return int number of active publishes per user
      *
      * @throws Exception if not found
      */

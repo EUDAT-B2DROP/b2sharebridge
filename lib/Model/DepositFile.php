@@ -28,7 +28,9 @@ use OCP\Util;
  */
 class DepositFile extends Entity
 {
-
+    /**
+     * DO NOT ADD TYPE HINTS TO THIS
+     */
     protected $depositStatusId;
     protected $fileid;
     protected $filename;

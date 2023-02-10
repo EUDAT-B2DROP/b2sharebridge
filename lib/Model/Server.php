@@ -11,9 +11,12 @@
  * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
+
 namespace OCA\B2shareBridge\Model;
+
 use OCP\AppFramework\Db\Entity;
 use JsonSerializable;
+
 /**
  * Creates a database entity for the deposit status
  *
@@ -25,14 +28,23 @@ use JsonSerializable;
  */
 class Server extends Entity implements JsonSerializable
 {
+    /**
+     * DO NOT ADD TYPE HINTS TO THIS
+     */
     protected $name;
     protected $publishUrl;
+    protected $maxUploads;
+    protected $maxUploadFilesize;
+    protected $checkSsl;
 
     public function __construct()
     {
         $this->addType('id', 'string');
         $this->addType('name', 'string');
         $this->addType('publishUrl', 'string');
+        $this->addType('maxUploads', 'integer');
+        $this->addType('maxUploadFilesize', 'integer');
+        $this->addType('checkSsl', 'integer');
     }
 
     /**
@@ -42,13 +54,16 @@ class Server extends Entity implements JsonSerializable
     {
         return [
             'id' => $this->id,
-            'name' => $this->name,
-            'publishUrl' => $this->publishUrl
+            'name' => $this->getName(),
+            'publishUrl' => $this->getPublishUrl(),
+            'maxUploads' => $this->getMaxUploads(),
+            'maxUploadFilesize' => $this->getMaxUploadFilesize(),
+            'checkSsl' => $this->getCheckSsl()
         ];
     }
 
-    public function __toString()
+    public function __toString(): string
     {
-        return "Server with id " . $this->id . " and name " . $this->name . " and publishUrl " . $this->publishUrl;
+        return "Server with id " . $this->id . " and name " . $this->getName() . " and publishUrl " . $this->getPublishUrl();
     }
 }

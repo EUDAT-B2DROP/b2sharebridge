@@ -120,8 +120,9 @@ import {
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate'
-import '../../css/style.css'
-import 'bootstrap/dist/css/bootstrap.min.css'
+import '../../css/style.scss'
+/*DO NOT IMPORT ALL OF BOOTSTRAP, IT BREAKS NEXTCLOUD*/
+//import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 

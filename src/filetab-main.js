@@ -18,13 +18,17 @@ import '../css/fix-breadcrumbs.css'
 
 Vue.component('ValidationProvider', ValidationProvider)
 Vue.component('ValidationObserver', ValidationObserver)
-
-configure({
+const config = {
 	classes: {
 		valid: 'is-valid',
-		invalid: 'is-invalid',
+		invalid: 'is-invalid'
 	},
-})
+	bails: true,
+	skipOptional: true,
+	mode: 'aggressive',
+	useConstraintAttrs: true
+};
+configure(config)
 
 // Import Bootstrap and BootstrapVue CSS files (order is important)
 // import 'bootstrap/dist/css/bootstrap.css'

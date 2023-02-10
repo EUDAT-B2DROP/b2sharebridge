@@ -38,6 +38,14 @@ interface IPublish
      */
     public function __construct(IConfig $config, LoggerInterface $logger);
 
+
+    /**
+     * Set SSL parameters
+     *
+     * @param bool $checkSsl
+     */
+    public function setCheckSSL(bool $checkSsl);
+
     /**
      * Placeholder for actually creating a deposit
      *

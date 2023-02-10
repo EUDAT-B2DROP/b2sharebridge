@@ -108,4 +108,9 @@ class Swift implements IPublish
         $res = $this->finalize();
         return $res['status'] == 'success';
     }
+
+    public function setCheckSSL(bool $checkSsl)
+    {
+        // Swift ignores SSL
+    }
 }

@@ -193,11 +193,11 @@ export default {
 					text: server.name,
 				}))
 			})
-			if(this.servers.length === 1) {
-        console.debug("Selected server automatically")
-        this.server_selected = this.servers[0].id
-        this.onChangeServer()  // update communities
-      }
+			if (this.servers.length === 1) {
+				console.debug('Selected server automatically')
+				this.server_selected = this.servers[0].id
+				this.onChangeServer() // update communities
+			}
 		}
 		await this.loadTokens()
 		this.loaded_sidebar = true
@@ -248,7 +248,7 @@ export default {
 						}
 					}
 					this.publishDisabled = false
-					console.log(error)
+					console.error(error)
 				})
 		},
 
@@ -262,7 +262,7 @@ export default {
 				.get(generateUrl(url_path))
 				.then((response) => {
 					console.log('Loaded servers:')
-					console.log(response)
+					console.debug(response)
 					this.servers = response.data
 				})
 				.catch((error) => {
@@ -280,7 +280,7 @@ export default {
 				.get(generateUrl(url_path))
 				.then((response) => {
 					console.log('Loaded communities:')
-					console.log(response)
+					console.debug(response)
 					this.communities = response.data
 				})
 				.catch((error) => {
@@ -298,7 +298,7 @@ export default {
 				.get(generateUrl(url_path))
 				.then((response) => {
 					console.log('Successfully requested tokens!')
-					console.log(response.data)
+					console.debug(response.data)
 					if (response.data) {
 						this.tokens = response.data
 					} else {
@@ -315,17 +315,16 @@ export default {
 		onChangeServer() {
 			if (this.server_selected !== null) {
 				this.community_options = [{ value: null, text: 'Please select a community', disabled: true }]
-				console.log(this.server_selected)
 				this.communities.forEach((community, index) => {
 					if (community.hasOwnProperty('serverId') && parseInt(community.serverId) === parseInt(this.server_selected)) {
 						this.community_options.push(new Object({
 							value: community.id,
 							text: community.name,
 						}))
-            if(community.name === 'EUDAT') {  //TODO make this configurable
-              console.debug("Automatically selected EUDAT as community")
-              this.community_selected = community.id
-            }
+						if (community.name === 'EUDAT') { // TODO make this configurable
+							console.debug('Automatically selected EUDAT as community')
+							this.community_selected = community.id
+						}
 					}
 				})
 			}
@@ -350,7 +349,14 @@ export default {
           + encodeURIComponent(OC.requestToken) + '&file_id='
           + encodeURIComponent(fileInfo.id)
 			this.fileInfo = fileInfo
-			axios.get(generateUrl(url_path)) // TODO process errors with then
+			axios.get(generateUrl(url_path))
+				.catch((error) => {
+					if (error.data && 'error_msg' in error.data) {
+						this.errormessage = '<p>' + error.response.data.error_msg + '</p>'
+						this.showErrorModal = true
+					}
+					console.error(error)
+				})
 		},
 
 		// VeeValidate

@@ -77,6 +77,11 @@ return [
             'verb' => 'POST'
         ],
         [
+            'name' => 'Server#saveServer',
+            'url' => '/server',
+            'verb' => 'POST'
+        ],
+        [
             'name' => 'Server#deleteServer',
             'url' => '/servers/{id}',
             'verb' => 'DELETE'

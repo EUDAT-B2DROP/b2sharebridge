@@ -20,6 +20,7 @@
     <dependencies>
         <database>sqlite</database>
         <database>mysql</database>
+        <database>pgsql</database>
         <lib>curl</lib>
         <nextcloud min-version="25" max-version="25" />
     </dependencies>

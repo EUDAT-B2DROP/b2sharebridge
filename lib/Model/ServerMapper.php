@@ -14,30 +14,47 @@
 
 namespace OCA\B2shareBridge\Model;
 
-use OCP\AppFramework\Db\Mapper;
+use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
+use OCP\AppFramework\Db\QBMapper;
+use OCP\DB\Exception;
+use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
-use OCP\Util;
 
-class ServerMapper extends Mapper
+class ServerMapper extends QBMapper
 {
     public function __construct(IDBConnection $db)
     {
         parent::__construct(
             $db,
             'b2sharebridge_server',
-            '\OCA\B2shareBridge\Model\Server'
+            Server::class,
         );
     }
 
-    public function find($id)
+    /**
+     * @throws DoesNotExistException
+     * @throws MultipleObjectsReturnedException
+     * @throws Exception
+     */
+    public function find(int $id): Server
     {
-        $sql = 'SELECT * FROM `' . $this->tableName . '`WHERE `id` = ?';
-        return $this->findEntity($sql, [$id]);
+        //$sql = 'SELECT * FROM `' . $this->tableName . '`WHERE `id` = ?';
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('*')->from($this->tableName)->where(
+            $qb->expr()->eq('id', $qb->createNamedParameter($id, IQueryBuilder::PARAM_INT))
+        );
+        return $this->findEntity($qb);
     }
 
-    public function findAll()
+    /**
+     * @throws Exception
+     */
+    public function findAll(): array
     {
-        $sql = 'SELECT * FROM ' . $this->tableName;
-        return $this->findEntities($sql);
+        //$sql = 'SELECT * FROM ' . $this->tableName;
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('*')->from($this->tableName);
+        return $this->findEntities($qb);
     }
 }

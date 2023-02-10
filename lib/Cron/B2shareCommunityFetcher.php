@@ -14,11 +14,13 @@
 
 namespace OCA\B2shareBridge\Cron;
 
+use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Model\Community;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
+use OCP\DB\Exception;
 use OCP\IConfig;
-use OCP\ILogger;
+use Psr\Log\LoggerInterface;
 use OCP\IDBConnection;
 use OCP\BackgroundJob\TimedJob;
 use OCP\AppFramework\Utility\ITimeFactory;
@@ -36,14 +38,14 @@ class B2shareCommunityFetcher extends TimedJob
 {
 
     private IConfig $config;
-    private ILogger $logger;
+    private LoggerInterface $logger;
     private IDBConnection $dbconnection;
 
     /**
      * Create cron that is fetching the b2share communities api
      * with dependency injection
      */
-    function __construct(ILogger $logger, IConfig $config, IDBConnection $dbconnection, ITimeFactory $time)
+    function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $dbconnection, ITimeFactory $time)
     {
         parent::__construct($time);
         $this->config = $config;
@@ -56,7 +58,8 @@ class B2shareCommunityFetcher extends TimedJob
     /**
      * Cron code to execute
      *
-     * @param array(string) $args array of arguments
+     * @param  array $args array of arguments
+     * @throws Exception
      */
     function run($args)
     {
@@ -70,7 +73,7 @@ class B2shareCommunityFetcher extends TimedJob
                 $this->logger->error(
                     'Fetching the B2SHARE communities API at ' . $b2share_communities_url .
                     ' was not possible.',
-                    ['app' => 'b2sharebridge']
+                    ['app' => Application::APP_ID]
                 );
                 continue;
             }
@@ -79,7 +82,7 @@ class B2shareCommunityFetcher extends TimedJob
                 $this->logger->error(
                     'Fetching the B2SHARE communities API at ' . $b2share_communities_url .
                     ' did not return a valid JSON.',
-                    ['app' => 'b2sharebridge']
+                    ['app' => Application::APP_ID]
                 );
                 continue;
             }
@@ -90,7 +93,7 @@ class B2shareCommunityFetcher extends TimedJob
                     'Fetched community with id: ' . $community['id'] .
                     ' and name: ' . $community['name'] . ' fetched' .
                     ' and restricted_submission: ' . $community['restricted_submission'] . ' from server ' . $server->getName(),
-                    ['app' => 'b2sharebridge']
+                    ['app' => Application::APP_ID]
                 );
                 if ($community['restricted_submission'] !== true) {
                     $communities_b2share[$community['id']] = $community['name'];
@@ -114,7 +117,7 @@ class B2shareCommunityFetcher extends TimedJob
                 $this->logger->info(
                     'Removing community with id: ' . $id .
                     ' and name: ' . $name . ' after synchronization with b2share',
-                    ['app' => 'b2sharebridge']
+                    ['app' => Application::APP_ID]
                 );
                 $communityMapper->deleteCommunity($id);
             }
@@ -125,7 +128,7 @@ class B2shareCommunityFetcher extends TimedJob
                 $this->logger->info(
                     'Adding community with id: ' . $id . ' and name: '
                     . $name . ' after synchronization with B2SHARE server ' . $server->getName(),
-                    ['app' => 'b2sharebridge']
+                    ['app' => Application::APP_ID]
                 );
                 $communityMapper->insert(Community::fromParams(['id' => $id, 'name' => $name, 'serverId' => $server->getId()]));
             }
@@ -155,11 +158,11 @@ class B2shareCommunityFetcher extends TimedJob
      *
      * @param string $url URL to fetch
      *
-     * @return string Response
+     * @return bool|string Response
      *
      * @NoAdminRequired
      */
-    private function _getUrlContent(string $url)
+    private function _getUrlContent(string $url): bool|string
     {
         $ch = curl_init();
         $config = array(
@@ -170,7 +173,7 @@ class B2shareCommunityFetcher extends TimedJob
             CURLOPT_RETURNTRANSFER => true
         );
         $check_ssl = $this->config->getAppValue(
-            'b2sharebridge',
+            Application::APP_ID,
             'check_ssl',
             '1'
         );

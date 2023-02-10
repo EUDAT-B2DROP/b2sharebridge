@@ -15,7 +15,10 @@
 
 namespace OCA\B2shareBridge\Settings;
 
+use OCA\B2shareBridge\AppInfo\Application;
+use OCP\AppFramework\App;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
 use OCA\B2shareBridge\Model\ServerMapper;
@@ -31,13 +34,8 @@ use OCA\B2shareBridge\Model\ServerMapper;
  */
 class Admin implements ISettings
 {
-    /**
-     * Nextcloud config container
-     *
-     * @var IConfig
-     */
-    private $_config;
-    private $mapper;
+    private IConfig $_config;
+    private ServerMapper $mapper;
 
     /**
      * Constructors construct.
@@ -52,27 +50,28 @@ class Admin implements ISettings
 
 
     /**
-     * Create Admin menue content
+     * Create Admin menu content
      *
      * @return TemplateResponse
+     * @throws Exception
      */
-    public function getForm()
+    public function getForm(): TemplateResponse
     {
-        $servers = $this->mapper->findAll();
+        //$servers = $this->mapper->findAll();
         $params = [
             'max_uploads' => $this->_config->getAppValue(
-                'b2sharebridge', 'max_uploads'
+                Application::APP_ID, 'max_uploads'
             ),
             'max_upload_filesize' => $this->_config->getAppValue(
-                'b2sharebridge', 'max_upload_filesize'
+                Application::APP_ID, 'max_upload_filesize'
             ),
             'check_ssl' => $this->_config->getAppValue(
-                'b2sharebridge', 'check_ssl'
+                Application::APP_ID, 'check_ssl'
             ),
             'servers' => $this->mapper->findAll()
         ];
 
-        return new TemplateResponse('b2sharebridge', 'settings-admin', $params);
+        return new TemplateResponse(Application::APP_ID, 'settings-admin', $params);
     }
 
     /**
@@ -80,7 +79,7 @@ class Admin implements ISettings
      *
      * @return string the section, 'b2sharebridge'
      */
-    public function getSection() 
+    public function getSection(): string
     {
         return 'b2sharebridge';
     }
@@ -90,7 +89,7 @@ class Admin implements ISettings
      *
      * @return int 0
      */
-    public function getPriority() 
+    public function getPriority(): int
     {
         return 0;
     }

@@ -35,7 +35,10 @@ class Server extends Entity implements JsonSerializable
         $this->addType('publishUrl', 'string');
     }
 
-    public function jsonSerialize()
+    /**
+     * @return mixed
+     */
+    public function jsonSerialize(): array
     {
         return [
             'id' => $this->id,

@@ -22,6 +22,7 @@ use PHPUnit\Framework\TestCase;
 
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http;
+use Psr\Log\LoggerInterface;
 
 class ViewControllerTest extends TestCase
 {
@@ -47,6 +48,7 @@ class ViewControllerTest extends TestCase
             ->getMock();
         $deposit_file_mapper =
             $this->getMockBuilder(DepositFileMapper::class)
+            ->onlyMethods(['getFileCount'])
             ->disableOriginalConstructor()
             ->getMock();
         $community_mapper = $this->getMockBuilder(CommunityMapper::class)
@@ -56,6 +58,10 @@ class ViewControllerTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
         $this->statusCodes = $this->getMockBuilder(StatusCodes::class)
+            ->getMock();
+
+        $logger = $this->getMockBuilder(LoggerInterface::class)
+            ->disableOriginalConstructor()
             ->getMock();
 
         $this->data = [
@@ -70,16 +76,20 @@ class ViewControllerTest extends TestCase
         $this->deposit_mapper->method('findAllForUser')
             ->willReturn($this->data);
 
+        $deposit_file_mapper->method('getFileCount')
+            ->willReturn(1);
+
         $this->controller = new ViewController(
             'b2sharebridge', $this->request, $config, $this->deposit_mapper,
             $deposit_file_mapper, $community_mapper, $server_mapper,
-            $this->statusCodes, $this->userId
+            $this->statusCodes, $logger, $this->userId
         );
     }
 
     public function createDepositStatus($owner, $status, $title, $serverId): DepositStatus
     {
         $fcStatus = new DepositStatus();
+        $fcStatus->setId(1);
         $fcStatus->setOwner($owner);
         $fcStatus->setStatus($status);
         $fcStatus->setCreatedAt(time());
@@ -124,7 +134,7 @@ class ViewControllerTest extends TestCase
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
         foreach ($this->data as $index => $entity) {
-            $this->assertEquals($entity->toJson(), $result->getData()[$index]);
+            $this->assertEquals($entity, $result->getData()[$index]);
         }
     }
 
@@ -134,7 +144,7 @@ class ViewControllerTest extends TestCase
         $result = $this->createDeposit($filter);
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
         $this->assertTrue(sizeof($result->getData()) == 1);
-        $this->assertEquals($this->data[0]->toJson(), $result->getData()[0]);
+        $this->assertEquals($this->data[0], $result->getData()[0]);
     }
 
     public function testPending()
@@ -144,7 +154,7 @@ class ViewControllerTest extends TestCase
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
         $this->assertTrue(sizeof($result->getData()) == 2);
         for ($i = 0; $i < sizeof($result->getData()); $i++) {
-            $this->assertEquals($this->data[$i + 1]->toJson(), $result->getData()[$i]);
+            $this->assertEquals($this->data[$i + 1], $result->getData()[$i]);
         }
     }
 
@@ -155,7 +165,7 @@ class ViewControllerTest extends TestCase
         $this->assertEquals(Http::STATUS_OK, $result->getStatus());
         $this->assertTrue(sizeof($result->getData()) == 3);
         for ($i = 0; $i < sizeof($result->getData()); $i++) {
-            $this->assertEquals($this->data[$i + 3]->toJson(), $result->getData()[$i]);
+            $this->assertEquals($this->data[$i + 3], $result->getData()[$i]);
         }
     }
 

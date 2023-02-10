@@ -25,14 +25,14 @@ use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
-use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IRequest;
-use OCP\ILogger;
+use OCP\PreConditionNotMetException;
 use OCP\Util;
 use OCA\B2shareBridge\AppInfo\Application;
+use Psr\Log\LoggerInterface;
 
 /**
  * Implement a ownCloud AppFramework Controller
@@ -53,7 +53,7 @@ class ViewController extends Controller
     protected $cMapper;
     protected $smapper;
 
-    private $lastUpdate;
+    private LoggerInterface $logger;
 
     /**
      * Creates the AppFramwork Controller
@@ -77,7 +77,8 @@ class ViewController extends Controller
         CommunityMapper $cMapper,
         ServerMapper $smapper,
         StatusCodes $statusCodes,
-        $userId,
+        LoggerInterface $logger,
+        string $userId,
     ) {
         parent::__construct($appName, $request);
         $this->userId = $userId;
@@ -87,7 +88,7 @@ class ViewController extends Controller
         $this->smapper = $smapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
-        $this->lastUpdate = null;
+        $this->logger = $logger;
     }
 
     /**
@@ -163,10 +164,7 @@ class ViewController extends Controller
             $publication->setFileCount(
                 $this->fdmapper->getFileCount($publication->getId())
             );
-            $publication = $publication->toJson();
         }
-
-
         return new JSONResponse($publications);
     }
 
@@ -175,14 +173,13 @@ class ViewController extends Controller
      *
      * @return          JSONResponse
      * @NoAdminRequired
+     * @throws          PreConditionNotMetException
      */
-    public function setToken()
+    public function setToken(): JSONResponse
     {
         $param = $this->request->getParams();
         $error = false;
-        if (!is_array($param)
-            || !array_key_exists('token', $param)
-        ) {
+        if (!array_key_exists('token', $param) || !array_key_exists('serverid', $param)) {
             $error = 'Parameters gotten from UI are no array or they are missing';
         }
         $token = $param['token'];
@@ -191,25 +188,25 @@ class ViewController extends Controller
         if (!is_string($token)) {
             $error = 'Problems while parsing fileid or publishToken';
         }
-        $userId = \OC::$server->getUserSession()->getUser()->getUID();
-        if (strlen($userId) <= 0) {
+        if (strlen($this->userId) <= 0) {
             $error = 'No user configured for session';
         }
         if (($error)) {
-            \OC::$server->getLogger()->error($error, ['app' => 'b2sharebridge']);
+            $this->logger->error($error, ['app' => Application::APP_ID]);
             return new JSONResponse(
                 [
                     'message' => 'Internal server error, contact the EUDAT helpdesk',
                     'status' => 'error'
-                ]
+                ],
+                Http::STATUS_BAD_REQUEST
             );
         }
 
 
-        \OC::$server->getLogger()->info(
-            'saving API token', ['app' => 'b2sharebridge']
+        $this->logger->info(
+            'saving API token', ['app' => Application::APP_ID]
         );
-        $this->config->setUserValue($userId, $this->appName, "token_" . $server_id, $token);
+        $this->config->setUserValue($this->userId, $this->appName, "token_" . $server_id, $token);
         return new JSONResponse(
             [
                 "data" => ["message" => "Saved"],
@@ -221,27 +218,35 @@ class ViewController extends Controller
     /**
      * XHR request endpoint for token setter
      *
+     * @param           $id
      * @return          JSONResponse
+     * @throws          PreConditionNotMetException
      * @NoAdminRequired
      */
-    public function deleteToken($id)
+    public function deleteToken($id): JSONResponse
     {
-        \OC::$server->getLogger()->info(
-            'Deleting API token', ['app' => 'b2sharebridge']
+        $this->logger->info(
+            'Deleting API token', ['app' => Application::APP_ID]
         );
-        $userId = \OC::$server->getUserSession()->getUser()->getUID();
-        if (strlen($userId) <= 0) {
-            \OC::$server->getLogger()->info(
-                'No user configured for session', ['app' => 'b2sharebridge']
+        if (strlen($this->userId) <= 0) {
+            $this->logger->info(
+                'No user configured for session', ['app' => Application::APP_ID]
             );
             return new JSONResponse(
                 [
                     'message' => 'Internal server error, contact the EUDAT helpdesk',
                     'status' => 'error'
-                ]
+                ],
+                Http::STATUS_BAD_REQUEST
             );
         }
-        $this->config->setUserValue($userId, $this->appName, 'token_' . $id, '');
+        $this->config->setUserValue($this->userId, $this->appName, 'token_' . $id, '');
+        return new JSONResponse(
+            [
+                'message' => 'Ok',
+                'status' => 'success'
+            ]
+        );
     }
 
     /**
@@ -249,15 +254,16 @@ class ViewController extends Controller
      *
      * @return          array
      * @NoAdminRequired
+     * @throws          Exception
      */
     public function getTokens(): array
     {
-        $userId = \OC::$server->getUserSession()->getUser()->getUID();
         $ret = [];
+        //TODO catch errors and return HTTP 500
         $servers = $this->smapper->findAll();
         foreach ($servers as $server) {
             $serverId = $server->getId();
-            $token = $this->config->getUserValue($userId, $this->appName, 'token_' . $serverId, null);
+            $token = $this->config->getUserValue($this->userId, $this->appName, 'token_' . $serverId, null);
             if($token) {
                 $ret[$serverId] = $token;
             }
@@ -270,8 +276,9 @@ class ViewController extends Controller
      *
      * @return          array
      * @NoAdminRequired
+     * @throws          Exception
      */
-    public function getTabViewContent()
+    public function getTabViewContent(): array
     {
 
         return $this->cMapper->getCommunityList();
@@ -282,44 +289,44 @@ class ViewController extends Controller
      *
      * @return          JSONResponse
      * @NoAdminRequired
+     * @throws          Exception
      */
-    public function initializeB2ShareUI()
+    public function initializeB2ShareUI(): JSONResponse
     {
-        $is_error = false;
         $error_msg = "";
-        \OC::$server->getLogger()->debug(
-            'in func initUI', ['app' => 'b2sharebridge']
+        $status_code = Http::STATUS_OK;
+        $this->logger->debug(
+            'in func initUI', ['app' => Application::APP_ID]
         );
-        $userId = \OC::$server->getUserSession()->getUser()->getUID();
-        if (strlen($userId) <= 0) {
-            \OC::$server->getLogger()->info(
-                'No user configured for session', ['app' => 'b2sharebridge']
+        if (strlen($this->userId) <= 0) {
+            $this->logger->info(
+                'No user configured for session', ['app' => Application::APP_ID]
             );
-            $is_error = true;
             $error_msg .= "Authorization failure: login first.<br>\n";
+            $status_code = Http::STATUS_UNAUTHORIZED;
         }
         $param = $this->request->getParams();
         $id = (int)$param['file_id'];
         Filesystem::init($this->userId, '/');
         $view = Filesystem::getView();
-        \OC::$server->getLogger()->debug(
-            'File ID: ' . $id, ['app' => 'b2sharebridge']
+        $this->logger->debug(
+            'File ID: ' . $id, ['app' => Application::APP_ID]
         );
         $filesize = $view->filesize(Filesystem::getPath($id));
         $fileName = basename(Filesystem::getPath($id));
         $is_dir = $view->is_dir(Filesystem::getPath($id));
         if ($is_dir) {
-            $is_error = true;
             $error_msg .= "You can only publish a file to B2SHARE.<br>\n";
+            $status_code = Http::STATUS_BAD_REQUEST;
         }
 
         $allowed_uploads = $this->config->getAppValue(
-            'b2sharebridge',
+            Application::APP_ID,
             'max_uploads',
             5
         );
         $allowed_filesize = $this->config->getAppValue(
-            'b2sharebridge',
+            Application::APP_ID,
             'max_upload_filesize',
             512
         );
@@ -330,21 +337,23 @@ class ViewController extends Controller
             )
         );
         if ($active_uploads > $allowed_uploads) {
-            $is_error = true;
             $error_msg .= "You already have " . $active_uploads .
                 " active uploads. You are only allowed " . $allowed_uploads .
                 " uploads. Please try again later.<br>\n";
+            $status_code = Http::STATUS_SERVICE_UNAVAILABLE; //can't server user due to overload
         }
         if ($filesize > $allowed_filesize * 1024 * 1024) {
-            $is_error = true;
-            $error_msg .= "We currently only support files smaller then "
+            $error_msg .= "We currently only support files smaller than "
                 . $allowed_filesize . " MB.<br>\n";
+            $status_code = Http::STATUS_REQUEST_ENTITY_TOO_LARGE;
         }
         $result = [
             "title" => $fileName,
-            "error" => $is_error,
-            "error_msg" => $error_msg
         ];
+        if($error_msg != "") {
+            $result["error_msg"] = $error_msg;
+            return new JSONResponse($result, $status_code);
+        }
         return new JSONResponse($result);
     }
 }

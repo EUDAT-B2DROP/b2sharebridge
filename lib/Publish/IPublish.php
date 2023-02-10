@@ -15,6 +15,7 @@
 namespace OCA\B2shareBridge\Publish;
 
 use OCP\IConfig;
+use Psr\Log\LoggerInterface;
 
 /**
  * Create a interface that must be implemented by publishing backends
@@ -30,30 +31,33 @@ interface IPublish
     /**
      * Placeholder for actually creating a deposit
      *
-     * @param IConfig $config access to nextcloud configuration
+     * @param IConfig         $config access to nextcloud configuration
+     * @param LoggerInterface $logger a logger
      *
      * @return null
      */
-    public function __construct(IConfig $config);
+    public function __construct(IConfig $config, LoggerInterface $logger);
 
     /**
      * Placeholder for actually creating a deposit
      *
-     * @param string $token    users access token
-     * @param string $filename local filename of file that should be submitted
-     *
-     * @return null
+     * @param  string $token        users access token
+     * @param  string $community
+     * @param  string $open_access
+     * @param  string $title
+     * @param  string $api_endpoint
+     * @return string
      */
-    public function create($token, $filename);
+    public function create(string $token, string $community, string $open_access, string $title, string $api_endpoint): string;
 
     /**
      * Placeholder for upload
      *
      * @param string $file_upload_url url invenio files bucket URL
-     * @param string $filehandle      users access token
+     * @param mixed  $filehandle      users access token
      * @param string $filesize        local filename of file that should be submitted
      *
-     * @return null
+     * @return bool success of the upload
      */
-    public function upload($file_upload_url, $filehandle, $filesize);
+    public function upload(string $file_upload_url, mixed $filehandle, string $filesize): bool;
 }

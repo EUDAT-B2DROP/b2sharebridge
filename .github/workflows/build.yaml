@@ -38,10 +38,10 @@ jobs:
       - name: Make sure production is commited
         run: |
           diff -rq js js_bac
-          if [ $? = 1 ] ; then
-            echo "Build files differ! Rebuild frontend with make build-js-production and submit changes!"
+          if [ $? -eq 1 ];then
+          echo "Build files differ! Rebuild frontend with make build-js-production and submit changes!"
+          exit 1
           fi
-          exit $?
   
 
   deploy:

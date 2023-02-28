@@ -252,11 +252,11 @@ class ViewController extends Controller
     /**
      * request endpoint for gettin users tokens
      *
-     * @return          array
+     * @return          JSONResponse
      * @NoAdminRequired
      * @throws          Exception
      */
-    public function getTokens(): array
+    public function getTokens(): JSONResponse
     {
         $ret = [];
         //TODO catch errors and return HTTP 500
@@ -267,8 +267,11 @@ class ViewController extends Controller
             if($token) {
                 $ret[$serverId] = $token;
             }
+            else {
+                $ret[$serverId] = "";
+            }
         }
-        return $ret;
+        return new JSONResponse($ret);
     }
 
     /**

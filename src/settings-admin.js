@@ -3,13 +3,12 @@ import Vue from 'vue'
 /**
  * Import Bootstrap
  */
-import {BootstrapVue, IconsPlugin} from 'bootstrap-vue'
+import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 
 /**
  * Import Sidebar
  */
 import AdminSettings from './components/AdminSettings.vue'
-
 
 // Import Bootstrap and BootstrapVue CSS files (order is important)
 // import 'bootstrap/dist/css/bootstrap.css'
@@ -22,11 +21,11 @@ Vue.use(IconsPlugin)
 
 Vue.extend(AdminSettings)
 
-Vue.mixin({methods: {t, n}})
+Vue.mixin({ methods: { t, n } })
 
-if (document.getElementById("admin-settings")) {
-    new Vue({
-        el: '#admin-settings',
-        render: h => h(AdminSettings),
-    })
+if (document.getElementById('admin-settings')) {
+	new Vue({
+		el: '#admin-settings',
+		render: h => h(AdminSettings),
+	})
 }

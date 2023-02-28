@@ -3,13 +3,13 @@ import Vue from 'vue'
 /**
  * Import Bootstrap
  */
-import {BootstrapVue, IconsPlugin} from 'bootstrap-vue'
+import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 
 /**
  * Import Sidebar
  */
 import PersonalSettings from './components/PersonalSettings.vue'
-import {ValidationObserver, ValidationProvider} from "vee-validate";
+import { ValidationObserver, ValidationProvider } from 'vee-validate'
 
 // Import Bootstrap and BootstrapVue CSS files (order is important)
 // import 'bootstrap/dist/css/bootstrap.css'
@@ -22,15 +22,14 @@ Vue.use(IconsPlugin)
 
 Vue.extend(PersonalSettings)
 
-Vue.mixin({methods: {t, n}})
+Vue.mixin({ methods: { t, n } })
 
 Vue.component('ValidationProvider', ValidationProvider)
 Vue.component('ValidationObserver', ValidationObserver)
 
-
-if (document.getElementById("b2sharebridge-personal-settings")) {
-    new Vue({
-        el: '#b2sharebridge-personal-settings',
-        render: h => h(PersonalSettings),
-    })
+if (document.getElementById('b2sharebridge-personal-settings')) {
+	new Vue({
+		el: '#b2sharebridge-personal-settings',
+		render: h => h(PersonalSettings),
+	})
 }

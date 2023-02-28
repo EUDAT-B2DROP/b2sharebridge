@@ -121,8 +121,8 @@ import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate'
 import '../../css/style.scss'
-/*DO NOT IMPORT ALL OF BOOTSTRAP, IT BREAKS NEXTCLOUD*/
-//import 'bootstrap/dist/css/bootstrap.min.css'
+/* DO NOT IMPORT ALL OF BOOTSTRAP, IT BREAKS NEXTCLOUD */
+// import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
@@ -184,28 +184,45 @@ export default {
 	},
 
 	async mounted() {
-		await this.loadServers()
-		await this.loadCommunities()
+		const server_promise = this.loadServers()
+		const community_promise = this.loadCommunities()
+		const token_promise = this.loadTokens()
+		await server_promise
+		await community_promise
+		await token_promise
+
+		if (!this.hasValidTokens()) {
+			this.errormessage = 'Please set your B2SHARE API token <a href="/settings/user/b2sharebridge">here</a>'
+			this.showErrorModal = true
+			this.tokens = null
+			this.loaded_sidebar = true
+			return
+		}
+
+		if (this.servers.length !== Object.keys(this.tokens).length) {
+			console.error('Number of servers and tokens differ, please contact an administrator')
+			return
+		}
+
 		if (this.servers.length !== 0) {
 			this.server_options = [{ value: null, text: 'Please select a server', disabled: true }]
+
 			this.servers.forEach(server => {
+				const disabled = this.tokens[server.id] === ''
 				this.server_options.push(new Object({
 					value: server.id,
 					text: server.name,
+					disabled,
 				}))
+				if (!disabled && this.server_selected === null) {
+					console.debug('Selected server automatically')
+					this.server_selected = server.id
+					this.onChangeServer() // update communities
+				}
 			})
-			if (this.servers.length === 1) {
-				console.debug('Selected server automatically')
-				this.server_selected = this.servers[0].id
-				this.onChangeServer() // update communities
-			}
 		}
-		await this.loadTokens()
+
 		this.loaded_sidebar = true
-		if (this.tokens === null) {
-			this.errormessage = 'Please set your B2SHARE API token <a href="/settings/user/b2sharebridge">here</a>'
-			this.showErrorModal = true
-		}
 	},
 
 	methods: {
@@ -329,6 +346,16 @@ export default {
 					}
 				})
 			}
+		},
+
+		hasValidTokens() {
+			let valid_token_found = false
+			Object.keys(this.tokens).forEach(key => {
+				if (this.tokens[key] !== '') {
+					valid_token_found = true
+				}
+			})
+			return valid_token_found
 		},
 
 		/**

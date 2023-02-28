@@ -21,13 +21,13 @@ Vue.component('ValidationObserver', ValidationObserver)
 const config = {
 	classes: {
 		valid: 'is-valid',
-		invalid: 'is-invalid'
+		invalid: 'is-invalid',
 	},
 	bails: true,
 	skipOptional: true,
 	mode: 'aggressive',
-	useConstraintAttrs: true
-};
+	useConstraintAttrs: true,
+}
 configure(config)
 
 // Import Bootstrap and BootstrapVue CSS files (order is important)

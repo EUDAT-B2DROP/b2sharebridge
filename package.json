@@ -1,7 +1,7 @@
 {
   "name": "b2sharebridge",
   "description": "An app to connect b2drop with b2share",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "author": "EUDAT-B2DROP developers <info@eudat.eu>",
   "repository": {
     "url": "https://github.com/EUDAT-B2DROP/b2sharebridge",
@@ -48,7 +48,7 @@
     "@nextcloud/stylelint-config": "^2.3.0",
     "@nextcloud/webpack-vue-config": "^5.4.0",
     "stylelint": "^14.16.1",
-    "webpack": "^5.75.0",
+    "webpack": "^5.76.0",
     "webpack-cli": "^4.10.0"
   }
 }

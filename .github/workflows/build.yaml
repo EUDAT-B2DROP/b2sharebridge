@@ -49,7 +49,7 @@ jobs:
     strategy:
       matrix:
         php-version: [ 8.0, 8.1 ]
-        nextcloud-version-branch: [ stable25 ]  # see https://github.com/nextcloud/server/branches
+        nextcloud-version-branch: [ stable25, stable26 ]  # see https://github.com/nextcloud/server/branches
 
     name: Deploy b2sharebridge-app in a NC environment
     needs: build

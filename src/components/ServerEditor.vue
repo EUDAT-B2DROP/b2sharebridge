@@ -116,7 +116,8 @@ export default {
 				data.id = this.id
 			}
 			data.name = this.mutable_name
-			data.publishUrl = this.mutable_publishUrl
+			data.publishUrl = this.stripTrailingSlash(this.mutable_publishUrl)
+      this.mutable_publishUrl = data.publishUrl
 			data.maxUploads = this.mutable_maxUploads
 			data.maxUploadFilesize = this.mutable_maxUploadFilesize
 			data.checkSsl = this.mutable_checkSsl
@@ -144,6 +145,12 @@ export default {
 					})
 			}
 		},
+
+    stripTrailingSlash(str) {
+      return str.endsWith('/') ?
+          str.slice(0, -1) :
+          str;
+    },
 	},
 }
 </script>

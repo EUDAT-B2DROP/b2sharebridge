@@ -9,7 +9,7 @@
         If enabled, a icon is added to the file-list, that triggers a third party file transfer from the B2DROP server to a service like B2SHARE.
         Because this upload is delayed and happening in the background, there is a status page available that is holding additional information.
     </description>
-    <version>3.2.2</version>
+    <version>3.2.3</version>
     <licence>agpl</licence>
     <author>EUDAT</author>
     <namespace>B2shareBridge</namespace>

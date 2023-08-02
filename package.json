@@ -1,7 +1,7 @@
 {
   "name": "b2sharebridge",
   "description": "An app to connect b2drop with b2share",
-  "version": "3.2.2",
+  "version": "3.2.3",
   "author": "EUDAT-B2DROP developers <info@eudat.eu>",
   "repository": {
     "url": "https://github.com/EUDAT-B2DROP/b2sharebridge",

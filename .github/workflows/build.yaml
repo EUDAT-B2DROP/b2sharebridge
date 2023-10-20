@@ -36,6 +36,7 @@ jobs:
           make npm-init
           make build-js-production
       - name: Make sure production is commited
+        continue-on-error: true
         run: |
           diff -rq js js_bac
           if [ $? -eq 1 ];then

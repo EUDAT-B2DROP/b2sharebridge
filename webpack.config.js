@@ -9,10 +9,4 @@ webpackConfig.entry = {
     settingspersonal: path.resolve(path.join('src', 'settings-personal.js'))
 }
 
-webpackConfig.optimization = {
-    splitChunks: {
-        chunks: 'all',
-    },
-}
-
 module.exports = webpackConfig

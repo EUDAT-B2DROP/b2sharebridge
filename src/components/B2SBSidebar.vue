@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-b-visible.once="visibleHandlerOnce">
 		<NcAppContent>
 			<div id="b2shareBridgeTabView" class="dialogContainer">
 				<div v-if="tokens === null && loaded_sidebar" id="b2sharebridge_errormsg" style="color: red;">
@@ -192,15 +192,16 @@ export default {
 		await token_promise
 
 		if (!this.hasValidTokens()) {
-			this.errormessage = 'Please set your B2SHARE API token <a href="/settings/user/b2sharebridge">here</a>'
-			this.showErrorModal = true
-			this.tokens = null
-			this.loaded_sidebar = true
-			return
+		    this.tokens = null
+		    this.errormessage = 'Please set your B2SHARE API token <a href="/settings/user/b2sharebridge">here</a>'
+		    this.loaded_sidebar = true
+		    return
 		}
 
 		if (this.servers.length !== Object.keys(this.tokens).length) {
 			console.error('Number of servers and tokens differ, please contact an administrator')
+			this.tokens = null
+			this.loaded_sidebar = true
 			return
 		}
 
@@ -225,7 +226,22 @@ export default {
 		this.loaded_sidebar = true
 	},
 
+	async activated() {
+
+	},
+
 	methods: {
+	    /**
+	    * Only triggers, if the sidebar is visible for the first time
+	    */
+	    visibleHandlerOnce(isVisible) {
+	        if (isVisible) {
+	            if (!this.hasValidTokens()) {
+			        this.showErrorModal = true
+			        return
+			    }
+		    }
+	    },
 		/**
 		 * Submit deposit to B2SHARE
 		 */
@@ -349,6 +365,9 @@ export default {
 		},
 
 		hasValidTokens() {
+		    if (this.tokens === null) {
+		        return false
+		    }
 			let valid_token_found = false
 			Object.keys(this.tokens).forEach(key => {
 				if (this.tokens[key] !== '') {

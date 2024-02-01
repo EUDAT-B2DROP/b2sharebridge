@@ -75,3 +75,9 @@ clean-dev:
 test:
 	./vendor/phpunit/phpunit/phpunit -c tests/phpunit.xml tests/unit
 	./vendor/phpunit/phpunit/phpunit -c tests/phpunit.integration.xml tests/integration
+
+test-unit:
+	./vendor/phpunit/phpunit/phpunit -c tests/phpunit.xml tests/unit
+
+test-integration:
+	./vendor/phpunit/phpunit/phpunit -c tests/phpunit.integration.xml tests/integration

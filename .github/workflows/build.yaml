@@ -48,13 +48,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: [ 8.0, 8.1, 8.2 ]
-        nextcloud-version-branch: [ stable25, stable26, stable27 ]  # see https://github.com/nextcloud/server/branches
+        php-version: [ 8.0, 8.1, 8.2, 8.3 ]
+        nextcloud-version-branch: [ stable25, stable26, stable27, stable28 ]  # see https://github.com/nextcloud/server/branches
         exclude:
           - php-version: 8.2
             nextcloud-version-branch: stable25
+          - php-version: 8.3
+            nextcloud-version-branch: stable25
+          - php-version: 8.3
+            nextcloud-version-branch: stable26
           - php-version: 8.0
             nextcloud-version-branch: stable27
+          - php-version: 8.3
+            nextcloud-version-branch: stable27
+          - php-version: 8.0
+            nextcloud-version-branch: stable28
 
     name: Deploy b2sharebridge-app in a NC environment
     needs: build
@@ -97,13 +105,11 @@ jobs:
 
       - name: Unit Tests
         run: |
-          cd apps/b2sharebridge/tests
-          phpunit -c phpunit.xml unit
+          make test-unit
 
       - name: Integration Tests
         run: |
-          cd apps/b2sharebridge/tests
-          phpunit -c phpunit.integration.xml integration
+          make test-integration
 
       - name: Test Background Job
         if: ${{ matrix.nextcloud-version-branch != 'stable22' }}  # https://github.com/actions/runner/issues/1173   # 'background-job'-cmd is only available since nc23

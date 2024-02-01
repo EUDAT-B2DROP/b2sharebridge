@@ -105,10 +105,12 @@ jobs:
 
       - name: Unit Tests
         run: |
+          cd apps/b2sharebridge
           make test-unit
 
       - name: Integration Tests
         run: |
+          cd apps/b2sharebridge
           make test-integration
 
       - name: Test Background Job

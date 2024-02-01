@@ -77,6 +77,13 @@ class Application extends App implements IBootstrap
                 Util::addScript(self::APP_ID, 'b2sharebridge-filetabmain');
             }
         );
+
+        $dispatcher->addListener(
+            '\OCA\Settings\Events\BeforeTemplateRenderedEvent', function () {
+                Util::addScript(self::APP_ID, "b2sharebridge-settingsadmin");
+                Util::addScript(self::APP_ID, "b2sharebridge-settingspersonal");
+            }
+        );
     }
 
     /**
@@ -84,8 +91,10 @@ class Application extends App implements IBootstrap
      */
     public static function loadScripts()
     {
+        /* Removed and moved to listener
         Util::addScript(self::APP_ID, "b2sharebridge-settingsadmin");
         Util::addScript(self::APP_ID, "b2sharebridge-settingspersonal");
+        */
     }
 
     public function register(IRegistrationContext $context): void

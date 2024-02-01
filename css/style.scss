@@ -1,30 +1,30 @@
 /* stylelint-disable scss/at-import-no-partial-leading-underscore -- due to bootstrap includes */
 /*https://stackoverflow.com/questions/60012016/importing-bootstrap-css-in-app-js-breaks-current-styles-vuejs*/
 /* required:*/
-@import 'bootstrap/scss/_functions';
-@import 'bootstrap/scss/_variables';
-@import 'bootstrap/scss/_mixins';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/mixins';
 /* optional*/
-@import 'bootstrap/scss/_root';
-/*@import "bootstrap/scss/_reboot";*/
-@import 'bootstrap/scss/_images';
-@import 'bootstrap/scss/_grid';
+@import 'bootstrap/scss/root';
+/*@import "bootstrap/scss/reboot.scss";*/
+@import 'bootstrap/scss/images';
+@import 'bootstrap/scss/grid';
 
-@import 'bootstrap/scss/_forms';
-@import 'bootstrap/scss/_buttons';
-@import 'bootstrap/scss/_transitions';
-@import 'bootstrap/scss/_button-group';
-@import 'bootstrap/scss/_input-group';
-@import 'bootstrap/scss/_dropdown';
-@import 'bootstrap/scss/_alert';
-@import 'bootstrap/scss/_list-group';
-@import 'bootstrap/scss/_utilities';
+@import 'bootstrap/scss/forms';
+@import 'bootstrap/scss/buttons';
+@import 'bootstrap/scss/transitions';
+@import 'bootstrap/scss/button-group';
+@import 'bootstrap/scss/input-group';
+@import 'bootstrap/scss/dropdown';
+@import 'bootstrap/scss/alert';
+@import 'bootstrap/scss/list-group';
+@import 'bootstrap/scss/utilities';
 
 /*marked as not working but required*/
-@import 'bootstrap/scss/_tables';
-@import 'bootstrap/scss/_custom-forms';
-@import 'bootstrap/scss/_modal';
-@import 'bootstrap/scss/_close';
+@import 'bootstrap/scss/tables';
+@import 'bootstrap/scss/custom-forms';
+@import 'bootstrap/scss/modal';
+@import 'bootstrap/scss/close';
 
 .b2sharebridge {
 	width: 100%;

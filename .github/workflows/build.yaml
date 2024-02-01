@@ -94,14 +94,17 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          ini-file: apps/b2sharebridge/tests/travis/php.ini
-          tools: phpunit:9.5, phpcs, phpcbf
 
       - name: Configure NC
         run: |
           mkdir data
           ./occ maintenance:install --database-name $DB_DATABASE --database-user oc_autotest --admin-user admin --admin-pass admin --database mysql --database-pass=''
           ./occ app:enable b2sharebridge
+
+      - name: Install dev dependencies with Composer
+        run: |
+          cd apps/b2sharebridge
+          make composer
 
       - name: Unit Tests
         run: |

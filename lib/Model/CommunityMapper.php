@@ -69,7 +69,6 @@ class CommunityMapper extends QBMapper
      * @return array(Entity)
      * @throws Exception if more th one
      */
-
     public function findForServer($serverId): array
     {
         $qb = $this->db->getQueryBuilder();

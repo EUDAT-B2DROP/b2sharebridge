@@ -13,7 +13,7 @@ import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
  * Import Sidebar
  */
 import B2SBSidebar from './components/B2SBSidebar.vue'
-import { registerFileAction, View } from '@nextcloud/files'
+import { registerFileAction, getNavigation } from '@nextcloud/files'
 
 
 import '../css/fix-breadcrumbs.css'
@@ -42,7 +42,7 @@ Vue.use(BootstrapVue)
 // Optionally install the BootstrapVue icon components plugin
 Vue.use(IconsPlugin)
 
-// const B2BView = Vue.extend(B2SBSidebar)
+const View = Vue.extend(B2SBSidebar)
 
 
 /*const b2sharebridgeTab = new View({
@@ -64,3 +64,40 @@ window.addEventListener('DOMContentLoaded', function() {
 })*/
 
 registerFileAction(action)
+let tabInstance = null
+
+window.addEventListener('DOMContentLoaded', function() {
+    if (OCA.Files?.Sidebar === undefined) {
+        return
+    }
+    const b2sharebridgeTab = new OCA.Files.Sidebar.Tab({
+        id: 'b2sharebridgetab',
+        name: t('b2sharebridge', 'B2SHARE'),
+        // iconClass: 'icon-b2share', // OC.imagePath('b2sharebridge', 'filelisticon'),
+        icon: 'icon-upload',
+        async mount(el, fileInfo, context) {
+            if (tabInstance) {
+                tabInstance.$destroy()
+            }
+            tabInstance = new View({
+                // Better integration with vue parent component
+                parent: context,
+            })
+            // Only mount after we have all the info we need
+            await tabInstance.initializeB2ShareUI(fileInfo)
+            tabInstance.$mount(el)
+        },
+        update(fileInfo) {
+            tabInstance.initializeB2ShareUI(fileInfo)
+        },
+        destroy() {
+            tabInstance.$destroy()
+            tabInstance = null
+        },
+        enabled(fileInfo) {
+            return (fileInfo && !fileInfo.isDirectory())
+        },
+    })
+
+    OCA.Files.Sidebar.registerTab(b2sharebridgeTab)
+})

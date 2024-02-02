@@ -237,7 +237,7 @@ export default {
 	    visibleHandlerOnce(isVisible) {
 	        if (isVisible) {
 	            if (!this.hasValidTokens()) {
-			        this.showErrorModal = true
+			        this.showErrorModal = false
 			        return
 			    }
 		    }
@@ -247,7 +247,7 @@ export default {
 		 */
 		async publishAction() {
 			this.publishDisabled = true
-			const selectedFiles = FileList.getSelectedFiles()
+			const selectedFiles = App.FileList.getSelectedFiles()
 
 			// if selectedFiles is empty, use fileInfo
 			// otherwise create an array of files from the selection

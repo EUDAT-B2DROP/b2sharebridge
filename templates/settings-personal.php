@@ -1,1 +1,1 @@
-<div id="b2sharebridge-personal-settings""</div>
+<div id="b2sharebridge-personal-settings">

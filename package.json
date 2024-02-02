@@ -21,6 +21,7 @@
     "stylelint:fix": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue --fix"
   },
   "dependencies": {
+    "@mdi/svg": "^7.4.47",
     "@nextcloud/axios": "^2.4.0",
     "@nextcloud/dialogs": "^3.2.0",
     "@nextcloud/router": "^2.2.0",
@@ -42,8 +43,8 @@
     "@nextcloud/stylelint-config": "^2.3.1",
     "@nextcloud/webpack-vue-config": "^6.0.0",
     "stylelint": "^15.11.0",
+    "vue-loader": "^15",
     "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4",
-    "vue-loader": "^15"
+    "webpack-cli": "^5.1.4"
   }
 }

@@ -59,6 +59,7 @@ class Personal implements ISettings
      */
     public function getForm(): TemplateResponse
     {
+        \OCP\Util::addScript('b2sharebridge', 'b2sharebridge-settingspersonal');
         return new TemplateResponse(Application::APP_ID, 'settings-personal');
     }
 

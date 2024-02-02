@@ -70,7 +70,7 @@ class Admin implements ISettings
             ),
             'servers' => $this->mapper->findAll()
         ];*/
-
+        \OCP\Util::addScript('b2sharebridge', 'b2sharebridge-settingsadmin');
         return new TemplateResponse(Application::APP_ID, 'settings-admin');
     }
 

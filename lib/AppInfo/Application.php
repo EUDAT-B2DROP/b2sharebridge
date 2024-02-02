@@ -27,10 +27,12 @@ use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
 use OCA\B2shareBridge\Publish\B2share;
 use OCA\B2shareBridge\Settings\Admin;
 use OCA\B2shareBridge\Settings\Personal;
+use OCA\B2shareBridge\EventListener\SettingsEventListener;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\IJobList;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\EventDispatcher\Event;
 use OCP\IConfig;
 use OCP\IContainer;
 use OCP\IDBConnection;
@@ -72,16 +74,10 @@ class Application extends App implements IBootstrap
         // Register files tab view
         $dispatcher = $container->get(IEventDispatcher::class);
 
+        Util::addScript(self::APP_ID, 'b2sharebridge-filetabmain');
         $dispatcher->addListener(
             'OCA\Files::loadAdditionalScripts', function () {
                 Util::addScript(self::APP_ID, 'b2sharebridge-filetabmain');
-            }
-        );
-
-        $dispatcher->addListener(
-            '\OCA\Settings\Events\BeforeTemplateRenderedEvent', function () {
-                Util::addScript(self::APP_ID, "b2sharebridge-settingsadmin");
-                Util::addScript(self::APP_ID, "b2sharebridge-settingspersonal");
             }
         );
     }

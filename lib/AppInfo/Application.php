@@ -195,7 +195,7 @@ class Application extends App implements IBootstrap
                     $c->get(ServerMapper::class),
                     $c->get(LoggerInterface::class),
                     $c->get(IJobList::class),
-                    $c->get("UserId")
+                    $c->get("userId")
                 );
             }
         );
@@ -212,7 +212,7 @@ class Application extends App implements IBootstrap
                     $c->get(ServerMapper::class),
                     $c->get(StatusCodes::class),
                     $c->get(LoggerInterface::class),
-                    $c->get("UserId")
+                    $c->get("userId")
                 );
             }
         );
@@ -225,7 +225,7 @@ class Application extends App implements IBootstrap
                     $c->get(ServerMapper::class),
                     $c->get(IJobList::class),
                     $c->get(LoggerInterface::class),
-                    $c->get("UserId")
+                    $c->get("userId")
                 );
             }
         );

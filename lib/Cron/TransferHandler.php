@@ -173,8 +173,9 @@ class TransferHandler extends QueuedJob
                      * External error: during uploading file
                      */
                     $this->logger->error(
-                        'No upload_result', ['app' => Application::APP_ID]
+                        'No upload result', ['app' => Application::APP_ID]
                     );
+                    $fcStatus->setErrorMessage("No upload result, please check your drafts, as it may be created anyway!");
                     $fcStatus->setStatus(3);
                 }
             } else {

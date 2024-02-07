@@ -1,5 +1,24 @@
+import Vue from 'vue'
 import { FileAction, Node } from '@nextcloud/files'
 import logger from '../logger.js'
+import { generateUrl } from '@nextcloud/router'
+import axios from '@nextcloud/axios'
+//import '@nextcloud/dialogs/style.css'
+import { showMessage, showInfo, showSuccess, showWarning, showError, spawnDialog } from '@nextcloud/dialogs'
+import B2SBSidebar from '../components/B2SBSidebar.vue'
+
+const filepicker = async (nodes) => {
+    const FileIds = nodes.map(node => node.fileid)
+    const bridgeVueComponent = Vue.extend({
+        extends: B2SBSidebar,
+        data() {
+            return {
+                selectedFiles: FileIds,
+            };
+        },
+    })
+    spawnDialog(bridgeVueComponent)
+}
 
 export const action = new FileAction({
 	id: 'b2sharebridge-action',
@@ -19,15 +38,23 @@ export const action = new FileAction({
 		return true
 	},
 
-	async exec(node) {
-		try {
+	async exec(node, view, dir) {
+		/*try {
 			window.OCA.Files.Sidebar.setActiveTab('b2sharebridgetab')
 			await window.OCA.Files.Sidebar.open(node.path)
 			return null
 		} catch (error) {
 			logger.error('Error while opening sidebar', { error })
 			return false
-		}
+		}*/
+		await filepicker([node])//await openB2SharePickerForAction(dir, [node])
+	},
+
+	async execBatch(nodes, view, dir) {
+	    if (nodes.length == 0)
+	        return false
+	    logger.info('Nodes batch pressed!', {nodes})
+	    await filepicker(nodes)//await openB2SharePickerForAction(dir, nodes)
 	},
 
 	inline: () => false,

@@ -1,6 +1,226 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./node_modules/@nextcloud/axios/node_modules/@nextcloud/router/dist/index.js":
+/*!************************************************************************************!*\
+  !*** ./node_modules/@nextcloud/axios/node_modules/@nextcloud/router/dist/index.js ***!
+  \************************************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", ({
+  value: true
+}));
+exports.generateUrl = exports.generateRemoteUrl = exports.generateOcsUrl = exports.generateFilePath = void 0;
+exports.getAppRootUrl = getAppRootUrl;
+exports.getRootUrl = getRootUrl;
+exports.linkTo = exports.imagePath = void 0;
+__webpack_require__(/*! core-js/modules/es.string.replace.js */ "./node_modules/core-js/modules/es.string.replace.js");
+/**
+ * Get an url with webroot to a file in an app
+ *
+ * @param {string} app the id of the app the file belongs to
+ * @param {string} file the file path relative to the app folder
+ * @return {string} URL with webroot to a file
+ */
+const linkTo = (app, file) => generateFilePath(app, '', file);
+
+/**
+ * Creates a relative url for remote use
+ *
+ * @param {string} service id
+ * @return {string} the url
+ */
+exports.linkTo = linkTo;
+const linkToRemoteBase = service => getRootUrl() + '/remote.php/' + service;
+
+/**
+ * @brief Creates an absolute url for remote use
+ * @param {string} service id
+ * @return {string} the url
+ */
+const generateRemoteUrl = service => window.location.protocol + '//' + window.location.host + linkToRemoteBase(service);
+
+/**
+ * Get the base path for the given OCS API service
+ *
+ * @param {string} url OCS API service url
+ * @param {object} params parameters to be replaced into the service url
+ * @param {UrlOptions} options options for the parameter replacement
+ * @param {boolean} options.escape Set to false if parameters should not be URL encoded (default true)
+ * @param {Number} options.ocsVersion OCS version to use (defaults to 2)
+ * @return {string} Absolute path for the OCS URL
+ */
+exports.generateRemoteUrl = generateRemoteUrl;
+const generateOcsUrl = (url, params, options) => {
+  const allOptions = Object.assign({
+    ocsVersion: 2
+  }, options || {});
+  const version = allOptions.ocsVersion === 1 ? 1 : 2;
+  return window.location.protocol + '//' + window.location.host + getRootUrl() + '/ocs/v' + version + '.php' + _generateUrlPath(url, params, options);
+};
+exports.generateOcsUrl = generateOcsUrl;
+/**
+ * Generate a url path, which can contain parameters
+ *
+ * Parameters will be URL encoded automatically
+ *
+ * @param {string} url address (can contain placeholders e.g. /call/{token} would replace {token} with the value of params.token
+ * @param {object} params parameters to be replaced into the address
+ * @param {UrlOptions} options options for the parameter replacement
+ * @return {string} Path part for the given URL
+ */
+const _generateUrlPath = (url, params, options) => {
+  const allOptions = Object.assign({
+    escape: true
+  }, options || {});
+  const _build = function (text, vars) {
+    vars = vars || {};
+    return text.replace(/{([^{}]*)}/g, function (a, b) {
+      var r = vars[b];
+      if (allOptions.escape) {
+        return typeof r === 'string' || typeof r === 'number' ? encodeURIComponent(r.toString()) : encodeURIComponent(a);
+      } else {
+        return typeof r === 'string' || typeof r === 'number' ? r.toString() : a;
+      }
+    });
+  };
+  if (url.charAt(0) !== '/') {
+    url = '/' + url;
+  }
+  return _build(url, params || {});
+};
+
+/**
+ * Generate the url with webroot for the given relative url, which can contain parameters
+ *
+ * Parameters will be URL encoded automatically
+ *
+ * @param {string} url address (can contain placeholders e.g. /call/{token} would replace {token} with the value of params.token
+ * @param {object} params parameters to be replaced into the url
+ * @param {UrlOptions} options options for the parameter replacement
+ * @param {boolean} options.noRewrite True if you want to force index.php being added
+ * @param {boolean} options.escape Set to false if parameters should not be URL encoded (default true)
+ * @return {string} URL with webroot for the given relative URL
+ */
+const generateUrl = (url, params, options) => {
+  var _window;
+  const allOptions = Object.assign({
+    noRewrite: false
+  }, options || {});
+  if (((_window = window) === null || _window === void 0 || (_window = _window.OC) === null || _window === void 0 || (_window = _window.config) === null || _window === void 0 ? void 0 : _window.modRewriteWorking) === true && !allOptions.noRewrite) {
+    return getRootUrl() + _generateUrlPath(url, params, options);
+  }
+  return getRootUrl() + '/index.php' + _generateUrlPath(url, params, options);
+};
+
+/**
+ * Get the path with webroot to an image file
+ * if no extension is given for the image, it will automatically decide
+ * between .png and .svg based on what the browser supports
+ *
+ * @param {string} app the app id to which the image belongs
+ * @param {string} file the name of the image file
+ * @return {string}
+ */
+exports.generateUrl = generateUrl;
+const imagePath = (app, file) => {
+  if (file.indexOf('.') === -1) {
+    //if no extension is given, use svg
+    return generateFilePath(app, 'img', file + '.svg');
+  }
+  return generateFilePath(app, 'img', file);
+};
+
+/**
+ * Get the url with webroot for a file in an app
+ *
+ * @param {string} app the id of the app
+ * @param {string} type the type of the file to link to (e.g. css,img,ajax.template)
+ * @param {string} file the filename
+ * @return {string} URL with webroot for a file in an app
+ */
+exports.imagePath = imagePath;
+const generateFilePath = (app, type, file) => {
+  var _window2;
+  const isCore = ((_window2 = window) === null || _window2 === void 0 || (_window2 = _window2.OC) === null || _window2 === void 0 || (_window2 = _window2.coreApps) === null || _window2 === void 0 ? void 0 : _window2.indexOf(app)) !== -1;
+  let link = getRootUrl();
+  if (file.substring(file.length - 3) === 'php' && !isCore) {
+    link += '/index.php/apps/' + app;
+    if (file !== 'index.php') {
+      link += '/';
+      if (type) {
+        link += encodeURI(type + '/');
+      }
+      link += file;
+    }
+  } else if (file.substring(file.length - 3) !== 'php' && !isCore) {
+    link = getAppRootUrl(app);
+    if (type) {
+      link += '/' + type + '/';
+    }
+    if (link.substring(link.length - 1) !== '/') {
+      link += '/';
+    }
+    link += file;
+  } else {
+    if ((app === 'settings' || app === 'core' || app === 'search') && type === 'ajax') {
+      link += '/index.php/';
+    } else {
+      link += '/';
+    }
+    if (!isCore) {
+      link += 'apps/';
+    }
+    if (app !== '') {
+      app += '/';
+      link += app;
+    }
+    if (type) {
+      link += type + '/';
+    }
+    link += file;
+  }
+  return link;
+};
+
+/**
+ * Return the web root path where this Nextcloud instance
+ * is accessible, with a leading slash.
+ * For example "/nextcloud".
+ *
+ * @return {string} web root path
+ */
+exports.generateFilePath = generateFilePath;
+function getRootUrl() {
+  let webroot = window._oc_webroot;
+  if (typeof webroot === 'undefined') {
+    webroot = location.pathname;
+    const pos = webroot.indexOf('/index.php/');
+    if (pos !== -1) {
+      webroot = webroot.substr(0, pos);
+    } else {
+      webroot = webroot.substr(0, webroot.lastIndexOf('/'));
+    }
+  }
+  return webroot;
+}
+
+/**
+ * Return the web root path for a given app
+ * @param {string} app The ID of the app
+ */
+function getAppRootUrl(app) {
+  var _window$_oc_appswebro, _webroots$app;
+  const webroots = (_window$_oc_appswebro = window._oc_appswebroots) !== null && _window$_oc_appswebro !== void 0 ? _window$_oc_appswebro : {};
+  return (_webroots$app = webroots[app]) !== null && _webroots$app !== void 0 ? _webroots$app : '';
+}
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
 /***/ "./node_modules/@nextcloud/event-bus/node_modules/semver/classes/semver.js":
 /*!*********************************************************************************!*\
   !*** ./node_modules/@nextcloud/event-bus/node_modules/semver/classes/semver.js ***!
@@ -653,12 +873,17 @@ createToken('XRANGELOOSE', `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAINLOOSE]}$`)
 
 // Coercion.
 // Extract anything that could conceivably be a part of a valid semver
-createToken('COERCE', `${'(^|[^\\d])' +
+createToken('COERCEPLAIN', `${'(^|[^\\d])' +
               '(\\d{1,'}${MAX_SAFE_COMPONENT_LENGTH}})` +
               `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
-              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
+              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?`)
+createToken('COERCE', `${src[t.COERCEPLAIN]}(?:$|[^\\d])`)
+createToken('COERCEFULL', src[t.COERCEPLAIN] +
+              `(?:${src[t.PRERELEASE]})?` +
+              `(?:${src[t.BUILD]})?` +
               `(?:$|[^\\d])`)
 createToken('COERCERTL', src[t.COERCE], true)
+createToken('COERCERTLFULL', src[t.COERCEFULL], true)
 
 // Tilde ranges.
 // Meaning is "reasonably at or greater than"
@@ -713,226 +938,6 @@ createToken('GTE0PRE', '^\\s*>=\\s*0\\.0\\.0-0\\s*$')
 
 /***/ }),
 
-/***/ "./node_modules/@nextcloud/router/dist/index.js":
-/*!******************************************************!*\
-  !*** ./node_modules/@nextcloud/router/dist/index.js ***!
-  \******************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports.generateUrl = exports.generateRemoteUrl = exports.generateOcsUrl = exports.generateFilePath = void 0;
-exports.getAppRootUrl = getAppRootUrl;
-exports.getRootUrl = getRootUrl;
-exports.linkTo = exports.imagePath = void 0;
-__webpack_require__(/*! core-js/modules/es.string.replace.js */ "./node_modules/core-js/modules/es.string.replace.js");
-/**
- * Get an url with webroot to a file in an app
- *
- * @param {string} app the id of the app the file belongs to
- * @param {string} file the file path relative to the app folder
- * @return {string} URL with webroot to a file
- */
-const linkTo = (app, file) => generateFilePath(app, '', file);
-
-/**
- * Creates a relative url for remote use
- *
- * @param {string} service id
- * @return {string} the url
- */
-exports.linkTo = linkTo;
-const linkToRemoteBase = service => getRootUrl() + '/remote.php/' + service;
-
-/**
- * @brief Creates an absolute url for remote use
- * @param {string} service id
- * @return {string} the url
- */
-const generateRemoteUrl = service => window.location.protocol + '//' + window.location.host + linkToRemoteBase(service);
-
-/**
- * Get the base path for the given OCS API service
- *
- * @param {string} url OCS API service url
- * @param {object} params parameters to be replaced into the service url
- * @param {UrlOptions} options options for the parameter replacement
- * @param {boolean} options.escape Set to false if parameters should not be URL encoded (default true)
- * @param {Number} options.ocsVersion OCS version to use (defaults to 2)
- * @return {string} Absolute path for the OCS URL
- */
-exports.generateRemoteUrl = generateRemoteUrl;
-const generateOcsUrl = (url, params, options) => {
-  const allOptions = Object.assign({
-    ocsVersion: 2
-  }, options || {});
-  const version = allOptions.ocsVersion === 1 ? 1 : 2;
-  return window.location.protocol + '//' + window.location.host + getRootUrl() + '/ocs/v' + version + '.php' + _generateUrlPath(url, params, options);
-};
-exports.generateOcsUrl = generateOcsUrl;
-/**
- * Generate a url path, which can contain parameters
- *
- * Parameters will be URL encoded automatically
- *
- * @param {string} url address (can contain placeholders e.g. /call/{token} would replace {token} with the value of params.token
- * @param {object} params parameters to be replaced into the address
- * @param {UrlOptions} options options for the parameter replacement
- * @return {string} Path part for the given URL
- */
-const _generateUrlPath = (url, params, options) => {
-  const allOptions = Object.assign({
-    escape: true
-  }, options || {});
-  const _build = function (text, vars) {
-    vars = vars || {};
-    return text.replace(/{([^{}]*)}/g, function (a, b) {
-      var r = vars[b];
-      if (allOptions.escape) {
-        return typeof r === 'string' || typeof r === 'number' ? encodeURIComponent(r.toString()) : encodeURIComponent(a);
-      } else {
-        return typeof r === 'string' || typeof r === 'number' ? r.toString() : a;
-      }
-    });
-  };
-  if (url.charAt(0) !== '/') {
-    url = '/' + url;
-  }
-  return _build(url, params || {});
-};
-
-/**
- * Generate the url with webroot for the given relative url, which can contain parameters
- *
- * Parameters will be URL encoded automatically
- *
- * @param {string} url address (can contain placeholders e.g. /call/{token} would replace {token} with the value of params.token
- * @param {object} params parameters to be replaced into the url
- * @param {UrlOptions} options options for the parameter replacement
- * @param {boolean} options.noRewrite True if you want to force index.php being added
- * @param {boolean} options.escape Set to false if parameters should not be URL encoded (default true)
- * @return {string} URL with webroot for the given relative URL
- */
-const generateUrl = (url, params, options) => {
-  var _window;
-  const allOptions = Object.assign({
-    noRewrite: false
-  }, options || {});
-  if (((_window = window) === null || _window === void 0 || (_window = _window.OC) === null || _window === void 0 || (_window = _window.config) === null || _window === void 0 ? void 0 : _window.modRewriteWorking) === true && !allOptions.noRewrite) {
-    return getRootUrl() + _generateUrlPath(url, params, options);
-  }
-  return getRootUrl() + '/index.php' + _generateUrlPath(url, params, options);
-};
-
-/**
- * Get the path with webroot to an image file
- * if no extension is given for the image, it will automatically decide
- * between .png and .svg based on what the browser supports
- *
- * @param {string} app the app id to which the image belongs
- * @param {string} file the name of the image file
- * @return {string}
- */
-exports.generateUrl = generateUrl;
-const imagePath = (app, file) => {
-  if (file.indexOf('.') === -1) {
-    //if no extension is given, use svg
-    return generateFilePath(app, 'img', file + '.svg');
-  }
-  return generateFilePath(app, 'img', file);
-};
-
-/**
- * Get the url with webroot for a file in an app
- *
- * @param {string} app the id of the app
- * @param {string} type the type of the file to link to (e.g. css,img,ajax.template)
- * @param {string} file the filename
- * @return {string} URL with webroot for a file in an app
- */
-exports.imagePath = imagePath;
-const generateFilePath = (app, type, file) => {
-  var _window2;
-  const isCore = ((_window2 = window) === null || _window2 === void 0 || (_window2 = _window2.OC) === null || _window2 === void 0 || (_window2 = _window2.coreApps) === null || _window2 === void 0 ? void 0 : _window2.indexOf(app)) !== -1;
-  let link = getRootUrl();
-  if (file.substring(file.length - 3) === 'php' && !isCore) {
-    link += '/index.php/apps/' + app;
-    if (file !== 'index.php') {
-      link += '/';
-      if (type) {
-        link += encodeURI(type + '/');
-      }
-      link += file;
-    }
-  } else if (file.substring(file.length - 3) !== 'php' && !isCore) {
-    link = getAppRootUrl(app);
-    if (type) {
-      link += '/' + type + '/';
-    }
-    if (link.substring(link.length - 1) !== '/') {
-      link += '/';
-    }
-    link += file;
-  } else {
-    if ((app === 'settings' || app === 'core' || app === 'search') && type === 'ajax') {
-      link += '/index.php/';
-    } else {
-      link += '/';
-    }
-    if (!isCore) {
-      link += 'apps/';
-    }
-    if (app !== '') {
-      app += '/';
-      link += app;
-    }
-    if (type) {
-      link += type + '/';
-    }
-    link += file;
-  }
-  return link;
-};
-
-/**
- * Return the web root path where this Nextcloud instance
- * is accessible, with a leading slash.
- * For example "/nextcloud".
- *
- * @return {string} web root path
- */
-exports.generateFilePath = generateFilePath;
-function getRootUrl() {
-  let webroot = window._oc_webroot;
-  if (typeof webroot === 'undefined') {
-    webroot = location.pathname;
-    const pos = webroot.indexOf('/index.php/');
-    if (pos !== -1) {
-      webroot = webroot.substr(0, pos);
-    } else {
-      webroot = webroot.substr(0, webroot.lastIndexOf('/'));
-    }
-  }
-  return webroot;
-}
-
-/**
- * Return the web root path for a given app
- * @param {string} app The ID of the app
- */
-function getAppRootUrl(app) {
-  var _window$_oc_appswebro, _webroots$app;
-  const webroots = (_window$_oc_appswebro = window._oc_appswebroots) !== null && _window$_oc_appswebro !== void 0 ? _window$_oc_appswebro : {};
-  return (_webroots$app = webroots[app]) !== null && _webroots$app !== void 0 ? _webroots$app : '';
-}
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
 /***/ "./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AdminSettings.vue?vue&type=script&lang=js":
 /*!**********************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js!./node_modules/vue-loader/lib/index.js??vue-loader-options!./src/components/AdminSettings.vue?vue&type=script&lang=js ***!
@@ -945,7 +950,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _nextcloud_axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @nextcloud/axios */ "./node_modules/@nextcloud/axios/dist/index.es.mjs");
-/* harmony import */ var _nextcloud_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @nextcloud/router */ "./node_modules/@nextcloud/router/dist/index.js");
+/* harmony import */ var _nextcloud_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @nextcloud/router */ "./node_modules/@nextcloud/router/dist/index.mjs");
 /* harmony import */ var _ServerEditor_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ServerEditor.vue */ "./src/components/ServerEditor.vue");
 // import {NcAppContent} from "@nextcloud/vue";
 
@@ -1008,7 +1013,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _nextcloud_axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @nextcloud/axios */ "./node_modules/@nextcloud/axios/dist/index.es.mjs");
-/* harmony import */ var _nextcloud_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @nextcloud/router */ "./node_modules/@nextcloud/router/dist/index.js");
+/* harmony import */ var _nextcloud_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @nextcloud/router */ "./node_modules/@nextcloud/router/dist/index.mjs");
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -63390,7 +63395,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
 /* harmony import */ var _nextcloud_auth__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @nextcloud/auth */ "./node_modules/@nextcloud/auth/dist/index.es.mjs");
-/* harmony import */ var _nextcloud_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @nextcloud/router */ "./node_modules/@nextcloud/router/dist/index.js");
+/* harmony import */ var _nextcloud_router__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @nextcloud/router */ "./node_modules/@nextcloud/axios/node_modules/@nextcloud/router/dist/index.js");
 
 
 
@@ -63686,6 +63691,82 @@ function emit(name, event) {
 
 
 //# sourceMappingURL=index.mjs.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@nextcloud/router/dist/index.mjs":
+/*!*******************************************************!*\
+  !*** ./node_modules/@nextcloud/router/dist/index.mjs ***!
+  \*******************************************************/
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   generateFilePath: () => (/* binding */ u),
+/* harmony export */   generateOcsUrl: () => (/* binding */ v),
+/* harmony export */   generateRemoteUrl: () => (/* binding */ U),
+/* harmony export */   generateUrl: () => (/* binding */ _),
+/* harmony export */   getAppRootUrl: () => (/* binding */ b),
+/* harmony export */   getBaseUrl: () => (/* binding */ w),
+/* harmony export */   getRootUrl: () => (/* binding */ f),
+/* harmony export */   imagePath: () => (/* binding */ h),
+/* harmony export */   linkTo: () => (/* binding */ R)
+/* harmony export */ });
+const R = (n, e) => u(n, "", e), g = (n) => "/remote.php/" + n, U = (n, e) => {
+  var o;
+  return ((o = e == null ? void 0 : e.baseURL) != null ? o : w()) + g(n);
+}, v = (n, e, o) => {
+  var c;
+  const i = Object.assign({
+    ocsVersion: 2
+  }, o || {}).ocsVersion === 1 ? 1 : 2;
+  return ((c = o == null ? void 0 : o.baseURL) != null ? c : w()) + "/ocs/v" + i + ".php" + d(n, e, o);
+}, d = (n, e, o) => {
+  const c = Object.assign({
+    escape: !0
+  }, o || {}), s = function(i, r) {
+    return r = r || {}, i.replace(
+      /{([^{}]*)}/g,
+      function(l, t) {
+        const a = r[t];
+        return c.escape ? encodeURIComponent(typeof a == "string" || typeof a == "number" ? a.toString() : l) : typeof a == "string" || typeof a == "number" ? a.toString() : l;
+      }
+    );
+  };
+  return n.charAt(0) !== "/" && (n = "/" + n), s(n, e || {});
+}, _ = (n, e, o) => {
+  var c, s, i;
+  const r = Object.assign({
+    noRewrite: !1
+  }, o || {}), l = (c = o == null ? void 0 : o.baseURL) != null ? c : f();
+  return ((i = (s = window == null ? void 0 : window.OC) == null ? void 0 : s.config) == null ? void 0 : i.modRewriteWorking) === !0 && !r.noRewrite ? l + d(n, e, o) : l + "/index.php" + d(n, e, o);
+}, h = (n, e) => e.indexOf(".") === -1 ? u(n, "img", e + ".svg") : u(n, "img", e), u = (n, e, o) => {
+  var c, s, i;
+  const r = (i = (s = (c = window == null ? void 0 : window.OC) == null ? void 0 : c.coreApps) == null ? void 0 : s.includes(n)) != null ? i : !1, l = o.slice(-3) === "php";
+  let t = f();
+  return l && !r ? (t += "/index.php/apps/".concat(n), e && (t += "/".concat(encodeURI(e))), o !== "index.php" && (t += "/".concat(o))) : !l && !r ? (t = b(n), e && (t += "/".concat(e, "/")), t.at(-1) !== "/" && (t += "/"), t += o) : ((n === "settings" || n === "core" || n === "search") && e === "ajax" && (t += "/index.php"), n && (t += "/".concat(n)), e && (t += "/".concat(e)), t += "/".concat(o)), t;
+}, w = () => window.location.protocol + "//" + window.location.host + f();
+function f() {
+  let n = window._oc_webroot;
+  if (typeof n > "u") {
+    n = location.pathname;
+    const e = n.indexOf("/index.php/");
+    if (e !== -1)
+      n = n.slice(0, e);
+    else {
+      const o = n.indexOf("/", 1);
+      n = n.slice(0, o > 0 ? o : void 0);
+    }
+  }
+  return n;
+}
+function b(n) {
+  var e, o;
+  return (o = ((e = window._oc_appswebroots) != null ? e : {})[n]) != null ? o : "";
+}
+
 
 
 /***/ }),
@@ -67981,4 +68062,4 @@ if (document.getElementById('admin-settings')) {
 
 /******/ })()
 ;
-//# sourceMappingURL=b2sharebridge-settingsadmin.js.map?v=955987455de0578d2f0c
+//# sourceMappingURL=b2sharebridge-settingsadmin.js.map?v=117e74856e91041a54a7

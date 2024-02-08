@@ -1,6 +1,6 @@
 <template>
 	<b-modal id="bridgedial" v-model="isModalOpen" title="Create a B2SHARE deposit" ok-title="Publish" @ok="handleOk"
-		:ok-disabled="publishDisabled">
+		:ok-disabled="publishDisabled" header-class="bridgeheader" modal-class="bridgemodal" footer-class="bridgefooter">
 		<h1> Create a B2SHARE deposit</h1>
 		<p>TODO List selected files here</p>
 		<div id="b2shareBridgeTabView" class="dialogContainer">
@@ -8,7 +8,8 @@
 				Please set your B2SHARE API token <a href="/settings/user/b2sharebridge">here</a>
 			</div>
 			<div v-else-if="loaded_sidebar">
-				<ValidationObserver tag="form" ref="observer" v-slot="{ handleSubmit }" @submit.prevent="handleSubmit(publishAction)">
+				<ValidationObserver tag="form" ref="observer" v-slot="{ handleSubmit }"
+					@submit.prevent="handleSubmit(publishAction)">
 					<ValidationProvider v-slot="validationContext" name="Title" :rules="{ required: true, min: 3 }">
 						<b-form-group label-cols="3" label-cols-lg="sm" label="Deposit Title:" label-for="b2s_title">
 							<b-form-input id="b2s_title" v-model="deposit_title" placeholder="Deposit title"
@@ -223,9 +224,8 @@ export default {
 		 */
 		async publishAction() {
 			this.publishDisabled = await this.$refs.observer.validate()
-			
-			if (!this.publishDisabled)
-			{
+
+			if (!this.publishDisabled) {
 				return
 			}
 			if (!this.selectedFiles.length) {
@@ -400,66 +400,32 @@ export default {
 }
 </script>
 
-<style scoped>
-#tab-b2sharebridge {
-	height: 100%;
-	padding: 0;
+<style>
+.bridgeheader, .bridgefooter button.btn.btn-primary{
+	background-color: var(--color-background-plain);
+	/*var(--color-main-background);*/
+	color: var(--color-primary-text);
 }
 
-#bridgedial {
-	padding-block: 4px 8px;
-	padding-inline: 12px 8px;
-	max-width: 90%;
-	width: 900px;
-	max-height: min(90%, 100% - 100px);
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	transition: transform .3s ease;
-	border-radius: var(--border-radius-large);
-	background-color: var(--color-main-background);
-	color: var(--color-main-text);
-	box-shadow: 0 0 40px #0003;
+.bridgeheader {
+	border-radius: var(--border-radius-large) var(--border-radius-large) 0 0;
 }
 
-label.col-auto {
-	width: 25%;
+.bridgeheader h5 {
+	font-size: 20px;
+	padding: 1rem 1rem;
 }
 
-#publish_button {
-	margin-left: 3px;
-	width: 25%;
-	background-color: rgb(26, 48, 99);
-	color: white;
+.bridgeheader button.close {
+	background-color: var(--color-primary-text);
+	border-radius: var(--border-radius-large); /*might be border-radius-pill instead*/
 }
 
-input.is-valid,
-select.is-valid {
-	outline-color: rgb(37, 156, 64);
-	border: 2px solid rgb(37, 156, 64);
+.bridgemodal input{
+	border-radius: var(--border-radius);
 }
 
-input.is-valid:focus,
-input.is-invalid:hover,
-select.is-valid:focus {
-	box-shadow: rgba(32, 134, 55, 0.25) 0 0 0 0.2rem;
-	border-color: rgb(37, 156, 64);
-}
-
-input.is-invalid,
-select.is-invalid {
-	outline-color: rgb(148, 26, 37);
-	border: 2px solid rgb(148, 26, 37);
-}
-
-input.is-invalid:focus,
-select.is-invalid:focus {
-	box-shadow: rgba(165, 29, 42, 0.25) 0 0 0 0.2rem;
-	border-color: rgb(148, 26, 37);
-}
-
-div.invalid-feedback {
-	color: rgb(148, 26, 37);
+#bridgedial div.modal-content{
+	border-radius: 30px 30px var(--border-radius-large) var(--border-radius-large);/*the 30 should be some calc statement*/
 }
 </style>

@@ -1,14 +1,11 @@
 <template>
-	<div id="eudat_b2share" class="section">
+	<div id="bridgepersonal" class="section">
 		<h2>EUDAT B2SHARE Bridge</h2>
 		<div v-if="loaded && servers.length" class="servers">
 			<ul>
 				<li v-for="server in servers">
-					<TokenEditor :id="parseInt(server.id)"
-						:name="server.name"
-						:url="server.publishUrl"
-						:token="getToken(server.id)"
-						@token-change="updateTokens" />
+					<TokenEditor :id="parseInt(server.id)" :name="server.name" :url="server.publishUrl"
+						:token="getToken(server.id)" @token-change="updateTokens" />
 				</li>
 			</ul>
 		</div>
@@ -90,11 +87,12 @@ export default {
 }
 </script>
 
-<style scoped>
-div.servers {
+<style>
+#bridgepersonal .servers {
 	margin-top: 10px;
-	background: rgba(128, 128, 128, 0.1);
+	/*background: var(--color-background-plain);*/
+	border: 5px solid var(--color-border);
 	padding: 10px;
-	border-radius: 20px;
+	border-radius: var(--border-radius-rounded);
 }
 </style>

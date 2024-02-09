@@ -45,7 +45,7 @@
 					</ValidationProvider>
 					<b-form-group label-cols="3" label-cols-lg="sm" label="Open access:" label-for="cbopen_access">
 						<b-form-checkbox id="cbopen_access" v-model="checkbox_status" label="Open access:" type="checkbox"
-							name="open_access" size="lg" />
+							class="checkbox" name="open_access" size="lg" />
 					</b-form-group>
 					<!-- <b-btn id="publish_button"
 									type="submit"
@@ -401,7 +401,8 @@ export default {
 </script>
 
 <style>
-.bridgeheader, .bridgefooter button.btn.btn-primary{
+.bridgeheader,
+.bridgefooter button.btn.btn-primary {
 	background-color: var(--color-background-plain);
 	/*var(--color-main-background);*/
 	color: var(--color-primary-text);
@@ -418,14 +419,22 @@ export default {
 
 .bridgeheader button.close {
 	background-color: var(--color-primary-text);
-	border-radius: var(--border-radius-large); /*might be border-radius-pill instead*/
+	border-radius: var(--border-radius-large);
+	/*might be border-radius-pill instead*/
 }
 
-.bridgemodal input{
+.bridgemodal input {
 	border-radius: var(--border-radius);
 }
 
-#bridgedial div.modal-content{
-	border-radius: 30px 30px var(--border-radius-large) var(--border-radius-large);/*the 30 should be some calc statement*/
+#bridgedial div.modal-content {
+	border-radius: 30px 30px var(--border-radius-large) var(--border-radius-large);
+	/*the 30 should be some calc statement*/
+	background-color: var(--color-main-background);
+}
+
+.bridgefooter,
+.bridgeheader {
+	border-color: var(--color-border);
 }
 </style>

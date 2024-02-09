@@ -1,5 +1,5 @@
 <template>
-	<NcContent id=content app-name="b2sharebridge" class="app-b2sharebridge">
+	<NcContent id=bridgecontent app-name="b2sharebridge" class="app-b2sharebridge">
 		<NcAppNavigation>
 			<NcAppNavigationNew v-if="!loading" :text="t('b2sharebridge', 'All Deposits')"
 				:disabled="filter === DepositFilter.ALL" button-id="deposit-all-button" button-class="icon-add"
@@ -251,7 +251,7 @@ export default {
 	},
 }
 </script>
-<style scoped>
+<style>
 #deposit-table-name {
 	height: 50px;
 }
@@ -263,9 +263,10 @@ export default {
 	display: flex;
 	flex-direction: column;
 	flex-grow: 1;
+	background-color: var(--color-main-background)
 }
 
-.icon-file {
+#bridgecontent .icon-file {
 	height: 50px;
 }
 
@@ -275,9 +276,10 @@ export default {
 	border-bottom: 0;
 }
 
-table th td {
-	color: white;
-	text-align: left;
+#bridgecontent td,
+#bridgecontent th {
+	color: var(--color-main-text);
+	border-color: var(--color-border);
 }
 
 body .table.b-table>tfoot>tr>[aria-sort=none],

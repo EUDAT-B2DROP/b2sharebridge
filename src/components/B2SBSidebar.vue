@@ -1,11 +1,10 @@
 <template>
+	<!--TODO get rid of bootstrap and use nextcloud vue components-->
 	<b-modal id="bridgedial" v-model="isModalOpen" title="Create a B2SHARE deposit" ok-title="Publish" @ok="handleOk"
 		:ok-disabled="publishDisabled" header-class="bridgeheader" modal-class="bridgemodal" footer-class="bridgefooter">
-		<h1> Create a B2SHARE deposit</h1>
-		<p>TODO List selected files here</p>
 		<div id="b2shareBridgeTabView" class="dialogContainer">
 			<div v-if="tokens === null && loaded_sidebar" id="b2sharebridge_errormsg" style="color: red;">
-				Please set your B2SHARE API token <a href="/settings/user/b2sharebridge">here</a>
+				Please set your B2SHARE API token <a class="bridgelink" href="/settings/user/b2sharebridge">here</a>
 			</div>
 			<div v-else-if="loaded_sidebar">
 				<ValidationObserver tag="form" ref="observer" v-slot="{ handleSubmit }"
@@ -44,6 +43,7 @@
 						</b-form-group>
 					</ValidationProvider>
 					<b-form-group label-cols="3" label-cols-lg="sm" label="Open access:" label-for="cbopen_access">
+						<!--TODO use NcCheckboxRadioSwitch-->
 						<b-form-checkbox id="cbopen_access" v-model="checkbox_status" label="Open access:" type="checkbox"
 							class="checkbox" name="open_access" size="lg" />
 					</b-form-group>
@@ -57,19 +57,20 @@
 			</div>
 		</div>
 		<b-modal v-if="errormessage !== null" id="error_modal" v-model="showErrorModal" title="B2SHARE" ok-only
-			header-bg-variant="danger" header-text-variant="light">
+			header-bg-variant="danger" header-text-variant="light" modal-class="bridgemodal" footer-class="bridgefooter">
 			<div>
 				<span v-html="errormessage"></span>
 			</div>
 		</b-modal>
 		<b-modal id="published_modal" v-model="showPublishedModal" title="B2SHARE" ok-only @close="handleOkPublished"
-			@ok="handleOkPublished" header-class="b2share-modal-header">
+			@ok="handleOkPublished" header-class="bridgeheader" modal-class="bridgemodal" footer-class="bridgefooter">
 			<div>
 				<p class="my-4">
 					Transferring file to B2SHARE in the background.
 				</p>
 				<p>
-					Click <a href="/apps/b2sharebridge">here</a> to review the deposit status or edit your draft after the
+					Click <a class="bridgelink" href="/apps/b2sharebridge">here</a> to review the deposit status or edit
+					your draft after the
 					transfer.
 				</p>
 			</div>
@@ -159,8 +160,9 @@ export default {
 
 		if (!this.hasValidTokens()) {
 			this.tokens = null
-			this.errormessage = 'Please set your B2SHARE API token <a href="/settings/user/b2sharebridge">here</a>'
+			this.errormessage = 'Please set your B2SHARE API token <a class="bridgelink" href="/settings/user/b2sharebridge">here</a>'
 			this.loaded_sidebar = true
+			this.publishDisabled = true
 			return
 		}
 
@@ -168,6 +170,7 @@ export default {
 			console.error('Number of servers and tokens differ, please contact an administrator')
 			this.tokens = null
 			this.loaded_sidebar = true
+			this.publishDisabled = true
 			return
 		}
 
@@ -427,7 +430,9 @@ export default {
 	border-radius: var(--border-radius);
 }
 
-#bridgedial div.modal-content {
+#bridgedial div.modal-content,
+#published_modal div.modal-content,
+#error_modal div.modal-content {
 	border-radius: 30px 30px var(--border-radius-large) var(--border-radius-large);
 	/*the 30 should be some calc statement*/
 	background-color: var(--color-main-background);
@@ -436,5 +441,17 @@ export default {
 .bridgefooter,
 .bridgeheader {
 	border-color: var(--color-border);
+}
+
+.bridgelink {
+	color: blue;
+}
+
+.bridgelink:hover {
+	text-decoration: underline;
+}
+
+.bridgelink:visited {
+	color: purple;
 }
 </style>

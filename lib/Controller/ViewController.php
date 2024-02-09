@@ -204,7 +204,8 @@ class ViewController extends Controller
 
 
         $this->logger->info(
-            'saving API token', ['app' => Application::APP_ID]
+            'saving API token',
+            ['app' => Application::APP_ID]
         );
         $this->config->setUserValue($this->userId, $this->appName, "token_" . $server_id, $token);
         return new JSONResponse(
@@ -226,11 +227,13 @@ class ViewController extends Controller
     public function deleteToken($id): JSONResponse
     {
         $this->logger->info(
-            'Deleting API token', ['app' => Application::APP_ID]
+            'Deleting API token',
+            ['app' => Application::APP_ID]
         );
         if (strlen($this->userId) <= 0) {
             $this->logger->info(
-                'No user configured for session', ['app' => Application::APP_ID]
+                'No user configured for session',
+                ['app' => Application::APP_ID]
             );
             return new JSONResponse(
                 [
@@ -264,10 +267,9 @@ class ViewController extends Controller
         foreach ($servers as $server) {
             $serverId = $server->getId();
             $token = $this->config->getUserValue($this->userId, $this->appName, 'token_' . $serverId, null);
-            if($token) {
+            if ($token) {
                 $ret[$serverId] = $token;
-            }
-            else {
+            } else {
                 $ret[$serverId] = "";
             }
         }
@@ -283,53 +285,6 @@ class ViewController extends Controller
      */
     public function getTabViewContent(): array
     {
-
         return $this->cMapper->getCommunityList();
-    }
-
-    /**
-     * XHR request endpoint for token state: disables or enables publish button
-     *
-     * @return          JSONResponse
-     * @NoAdminRequired
-     * @throws          Exception
-     */
-    public function initializeB2ShareUI(): JSONResponse
-    {
-        $error_msg = "";
-        $status_code = Http::STATUS_OK;
-        $this->logger->debug(
-            'in func initUI', ['app' => Application::APP_ID]
-        );
-        if (strlen($this->userId) <= 0) {
-            $this->logger->info(
-                'No user configured for session', ['app' => Application::APP_ID]
-            );
-            $error_msg .= "Authorization failure: login first.<br>\n";
-            $status_code = Http::STATUS_UNAUTHORIZED;
-        }
-        $param = $this->request->getParams();
-        $id = (int)$param['file_id'];
-        Filesystem::init($this->userId, '/');
-        $view = Filesystem::getView();
-        $this->logger->debug(
-            'File ID: ' . $id, ['app' => Application::APP_ID]
-        );
-        $filesize = $view->filesize(Filesystem::getPath($id));
-        $fileName = basename(Filesystem::getPath($id));
-        $is_dir = $view->is_dir(Filesystem::getPath($id));
-        if ($is_dir) {
-            $error_msg .= "You can only publish a file to B2SHARE.<br>\n";
-            $status_code = Http::STATUS_BAD_REQUEST;
-        }
-
-        $result = [
-            "title" => $fileName,
-        ];
-        if($error_msg != "") {
-            $result["error_msg"] = $error_msg;
-            return new JSONResponse($result, $status_code);
-        }
-        return new JSONResponse($result);
     }
 }

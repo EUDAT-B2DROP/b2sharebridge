@@ -235,7 +235,6 @@ export default {
 				console.error("No files selected")
 				return
 			}
-			//this.initializeB2ShareUI(this.selectedFiles[0])
 
 			axios
 				.post(generateUrl('/apps/b2sharebridge/publish'),
@@ -365,22 +364,6 @@ export default {
 				return false
 			}
 			return !fileInfo.isDirectory()
-		},
-
-		initializeB2ShareUI(fileInfo) {
-			const url_path
-				= '/apps/b2sharebridge/initializeb2shareui?requesttoken='
-				+ encodeURIComponent(OC.requestToken) + '&file_id='
-				+ encodeURIComponent(fileInfo.id)
-			this.fileInfo = fileInfo
-			axios.get(generateUrl(url_path))
-				.catch((error) => {
-					if (error.data && 'error_msg' in error.data) {
-						this.errormessage = '<p>' + error.response.data.error_msg + '</p>'
-						this.showErrorModal = true
-					}
-					console.error(error)
-				})
 		},
 
 		// VeeValidate

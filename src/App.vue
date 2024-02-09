@@ -49,7 +49,7 @@
 				<b-table id="deposit-table" striped hover :items="deposits" :fields="fields" :sort-by.sync="sortBy"
 					:sort-desc.sync="sortDesc" label-sort-asc="" label-sort-desc="" label-sort-clear="" sort-icon-left>
 					<template #cell(url)="url_data" class="link-primary">
-						<a :href="url_data.value">{{ url_data.value }}</a>
+						<a class="bridgelink" :href="url_data.value">{{ url_data.value }}</a>
 					</template>
 				</b-table>
 			</div>
@@ -317,5 +317,17 @@ textarea {
 
 .columnWidthTitle {
 	width: 20%
+}
+
+.bridgelink {
+	color: blue;
+}
+
+.bridgelink:hover {
+	text-decoration: underline;
+}
+
+.bridgelink:visited {
+	color: purple;
 }
 </style>

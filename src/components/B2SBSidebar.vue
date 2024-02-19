@@ -1,13 +1,14 @@
 <template>
 	<!--TODO get rid of bootstrap and use nextcloud vue components-->
-	<b-modal id="bridgedial" v-model="isModalOpen" title="Create a B2SHARE deposit" ok-title="Publish" @ok="handleOk"
-		:ok-disabled="publishDisabled" header-class="bridgeheader" modal-class="bridgemodal" footer-class="bridgefooter">
+	<b-modal id="bridgedial" v-model="isModalOpen" title="Create a B2SHARE deposit" ok-title="Publish"
+		:ok-disabled="publishDisabled" header-class="bridgeheader" modal-class="bridgemodal" footer-class="bridgefooter"
+		@ok="handleOk">
 		<div id="b2shareBridgeTabView" class="dialogContainer">
 			<div v-if="tokens === null && loaded_sidebar" id="b2sharebridge_errormsg" style="color: red;">
 				Please set your B2SHARE API token <a class="bridgelink" href="/settings/user/b2sharebridge">here</a>
 			</div>
 			<div v-else-if="loaded_sidebar">
-				<ValidationObserver tag="form" ref="observer" v-slot="{ handleSubmit }"
+				<ValidationObserver ref="observer" v-slot="{ handleSubmit }" tag="form"
 					@submit.prevent="handleSubmit(publishAction)">
 					<ValidationProvider v-slot="validationContext" name="Title" :rules="{ required: true, min: 3 }">
 						<b-form-group label-cols="3" label-cols-lg="sm" label="Deposit Title:" label-for="b2s_title">
@@ -52,18 +53,17 @@
 									:disabled="publishDisabled">
 									Publish
 								</b-btn> -->
-
 				</ValidationObserver>
 			</div>
 		</div>
 		<b-modal v-if="errormessage !== null" id="error_modal" v-model="showErrorModal" title="B2SHARE" ok-only
 			header-bg-variant="danger" header-text-variant="light" modal-class="bridgemodal" footer-class="bridgefooter">
 			<div>
-				<span v-html="errormessage"></span>
+				<span v-html="errormessage" />
 			</div>
 		</b-modal>
-		<b-modal id="published_modal" v-model="showPublishedModal" title="B2SHARE" ok-only @close="handleOkPublished"
-			@ok="handleOkPublished" header-class="bridgeheader" modal-class="bridgemodal" footer-class="bridgefooter">
+		<b-modal id="published_modal" v-model="showPublishedModal" title="B2SHARE" ok-only header-class="bridgeheader"
+			modal-class="bridgemodal" footer-class="bridgefooter" @close="handleOkPublished" @ok="handleOkPublished">
 			<div>
 				<p class="my-4">
 					Transferring file to B2SHARE in the background.
@@ -82,13 +82,12 @@ import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import { ValidationProvider, ValidationObserver, extend } from 'vee-validate'
 
-//css
+// css
 import '../../css/style.scss'
 /* DO NOT IMPORT ALL OF BOOTSTRAP, IT BREAKS NEXTCLOUD */
 // import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-
 
 /**
  * Validation rules
@@ -119,8 +118,8 @@ extend('required', {
 export default {
 	name: 'B2sharebridgeSidebar',
 	components: {
-		//NcAppContent,
-		//FilePicker,
+		// NcAppContent,
+		// FilePicker,
 		ValidationObserver,
 		ValidationProvider,
 	},
@@ -148,6 +147,18 @@ export default {
 			loaded_sidebar: false,
 			selectedFiles: [],
 		}
+	},
+
+	computed: {
+		filepickerOptions() {
+			return {
+				allowPickDirectory: false,
+				buttons: this.buttonFactory,
+				container: `#${this.containerId}`,
+				multiselect: false,
+				name: t('files', 'Select file or folder to link to'),
+			}
+		},
 	},
 
 	async mounted() {
@@ -201,13 +212,14 @@ export default {
 
 	methods: {
 		/**
-		* Only triggers, if the sidebar is visible for the first time
-		*/
+		 * Only triggers, if the sidebar is visible for the first time
+		 * @param isVisible
+		 */
 		visibleHandlerOnce(isVisible) {
 			if (isVisible) {
 				if (!this.hasValidTokens()) {
 					this.showErrorModal = false
-					return
+
 				}
 			}
 		},
@@ -219,7 +231,7 @@ export default {
 
 		handleOkPublished() {
 			this.$bvModal.hide()
-			this.$emit("close")
+			this.$emit('close')
 			this.isModalOpen = false
 		},
 		/**
@@ -232,7 +244,7 @@ export default {
 				return
 			}
 			if (!this.selectedFiles.length) {
-				console.error("No files selected")
+				console.error('No files selected')
 				return
 			}
 
@@ -369,18 +381,6 @@ export default {
 		// VeeValidate
 		getValidationState({ dirty, validated, valid = null }) {
 			return dirty || validated ? valid : null
-		},
-	},
-
-	computed: {
-		filepickerOptions() {
-			return {
-				allowPickDirectory: false,
-				buttons: this.buttonFactory,
-				container: `#${this.containerId}`,
-				multiselect: false,
-				name: t('files', 'Select file or folder to link to'),
-			}
 		},
 	},
 }

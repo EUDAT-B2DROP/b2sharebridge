@@ -9,8 +9,8 @@
 					<em>External publishing</em>
 				</p>
 				<p id="b2shareAPITokenField">
-					<ValidationProvider v-slot="validationContext" name="token" rules="required|tokenrule" :vid="'prov_' + id"
-						class="validation">
+					<ValidationProvider v-slot="validationContext" name="token" rules="required|tokenrule"
+						:vid="'prov_' + id" class="validation">
 						<b-form-input v-model="mutable_token" title="b2share API token" type="text"
 							placeholder="Your API token" name="b2share_apitoken" style="width: 400px; grid-column: 1"
 							class="form-control" :state="getValidationState(validationContext)" />

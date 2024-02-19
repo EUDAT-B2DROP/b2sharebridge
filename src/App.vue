@@ -1,5 +1,5 @@
 <template>
-	<NcContent id=bridgecontent app-name="b2sharebridge" class="app-b2sharebridge">
+	<NcContent id="bridgecontent" app-name="b2sharebridge" class="app-b2sharebridge">
 		<NcAppNavigation>
 			<NcAppNavigationNew v-if="!loading" :text="t('b2sharebridge', 'All Deposits')"
 				:disabled="filter === DepositFilter.ALL" button-id="deposit-all-button" button-class="icon-add"
@@ -72,7 +72,7 @@ import {
 // import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-//import '@nextcloud/dialogs/styles/toast.scss'
+// import '@nextcloud/dialogs/styles/toast.scss'
 import '../css/style.scss'
 
 const DepositFilter = {

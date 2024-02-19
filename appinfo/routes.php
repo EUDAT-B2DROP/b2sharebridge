@@ -62,11 +62,6 @@ return [
             'verb'=>'GET'
         ],
         [
-            'name' => 'View#initializeB2ShareUI',
-            'url' => '/initializeb2shareui',
-            'verb' => 'GET'
-        ],
-        [
             'name' => 'Server#listServers',
             'url' => '/servers',
             'verb' => 'GET'

@@ -1,27 +1,19 @@
 <template>
-	<div id="admin-settings" class="section">
+	<div id="admin-settings" class="bridgeadmin">
 		<h2>EUDAT B2SHARE Bridge</h2>
-		<div class="new_server">
+		<div class="bridgeservers">
 			<h3>Create a new Server:</h3>
-			<ServerEditor :id="dummy_server.id"
-				:name="dummy_server.name"
-				:publishurl="dummy_server.publishUrl"
-				:maxuploads="dummy_server.maxUploads"
-				:maxuploadfilesize="dummy_server.maxUploadFilesize"
-				:checkssl="dummy_server.checkSsl"
-				@server-change="loadServers" />
+			<ServerEditor :id="dummy_server.id" :name="dummy_server.name" :publishurl="dummy_server.publishUrl"
+				:maxuploads="dummy_server.maxUploads" :maxuploadfilesize="dummy_server.maxUploadFilesize"
+				:checkssl="dummy_server.checkSsl" @server-change="loadServers" />
 		</div>
-		<div v-if="loaded && servers.length" class="servers">
+		<div v-if="loaded && servers.length" class="bridgeservers">
 			<h3>Servers:</h3>
 			<ul>
 				<li v-for="server in servers">
-					<ServerEditor :id="parseInt(server.id)"
-						:name="server.name"
-						:publishurl="server.publishUrl"
-						:maxuploads="server.maxUploads"
-						:maxuploadfilesize="server.maxUploadFilesize"
-						:checkssl="server.checkSsl === 1"
-						@server-change="loadServers" />
+					<ServerEditor :id="parseInt(server.id)" :name="server.name" :publishurl="server.publishUrl"
+						:maxuploads="server.maxUploads" :maxuploadfilesize="server.maxUploadFilesize"
+						:checkssl="server.checkSsl === 1" @server-change="loadServers" />
 				</li>
 			</ul>
 		</div>
@@ -83,17 +75,16 @@ export default {
 }
 </script>
 
-<style scoped>
-div.new_server {
-	background: rgba(128, 128, 128, 0.1);
+<style>
+.bridgeadmin {
 	padding: 10px;
-	border-radius: 20px;
+	border-radius: var(--border-radius-rounded);
 }
 
 div.servers {
 	margin-top: 10px;
-	background: rgba(128, 128, 128, 0.1);
+	background-color: var(--color-background-plain);
 	padding: 10px;
-	border-radius: 20px;
+	border-radius: var(--border-radius-large);
 }
 </style>

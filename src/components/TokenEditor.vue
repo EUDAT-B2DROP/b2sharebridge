@@ -1,34 +1,21 @@
 <template>
-	<div class="token_form">
+	<div class="bridgetoken">
 		<h3>{{ name }}</h3>
 		<ValidationObserver>
 			<b-form @submit.prevent.stop="saveToken">
 				<p id="b2shareUrlField">
-					<input v-model="url"
-						title="publish_baseurl"
-						type="text"
-						style="width: 400px"
-						disabled
+					<input v-model="url" title="publish_baseurl" type="text" style="width: 400px" disabled
 						class="publish_url">
 					<em>External publishing</em>
 				</p>
 				<p id="b2shareAPITokenField">
-					<ValidationProvider v-slot="validationContext"
-						name="token"
-						rules="required|tokenrule"
-						:vid="'prov_'+id"
-						class="validation">
-						<b-form-input v-model="mutable_token"
-							title="b2share API token"
-							type="text"
-							placeholder="Your API token"
-							name="b2share_apitoken"
-							style="width: 400px; grid-column: 1"
-							class="form-control"
-							:state="getValidationState(validationContext)" />
+					<ValidationProvider v-slot="validationContext" name="token" rules="required|tokenrule"
+						:vid="'prov_' + id" class="validation">
+						<b-form-input v-model="mutable_token" title="b2share API token" type="text"
+							placeholder="Your API token" name="b2share_apitoken" style="width: 400px; grid-column: 1"
+							class="form-control" :state="getValidationState(validationContext)" />
 						<em class="validation">B2Share API token</em>
-						<b-form-invalid-feedback id="input-1-live-feedback"
-							style="grid-row: 2">
+						<b-form-invalid-feedback id="input-1-live-feedback" style="grid-row: 2">
 							{{
 								validationContext.errors[0]
 							}}
@@ -152,17 +139,17 @@ export default {
 	},
 }
 </script>
-<style scoped>
-
-div.token_form {
-	background: rgba(128, 128, 128, 0.1);
+<style>
+.bridgetoken {
+	background: var(--color-main-background);
 	padding: 10px;
-	border-radius: 20px;
+	border-radius: var(--border-radius-large);
 	margin-top: 2px;
+	border: 5px solid var(--color-border);
 }
 
-input.publish_url {
-	background: rgba(128, 128, 128, 0.1);
+.bridgetoken input {
+	border-radius: var(--border-radius-large);
 }
 
 em.validation {
@@ -175,5 +162,4 @@ span.validation {
 	column-gap: 7px;
 	grid-template-columns: 400px;
 }
-
 </style>

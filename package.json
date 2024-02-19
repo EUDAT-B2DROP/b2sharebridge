@@ -1,7 +1,7 @@
 {
   "name": "b2sharebridge",
   "description": "An app to connect b2drop with b2share",
-  "version": "3.2.5",
+  "version": "4.0.0",
   "author": "EUDAT-B2DROP developers <info@eudat.eu>",
   "repository": {
     "url": "https://github.com/EUDAT-B2DROP/b2sharebridge",
@@ -21,10 +21,11 @@
     "stylelint:fix": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue --fix"
   },
   "dependencies": {
+    "@mdi/svg": "^7.4.47",
     "@nextcloud/axios": "^2.4.0",
-    "@nextcloud/dialogs": "^3.2.0",
-    "@nextcloud/router": "^2.2.0",
-    "@nextcloud/vue": "^7.12.6",
+    "@nextcloud/dialogs": "^5",
+    "@nextcloud/router": "^3",
+    "@nextcloud/vue": "^8",
     "bootstrap-vue": "^2.23.1",
     "fast-xml-parser": "^4.3.2",
     "vee-validate": "^3.4.15",
@@ -42,8 +43,8 @@
     "@nextcloud/stylelint-config": "^2.3.1",
     "@nextcloud/webpack-vue-config": "^6.0.0",
     "stylelint": "^15.11.0",
+    "vue-loader": "^15",
     "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4",
-    "vue-loader": "^15"
+    "webpack-cli": "^5.1.4"
   }
 }

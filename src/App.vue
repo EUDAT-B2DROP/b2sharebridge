@@ -1,29 +1,17 @@
 <template>
-	<div id="content" class="app-b2sharebridge">
+	<NcContent id="bridgecontent" app-name="b2sharebridge" class="app-b2sharebridge">
 		<NcAppNavigation>
-			<NcAppNavigationNew v-if="!loading"
-				:text="t('b2sharebridge', 'All Deposits')"
-				:disabled="filter === DepositFilter.ALL"
-				button-id="deposit-all-button"
-				button-class="icon-add"
+			<NcAppNavigationNew v-if="!loading" :text="t('b2sharebridge', 'All Deposits')"
+				:disabled="filter === DepositFilter.ALL" button-id="deposit-all-button" button-class="icon-add"
 				@click="showAllDeposits" />
-			<NcAppNavigationNew v-if="!loading"
-				:text="t('b2sharebridge', 'Pending Deposits')"
-				:disabled="filter === DepositFilter.PENDING"
-				button-id="deposit-pending-button"
-				button-class="icon-add"
+			<NcAppNavigationNew v-if="!loading" :text="t('b2sharebridge', 'Pending Deposits')"
+				:disabled="filter === DepositFilter.PENDING" button-id="deposit-pending-button" button-class="icon-add"
 				@click="showPendingDeposits" />
-			<NcAppNavigationNew v-if="!loading"
-				:text="t('b2sharebridge', 'Published Deposits')"
-				:disabled="filter === DepositFilter.PUBLISHED"
-				button-id="deposit-published-button"
-				button-class="icon-add"
+			<NcAppNavigationNew v-if="!loading" :text="t('b2sharebridge', 'Published Deposits')"
+				:disabled="filter === DepositFilter.PUBLISHED" button-id="deposit-published-button" button-class="icon-add"
 				@click="showPublishedDeposits" />
-			<NcAppNavigationNew v-if="!loading"
-				:text="t('b2sharebridge', 'Failed Deposits')"
-				:disabled="filter === DepositFilter.FAILED"
-				button-id="deposit-failed-button"
-				button-class="icon-add"
+			<NcAppNavigationNew v-if="!loading" :text="t('b2sharebridge', 'Failed Deposits')"
+				:disabled="filter === DepositFilter.FAILED" button-id="deposit-failed-button" button-class="icon-add"
 				@click="showFailedDeposits" />
 		</NcAppNavigation>
 		<NcAppContent>
@@ -58,30 +46,22 @@
 				<h2 id="deposit-table-name" style="text-align: center;">
 					{{ getTableName() }}
 				</h2>
-				<b-table id="deposit-table"
-					striped
-					hover
-					:items="deposits"
-					:fields="fields"
-					:sort-by.sync="sortBy"
-					:sort-desc.sync="sortDesc"
-					label-sort-asc=""
-					label-sort-desc=""
-					label-sort-clear=""
-					sort-icon-left>
+				<b-table id="deposit-table" striped hover :items="deposits" :fields="fields" :sort-by.sync="sortBy"
+					:sort-desc.sync="sortDesc" label-sort-asc="" label-sort-desc="" label-sort-clear="" sort-icon-left>
 					<template #cell(url)="url_data" class="link-primary">
-						<a :href="url_data.value">{{ url_data.value }}</a>
+						<a class="bridgelink" :href="url_data.value">{{ url_data.value }}</a>
 					</template>
 				</b-table>
 			</div>
 		</NcAppContent>
-	</div>
+	</NcContent>
 </template>
 <script>
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import { showError, showSuccess } from '@nextcloud/dialogs'
 import {
+	NcContent,
 	NcActionButton,
 	NcAppContent,
 	NcAppNavigation,
@@ -92,7 +72,7 @@ import {
 // import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-import '@nextcloud/dialogs/styles/toast.scss'
+// import '@nextcloud/dialogs/styles/toast.scss'
 import '../css/style.scss'
 
 const DepositFilter = {
@@ -105,6 +85,7 @@ const DepositFilter = {
 export default {
 	name: 'App',
 	components: {
+		NcContent,
 		NcActionButton,
 		NcAppContent,
 		NcAppNavigation,
@@ -222,16 +203,16 @@ export default {
 
 		getTableName() {
 			switch (this.filter) {
-			case DepositFilter.ALL:
-				return 'All Deposits'
-			case DepositFilter.PENDING:
-				return 'Pending Deposits'
-			case DepositFilter.PUBLISHED:
-				return 'Published Deposits'
-			case DepositFilter.FAILED:
-				return 'Failed Deposits'
-			default:
-				return 'Error Table'
+				case DepositFilter.ALL:
+					return 'All Deposits'
+				case DepositFilter.PENDING:
+					return 'Pending Deposits'
+				case DepositFilter.PUBLISHED:
+					return 'Published Deposits'
+				case DepositFilter.FAILED:
+					return 'Failed Deposits'
+				default:
+					return 'Error Table'
 			}
 		},
 
@@ -242,20 +223,20 @@ export default {
 		translateDepositStatus(deposit_status) {
 			if ('status' in deposit_status) {
 				switch (deposit_status.status) {
-				case 0:
-					deposit_status.status = this.capitalizeFirstLetter(DepositFilter.PUBLISHED)
-					break
-				case 1:
-				case 2:
-					deposit_status.status = this.capitalizeFirstLetter(DepositFilter.PENDING)
-					break
-				case 3:
-				case 4:
-				case 5:
-					deposit_status.status = this.capitalizeFirstLetter(DepositFilter.FAILED)
-					break
-				default:
-					break
+					case 0:
+						deposit_status.status = this.capitalizeFirstLetter(DepositFilter.PUBLISHED)
+						break
+					case 1:
+					case 2:
+						deposit_status.status = this.capitalizeFirstLetter(DepositFilter.PENDING)
+						break
+					case 3:
+					case 4:
+					case 5:
+						deposit_status.status = this.capitalizeFirstLetter(DepositFilter.FAILED)
+						break
+					default:
+						break
 				}
 			}
 			// TODO query server id?
@@ -270,66 +251,83 @@ export default {
 	},
 }
 </script>
-<style scoped>
+<style>
 #deposit-table-name {
-  height: 50px;
+	height: 50px;
 }
 
-#app-content > div {
-  width: 100%;
-  height: 100%;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
+#app-content>div {
+	width: 100%;
+	height: 100%;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	background-color: var(--color-main-background)
 }
 
-.icon-file {
-  height: 50px;
+#bridgecontent .icon-file {
+	height: 50px;
 }
 
 #deposit-table {
-  width: 100%;
-  border-top: 0;
-  border-bottom: 0;
+	width: 100%;
+	border-top: 0;
+	border-bottom: 0;
 }
 
-table th td {
-  color: white;
-  text-align: left;
+#bridgecontent td,
+#bridgecontent th {
+	color: var(--color-main-text);
+	border-color: var(--color-border);
 }
 
-body .table.b-table > tfoot > tr > [aria-sort=none], body .table.b-table > thead > tr > th[aria-sort=none] {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
+body .table.b-table>tfoot>tr>[aria-sort=none],
+body .table.b-table>thead>tr>th[aria-sort=none] {
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
 }
 
-body .table.b-table > tfoot > tr > [aria-sort=ascending], body .table.b-table > thead > tr > th[aria-sort=ascending] {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
+body .table.b-table>tfoot>tr>[aria-sort=ascending],
+body .table.b-table>thead>tr>th[aria-sort=ascending] {
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' opacity='.3' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
 }
 
-body .table.b-table.table-dark > tfoot > tr > [aria-sort=descending], body #app .table.b-table.table-dark > thead > tr > [aria-sort=descending], .table.b-table > .thead-dark > tr > [aria-sort=descending] {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
+body .table.b-table.table-dark>tfoot>tr>[aria-sort=descending],
+body #app .table.b-table.table-dark>thead>tr>[aria-sort=descending],
+.table.b-table>.thead-dark>tr>[aria-sort=descending] {
+	background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='101' height='101' view-box='0 0 101 101' preserveAspectRatio='none'%3e%3cpath fill='white' opacity='.3' d='M51 1l25 23 24 22H1l25-22z'/%3e%3cpath fill='white' d='M51 101l25-23 24-22H1l25 22z'/%3e%3c/svg%3e") !important;
 }
 
 input[type='text'] {
-  width: 100%;
+	width: 100%;
 }
 
 textarea {
-  flex-grow: 1;
-  width: 100%;
+	flex-grow: 1;
+	width: 100%;
 }
 
 .columnWidthInt {
-  width: 10%
+	width: 10%
 }
 
 .columnWidthDate {
-  width: 15%
+	width: 15%
 }
 
 .columnWidthTitle {
-  width: 20%
+	width: 20%
 }
 
+.bridgelink {
+	color: blue;
+}
+
+.bridgelink:hover {
+	text-decoration: underline;
+}
+
+.bridgelink:visited {
+	color: purple;
+}
 </style>

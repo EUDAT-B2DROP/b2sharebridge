@@ -39,7 +39,7 @@
             <name>B2SHARE</name>
             <order>100</order>
             <route>b2sharebridge.View.index</route>
-            <icon>appbrowsericon.svg</icon>
+            <icon>appbrowsericon_w_border.svg</icon>
         </navigation>
     </navigations>
 </info>

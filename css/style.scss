@@ -48,23 +48,12 @@
 	table-layout: fixed /* fix a bug on firefox*/
 }
 
-.b2sharebridge .publish-queue-list th {
-	/*text-align: left;*/
-}
-
 .b2share-modal-header, btn .btn-primary {
 	background-color: rgb(26, 48, 99);
 	color: white;
 }
 
-p {
-	margin-bottom: 0;
-}
-
-h2 {
-	font-size: 20px;
-}
-
-h3 {
-	font-size: 16px;
+/*fix bootstrap modal breaking other modals*/
+.modal-header {
+	border: 0;
 }

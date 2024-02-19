@@ -23,18 +23,13 @@ use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
-use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
 use OCA\B2shareBridge\Publish\B2share;
-use OCA\B2shareBridge\Settings\Admin;
-use OCA\B2shareBridge\Settings\Personal;
-use OCA\B2shareBridge\EventListener\SettingsEventListener;
+use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\IJobList;
 use OCP\EventDispatcher\IEventDispatcher;
-use OCP\EventDispatcher\Event;
 use OCP\IConfig;
-use OCP\IContainer;
 use OCP\IDBConnection;
 use OCP\IRequest;
 use OCP\Util;
@@ -74,9 +69,9 @@ class Application extends App implements IBootstrap
         // Register files tab view
         $dispatcher = $container->get(IEventDispatcher::class);
 
-        Util::addScript(self::APP_ID, 'b2sharebridge-filetabmain');
         $dispatcher->addListener(
-            'OCA\Files::loadAdditionalScripts', function () {
+            \OCA\Files\Event\LoadAdditionalScriptsEvent::class,
+            function () {
                 Util::addScript(self::APP_ID, 'b2sharebridge-filetabmain');
             }
         );
@@ -102,7 +97,8 @@ class Application extends App implements IBootstrap
          */
         //Note: Why do they all show as deprecated?
         $context->registerService(
-            CommunityMapper::class, function (ContainerInterface $c): CommunityMapper {
+            CommunityMapper::class,
+            function (ContainerInterface $c): CommunityMapper {
                 return new CommunityMapper(
                     $c->get(IDBConnection::class)
                 );
@@ -110,7 +106,8 @@ class Application extends App implements IBootstrap
         );
 
         $context->registerService(
-            DepositStatusMapper::class, function (ContainerInterface $c): DepositStatusMapper {
+            DepositStatusMapper::class,
+            function (ContainerInterface $c): DepositStatusMapper {
                 return new DepositStatusMapper(
                     $c->get(IDBConnection::class),
                     $c->get(LoggerInterface::class)
@@ -119,7 +116,8 @@ class Application extends App implements IBootstrap
         );
 
         $context->registerService(
-            DepositFileMapper::class, function (ContainerInterface $c): DepositFileMapper {
+            DepositFileMapper::class,
+            function (ContainerInterface $c): DepositFileMapper {
                 return new DepositFileMapper(
                     $c->get(IDBConnection::class)
                 );
@@ -127,7 +125,8 @@ class Application extends App implements IBootstrap
         );
 
         $context->registerService(
-            ServerMapper::class, function (ContainerInterface $c): ServerMapper {
+            ServerMapper::class,
+            function (ContainerInterface $c): ServerMapper {
                 return new ServerMapper(
                     $c->get(IDBConnection::class)
                 );
@@ -139,13 +138,15 @@ class Application extends App implements IBootstrap
          */
         //Note: does this qualify as a service?
         $context->registerService(
-            StatusCodes::class, function (): StatusCodes {
+            StatusCodes::class,
+            function (): StatusCodes {
                 return new StatusCodes();
             }
         );
 
         $context->registerService(
-            B2share::class, function (ContainerInterface $c): B2share {
+            B2share::class,
+            function (ContainerInterface $c): B2share {
                 return new B2share(
                     $c->get(IConfig::class),
                     $c->get(LoggerInterface::class)
@@ -182,7 +183,8 @@ class Application extends App implements IBootstrap
          * Controller
          */
         $context->registerService(
-            PublishController::class, function (ContainerInterface $c): PublishController {
+            PublishController::class,
+            function (ContainerInterface $c): PublishController {
                 return new PublishController(
                     $c->get('appName'),
                     $c->get(IRequest::class),
@@ -201,7 +203,8 @@ class Application extends App implements IBootstrap
         );
 
         $context->registerService(
-            ViewController::class, function (ContainerInterface $c): ViewController {
+            ViewController::class,
+            function (ContainerInterface $c): ViewController {
                 return new ViewController(
                     $c->get('appName'),
                     $c->get(IRequest::class),
@@ -218,7 +221,8 @@ class Application extends App implements IBootstrap
         );
 
         $context->registerService(
-            ServerController::class, function (ContainerInterface $c): ServerController {
+            ServerController::class,
+            function (ContainerInterface $c): ServerController {
                 return new ServerController(
                     $c->get('appName'),
                     $c->get(IRequest::class),

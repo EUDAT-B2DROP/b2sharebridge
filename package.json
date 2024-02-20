@@ -21,15 +21,13 @@
     "stylelint:fix": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue --fix"
   },
   "dependencies": {
-    "@mdi/svg": "^7.4.47",
     "@nextcloud/axios": "^2.4.0",
     "@nextcloud/dialogs": "^5",
     "@nextcloud/router": "^3",
     "@nextcloud/vue": "^8",
     "bootstrap-vue": "^2.23.1",
-    "fast-xml-parser": "^4.3.2",
-    "vee-validate": "^3.4.15",
-    "vue": "^2.7.14"
+    "vue": "^2",
+    "vue-material-design-icons": "^5.1.2"
   },
   "browserslist": [
     "extends @nextcloud/browserslist-config"

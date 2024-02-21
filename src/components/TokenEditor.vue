@@ -1,87 +1,26 @@
 <template>
 	<div class="bridgetoken">
 		<h3>{{ name }}</h3>
-		<ValidationObserver>
-			<b-form @submit.prevent.stop="saveToken">
-				<p id="b2shareUrlField">
-					<input v-model="url" title="publish_baseurl" type="text" style="width: 400px" disabled
-						class="publish_url">
-					<em>External publishing</em>
-				</p>
-				<p id="b2shareAPITokenField">
-					<ValidationProvider v-slot="validationContext" name="token" rules="required|tokenrule"
-						:vid="'prov_' + id" class="validation">
-						<b-form-input v-model="mutable_token" title="b2share API token" type="text"
-							placeholder="Your API token" name="b2share_apitoken" style="width: 400px; grid-column: 1"
-							class="form-control" :state="getValidationState(validationContext)" />
-						<em class="validation">B2Share API token</em>
-						<b-form-invalid-feedback id="input-1-live-feedback" style="grid-row: 2">
-							{{
-								validationContext.errors[0]
-							}}
-						</b-form-invalid-feedback>
-					</ValidationProvider>
-				</p>
-				<p id="b2shareManageAPIToken">
-					<button type="submit" :disabled="!canSave()" @click="saveToken">
-						Save B2SHARE API Token
-					</button>
-					<button :disabled="token === ''" @click="deleteToken">
-						Delete B2SHARE API Token
-					</button>
-				</p>
-			</b-form>
-		</ValidationObserver>
+		<a :href="url + '/user'">{{ url }}</a>
+		<NcPasswordField :value.sync="mutable_token" label="Token" placeholder="Token" :minlength="60" :maxlength="60"
+			@valid="saveToken" @update:value="saveToken" :success="this.token.length === 60"
+			:helper-text="this.token.length === 60 ? 'Token saved' : ''" />
+		<NcButton type="error" @click="deleteToken">
+			Delete Token
+		</NcButton>
 	</div>
 </template>
 
 <script>
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
-import { configure, extend, ValidationObserver, ValidationProvider } from 'vee-validate'
-
-import '../../css/style.scss'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-
-extend('tokenrule', {
-	validate(value) {
-		return {
-			required: true,
-			valid: value.length === 60,
-		}
-	},
-})
-
-extend('required', {
-	validate(value) {
-		return {
-			required: true,
-			valid: ['', null, undefined].indexOf(value) === -1,
-		}
-	},
-	computesRequired: true,
-	message: (fieldName) => {
-		return `Please enter a valid ${fieldName}`
-	},
-})
-
-const config = {
-	classes: {
-		valid: 'is-valid',
-		invalid: 'is-invalid',
-	},
-	bails: true,
-	skipOptional: true,
-	mode: 'aggressive',
-	useConstraintAttrs: true,
-}
-configure(config)
+import { NcPasswordField, NcButton } from '@nextcloud/vue'
 
 export default {
 	name: 'TokenEditor',
 	components: {
-		ValidationObserver,
-		ValidationProvider,
+		NcPasswordField,
+		NcButton,
 	},
 	model: {
 		event: 'token-change',
@@ -95,10 +34,17 @@ export default {
 	data() {
 		return {
 			mutable_token: this.token,
+			helpertext: "",
 		}
 	},
 	methods: {
 		saveToken() {
+			if (!this.canSave()) {
+				return
+			}
+			if (this.mutable_token.length !== 60) {
+				return
+			}
 			const data = {
 				requesttoken: OC.requesttoken,
 				token: this.mutable_token,
@@ -130,11 +76,6 @@ export default {
 
 		canSave() {
 			return this.mutable_token !== this.token && this.mutable_token !== ''
-		},
-
-		// VeeValidate
-		getValidationState({ dirty, validated, valid = null }) {
-			return dirty || validated ? valid : null
 		},
 	},
 }

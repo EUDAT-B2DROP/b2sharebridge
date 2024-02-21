@@ -3,12 +3,12 @@ import { Permission, FileAction, Node, FileType } from '@nextcloud/files'
 import logger from '../logger.js'
 
 import { showMessage, showInfo, showSuccess, showWarning, showError, spawnDialog } from '@nextcloud/dialogs'
-import B2SBSidebar from '../components/B2SBSidebar.vue'
+import BridgeDialog from '../components/BridgeDialog.vue'
 
 const filepicker = async (nodes) => {
 	const FileIds = nodes.map(node => node.fileid)
 	const bridgeVueComponent = Vue.extend({
-		extends: B2SBSidebar,
+		extends: BridgeDialog,
 		data() {
 			return {
 				selectedFiles: FileIds,

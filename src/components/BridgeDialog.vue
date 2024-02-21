@@ -1,0 +1,422 @@
+<template>
+    <NcModal id="infodial" v-if="info.message !== ''" name="" ref="modalRef">
+        <div class="modal__content">
+            <h2>{{ info.heading }}</h2>
+            <p>{{ info.message }}</p>
+            <span class="button-container">
+                <NcButton :href="button.href" @click="button.callback" :type="button.type" v-for="button in info.buttons">
+                    {{ button.label }}
+                </NcButton>
+            </span>
+        </div>
+    </NcModal>
+    <NcModal id="bridgedial" v-else-if="showDialog" name="" ref="modalRef">
+        <div class="modal__content">
+            <h2>Create a B2SHARE deposit</h2>
+            <NcTextField :value.sync="title.text" label="Title" placeholder="Please enter a title" :error="title.error"
+                :success="title.success" minlength="3" maxlength="128" @update:value="validate"
+                :helper-text="title.helpertext">
+                <PencilIcon :size="20" />
+            </NcTextField>
+            <NcSelect v-bind="serverprops" v-model="serverprops.value" required
+                v-bind:class="{ selecterror: serverprops.error }" @input="onChangeServer">
+            </NcSelect>
+            <NcSelect v-bind="communityprops" v-model="communityprops.value" required
+                v-bind:class="{ selecterror: communityprops.error }" @input="validate">
+            </NcSelect>
+            <NcCheckboxRadioSwitch :checked.sync="openAccess">
+                Open Access
+            </NcCheckboxRadioSwitch>
+            <span class="button-container">
+                <NcButton @click="closeModal">
+                    Cancel
+                </NcButton>
+                <NcButton :disabled="publish.disabled" @click="createDeposit" type="primary">
+                    Publish
+                </NcButton>
+            </span>
+        </div>
+    </NcModal>
+</template>
+<script>
+import { NcDialog, NcModal, NcButton, NcTextField, NcSelect, NcCheckboxRadioSwitch } from '@nextcloud/vue'
+import { generateUrl } from '@nextcloud/router'
+import axios from '@nextcloud/axios'
+import PencilIcon from 'vue-material-design-icons/Pencil.vue'
+import Close from 'vue-material-design-icons/Close'
+import CloudUploadOutline from 'vue-material-design-icons/CloudUploadOutline'
+export default {
+    name: 'BridgeDialog',
+    components: {
+        NcDialog,
+        NcModal,
+        NcTextField,
+        NcSelect,
+        NcCheckboxRadioSwitch,
+        NcButton,
+        PencilIcon,
+        Close,
+        CloudUploadOutline,
+    },
+    data() {
+        return {
+            showDialog: false,
+            publish: {
+                disabled: true,
+                pressedOnce: false,
+            },
+            title: {
+                success: false,
+                error: false,
+                text: "",
+                helpertext: "",
+            },
+            serverprops: {
+                inputLabel: "Server",
+                options: [],
+                value: null,
+                error: false,
+            },
+            communityprops: {
+                inputLabel: "Community",
+                options: [],
+                value: null,
+                error: false,
+            },
+            openAccess: false,
+            info: {
+                heading: "Error",
+                message: "",
+                buttons: [
+                    {
+                        label: "Ok",
+                        type: "error",
+                        callback: () => (this.closeModal()),
+                    },
+                ],
+            },
+
+            // Technical fields
+            tokens: [],
+            servers: [],
+            selectedFiles: [],
+        }
+    },
+
+    async mounted() {
+        const server_promise = this.loadServers()
+        const community_promise = this.loadCommunities()
+        const token_promise = this.loadTokens()
+        await server_promise
+        await community_promise
+        await token_promise
+
+        if (!this.hasValidTokens()) {
+            this.tokens = null
+            this.info.heading = 'You are missing a token!'
+            this.info.message = 'Please set your B2SHARE API token.' // <a class="bridgelink" href="/settings/user/b2sharebridge">here</a>'
+            //this.showDialog = true
+            this.info.buttons = [
+                {
+                    label: "Cancel",
+                    type: "secondary",
+                    callback: () => (this.closeModal()),
+                },
+                {
+                    label: "Set API Token",
+                    type: "primary",
+                    callback: () => (this.redirect('/settings/user/b2sharebridge')),
+                    href: generateUrl('/settings/user/b2sharebridge'),
+                },
+            ]
+            return
+        }
+
+        if (this.servers.length !== Object.keys(this.tokens).length) {
+            this.info.message = 'Number of servers and tokens differ, please contact an administrator'
+            console.error(this.info.message)
+            this.tokens = null
+            //this.showDialog = true
+            return
+        }
+
+        if (this.servers.length !== 0) {
+            this.servers.forEach(server => {
+                const hasToken = this.tokens[server.id] !== ''
+                if (hasToken) {
+                    let serverOption = new Object({
+                        id: server.id,
+                        label: server.name,
+                    })
+                    this.serverprops.options.push(serverOption)
+                    if (this.serverprops.value === null) {
+                        console.debug('Selected server automatically')
+                        this.serverprops.value = serverOption
+                        this.onChangeServer() // update communities
+                    }
+                }
+            })
+        }
+
+        this.showDialog = true
+    },
+
+    methods: {
+        // API stuff
+        loadServers() {
+            const url_path
+                = '/apps/b2sharebridge/servers?requesttoken='
+                + encodeURIComponent(OC.requestToken)
+
+            return axios
+                .get(generateUrl(url_path))
+                .then((response) => {
+                    console.log('Loaded servers:')
+                    console.debug(response)
+                    this.servers = response.data
+                })
+                .catch((error) => {
+                    this.info.message = 'Fetching B2SHARE servers failed! Please check your connection or contact an administrator!'
+                    console.error(this.info.message)
+                    console.error(error)
+                })
+        },
+
+        loadCommunities() {
+            const url_path
+                = '/apps/b2sharebridge/gettabviewcontent?requesttoken='
+                + encodeURIComponent(OC.requestToken)
+
+            return axios
+                .get(generateUrl(url_path))
+                .then((response) => {
+                    console.debug('Loaded communities:')
+                    console.debug(response)
+                    this.communities = response.data
+                })
+                .catch((error) => {
+                    this.info.message = 'Fetching B2SHARE communities failed! Please check your connection or contact an administrator!'
+                    console.error(this.info.message)
+                    console.error(error)
+                })
+        },
+
+        loadTokens() {
+            const url_path
+                = '/apps/b2sharebridge/apitoken?requesttoken='
+                + encodeURIComponent(OC.requestToken)
+
+            return axios
+                .get(generateUrl(url_path))
+                .then((response) => {
+                    console.log('Successfully requested tokens!')
+                    console.debug(response.data)
+                    if (response.data) {
+                        this.tokens = response.data
+                    } else {
+                        console.info('No token set!')
+                    }
+                })
+                .catch((error) => {
+                    this.info.message = 'Fetching tokens failed! Please check your connection or contact an administrator!'
+                    console.error(this.info.message)
+                    console.error(error)
+                })
+        },
+
+        // Events
+        onChangeServer() {
+            console.debug("Updating community options")
+
+            // reset communityprops
+            this.communityprops.options = []
+            this.communityprops.value = null
+
+            if (this.serverprops.value !== null) {
+                // set communities for new server
+                this.communities.forEach((community, index) => {
+                    if (community.hasOwnProperty('serverId') && parseInt(community.serverId) === parseInt(this.serverprops.value.id)) {
+                        let communityOption = new Object({
+                            id: community.id,
+                            label: community.name,
+                        })
+                        this.communityprops.options.push(communityOption)
+                        if (community.name === 'EUDAT') { // TODO make this configurable
+                            console.debug('Automatically selected EUDAT as community')
+                            this.communityprops.value = communityOption
+                        }
+                    }
+                })
+            }
+            this.validate()
+        },
+
+        hasValidTokens() {
+            if (this.tokens === null) {
+                return false
+            }
+            let valid_token_found = false
+            Object.keys(this.tokens).forEach(key => {
+                if (this.tokens[key] !== '') {
+                    valid_token_found = true
+                }
+            })
+            return valid_token_found
+        },
+
+        validate(event) {
+            let isValid = true
+            this.title.error = false
+            this.title.helpertext = ""
+            this.serverprops.error = false
+            this.communityprops.error = false
+
+            // run checks
+            if (this.serverprops.value === null) {
+                isValid = false
+                if (this.publish.pressedOnce) {
+                    this.serverprops.error = true
+                }
+            }
+
+            if (this.communityprops.value === null) {
+                isValid = false
+                if (this.publish.pressedOnce) {
+                    this.communityprops.error = true
+                }
+            }
+
+            if (this.title.text.length <= 3 || this.title.text.length > 128) {
+                isValid = false
+                if (this.publish.pressedOnce) {
+                    // Note both can be false
+                    this.title.error = true
+                    this.title.success = false
+                    this.title.helpertext = "Please set a title with a length between 3 and 128 characters"
+                }
+            }
+            else if (this.publish.pressedOnce) {
+                this.title.error = false
+                this.title.success = true
+            }
+
+            // Change publishable with validation
+            this.publish.disabled = !isValid
+            return isValid
+        },
+
+        async createDeposit() {
+            // validate inputs only after first press
+            this.publish.pressedOnce = true
+            if (!this.validate()) {
+                return
+            }
+
+            if (!this.selectedFiles.length) {
+                console.error('No files selected')
+                return
+            }
+
+            axios
+                .post(generateUrl('/apps/b2sharebridge/publish'),
+                    {
+                        ids: this.selectedFiles,
+                        community: this.communityprops.value.id,
+                        open_access: this.openAccess,
+                        title: this.title.text,
+                        server_id: this.serverprops.value.id,
+                    })
+                .then(() => {
+                    this.info.heading = 'Transferring to B2SHARE'
+                    this.info.message = 'Your files are transfarred in the background. This may take a few minutes.'
+                    this.info.buttons = [
+                        {
+                            label: "Ok",
+                            type: "secondary",
+                            callback: () => (this.closeModal()),
+                        },
+                        {
+                            label: "Show Deposit",
+                            type: "primary",
+                            callback: () => (this.redirect("/apps/b2sharebridge")),
+                            href: generateUrl("/apps/b2sharebridge"),
+                        },
+                    ]
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        if (error.response.status === 413) // entity too large
+                        {
+                            this.info.message = 'Publishing failed! One or more of your files are too large!'
+                        }
+                        else if (error.response.status === 429) { // too many uploads
+                            this.info.message = 'Publishing failed! You have too many pending uploads, please try again later!'
+                        }
+                        else {
+                            this.info.message = 'Publishing failed! Please check your connection or contact an administrator!'
+                        }
+                        console.error(this.info.message)
+                    }
+                    console.error(error)
+                })
+
+        },
+
+        closeModal() {
+            this.showDialog = false
+            this.info.message = ""
+        },
+
+        redirect(relative_url) {
+            /*let url = generateUrl(relative_url)
+            this.$router.push(url)
+            this.closeModal()*/
+        },
+
+    },
+}
+</script>
+
+<style>
+#bridgedial {
+	min-width: 60%;
+}
+
+#bridgedial .select {
+	width: 100%;
+}
+
+#bridgedial .modal__content,
+#infodial .modal__content {
+	margin: 50px;
+}
+
+#bridgedial .modal__content h2,
+#infodial .modal__content h2 {
+	text-align: center;
+}
+
+#bridgedial .form-group,
+#infodial .form-group {
+	margin: calc(var(--default-grid-baseline) * 4) 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+#bridgedial .button-container,
+#infodial .button-container {
+	display: flex;
+	flex-direction: row;
+	align-items: right;
+	justify-content: flex-end;
+}
+
+#bridgedial .selecterror div {
+	border-color: red;
+}
+
+#infodial a {
+	border-radius: var(--border-radius-pill);
+}
+</style>

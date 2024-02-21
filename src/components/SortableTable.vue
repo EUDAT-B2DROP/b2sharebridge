@@ -4,9 +4,23 @@
             <tr>
                 <template v-for="( field, index ) in fields">
                     <th v-if="fields.at(index).active" :key="index">
-                        {{ field.name }}
-                        <button @click="sortByColumn(field.label, 'asc')">▲</button>
-                        <button @click="sortByColumn(field.label, 'desc')">▼</button>
+                        <div class="sortheader">
+                            {{ field.name }}
+                            <span class="sortbuttons">
+                                <NcButton @click="sortByColumn(field.label, 'asc')" type="secondary" class="sorttop"
+                                    :disabled="sortBy === field.label && sortDir === 'asc'">
+                                    <template #icon>
+                                        <Triangle :size="10" />
+                                    </template>
+                                </NcButton>
+                                <NcButton @click="sortByColumn(field.label, 'desc')" type="secondary" class="sortbottom"
+                                    :disabled="sortBy === field.label && sortDir === 'desc'">
+                                    <template #icon>
+                                        <TriangleDown :size="10" />
+                                    </template>
+                                </NcButton>
+                            </span>
+                        </div>
                     </th>
                 </template>
             </tr>
@@ -29,8 +43,16 @@
 </template>
   
 <script>
+import Triangle from 'vue-material-design-icons/Triangle'
+import TriangleDown from 'vue-material-design-icons/TriangleDown'
+import { NcButton } from '@nextcloud/vue'
 export default {
     name: "SortableTable",
+    components: {
+        Triangle,
+        TriangleDown,
+        NcButton,
+    },
     props: {
         fields: {
             type: Array,
@@ -43,8 +65,8 @@ export default {
     },
     data() {
         return {
-            sortBy: null,
-            sortDir: 'asc',
+            sortBy: "createdAt",
+            sortDir: "desc",
         };
     },
     computed: {
@@ -78,11 +100,37 @@ export default {
 
 .sortable-table th,
 .sortable-table td {
-    padding: 8px;
-    border: 1px solid #ccc;
+    padding: 4px;
+    border-right: 1px solid;
+    border-color: var(--color-border);
 }
 
-.sortable-table th {
-    background-color: #f2f2f2;
+.sortable-table .sortheader {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sortable-table .sortbuttons {
+    display: flex;
+    flex-direction: column;
+}
+
+.sortable-table .sorttop {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+
+}
+
+.sortable-table .sortbottom {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+.sortable-table .sortbottom,
+.sortable-table .sorttop {
+    min-height: 22px;
+    height: 22px;
 }
 </style>

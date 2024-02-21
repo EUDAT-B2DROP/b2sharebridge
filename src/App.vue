@@ -46,7 +46,7 @@
 				<h2 id="deposit-table-name" style="text-align: center;">
 					{{ getTableName() }}
 				</h2>
-				<SortableTable id="deposit-table" striped hover :rows="deposits" :fields="fields" />
+				<SortableTable id="deposit-table" striped hover :rows="deposits" :fields="fields" sortBy="createdAt" sortDir="desc"/>
 			</div>
 		</NcAppContent>
 	</NcContent>
@@ -65,12 +65,6 @@ import {
 	NcAppNavigationNew,
 } from '@nextcloud/vue'
 
-// import 'bootstrap/dist/css/bootstrap.min.css'
-//import 'bootstrap/dist/js/bootstrap.min.js'
-//import 'bootstrap-vue/dist/bootstrap-vue.css'
-// import '@nextcloud/dialogs/styles/toast.scss'
-import '../css/style.scss'
-
 const DepositFilter = {
 	ALL: 'all',
 	PENDING: 'pending',
@@ -79,18 +73,15 @@ const DepositFilter = {
 }
 
 const DepositFields = [
-"status",
-"title",
-"owner",
-	"createdAt",
-	"error",
-	"fileCount",
-	
-	"serverId",
-	
-	
-	"updatedAt",
+	"status",
+	"title",
 	"url",
+	"owner",
+	"error",
+	"serverId",
+	"fileCount",
+	"createdAt",
+	"updatedAt",
 ]
 
 export default {
@@ -165,56 +156,24 @@ export default {
 
 		showAllDeposits() {
 			this.filter = DepositFilter.ALL
-			this.fields = [
-				{ name: 'status', extraClass: 'columnWidthInt' },
-				{ name: 'title', extraClass: 'columnWidthTitle' },
-				{ name: 'url', type: 'link' },
-				{ name: 'fileCount', extraClass: 'columnWidthInt' },
-				{ name: 'serverId', extraClass: 'columnWidthInt' },
-				{ name: 'createdAt', extraClass: 'columnWidthDate' },
-				{ name: 'updatedAt', extraClass: 'columnWidthDate' },
-			]
 			this.generateTableFields(['status', 'title', 'url', 'fileCount', 'serverId', 'createdAt', 'updatedAt'])
 			return this.loadDeposits(this.filter)
 		},
 
 		showPendingDeposits() {
 			this.filter = DepositFilter.PENDING
-			this.fields = [
-				{ name: 'title', extraClass: 'columnWidthTitle' },
-				{ name: 'fileCount', extraClass: 'columnWidthInt' },
-				{ name: 'serverId', extraClass: 'columnWidthInt' },
-				{ name: 'createdAt', extraClass: 'columnWidthDate' },
-				{ name: 'updatedAt', extraClass: 'columnWidthDate' },
-			]
 			this.generateTableFields(['title', 'fileCount', 'serverId', 'createdAt', 'updatedAt'])
 			return this.loadDeposits(this.filter)
 		},
 
 		showPublishedDeposits() {
 			this.filter = DepositFilter.PUBLISHED
-			this.fields = [
-				{ name: 'title', extraClass: 'columnWidthTitle' },
-				{ name: 'url', type: 'link' },
-				{ name: 'fileCount', extraClass: 'columnWidthInt' },
-				{ name: 'serverId', extraClass: 'columnWidthInt' },
-				{ name: 'createdAt', extraClass: 'columnWidthDate' },
-				{ name: 'updatedAt', extraClass: 'columnWidthDate' },
-			]
 			this.generateTableFields(['title', 'url', 'fileCount', 'serverId', 'createdAt', 'updatedAt'])
 			return this.loadDeposits(this.filter)
 		},
 
 		showFailedDeposits() {
 			this.filter = DepositFilter.FAILED
-			this.fields = [
-				{ name: 'title', extraClass: 'columnWidthTitle' },
-				{ name: 'fileCount', extraClass: 'columnWidthInt' },
-				{ name: 'serverId', extraClass: 'columnWidthInt' },
-				{ name: 'error', extraClass: { width: '30%' } },
-				{ name: 'createdAt', extraClass: 'columnWidthDate' },
-				{ name: 'updatedAt', extraClass: 'columnWidthDate' },
-			]
 			this.generateTableFields(['title', 'fileCount', 'serverId', 'error', 'createdAt', 'updatedAt'])
 			return this.loadDeposits(this.filter)
 		},
@@ -276,12 +235,29 @@ export default {
 					label: originalField,
 					type: originalField === 'url' ? 'link' : null,
 					active: activeFieldNames.includes(originalField),
+					extraClass: this.getExtraClass(originalField),
 				}
-				console.debug(field)
-				console.debug(activeFieldNames.includes(originalField))
 				this.fields.push(field)
 			}
 		},
+
+		getExtraClass(fieldName) {
+			let extraClass = "columnWidthInt"
+			switch (fieldName) {
+				case 'url':
+					extraClass = "bridgelink"
+					break
+				case 'title':
+					extraClass = "columnWidthTitle"
+					break
+				case 'createdAt':
+				case 'updatedAt':
+					extraClass = "columnWidthDate"
+					break
+				default: "columnWidthInt"
+			}
+			return extraClass
+		}
 	},
 }
 </script>
@@ -342,26 +318,30 @@ textarea {
 }
 
 .columnWidthInt {
-	width: 10%
+	width: 6%;
 }
 
 .columnWidthDate {
-	width: 15%
+	width: 15%;
 }
 
 .columnWidthTitle {
-	width: 20%
+	width: 20%;
 }
 
 .bridgelink {
+	width: 30%;
+}
+
+.bridgelink a{
 	color: blue;
 }
 
-.bridgelink:hover {
+.bridgelink a:hover {
 	text-decoration: underline;
 }
 
-.bridgelink:visited {
+.bridgelink a:visited {
 	color: purple;
 }
 </style>

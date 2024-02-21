@@ -46,18 +46,14 @@
 				<h2 id="deposit-table-name" style="text-align: center;">
 					{{ getTableName() }}
 				</h2>
-				<b-table id="deposit-table" striped hover :items="deposits" :fields="fields" :sort-by.sync="sortBy"
-					:sort-desc.sync="sortDesc" label-sort-asc="" label-sort-desc="" label-sort-clear="" sort-icon-left>
-					<template #cell(url)="url_data" class="link-primary">
-						<a class="bridgelink" :href="url_data.value">{{ url_data.value }}</a>
-					</template>
-				</b-table>
+				<SortableTable id="deposit-table" striped hover :rows="deposits" :fields="fields" />
 			</div>
 		</NcAppContent>
 	</NcContent>
 </template>
 <script>
 import axios from '@nextcloud/axios'
+import SortableTable from './components/SortableTable.vue'
 import { generateUrl } from '@nextcloud/router'
 import { showError, showSuccess } from '@nextcloud/dialogs'
 import {
@@ -70,8 +66,8 @@ import {
 } from '@nextcloud/vue'
 
 // import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap/dist/js/bootstrap.min.js'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+//import 'bootstrap/dist/js/bootstrap.min.js'
+//import 'bootstrap-vue/dist/bootstrap-vue.css'
 // import '@nextcloud/dialogs/styles/toast.scss'
 import '../css/style.scss'
 
@@ -81,6 +77,21 @@ const DepositFilter = {
 	PUBLISHED: 'published',
 	FAILED: 'failed',
 }
+
+const DepositFields = [
+"status",
+"title",
+"owner",
+	"createdAt",
+	"error",
+	"fileCount",
+	
+	"serverId",
+	
+	
+	"updatedAt",
+	"url",
+]
 
 export default {
 	name: 'App',
@@ -92,6 +103,8 @@ export default {
 		NcAppNavigationItem,
 		NcAppNavigationNew,
 		DepositFilter,
+		DepositFields,
+		SortableTable,
 	},
 
 	data() {
@@ -106,6 +119,7 @@ export default {
 			timer: null,
 			last_deposit_update: null,
 			DepositFilter, // https://stackoverflow.com/questions/57538539/how-to-use-enums-or-const-in-vuejs
+			DepositFields,
 		}
 	},
 	/**
@@ -152,52 +166,56 @@ export default {
 		showAllDeposits() {
 			this.filter = DepositFilter.ALL
 			this.fields = [
-				{ key: 'status', sortable: true, thClass: 'columnWidthInt' },
-				{ key: 'title', sortable: true, thClass: 'columnWidthTitle' },
-				{ key: 'url', sortable: true, thStyle: { width: '20%' } },
-				{ key: 'fileCount', sortable: true, thClass: 'columnWidthInt' },
-				{ key: 'serverId', sortable: true, thClass: 'columnWidthInt' },
-				{ key: 'createdAt', sortable: true, thClass: 'columnWidthDate' },
-				{ key: 'updatedAt', sortable: true, thClass: 'columnWidthDate' },
+				{ name: 'status', extraClass: 'columnWidthInt' },
+				{ name: 'title', extraClass: 'columnWidthTitle' },
+				{ name: 'url', type: 'link' },
+				{ name: 'fileCount', extraClass: 'columnWidthInt' },
+				{ name: 'serverId', extraClass: 'columnWidthInt' },
+				{ name: 'createdAt', extraClass: 'columnWidthDate' },
+				{ name: 'updatedAt', extraClass: 'columnWidthDate' },
 			]
+			this.generateTableFields(['status', 'title', 'url', 'fileCount', 'serverId', 'createdAt', 'updatedAt'])
 			return this.loadDeposits(this.filter)
 		},
 
 		showPendingDeposits() {
 			this.filter = DepositFilter.PENDING
 			this.fields = [
-				{ key: 'title', sortable: true, thStyle: { width: '50%' } },
-				{ key: 'fileCount', sortable: true, thClass: 'columnWidthInt' },
-				{ key: 'serverId', sortable: true, thClass: 'columnWidthInt' },
-				{ key: 'createdAt', sortable: true, thClass: 'columnWidthDate' },
-				{ key: 'updatedAt', sortable: true, thClass: 'columnWidthDate' },
+				{ name: 'title', extraClass: 'columnWidthTitle' },
+				{ name: 'fileCount', extraClass: 'columnWidthInt' },
+				{ name: 'serverId', extraClass: 'columnWidthInt' },
+				{ name: 'createdAt', extraClass: 'columnWidthDate' },
+				{ name: 'updatedAt', extraClass: 'columnWidthDate' },
 			]
+			this.generateTableFields(['title', 'fileCount', 'serverId', 'createdAt', 'updatedAt'])
 			return this.loadDeposits(this.filter)
 		},
 
 		showPublishedDeposits() {
 			this.filter = DepositFilter.PUBLISHED
 			this.fields = [
-				{ key: 'title', sortable: true, thClass: 'columnWidthTitle' },
-				{ key: 'url', sortable: true, thStyle: { width: '30%' } },
-				{ key: 'fileCount', sortable: true, thClass: 'columnWidthInt' },
-				{ key: 'serverId', sortable: true, thClass: 'columnWidthInt' },
-				{ key: 'createdAt', sortable: true, thClass: 'columnWidthDate' },
-				{ key: 'updatedAt', sortable: true, thClass: 'columnWidthDate' },
+				{ name: 'title', extraClass: 'columnWidthTitle' },
+				{ name: 'url', type: 'link' },
+				{ name: 'fileCount', extraClass: 'columnWidthInt' },
+				{ name: 'serverId', extraClass: 'columnWidthInt' },
+				{ name: 'createdAt', extraClass: 'columnWidthDate' },
+				{ name: 'updatedAt', extraClass: 'columnWidthDate' },
 			]
+			this.generateTableFields(['title', 'url', 'fileCount', 'serverId', 'createdAt', 'updatedAt'])
 			return this.loadDeposits(this.filter)
 		},
 
 		showFailedDeposits() {
 			this.filter = DepositFilter.FAILED
 			this.fields = [
-				{ key: 'title', sortable: true, thClass: 'columnWidthTitle' },
-				{ key: 'fileCount', sortable: true, thClass: 'columnWidthInt' },
-				{ key: 'serverId', sortable: true, thClass: 'columnWidthInt' },
-				{ key: 'error', sortable: false, thStyle: { width: '30%' } },
-				{ key: 'createdAt', sortable: true, thClass: 'columnWidthDate' },
-				{ key: 'updatedAt', sortable: true, thClass: 'columnWidthDate' },
+				{ name: 'title', extraClass: 'columnWidthTitle' },
+				{ name: 'fileCount', extraClass: 'columnWidthInt' },
+				{ name: 'serverId', extraClass: 'columnWidthInt' },
+				{ name: 'error', extraClass: { width: '30%' } },
+				{ name: 'createdAt', extraClass: 'columnWidthDate' },
+				{ name: 'updatedAt', extraClass: 'columnWidthDate' },
 			]
+			this.generateTableFields(['title', 'fileCount', 'serverId', 'error', 'createdAt', 'updatedAt'])
 			return this.loadDeposits(this.filter)
 		},
 
@@ -247,6 +265,22 @@ export default {
 		checkDepositUpdate() {
 			console.log('Polling deposits')
 			this.loadDeposits(this.filter) // try to fetch update after transfer handler
+		},
+
+		generateTableFields(activeFieldNames) {
+			this.fields = []
+			for (let i = 0; i < this.DepositFields.length; i++) {
+				const originalField = DepositFields[i]
+				let field = {
+					name: this.capitalizeFirstLetter(originalField),
+					label: originalField,
+					type: originalField === 'url' ? 'link' : null,
+					active: activeFieldNames.includes(originalField),
+				}
+				console.debug(field)
+				console.debug(activeFieldNames.includes(originalField))
+				this.fields.push(field)
+			}
 		},
 	},
 }

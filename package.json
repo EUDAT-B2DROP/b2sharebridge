@@ -25,7 +25,6 @@
     "@nextcloud/dialogs": "^5",
     "@nextcloud/router": "^3",
     "@nextcloud/vue": "^8",
-    "bootstrap-vue": "^2.23.1",
     "vue": "^2",
     "vue-material-design-icons": "^5.1.2"
   },

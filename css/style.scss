@@ -1,31 +1,3 @@
-/* stylelint-disable scss/at-import-no-partial-leading-underscore -- due to bootstrap includes */
-/*https://stackoverflow.com/questions/60012016/importing-bootstrap-css-in-app-js-breaks-current-styles-vuejs*/
-/* required:*/
-@import 'bootstrap/scss/functions';
-@import 'bootstrap/scss/variables';
-@import 'bootstrap/scss/mixins';
-/* optional*/
-@import 'bootstrap/scss/root';
-/*@import "bootstrap/scss/reboot.scss";*/
-@import 'bootstrap/scss/images';
-@import 'bootstrap/scss/grid';
-
-@import 'bootstrap/scss/forms';
-@import 'bootstrap/scss/buttons';
-@import 'bootstrap/scss/transitions';
-@import 'bootstrap/scss/button-group';
-@import 'bootstrap/scss/input-group';
-@import 'bootstrap/scss/dropdown';
-@import 'bootstrap/scss/alert';
-@import 'bootstrap/scss/list-group';
-@import 'bootstrap/scss/utilities';
-
-/*marked as not working but required*/
-@import 'bootstrap/scss/tables';
-@import 'bootstrap/scss/custom-forms';
-@import 'bootstrap/scss/modal';
-@import 'bootstrap/scss/close';
-
 .b2sharebridge {
 	width: 100%;
 }

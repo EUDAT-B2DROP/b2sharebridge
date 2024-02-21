@@ -379,44 +379,44 @@ export default {
 
 <style>
 #bridgedial {
-    min-width: 60%;
+	min-width: 60%;
 }
 
 #bridgedial .select {
-    width: 100%;
+	width: 100%;
 }
 
 #bridgedial .modal__content,
 #infodial .modal__content {
-    margin: 50px;
+	margin: 50px;
 }
 
 #bridgedial .modal__content h2,
 #infodial .modal__content h2 {
-    text-align: center;
+	text-align: center;
 }
 
 #bridgedial .form-group,
 #infodial .form-group {
-    margin: calc(var(--default-grid-baseline) * 4) 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+	margin: calc(var(--default-grid-baseline) * 4) 0;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
 }
 
 #bridgedial .button-container,
 #infodial .button-container {
-    display: flex;
-    flex-direction: row;
-    align-items: right;
-    justify-content: flex-end;
+	display: flex;
+	flex-direction: row;
+	align-items: right;
+	justify-content: flex-end;
 }
 
 #bridgedial .selecterror div {
-    border-color: red;
+	border-color: red;
 }
 
 #infodial a {
-    border-radius: var(--border-radius-pill);
+	border-radius: var(--border-radius-pill);
 }
 </style>

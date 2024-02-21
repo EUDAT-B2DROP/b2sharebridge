@@ -94,43 +94,43 @@ export default {
   
 <style>
 .sortable-table {
-    width: 100%;
-    border-collapse: collapse;
+	width: 100%;
+	border-collapse: collapse;
 }
 
 .sortable-table th,
 .sortable-table td {
-    padding: 4px;
-    border-right: 1px solid;
-    border-color: var(--color-border);
+	padding: 4px;
+	border-right: 1px solid;
+	border-color: var(--color-border);
 }
 
 .sortable-table .sortheader {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
 }
 
 .sortable-table .sortbuttons {
-    display: flex;
-    flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
 
 .sortable-table .sorttop {
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
+	border-bottom-left-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
 
 }
 
 .sortable-table .sortbottom {
-    border-top-left-radius: 0 !important;
-    border-top-right-radius: 0 !important;
+	border-top-left-radius: 0 !important;
+	border-top-right-radius: 0 !important;
 }
 
 .sortable-table .sortbottom,
 .sortable-table .sorttop {
-    min-height: 22px;
-    height: 22px;
+	min-height: 22px;
+	height: 22px;
 }
 </style>

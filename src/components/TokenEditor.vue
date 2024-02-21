@@ -16,9 +16,6 @@ import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import { NcPasswordField, NcButton } from '@nextcloud/vue'
 
-import '../../css/style.scss'
-//import 'bootstrap-vue/dist/bootstrap-vue.css'
-
 export default {
 	name: 'TokenEditor',
 	components: {

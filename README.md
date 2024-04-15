@@ -96,4 +96,7 @@ and other code smells:
 
 - `make phplint` to show and `make phplint-fix` to automatically fix some php issues
 - `make stylelint` to show and `make stylelint-fix` to automatically fix some css, scss or vue issues
-- `make lint` to show and `make lint-fix` to automatically fix some javascript issues 
+- `make lint` to show and `make lint-fix` to automatically fix some javascript issues
+
+## Additional Notes
+You need to at least use charset `utf8mb4` (or similar) in your database, because the fetched communitites contain the `🔒`-emoji in their name. Otherwise this causes mysql (or similar) to show a question mark `?` instead. This bug only causes visual issues.

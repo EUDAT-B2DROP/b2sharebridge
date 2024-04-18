@@ -2,9 +2,15 @@
 	<div class="bridgetoken">
 		<h3>{{ name }}</h3>
 		<a :href="url + '/user'">{{ url }}</a>
-		<NcPasswordField :value.sync="mutable_token" label="Token" placeholder="Token" :minlength="60" :maxlength="60"
-			@valid="saveToken" @update:value="saveToken" :success="this.token.length === 60"
-			:helper-text="this.token.length === 60 ? 'Token saved' : ''" />
+		<NcPasswordField :value.sync="mutable_token"
+			label="Token"
+			placeholder="Token"
+			:minlength="60"
+			:maxlength="60"
+			:success="token.length === 60"
+			:helper-text="token.length === 60 ? 'Token saved' : ''"
+			@valid="saveToken"
+			@update:value="saveToken" />
 		<NcButton type="error" @click="deleteToken">
 			Delete Token
 		</NcButton>
@@ -34,7 +40,7 @@ export default {
 	data() {
 		return {
 			mutable_token: this.token,
-			helpertext: "",
+			helpertext: '',
 		}
 	},
 	methods: {

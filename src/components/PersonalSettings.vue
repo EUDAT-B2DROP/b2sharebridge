@@ -4,8 +4,11 @@
 		<div v-if="loaded && servers.length" class="servers">
 			<ul>
 				<li v-for="server in servers">
-					<TokenEditor :id="parseInt(server.id)" :name="server.name" :url="server.publishUrl"
-						:token="getToken(server.id)" @token-change="updateTokens" />
+					<TokenEditor :id="parseInt(server.id)"
+						:name="server.name"
+						:url="server.publishUrl"
+						:token="getToken(server.id)"
+						@token-change="updateTokens" />
 				</li>
 			</ul>
 		</div>

@@ -1,17 +1,29 @@
 <template>
 	<NcContent id="bridgecontent" app-name="b2sharebridge" class="app-b2sharebridge">
 		<NcAppNavigation>
-			<NcAppNavigationNew v-if="!loading" :text="t('b2sharebridge', 'All Deposits')"
-				:disabled="filter === DepositFilter.ALL" button-id="deposit-all-button" button-class="icon-add"
+			<NcAppNavigationNew v-if="!loading"
+				:text="t('b2sharebridge', 'All Deposits')"
+				:disabled="filter === DepositFilter.ALL"
+				button-id="deposit-all-button"
+				button-class="icon-add"
 				@click="showAllDeposits" />
-			<NcAppNavigationNew v-if="!loading" :text="t('b2sharebridge', 'Pending Deposits')"
-				:disabled="filter === DepositFilter.PENDING" button-id="deposit-pending-button" button-class="icon-add"
+			<NcAppNavigationNew v-if="!loading"
+				:text="t('b2sharebridge', 'Pending Deposits')"
+				:disabled="filter === DepositFilter.PENDING"
+				button-id="deposit-pending-button"
+				button-class="icon-add"
 				@click="showPendingDeposits" />
-			<NcAppNavigationNew v-if="!loading" :text="t('b2sharebridge', 'Published Deposits')"
-				:disabled="filter === DepositFilter.PUBLISHED" button-id="deposit-published-button" button-class="icon-add"
+			<NcAppNavigationNew v-if="!loading"
+				:text="t('b2sharebridge', 'Published Deposits')"
+				:disabled="filter === DepositFilter.PUBLISHED"
+				button-id="deposit-published-button"
+				button-class="icon-add"
 				@click="showPublishedDeposits" />
-			<NcAppNavigationNew v-if="!loading" :text="t('b2sharebridge', 'Failed Deposits')"
-				:disabled="filter === DepositFilter.FAILED" button-id="deposit-failed-button" button-class="icon-add"
+			<NcAppNavigationNew v-if="!loading"
+				:text="t('b2sharebridge', 'Failed Deposits')"
+				:disabled="filter === DepositFilter.FAILED"
+				button-id="deposit-failed-button"
+				button-class="icon-add"
 				@click="showFailedDeposits" />
 		</NcAppNavigation>
 		<NcAppContent>
@@ -46,7 +58,13 @@
 				<h2 id="deposit-table-name" style="text-align: center;">
 					{{ getTableName() }}
 				</h2>
-				<SortableTable id="deposit-table" striped hover :rows="deposits" :fields="fields" sortBy="createdAt" sortDir="desc"/>
+				<SortableTable id="deposit-table"
+					striped
+					hover
+					:rows="deposits"
+					:fields="fields"
+					sort-by="createdAt"
+					sort-dir="desc" />
 			</div>
 		</NcAppContent>
 	</NcContent>
@@ -73,15 +91,15 @@ const DepositFilter = {
 }
 
 const DepositFields = [
-	"status",
-	"title",
-	"url",
-	"owner",
-	"error",
-	"serverId",
-	"fileCount",
-	"createdAt",
-	"updatedAt",
+	'status',
+	'title',
+	'url',
+	'owner',
+	'error',
+	'serverId',
+	'fileCount',
+	'createdAt',
+	'updatedAt',
 ]
 
 export default {
@@ -180,16 +198,16 @@ export default {
 
 		getTableName() {
 			switch (this.filter) {
-				case DepositFilter.ALL:
-					return 'All Deposits'
-				case DepositFilter.PENDING:
-					return 'Pending Deposits'
-				case DepositFilter.PUBLISHED:
-					return 'Published Deposits'
-				case DepositFilter.FAILED:
-					return 'Failed Deposits'
-				default:
-					return 'Error Table'
+			case DepositFilter.ALL:
+				return 'All Deposits'
+			case DepositFilter.PENDING:
+				return 'Pending Deposits'
+			case DepositFilter.PUBLISHED:
+				return 'Published Deposits'
+			case DepositFilter.FAILED:
+				return 'Failed Deposits'
+			default:
+				return 'Error Table'
 			}
 		},
 
@@ -200,20 +218,20 @@ export default {
 		translateDepositStatus(deposit_status) {
 			if ('status' in deposit_status) {
 				switch (deposit_status.status) {
-					case 0:
-						deposit_status.status = this.capitalizeFirstLetter(DepositFilter.PUBLISHED)
-						break
-					case 1:
-					case 2:
-						deposit_status.status = this.capitalizeFirstLetter(DepositFilter.PENDING)
-						break
-					case 3:
-					case 4:
-					case 5:
-						deposit_status.status = this.capitalizeFirstLetter(DepositFilter.FAILED)
-						break
-					default:
-						break
+				case 0:
+					deposit_status.status = this.capitalizeFirstLetter(DepositFilter.PUBLISHED)
+					break
+				case 1:
+				case 2:
+					deposit_status.status = this.capitalizeFirstLetter(DepositFilter.PENDING)
+					break
+				case 3:
+				case 4:
+				case 5:
+					deposit_status.status = this.capitalizeFirstLetter(DepositFilter.FAILED)
+					break
+				default:
+					break
 				}
 			}
 			// TODO query server id?
@@ -230,7 +248,7 @@ export default {
 			this.fields = []
 			for (let i = 0; i < this.DepositFields.length; i++) {
 				const originalField = DepositFields[i]
-				let field = {
+				const field = {
 					name: this.capitalizeFirstLetter(originalField),
 					label: originalField,
 					type: originalField === 'url' ? 'link' : null,
@@ -242,22 +260,22 @@ export default {
 		},
 
 		getExtraClass(fieldName) {
-			let extraClass = "columnWidthInt"
+			let extraClass = 'columnWidthInt'
 			switch (fieldName) {
-				case 'url':
-					extraClass = "bridgelink"
-					break
-				case 'title':
-					extraClass = "columnWidthTitle"
-					break
-				case 'createdAt':
-				case 'updatedAt':
-					extraClass = "columnWidthDate"
-					break
-				default: "columnWidthInt"
+			case 'url':
+				extraClass = 'bridgelink'
+				break
+			case 'title':
+				extraClass = 'columnWidthTitle'
+				break
+			case 'createdAt':
+			case 'updatedAt':
+				extraClass = 'columnWidthDate'
+				break
+			default: 'columnWidthInt'
 			}
 			return extraClass
-		}
+		},
 	},
 }
 </script>

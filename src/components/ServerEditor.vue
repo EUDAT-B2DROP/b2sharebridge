@@ -2,27 +2,48 @@
 	<div class="bridgeserver">
 		<h4>{{ id == null ? "New Server" : mutable_name }}</h4>
 		<p id="maxB2shareUploadsPerUser">
-			<input v-model="mutable_maxUploads" title="max_uploads" type="text" name="max_uploads" placeholder="5"
+			<input v-model="mutable_maxUploads"
+				title="max_uploads"
+				type="text"
+				name="max_uploads"
+				placeholder="5"
 				style="width: 400px">
 			<em># of uploads per user at the same time</em>
 		</p>
 		<p id="maxB2shareUploadSizePerFile">
-			<input v-model="mutable_maxUploadFilesize" title="max_upload_filesize" type="text" name="max_upload_filesize"
-				placeholder="512" style="width: 400px">
+			<input v-model="mutable_maxUploadFilesize"
+				title="max_upload_filesize"
+				type="text"
+				name="max_upload_filesize"
+				placeholder="512"
+				style="width: 400px">
 			<em>MB maximum filesize per upload</em>
 		</p>
 		<p>
-			<input :id="getCheckboxName" v-model="mutable_checkSsl" type="checkbox" :name="getCheckboxName" class="checkbox"
-				:checked="mutable_checkSsl" style="width: 400px">
+			<input :id="getCheckboxName"
+				v-model="mutable_checkSsl"
+				type="checkbox"
+				:name="getCheckboxName"
+				class="checkbox"
+				:checked="mutable_checkSsl"
+				style="width: 400px">
 			<label :for="getCheckboxName">Check SSL</label>
 		</p>
 		<p id="b2shareUrlField">
-			<input v-model="mutable_publishUrl" title="publishurl" type="text" name="publish_baseurl"
-				placeholder="https://b2share.eudat.eu" style="width: 400px">
+			<input v-model="mutable_publishUrl"
+				title="publishurl"
+				type="text"
+				name="publish_baseurl"
+				placeholder="https://b2share.eudat.eu"
+				style="width: 400px">
 			<em>Publish URL</em>
 		</p>
 		<p id="b2shareNameField">
-			<input v-model="mutable_name" title="name" type="text" name="name" style="width: 400px"
+			<input v-model="mutable_name"
+				title="name"
+				type="text"
+				name="name"
+				style="width: 400px"
 				placeholder="Your Server Name">
 			<em>Server name</em>
 		</p>
@@ -32,7 +53,10 @@
 		<button v-if="id !== null" @click="deleteServer">
 			Delete
 		</button>
-		<button v-if="id === null" id="reset" :disabled="!hasChanged()" @click="resetProps">
+		<button v-if="id === null"
+			id="reset"
+			:disabled="!hasChanged()"
+			@click="resetProps">
 			Reset
 		</button>
 	</div>

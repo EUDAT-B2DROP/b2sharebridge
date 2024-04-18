@@ -3,17 +3,25 @@
 		<h2>EUDAT B2SHARE Bridge</h2>
 		<div class="bridgeservers">
 			<h3>Create a new Server:</h3>
-			<ServerEditor :id="dummy_server.id" :name="dummy_server.name" :publishurl="dummy_server.publishUrl"
-				:maxuploads="dummy_server.maxUploads" :maxuploadfilesize="dummy_server.maxUploadFilesize"
-				:checkssl="dummy_server.checkSsl" @server-change="loadServers" />
+			<ServerEditor :id="dummy_server.id"
+				:name="dummy_server.name"
+				:publishurl="dummy_server.publishUrl"
+				:maxuploads="dummy_server.maxUploads"
+				:maxuploadfilesize="dummy_server.maxUploadFilesize"
+				:checkssl="dummy_server.checkSsl"
+				@server-change="loadServers" />
 		</div>
 		<div v-if="loaded && servers.length" class="bridgeservers">
 			<h3>Servers:</h3>
 			<ul>
 				<li v-for="server in servers">
-					<ServerEditor :id="parseInt(server.id)" :name="server.name" :publishurl="server.publishUrl"
-						:maxuploads="server.maxUploads" :maxuploadfilesize="server.maxUploadFilesize"
-						:checkssl="server.checkSsl === 1" @server-change="loadServers" />
+					<ServerEditor :id="parseInt(server.id)"
+						:name="server.name"
+						:publishurl="server.publishUrl"
+						:maxuploads="server.maxUploads"
+						:maxuploadfilesize="server.maxUploadFilesize"
+						:checkssl="server.checkSsl === 1"
+						@server-change="loadServers" />
 				</li>
 			</ul>
 		</div>

@@ -1,97 +1,101 @@
 <template>
-    <table class="sortable-table">
-        <thead>
-            <tr>
-                <template v-for="( field, index ) in fields">
-                    <th v-if="fields.at(index).active" :key="index">
-                        <div class="sortheader">
-                            {{ field.name }}
-                            <span class="sortbuttons">
-                                <NcButton @click="sortByColumn(field.label, 'asc')" type="secondary" class="sorttop"
-                                    :disabled="sortBy === field.label && sortDir === 'asc'">
-                                    <template #icon>
-                                        <Triangle :size="10" />
-                                    </template>
-                                </NcButton>
-                                <NcButton @click="sortByColumn(field.label, 'desc')" type="secondary" class="sortbottom"
-                                    :disabled="sortBy === field.label && sortDir === 'desc'">
-                                    <template #icon>
-                                        <TriangleDown :size="10" />
-                                    </template>
-                                </NcButton>
-                            </span>
-                        </div>
-                    </th>
-                </template>
-            </tr>
-        </thead>
-        <tbody>
-            <tr v-for="row in sortedRows">
-                <template v-for="( field, index ) in fields">
-                    <td v-if="field.active" :key="index" :class="field.extraClass">
-                        <a v-if="field.type === 'link'" :href="row[field.label]">
-                            {{ row[field.label] }}
-                        </a>
-                        <template v-else>
-                            {{ row[field.label] }}
-                        </template>
-                    </td>
-                </template>
-            </tr>
-        </tbody>
-    </table>
+	<table class="sortable-table">
+		<thead>
+			<tr>
+				<template v-for="( field, index ) in fields">
+					<th v-if="fields.at(index).active" :key="index">
+						<div class="sortheader">
+							{{ field.name }}
+							<span class="sortbuttons">
+								<NcButton type="secondary"
+									class="sorttop"
+									:disabled="sortBy === field.label && sortDir === 'asc'"
+									@click="sortByColumn(field.label, 'asc')">
+									<template #icon>
+										<Triangle :size="10" />
+									</template>
+								</NcButton>
+								<NcButton type="secondary"
+									class="sortbottom"
+									:disabled="sortBy === field.label && sortDir === 'desc'"
+									@click="sortByColumn(field.label, 'desc')">
+									<template #icon>
+										<TriangleDown :size="10" />
+									</template>
+								</NcButton>
+							</span>
+						</div>
+					</th>
+				</template>
+			</tr>
+		</thead>
+		<tbody>
+			<tr v-for="row in sortedRows">
+				<template v-for="( field, index ) in fields">
+					<td v-if="field.active" :key="index" :class="field.extraClass">
+						<a v-if="field.type === 'link'" :href="row[field.label]">
+							{{ row[field.label] }}
+						</a>
+						<template v-else>
+							{{ row[field.label] }}
+						</template>
+					</td>
+				</template>
+			</tr>
+		</tbody>
+	</table>
 </template>
-  
+
 <script>
 import Triangle from 'vue-material-design-icons/Triangle'
 import TriangleDown from 'vue-material-design-icons/TriangleDown'
 import { NcButton } from '@nextcloud/vue'
 export default {
-    name: "SortableTable",
-    components: {
-        Triangle,
-        TriangleDown,
-        NcButton,
-    },
-    props: {
-        fields: {
-            type: Array,
-            required: true
-        },
-        rows: {
-            type: Array,
-            required: true
-        }
-    },
-    data() {
-        return {
-            sortBy: "createdAt",
-            sortDir: "desc",
-        };
-    },
-    computed: {
-        sortedRows() {
-            if (!this.sortBy) {
-                return this.rows;
-            }
-            this.rows.sort((rowA, rowB) => {
-                return rowA[this.sortBy] > rowB[this.sortBy]
-            })
-            if (this.sortDir === 'desc') {
-                this.rows.reverse()
-            }
-            return this.rows
-        },
-    },
-    methods: {
-        sortByColumn(columnName, direction) {
-            this.sortBy = columnName
-            this.sortDir = direction
-        },
-    }
-};
+	name: 'SortableTable',
+	components: {
+		Triangle,
+		TriangleDown,
+		NcButton,
+	},
+	props: {
+		fields: {
+			type: Array,
+			required: true,
+		},
+		rows: {
+			type: Array,
+			required: true,
+		},
+	},
+	data() {
+		return {
+			sortBy: 'createdAt',
+			sortDir: 'desc',
+		}
+	},
+	computed: {
+		sortedRows() {
+			if (!this.sortBy) {
+				return this.rows
+			}
+			this.rows.sort((rowA, rowB) => {
+				return rowA[this.sortBy] > rowB[this.sortBy]
+			})
+			if (this.sortDir === 'desc') {
+				this.rows.reverse()
+			}
+			return this.rows
+		},
+	},
+	methods: {
+		sortByColumn(columnName, direction) {
+			this.sortBy = columnName
+			this.sortDir = direction
+		},
+	},
+}
 </script>
-  
+
 <style>
 .sortable-table {
 	width: 100%;
@@ -130,7 +134,7 @@ export default {
 
 .sortable-table .sortbottom,
 .sortable-table .sorttop {
-	min-height: 22px;
+	min-height: 22px !important;
 	height: 22px;
 }
 </style>

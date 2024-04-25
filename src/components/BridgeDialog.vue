@@ -1,49 +1,28 @@
 <template>
-	<NcModal v-if="info.message !== ''"
-		id="infodial"
-		ref="modalRef"
-		name="">
+	<NcModal v-if="info.message !== ''" id="infodial" ref="modalRef" name="">
 		<div class="modal__content">
 			<h2>{{ info.heading }}</h2>
 			<p>{{ info.message }}</p>
 			<span class="button-container">
-				<NcButton v-for="button in info.buttons"
-					:key="button.label"
-					:href="button.href"
-					:type="button.type"
+				<NcButton v-for="button in info.buttons" :key="button.label" :href="button.href" :type="button.type"
 					@click="button.callback">
 					{{ button.label }}
 				</NcButton>
 			</span>
 		</div>
 	</NcModal>
-	<NcModal v-else-if="showDialog"
-		id="bridgedial"
-		ref="modalRef"
-		name="">
+	<NcModal v-else-if="showDialog" id="bridgedial" ref="modalRef" name="">
 		<div class="modal__content">
 			<h2>Create a B2SHARE deposit</h2>
-			<NcTextField :value.sync="title.text"
-				label="Title"
-				placeholder="Please enter a title"
-				:error="title.error"
-				:success="title.success"
-				minlength="3"
-				maxlength="128"
-				:helper-text="title.helpertext"
+			<NcTextField :value.sync="title.text" label="Title" placeholder="Please enter a title" :error="title.error"
+				:success="title.success" minlength="3" maxlength="128" :helper-text="title.helpertext"
 				@update:value="validate">
 				<PencilIcon :size="20" />
 			</NcTextField>
-			<NcSelect v-bind="serverprops"
-				v-model="serverprops.value"
-				required
-				:class="{ selecterror: serverprops.error }"
-				@input="onChangeServer" />
-			<NcSelect v-bind="communityprops"
-				v-model="communityprops.value"
-				required
-				:class="{ selecterror: communityprops.error }"
-				@input="validate" />
+			<NcSelect v-bind="serverprops" v-model="serverprops.value" required
+				:class="{ selecterror: serverprops.error }" @input="onChangeServer" />
+			<NcSelect v-bind="communityprops" v-model="communityprops.value" required
+				:class="{ selecterror: communityprops.error }" @input="validate" />
 			<NcCheckboxRadioSwitch :checked.sync="openAccess">
 				Open Access
 			</NcCheckboxRadioSwitch>
@@ -185,8 +164,8 @@ export default {
 		// API stuff
 		loadServers() {
 			const url_path
-                = '/apps/b2sharebridge/servers?requesttoken='
-                + encodeURIComponent(OC.requestToken)
+				= '/apps/b2sharebridge/servers?requesttoken='
+				+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(url_path))
@@ -204,8 +183,8 @@ export default {
 
 		loadCommunities() {
 			const url_path
-                = '/apps/b2sharebridge/gettabviewcontent?requesttoken='
-                + encodeURIComponent(OC.requestToken)
+				= '/apps/b2sharebridge/gettabviewcontent?requesttoken='
+				+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(url_path))
@@ -223,8 +202,8 @@ export default {
 
 		loadTokens() {
 			const url_path
-                = '/apps/b2sharebridge/apitoken?requesttoken='
-                + encodeURIComponent(OC.requestToken)
+				= '/apps/b2sharebridge/apitoken?requesttoken='
+				+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(url_path))
@@ -347,7 +326,8 @@ export default {
 					})
 				.then(() => {
 					this.info.heading = 'Transferring to B2SHARE'
-					this.info.message = 'Your files are transfarred in the background. This may take a few minutes.'
+					this.info.message = 'Your files are transfarred in the background. This may take a few minutes. You\'ll \
+						get notified after the transfer finished.'
 					this.info.buttons = [
 						{
 							label: 'Ok',
@@ -386,8 +366,8 @@ export default {
 
 		redirect(relative_url) {
 			/* let url = generateUrl(relative_url)
-            this.$router.push(url)
-            this.closeModal() */
+			this.$router.push(url)
+			this.closeModal() */
 		},
 
 	},

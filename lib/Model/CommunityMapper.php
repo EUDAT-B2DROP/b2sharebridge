@@ -99,16 +99,18 @@ class CommunityMapper extends QBMapper
     /**
      * Returns community name by given id.
      *
-     * @param string $uid internal uid of the Community
-     *
+     * @param string $uid internal uid of the community
+     * @param string $serverId internal uid of the server
      * @return Community
      * @throws Exception|MultipleObjectsReturnedException|DoesNotExistException
      */
-    public function getByUid(string $uid): Community
+    public function find(string $uid, string $serverId): Community
     {
         $qb = $this->db->getQueryBuilder();
         $qb->select('*')->from($this->tableName)->where(
-            $qb->expr()->eq('id', $qb->createNamedParameter($uid, IQueryBuilder::PARAM_INT))
+            $qb->expr()->eq('id', $qb->createNamedParameter($uid))
+        )->andWhere(
+            $qb->expr()->eq('server_id', $qb->createNamedParameter($serverId, IQueryBuilder::PARAM_INT))
         );
         return $this->findEntity($qb);
     }

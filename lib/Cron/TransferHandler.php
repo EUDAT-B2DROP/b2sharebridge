@@ -56,9 +56,9 @@ class TransferHandler extends QueuedJob
      * Create the database mapper
      *
      * @param ITimeFactory|null        $time
-     * @param DepositStatusMapper|null $mapper    the database mapper for transfers
-     * @param DepositFileMapper|null   $dfmapper  ORM for DepositFile
-     * @param IPublish|null            $publisher publishing backend to use
+     * @param DepositStatusMapper|null $mapper     the database mapper for transfers
+     * @param DepositFileMapper|null   $dfmapper   ORM for DepositFile
+     * @param IPublish|null            $publisher  publishing backend to use
      * @param ServerMapper|null        $smapper
      * @param CommunityMapper|null     $cmapper
      * @param LoggerInterface|null     $logger
@@ -75,8 +75,7 @@ class TransferHandler extends QueuedJob
         LoggerInterface $logger = null
     ) {
         parent::__construct($time);
-        if (
-            $dfmapper === null or $mapper === null or $publisher === null or $smapper === null or $cmapper === null
+        if ($dfmapper === null or $mapper === null or $publisher === null or $smapper === null or $cmapper === null
             or $logger === null or $notManager === null
         ) {
             $this->fixTransferForCron();
@@ -115,8 +114,7 @@ class TransferHandler extends QueuedJob
      */
     public function run($args)
     {
-        if (
-            !array_key_exists('transferId', $args)
+        if (!array_key_exists('transferId', $args)
             || !array_key_exists('token', $args)
             || !array_key_exists('community', $args)
             || !array_key_exists('open_access', $args)

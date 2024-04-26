@@ -21,7 +21,6 @@ declare(strict_types=1);
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
  */
 
 namespace OCA\B2shareBridge\Notification;
@@ -65,7 +64,7 @@ class Notifier implements INotifier
 
     /**
      * @param INotification $notification
-     * @param string $languageCode The code of the language that should be used to prepare the notification
+     * @param string        $languageCode The code of the language that should be used to prepare the notification
      */
     public function prepare(INotification $notification, string $languageCode): INotification
     {
@@ -79,39 +78,41 @@ class Notifier implements INotifier
 
         switch ($notification->getSubject()) {
             // Deal with known subjects
-            case 'internal_error':
-            case 'external_error':
-            case 'no_upload_result':
-            case 'not_accessible':
-            case 'unauthorized':
-                $notification->setIcon($this->url->getAbsoluteURL($this->url->imagePath('core', 'actions/error.svg')))
-                    ->setLink($this->url->linkToRouteAbsolute(Application::APP_ID . '.View.index'));
+        case 'internal_error':
+        case 'external_error':
+        case 'no_upload_result':
+        case 'not_accessible':
+        case 'unauthorized':
+            $notification->setIcon($this->url->getAbsoluteURL($this->url->imagePath('core', 'actions/error.svg')))
+                ->setLink($this->url->linkToRouteAbsolute(Application::APP_ID . '.View.index'));
 
 
-                return $this->setErrorNotificationSubject($notification, $l);
-            case 'upload_successful':
-                $parameters = $notification->getSubjectParameters();
-                $notification->setIcon($this->url->getAbsoluteURL($this->url->imagePath('core', 'actions/checkmark.svg')))
-                    ->setLink($parameters['url']);
+            return $this->setErrorNotificationSubject($notification, $l);
+        case 'upload_successful':
+            $parameters = $notification->getSubjectParameters();
+            $notification->setIcon($this->url->getAbsoluteURL($this->url->imagePath('core', 'actions/checkmark.svg')))
+                ->setLink($parameters['url']);
 
-                // Set rich subject, see https://github.com/nextcloud/server/issues/1706 for more information
-                // and https://github.com/nextcloud/server/blob/master/lib/public/RichObjectStrings/Definitions.php
-                // for a list of defined objects and their parameters.
-                $notification->setRichSubject($l->t('Your transfer to B2SHARE was successful. Finalize your publication at: {share}'), [
-                    'share' => [
-                        'type' => 'pending-federated-share',
-                        'id' => $notification->getObjectId(),
-                        'name' => $parameters['url'],
+            // Set rich subject, see https://github.com/nextcloud/server/issues/1706 for more information
+            // and https://github.com/nextcloud/server/blob/master/lib/public/RichObjectStrings/Definitions.php
+            // for a list of defined objects and their parameters.
+            $notification->setRichSubject(
+                $l->t('Your transfer to B2SHARE was successful. Finalize your publication at: {share}'), [
+                'share' => [
+                    'type' => 'pending-federated-share',
+                    'id' => $notification->getObjectId(),
+                    'name' => $parameters['url'],
+                ]
                     ]
-                ]);
+            );
 
-                // Set the plain text subject automatically
-                $this->setParsedSubjectFromRichSubject($notification);
-                return $notification;
+            // Set the plain text subject automatically
+            $this->setParsedSubjectFromRichSubject($notification);
+            return $notification;
 
-            default:
-                // Unknown subject => Unknown notification => throw
-                throw new \InvalidArgumentException('Unknown subject "' . $notification->getSubject() . '"');
+        default:
+            // Unknown subject => Unknown notification => throw
+            throw new \InvalidArgumentException('Unknown subject "' . $notification->getSubject() . '"');
         }
     }
 
@@ -120,24 +121,24 @@ class Notifier implements INotifier
         $parameters = $notification->getSubjectParameters();
         switch ($notification->getSubject()) {
             // Deal with known subjects
-            case 'internal_error':
-                $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. An internal server error occured!'));
-                break;
-            case 'external_error':
-                $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. An external server error occured!'));
-                break;
-            case 'no_upload_result':
-                $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. Your upload returned no result! Please check '. $parameters['url'] . ', if your draft was created.'));
-                break;
-            case 'not_accessible':
-                $notification->setRichSubject($l->t('Your transfer to B2SHARE had issues. Some file was not accessible.'));
-                break;
-            case 'unauthorized':
-                $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. You are not allowed to upload to the community "'. $parameters['community'] . '".'));
-                break;
-            default:
-                // Unknown subject => Unknown notification => throw
-                throw new \InvalidArgumentException('Unknown subject "' . $notification->getSubject() . '"');
+        case 'internal_error':
+            $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. An internal server error occured!'));
+            break;
+        case 'external_error':
+            $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. An external server error occured!'));
+            break;
+        case 'no_upload_result':
+            $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. Your upload returned no result! Please check '. $parameters['url'] . ', if your draft was created.'));
+            break;
+        case 'not_accessible':
+            $notification->setRichSubject($l->t('Your transfer to B2SHARE had issues. Some file was not accessible.'));
+            break;
+        case 'unauthorized':
+            $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. You are not allowed to upload to the community "'. $parameters['community'] . '".'));
+            break;
+        default:
+            // Unknown subject => Unknown notification => throw
+            throw new \InvalidArgumentException('Unknown subject "' . $notification->getSubject() . '"');
         }
 
         // Set the plain text subject automatically

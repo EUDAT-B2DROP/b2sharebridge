@@ -99,8 +99,8 @@ class CommunityMapper extends QBMapper
     /**
      * Returns community name by given id.
      *
-     * @param string $uid internal uid of the community
-     * @param string $serverId internal uid of the server
+     * @param  string $uid      internal uid of the community
+     * @param  string $serverId internal uid of the server
      * @return Community
      * @throws Exception|MultipleObjectsReturnedException|DoesNotExistException
      */

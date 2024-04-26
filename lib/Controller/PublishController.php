@@ -118,8 +118,7 @@ class PublishController extends Controller
         //TODO what if token wasn't set? We couldn't have gotten here
         //but still a check seems in place.
 
-        if (
-            !array_key_exists('ids', $param)
+        if (!array_key_exists('ids', $param)
             || !array_key_exists('community', $param)
             || !array_key_exists('server_id', $param)
             || !array_key_exists('title', $param)

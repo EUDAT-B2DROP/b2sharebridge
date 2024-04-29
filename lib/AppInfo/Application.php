@@ -16,26 +16,28 @@ namespace OCA\B2shareBridge\AppInfo;
 
 
 use OCA\B2shareBridge\Controller\PublishController;
-use OCA\B2shareBridge\Controller\ViewController;
 use OCA\B2shareBridge\Controller\ServerController;
+use OCA\B2shareBridge\Controller\ViewController;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
+use OCA\B2shareBridge\Notification\Notifier;
 use OCA\B2shareBridge\Publish\B2share;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
+use OCP\AppFramework\Bootstrap\IBootContext;
+use OCP\AppFramework\Bootstrap\IBootstrap;
+use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\IJobList;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IRequest;
+use OCP\Notification\IManager;
 use OCP\Util;
-use OCP\AppFramework\Bootstrap\IBootContext;
-use OCP\AppFramework\Bootstrap\IBootstrap;
-use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -70,7 +72,7 @@ class Application extends App implements IBootstrap
         $dispatcher = $container->get(IEventDispatcher::class);
 
         $dispatcher->addListener(
-            \OCA\Files\Event\LoadAdditionalScriptsEvent::class,
+            LoadAdditionalScriptsEvent::class,
             function () {
                 Util::addScript(self::APP_ID, 'b2sharebridge-filetabmain');
             }
@@ -195,6 +197,8 @@ class Application extends App implements IBootstrap
                     $c->get(ITimeFactory::class),
                     $c->get(B2share::class),
                     $c->get(ServerMapper::class),
+                    $c->get(CommunityMapper::class),
+                    $c->get(IManager::class),
                     $c->get(LoggerInterface::class),
                     $c->get(IJobList::class),
                     $c->get("userId")
@@ -233,6 +237,8 @@ class Application extends App implements IBootstrap
                 );
             }
         );
+
+        $context->registerNotifierService(Notifier::class);
     }
 
     public function boot(IBootContext $context): void

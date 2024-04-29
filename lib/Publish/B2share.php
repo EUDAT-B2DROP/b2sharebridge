@@ -152,7 +152,7 @@ class B2share implements IPublish
             } else {
                 $this->error_message = "Something went wrong in uploading.";
                 if (property_exists($results, 'status')) {
-                    if ($results->status === '403') {
+                    if ($results->status === 403) {
                         $this->error_message = "403 - Authorization Required";
                     }
                 }

@@ -185,8 +185,8 @@ export default {
 		// API stuff
 		loadServers() {
 			const url_path
-                = '/apps/b2sharebridge/servers?requesttoken='
-                + encodeURIComponent(OC.requestToken)
+				= '/apps/b2sharebridge/servers?requesttoken='
+				+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(url_path))
@@ -204,8 +204,8 @@ export default {
 
 		loadCommunities() {
 			const url_path
-                = '/apps/b2sharebridge/gettabviewcontent?requesttoken='
-                + encodeURIComponent(OC.requestToken)
+				= '/apps/b2sharebridge/gettabviewcontent?requesttoken='
+				+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(url_path))
@@ -223,8 +223,8 @@ export default {
 
 		loadTokens() {
 			const url_path
-                = '/apps/b2sharebridge/apitoken?requesttoken='
-                + encodeURIComponent(OC.requestToken)
+				= '/apps/b2sharebridge/apitoken?requesttoken='
+				+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(url_path))
@@ -347,7 +347,8 @@ export default {
 					})
 				.then(() => {
 					this.info.heading = 'Transferring to B2SHARE'
-					this.info.message = 'Your files are transfarred in the background. This may take a few minutes.'
+					this.info.message = 'Your files are transfarred in the background. This may take a few minutes. You\'ll \
+						get notified after the transfer finished.'
 					this.info.buttons = [
 						{
 							label: 'Ok',
@@ -386,8 +387,8 @@ export default {
 
 		redirect(relative_url) {
 			/* let url = generateUrl(relative_url)
-            this.$router.push(url)
-            this.closeModal() */
+			this.$router.push(url)
+			this.closeModal() */
 		},
 
 	},

@@ -17,6 +17,7 @@ namespace OCA\B2shareBridge\Controller;
 use OC\Files\Filesystem;
 use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Cron\TransferHandler;
+use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatus;
 use OCA\B2shareBridge\Model\DepositFile;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
@@ -34,6 +35,7 @@ use OCP\BackgroundJob\IJobList;
 use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IRequest;
+use OCP\Notification\IManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -52,10 +54,12 @@ class PublishController extends Controller
     protected DepositFileMapper $dfmapper;
     protected StatusCodes $statusCodes;
     protected string $userId;
+    protected IManager $notManager;
     protected LoggerInterface $logger;
     private ITimeFactory $time;
     private B2share $publisher;
     private ServerMapper $smapper;
+    private CommunityMapper $cmapper;
     private IJobList $jobList;
 
     /**
@@ -79,6 +83,8 @@ class PublishController extends Controller
         ITimeFactory $time,
         B2share $publisher,
         ServerMapper $smapper,
+        CommunityMapper $cmapper,
+        IManager $notManager,
         LoggerInterface $logger,
         IJobList $jobList,
         string $userId
@@ -92,8 +98,10 @@ class PublishController extends Controller
         $this->time = $time;
         $this->publisher = $publisher;
         $this->smapper = $smapper;
+        $this->cmapper = $cmapper;
         $this->logger = $logger;
         $this->jobList = $jobList;
+        $this->notManager = $notManager;
     }
 
     /**
@@ -118,7 +126,7 @@ class PublishController extends Controller
         ) {
             return new JSONResponse(
                 [
-                    'message'=> 'Missing parameters',
+                    'message' => 'Missing parameters',
                     'status' => 'error'
                 ],
                 Http::STATUS_BAD_REQUEST
@@ -134,7 +142,7 @@ class PublishController extends Controller
         if (!is_string($token)) {
             return new JSONResponse(
                 [
-                    'message'=> 'Could not find token for user',
+                    'message' => 'Could not find token for user',
                     'status' => 'error'
                 ],
                 Http::STATUS_INTERNAL_SERVER_ERROR
@@ -146,7 +154,7 @@ class PublishController extends Controller
         } catch (DoesNotExistException $e) {
             return new JSONResponse(
                 [
-                    'message'=> 'Invalid server id',
+                    'message' => 'Invalid server id',
                     'status' => 'error'
                 ],
                 Http::STATUS_BAD_REQUEST
@@ -168,7 +176,16 @@ class PublishController extends Controller
                 $filesize = $filesize + $view->filesize(Filesystem::getPath($id));
             }
             if ($filesize < $server->getMaxUploadFilesize() * 1024 * 1024) {
-                $job = new TransferHandler($this->time, $this->mapper, $this->dfmapper, $this->publisher, $this->smapper, $this->logger);
+                $job = new TransferHandler(
+                    $this->time,
+                    $this->mapper,
+                    $this->dfmapper,
+                    $this->publisher,
+                    $this->smapper,
+                    $this->cmapper,
+                    $this->notManager,
+                    $this->logger
+                );
                 $fcStatus = new DepositStatus();
                 $fcStatus->setOwner($this->userId);
                 $fcStatus->setStatus(1);
@@ -177,13 +194,14 @@ class PublishController extends Controller
                 $fcStatus->setTitle($title);
                 $fcStatus->setServerId($serverId);
                 $depositId = $this->mapper->insert($fcStatus);
-                foreach ($ids as $id) { 
+                foreach ($ids as $id) {
                     $depositFile = new DepositFile();
                     $depositFile->setFilename(basename(Filesystem::getPath($id)));
                     $depositFile->setFileid($id);
                     $depositFile->setDepositStatusId($depositId->getId());
                     $this->logger->debug(
-                        "Inserting " . $depositFile->getFilename(), ['app' => Application::APP_ID]
+                        "Inserting " . $depositFile->getFilename(),
+                        ['app' => Application::APP_ID]
                     );
                     $this->dfmapper->insert($depositFile);
                 }
@@ -226,8 +244,8 @@ class PublishController extends Controller
 
         return new JSONResponse(
             [
-                "message" => 'Transferring file to B2SHARE in the Background. '.
-                'Review the status in B2SHARE app.',
+                "message" => 'Transferring file to B2SHARE in the Background. ' .
+                    'Review the status in B2SHARE app.',
                 'status' => 'success'
             ]
         );

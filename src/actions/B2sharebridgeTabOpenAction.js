@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import { Permission, FileAction, Node, FileType } from '@nextcloud/files'
-import { spawnDialog } from '@nextcloud/dialogs'
+import { spawnDialog } from '@nextcloud/vue/dist/Functions/dialog.js'
 import BridgeDialog from '../components/BridgeDialog.vue'
 
 const filepicker = async (nodes) => {

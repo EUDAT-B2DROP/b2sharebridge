@@ -49,7 +49,7 @@ jobs:
     strategy:
       matrix:
         php-version: [ 8.1, 8.2, 8.3 ]
-        nextcloud-version-branch: [ stable28 ]  # see https://github.com/nextcloud/server/branches
+        nextcloud-version-branch: [ stable28, stable29, stable30 ]  # see https://github.com/nextcloud/server/branches
         exclude:
           - php-version: 8.0
             nextcloud-version-branch: stable28

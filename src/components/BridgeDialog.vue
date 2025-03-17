@@ -8,6 +8,7 @@
 			<p>{{ info.message }}</p>
 			<span class="button-container">
 				<NcButton v-for="button in info.buttons"
+					:area-label="button.label"
 					:key="button.label"
 					:href="button.href"
 					:type="button.type"
@@ -48,10 +49,12 @@
 				Open Access
 			</NcCheckboxRadioSwitch>
 			<span class="button-container">
-				<NcButton @click="closeModal">
+				<NcButton @click="closeModal"
+					aria-label="close">
 					Cancel
 				</NcButton>
-				<NcButton :disabled="publish.disabled" type="primary" @click="createDeposit">
+				<NcButton :disabled="publish.disabled" type="primary" @click="createDeposit"
+				    aria-label="publish">
 					Publish
 				</NcButton>
 			</span>

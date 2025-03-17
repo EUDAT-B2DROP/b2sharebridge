@@ -11,7 +11,8 @@
 			:helper-text="token.length === 60 ? 'Token saved' : ''"
 			@valid="saveToken"
 			@update:value="saveToken" />
-		<NcButton type="error" @click="deleteToken">
+		<NcButton type="error" @click="deleteToken"
+			aria-label="Delete Token">
 			Delete Token
 		</NcButton>
 	</div>

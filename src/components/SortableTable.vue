@@ -8,6 +8,7 @@
 							{{ field.name }}
 							<span class="sortbuttons">
 								<NcButton type="secondary"
+								    aria-label="Ascending Sort"
 									class="sorttop"
 									:disabled="sortBy === field.label && sortDir === 'asc'"
 									@click="sortByColumn(field.label, 'asc')">
@@ -16,6 +17,7 @@
 									</template>
 								</NcButton>
 								<NcButton type="secondary"
+									aria-label="Descending Sort"
 									class="sortbottom"
 									:disabled="sortBy === field.label && sortDir === 'desc'"
 									@click="sortByColumn(field.label, 'desc')">

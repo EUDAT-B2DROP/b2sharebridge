@@ -30,7 +30,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			<tr v-for="row in sortedRows">
+			<tr v-for="row in sortedRows" :key="row">
 				<template v-for="( field, index ) in fields">
 					<td v-if="field.active" :key="index" :class="field.extraClass">
 						<a v-if="field.type === 'link'" :href="row[field.label]">
@@ -47,8 +47,8 @@
 </template>
 
 <script>
-import Triangle from 'vue-material-design-icons/Triangle'
-import TriangleDown from 'vue-material-design-icons/TriangleDown'
+import Triangle from 'vue-material-design-icons/Triangle.vue'
+import TriangleDown from 'vue-material-design-icons/TriangleDown.vue'
 import { NcButton } from '@nextcloud/vue'
 export default {
 	name: 'SortableTable',
@@ -78,13 +78,13 @@ export default {
 			if (!this.sortBy) {
 				return this.rows
 			}
-			this.rows.sort((rowA, rowB) => {
+			const rowsSorted = this.rows.slice(0).sort((rowA, rowB) => {
 				return rowA[this.sortBy] > rowB[this.sortBy]
 			})
 			if (this.sortDir === 'desc') {
-				this.rows.reverse()
+				rowsSorted.reverse()
 			}
-			return this.rows
+			return rowsSorted
 		},
 	},
 	methods: {

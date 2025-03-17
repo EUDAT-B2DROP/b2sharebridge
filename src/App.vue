@@ -73,15 +73,13 @@
 import axios from '@nextcloud/axios'
 import SortableTable from './components/SortableTable.vue'
 import { generateUrl } from '@nextcloud/router'
-import { showError, showSuccess } from '@nextcloud/dialogs'
-import {
-	NcContent,
-	NcActionButton,
-	NcAppContent,
-	NcAppNavigation,
-	NcAppNavigationItem,
-	NcAppNavigationNew,
-} from '@nextcloud/vue'
+import { showError } from '@nextcloud/dialogs'
+
+// import NcActionButton from '@nextcloud/vue/dist/Components/ActionButton.cjs'
+import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js'
+import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation.js'
+import NcAppNavigationNew from '@nextcloud/vue/dist/Components/NcAppNavigationNew.js'
+import NcContent from '@nextcloud/vue/dist/Components/NcContent.js'
 
 const DepositFilter = {
 	ALL: 'all',
@@ -106,13 +104,9 @@ export default {
 	name: 'App',
 	components: {
 		NcContent,
-		NcActionButton,
 		NcAppContent,
 		NcAppNavigation,
-		NcAppNavigationItem,
 		NcAppNavigationNew,
-		DepositFilter,
-		DepositFields,
 		SortableTable,
 	},
 
@@ -215,20 +209,20 @@ export default {
 			return string.charAt(0).toUpperCase() + string.slice(1)
 		},
 
-		translateDepositStatus(deposit_status) {
-			if ('status' in deposit_status) {
-				switch (deposit_status.status) {
+		translateDepositStatus(depositStatus) {
+			if ('status' in depositStatus) {
+				switch (depositStatus.status) {
 				case 0:
-					deposit_status.status = this.capitalizeFirstLetter(DepositFilter.PUBLISHED)
+					depositStatus.status = this.capitalizeFirstLetter(DepositFilter.PUBLISHED)
 					break
 				case 1:
 				case 2:
-					deposit_status.status = this.capitalizeFirstLetter(DepositFilter.PENDING)
+					depositStatus.status = this.capitalizeFirstLetter(DepositFilter.PENDING)
 					break
 				case 3:
 				case 4:
 				case 5:
-					deposit_status.status = this.capitalizeFirstLetter(DepositFilter.FAILED)
+					depositStatus.status = this.capitalizeFirstLetter(DepositFilter.FAILED)
 					break
 				default:
 					break
@@ -236,11 +230,11 @@ export default {
 			}
 			// TODO query server id?
 
-			return deposit_status
+			return depositStatus
 		},
 
 		checkDepositUpdate() {
-			console.log('Polling deposits')
+			console.debug('Polling deposits')
 			this.loadDeposits(this.filter) // try to fetch update after transfer handler
 		},
 
@@ -272,7 +266,7 @@ export default {
 			case 'updatedAt':
 				extraClass = 'columnWidthDate'
 				break
-			default: 'columnWidthInt'
+			default: extraClass = 'columnWidthInt'
 			}
 			return extraClass
 		},

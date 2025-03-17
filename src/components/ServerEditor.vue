@@ -73,8 +73,8 @@ export default {
 	},
 	props: {
 		id: { default: null, type: Number },
-		name: { required: false, type: String },
-		publishurl: { required: false, type: String },
+		name: { default: '', required: false, type: String },
+		publishurl: { default: '', required: false, type: String },
 		maxuploads: { default: 5, type: Number },
 		maxuploadfilesize: { default: 512, type: Number },
 		checkssl: { default: false, type: Boolean },
@@ -136,7 +136,7 @@ export default {
 			if (this.id) {
 				axios.delete(generateUrl('/apps/b2sharebridge/servers/' + this.id))
 					.then((response) => {
-						console.log("Deleted server '" + this.name + "'")
+						console.debug("Deleted server '" + this.name + "'")
 						this.$emit('server-change', this.id)
 					})
 					.catch((error) => {

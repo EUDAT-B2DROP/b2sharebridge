@@ -59,24 +59,19 @@
 	</NcModal>
 </template>
 <script>
-import { NcDialog, NcModal, NcButton, NcTextField, NcSelect, NcCheckboxRadioSwitch } from '@nextcloud/vue'
+import { NcModal, NcButton, NcTextField, NcSelect, NcCheckboxRadioSwitch } from '@nextcloud/vue'
 import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
 import PencilIcon from 'vue-material-design-icons/Pencil.vue'
-import Close from 'vue-material-design-icons/Close'
-import CloudUploadOutline from 'vue-material-design-icons/CloudUploadOutline'
 export default {
 	name: 'BridgeDialog',
 	components: {
-		NcDialog,
 		NcModal,
 		NcTextField,
 		NcSelect,
 		NcCheckboxRadioSwitch,
 		NcButton,
 		PencilIcon,
-		Close,
-		CloudUploadOutline,
 	},
 	data() {
 		return {
@@ -124,12 +119,12 @@ export default {
 	},
 
 	async mounted() {
-		const server_promise = this.loadServers()
-		const community_promise = this.loadCommunities()
-		const token_promise = this.loadTokens()
-		await server_promise
-		await community_promise
-		await token_promise
+		const serverPromise = this.loadServers()
+		const communityPromise = this.loadCommunities()
+		const tokenPromise = this.loadTokens()
+		await serverPromise
+		await communityPromise
+		await tokenPromise
 
 		if (!this.hasValidTokens()) {
 			this.tokens = null
@@ -164,10 +159,10 @@ export default {
 			this.servers.forEach(server => {
 				const hasToken = this.tokens[server.id] !== ''
 				if (hasToken) {
-					const serverOption = new Object({
+					const serverOption = {
 						id: server.id,
 						label: server.name,
-					})
+					}
 					this.serverprops.options.push(serverOption)
 					if (this.serverprops.value === null) {
 						console.debug('Selected server automatically')
@@ -184,14 +179,14 @@ export default {
 	methods: {
 		// API stuff
 		loadServers() {
-			const url_path
+			const urlPath
 				= '/apps/b2sharebridge/servers?requesttoken='
 				+ encodeURIComponent(OC.requestToken)
 
 			return axios
-				.get(generateUrl(url_path))
+				.get(generateUrl(urlPath))
 				.then((response) => {
-					console.log('Loaded servers:')
+					console.debug('Loaded servers:')
 					console.debug(response)
 					this.servers = response.data
 				})
@@ -203,12 +198,12 @@ export default {
 		},
 
 		loadCommunities() {
-			const url_path
+			const urlPath
 				= '/apps/b2sharebridge/gettabviewcontent?requesttoken='
 				+ encodeURIComponent(OC.requestToken)
 
 			return axios
-				.get(generateUrl(url_path))
+				.get(generateUrl(urlPath))
 				.then((response) => {
 					console.debug('Loaded communities:')
 					console.debug(response)
@@ -222,14 +217,14 @@ export default {
 		},
 
 		loadTokens() {
-			const url_path
+			const urlPath
 				= '/apps/b2sharebridge/apitoken?requesttoken='
 				+ encodeURIComponent(OC.requestToken)
 
 			return axios
-				.get(generateUrl(url_path))
+				.get(generateUrl(urlPath))
 				.then((response) => {
-					console.log('Successfully requested tokens!')
+					console.debug('Successfully requested tokens!')
 					console.debug(response.data)
 					if (response.data) {
 						this.tokens = response.data
@@ -255,11 +250,11 @@ export default {
 			if (this.serverprops.value !== null) {
 				// set communities for new server
 				this.communities.forEach((community, index) => {
-					if (community.hasOwnProperty('serverId') && parseInt(community.serverId) === parseInt(this.serverprops.value.id)) {
-						const communityOption = new Object({
+					if (Object.hasOwn(community, 'serverId') && parseInt(community.serverId) === parseInt(this.serverprops.value.id)) {
+						const communityOption = {
 							id: community.id,
 							label: community.name,
-						})
+						}
 						this.communityprops.options.push(communityOption)
 						if (community.name === 'EUDAT') { // TODO make this configurable
 							console.debug('Automatically selected EUDAT as community')
@@ -275,13 +270,13 @@ export default {
 			if (this.tokens === null) {
 				return false
 			}
-			let valid_token_found = false
+			let validTokenFound = false
 			Object.keys(this.tokens).forEach(key => {
 				if (this.tokens[key] !== '') {
-					valid_token_found = true
+					validTokenFound = true
 				}
 			})
-			return valid_token_found
+			return validTokenFound
 		},
 
 		validate(event) {
@@ -347,8 +342,8 @@ export default {
 					})
 				.then(() => {
 					this.info.heading = 'Transferring to B2SHARE'
-					this.info.message = 'Your files are transfarred in the background. This may take a few minutes. You\'ll \
-						get notified after the transfer finished.'
+					this.info.message = 'Your files are transfarred in the background. This may take a few minutes. You\'ll '
+						+ 'get notified after the transfer finished.'
 					this.info.buttons = [
 						{
 							label: 'Ok',
@@ -365,8 +360,7 @@ export default {
 				})
 				.catch((error) => {
 					if (error.response) {
-						if (error.response.status === 413) // entity too large
-						{
+						if (error.response.status === 413) { // entity too large
 							this.info.message = 'Publishing failed! One or more of your files are too large!'
 						} else if (error.response.status === 429) { // too many uploads
 							this.info.message = 'Publishing failed! You have too many pending uploads, please try again later!'
@@ -384,13 +378,6 @@ export default {
 			this.showDialog = false
 			this.info.message = ''
 		},
-
-		redirect(relative_url) {
-			/* let url = generateUrl(relative_url)
-			this.$router.push(url)
-			this.closeModal() */
-		},
-
 	},
 }
 </script>
@@ -426,7 +413,7 @@ export default {
 #infodial .button-container {
 	display: flex;
 	flex-direction: row;
-	align-items: right;
+	align-items: start;
 	justify-content: flex-end;
 }
 

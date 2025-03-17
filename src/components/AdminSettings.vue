@@ -14,7 +14,7 @@
 		<div v-if="loaded && servers.length" class="bridgeservers">
 			<h3>Servers:</h3>
 			<ul>
-				<li v-for="server in servers">
+				<li v-for="server in servers" :key="server.id">
 					<ServerEditor :id="parseInt(server.id)"
 						:name="server.name"
 						:publishurl="server.publishUrl"
@@ -64,12 +64,12 @@ export default {
 	},
 	methods: {
 		loadServers() {
-			const url_path = '/apps/b2sharebridge/servers?requesttoken=' + encodeURIComponent(OC.requestToken)
+			const urlPath = '/apps/b2sharebridge/servers?requesttoken=' + encodeURIComponent(OC.requestToken)
 
 			return axios
-				.get(generateUrl(url_path))
+				.get(generateUrl(urlPath))
 				.then((response) => {
-					console.log('Loaded servers:')
+					console.debug('Loaded servers:')
 					console.debug(response)
 					this.servers = []
 					this.servers = this.servers.concat(response.data)

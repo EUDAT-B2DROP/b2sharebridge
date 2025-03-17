@@ -3,7 +3,7 @@
 		<h2>EUDAT B2SHARE Bridge</h2>
 		<div v-if="loaded && servers.length" class="servers">
 			<ul>
-				<li v-for="server in servers">
+				<li v-for="server in servers" :key="server.id">
 					<TokenEditor :id="parseInt(server.id)"
 						:name="server.name"
 						:url="server.publishUrl"
@@ -47,12 +47,12 @@ export default {
 	},
 	methods: {
 		loadServers() {
-			const url_path = '/apps/b2sharebridge/servers?requesttoken=' + encodeURIComponent(OC.requestToken)
+			const urlPath = '/apps/b2sharebridge/servers?requesttoken=' + encodeURIComponent(OC.requestToken)
 
 			return axios
-				.get(generateUrl(url_path))
+				.get(generateUrl(urlPath))
 				.then((response) => {
-					console.log('Loaded servers:')
+					console.debug('Loaded servers:')
 					console.debug(response)
 					this.servers = response.data
 				})
@@ -63,12 +63,12 @@ export default {
 		},
 
 		loadTokens() {
-			const url_path = '/apps/b2sharebridge/apitoken?requesttoken=' + encodeURIComponent(OC.requestToken)
+			const urlPath = '/apps/b2sharebridge/apitoken?requesttoken=' + encodeURIComponent(OC.requestToken)
 
 			return axios
-				.get(generateUrl(url_path))
+				.get(generateUrl(urlPath))
 				.then((response) => {
-					console.log('Loaded tokens:')
+					console.debug('Loaded tokens:')
 					console.debug(response)
 					this.tokens = response.data
 				})
@@ -78,8 +78,8 @@ export default {
 				})
 		},
 
-		getToken(server_id) {
-			return this.tokens[server_id] || ''
+		getToken(serverId) {
+			return this.tokens[serverId] || ''
 		},
 
 		updateTokens() {

@@ -8,7 +8,7 @@
 							{{ field.name }}
 							<span class="sortbuttons">
 								<NcButton type="secondary"
-								    aria-label="Ascending Sort"
+									aria-label="Ascending Sort"
 									class="sorttop"
 									:disabled="sortBy === field.label && sortDir === 'asc'"
 									@click="sortByColumn(field.label, 'asc')">

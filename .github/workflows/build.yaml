@@ -48,11 +48,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: [ 8.1, 8.2, 8.3 ]
-        nextcloud-version-branch: [ stable28, stable29, stable30 ]  # see https://github.com/nextcloud/server/branches
+        php-version: [ 8.1, 8.2, 8.3, 8.4 ]
+        nextcloud-version-branch: [ stable28, stable29, stable30, stable31 ]  # see https://github.com/nextcloud/server/branches
         exclude:
-          - php-version: 8.0
+          - php-version: 8.4
             nextcloud-version-branch: stable28
+          - php-version: 8.4
+            nextcloud-version-branch: stable29
+          - php-version: 8.4
+            nextcloud-version-branch: stable30
 
     name: Deploy b2sharebridge-app in a NC environment
     needs: build
@@ -128,13 +132,11 @@ jobs:
           make stylelint-fix
 
       - name: Js Lint checking
-        continue-on-error: true
         run: |
           cd apps/b2sharebridge
           make lint
 
       - name: Fix Js Lint
-        continue-on-error: true
         run: |
           cd apps/b2sharebridge
           make lint-fix

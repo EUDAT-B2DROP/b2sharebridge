@@ -37,20 +37,25 @@ use OCP\AppFramework\Utility\ITimeFactory;
 class B2shareCommunityFetcher extends TimedJob
 {
 
-    private IConfig $config;
-    private LoggerInterface $logger;
-    private IDBConnection $dbconnection;
+    private IConfig $_config;
+    private LoggerInterface $_logger;
+    private IDBConnection $_dbconnection;
 
     /**
      * Create cron that is fetching the b2share communities api
      * with dependency injection
+     * 
+     * @param \Psr\Log\LoggerInterface               $logger       logger
+     * @param \OCP\IConfig                           $config       config
+     * @param \OCP\IDBConnection                     $dbconnection connection
+     * @param \OCP\AppFramework\Utility\ITimeFactory $time 
      */
-    function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $dbconnection, ITimeFactory $time)
+    public function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $dbconnection, ITimeFactory $time)
     {
         parent::__construct($time);
-        $this->config = $config;
-        $this->logger = $logger;
-        $this->dbconnection = $dbconnection;
+        $this->_config = $config;
+        $this->_logger = $logger;
+        $this->_dbconnection = $dbconnection;
         // Run once an hour
         $this->setInterval(3600);
     }
@@ -58,19 +63,22 @@ class B2shareCommunityFetcher extends TimedJob
     /**
      * Cron code to execute
      *
-     * @param  array $args array of arguments
+     * @param array $args array of arguments
+     * 
      * @throws Exception
+     * 
+     * @return void
      */
-    function run($args)
+    public function run($args)
     {
-        $serverMapper = new ServerMapper($this->dbconnection);
-        $communityMapper = new CommunityMapper($this->dbconnection);
+        $serverMapper = new ServerMapper($this->_dbconnection);
+        $communityMapper = new CommunityMapper($this->_dbconnection);
         $servers = $serverMapper->findAll();
         foreach ($servers as $server) {
             $b2share_communities_url = $server->getPublishUrl() . '/api/communities/';
             $json = $this->_getUrlContent($b2share_communities_url);
             if (!$json) {
-                $this->logger->error(
+                $this->_logger->error(
                     'Fetching the B2SHARE communities API at ' . $b2share_communities_url .
                     ' was not possible.',
                     ['app' => Application::APP_ID]
@@ -79,7 +87,7 @@ class B2shareCommunityFetcher extends TimedJob
             }
             $communities_fetched = json_decode($json, true)['hits']['hits'];
             if ($communities_fetched === null) {
-                $this->logger->error(
+                $this->_logger->error(
                     'Fetching the B2SHARE communities API at ' . $b2share_communities_url .
                     ' did not return a valid JSON.',
                     ['app' => Application::APP_ID]
@@ -89,7 +97,7 @@ class B2shareCommunityFetcher extends TimedJob
 
             $communities_b2share = [];
             foreach ($communities_fetched as $community) {
-                $this->logger->debug(
+                $this->_logger->debug(
                     'Fetched community with id: ' . $community['id'] .
                     ' and name: ' . $community['name'] . ' fetched' .
                     ' and restricted_submission: ' . $community['restricted_submission'] . ' from server ' . $server->getName(),
@@ -114,7 +122,7 @@ class B2shareCommunityFetcher extends TimedJob
                 $communities_b2share
             );
             foreach ($remove_communities as $id => $name) {
-                $this->logger->info(
+                $this->_logger->info(
                     'Removing community with id: ' . $id .
                     ' and name: ' . $name . ' after synchronization with b2share',
                     ['app' => Application::APP_ID]
@@ -125,7 +133,7 @@ class B2shareCommunityFetcher extends TimedJob
             // do we need to add a community?
             $add_communities = array_diff_key($communities_b2share, $communities_b2drop);
             foreach ($add_communities as $id => $name) {
-                $this->logger->info(
+                $this->_logger->info(
                     'Adding community with id: ' . $id . ' and name: '
                     . $name . ' after synchronization with B2SHARE server ' . $server->getName(),
                     ['app' => Application::APP_ID]
@@ -145,7 +153,7 @@ class B2shareCommunityFetcher extends TimedJob
                 }
             }
             if (!$found) {
-                $this->logger->info(
+                $this->_logger->info(
                     'Removing orphan community with id: ' . $community->getId()
                 );
                 $communityMapper->delete($community);
@@ -172,7 +180,7 @@ class B2shareCommunityFetcher extends TimedJob
             CURLOPT_REFERER => $url,
             CURLOPT_RETURNTRANSFER => true
         );
-        $check_ssl = $this->config->getAppValue(
+        $check_ssl = $this->_config->getAppValue(
             Application::APP_ID,
             'check_ssl',
             '1'

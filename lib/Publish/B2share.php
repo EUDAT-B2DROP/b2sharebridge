@@ -41,14 +41,22 @@ class B2share implements IPublish
     /**
      * Create object for actual upload
      *
-     * @param LoggerInterface $logger
+     * @param IConfig         $_config ignored
+     * @param LoggerInterface $logger  logger
      */
-    public function __construct(IConfig $config, LoggerInterface $logger)
+    public function __construct(IConfig $_config, LoggerInterface $logger)
     {
         $this->logger = $logger;
         $this->curl_client = curl_init();
     }
 
+    /**
+     * Activate or deactive SSL check
+     * 
+     * @param bool $checkSsl check SSL
+     * 
+     * @return void
+     */
     public function setCheckSSL(bool $checkSsl)
     {
         $defaults = array(

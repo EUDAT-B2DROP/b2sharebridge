@@ -42,18 +42,21 @@ interface IPublish
     /**
      * Set SSL parameters
      *
-     * @param bool $checkSsl
+     * @param bool $checkSsl check SSL
+     * 
+     * @return void
      */
     public function setCheckSSL(bool $checkSsl);
 
     /**
      * Placeholder for actually creating a deposit
      *
-     * @param  string $token        users access token
-     * @param  string $community
-     * @param  string $open_access
-     * @param  string $title
-     * @param  string $api_endpoint
+     * @param string $token        users access token
+     * @param string $community    Community
+     * @param string $open_access  Open Access
+     * @param string $title        Title
+     * @param string $api_endpoint API Endpoint
+     * 
      * @return string
      */
     public function create(string $token, string $community, string $open_access, string $title, string $api_endpoint): string;

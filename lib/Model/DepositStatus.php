@@ -90,6 +90,11 @@ class DepositStatus extends Entity implements JsonSerializable
         return urldecode($result);
     }
 
+    /**
+     * To JSON
+     * 
+     * @return array{createdAt: string, error: mixed, fileCount: mixed, owner: mixed, serverId: mixed, status: mixed, title: mixed, updatedAt: string, url: mixed}
+     */
     public function jsonSerialize(): array
     {
         return [

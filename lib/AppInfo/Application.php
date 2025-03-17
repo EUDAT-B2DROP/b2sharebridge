@@ -44,9 +44,9 @@ use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Implement a ownCloud Application for our b2sharebridge
+ * Implement a Nextcloud Application for our b2sharebridge
  *
- * @category Owncloud
+ * @category Nextcloud
  * @package  B2shareBridge
  * @author   EUDAT <b2drop-devel@postit.csc.fi>
  * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
@@ -59,11 +59,12 @@ class Application extends App implements IBootstrap
     /**
      * Create a ownCloud application
      *
-     * @param  array $urlParams a list of url parameters
+     * @param array $urlParams a list of url parameters
+     * 
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
-    public function __construct(array $urlParams = array())
+    public function __construct(array $urlParams = [])
     {
         parent::__construct(self::APP_ID, $urlParams);
         $container = $this->getContainer();
@@ -81,6 +82,10 @@ class Application extends App implements IBootstrap
 
     /**
      * Load additional javascript files
+     * 
+     * @deprecated 
+     * 
+     * @return void
      */
     public static function loadScripts()
     {
@@ -90,6 +95,13 @@ class Application extends App implements IBootstrap
         */
     }
 
+    /**
+     * Register Services into Context
+     * 
+     * @param \OCP\AppFramework\Bootstrap\IRegistrationContext $context Context
+     * 
+     * @return void
+     */
     public function register(IRegistrationContext $context): void
     {
         // Register the composer autoloader for packages shipped by this app, if applicable
@@ -241,6 +253,15 @@ class Application extends App implements IBootstrap
         $context->registerNotifierService(Notifier::class);
     }
 
+    /**
+     * Summary of boot
+     * 
+     * @param \OCP\AppFramework\Bootstrap\IBootContext $context Context
+     * 
+     * @deprecated 
+     * 
+     * @return void
+     */
     public function boot(IBootContext $context): void
     {
         //$this->registerNavigationEntry();

@@ -53,20 +53,21 @@ class ViewController extends Controller
     protected $cMapper;
     protected $smapper;
 
-    private LoggerInterface $logger;
+    private LoggerInterface $_logger;
 
     /**
      * Creates the AppFramwork Controller
      *
-     * @param string              $appName     name of the app
-     * @param IRequest            $request     request object
-     * @param IConfig             $config      config object
-     * @param DepositStatusMapper $mapper      whatever
+     * @param string              $appName     Name of the app
+     * @param IRequest            $request     Request
+     * @param IConfig             $config      Config
+     * @param DepositStatusMapper $mapper      Deposit Status Mapper
      * @param DepositFileMapper   $fdmapper    ORM for DepositFile
-     * @param CommunityMapper     $cMapper     a community mapper
-     * @param ServerMapper        $smapper     server mapper
-     * @param StatusCodes         $statusCodes whatever
-     * @param string              $userId      userid
+     * @param CommunityMapper     $cMapper     Community mapper
+     * @param ServerMapper        $smapper     Server Mapper
+     * @param StatusCodes         $statusCodes Status Code Mapper
+     * @param LoggerInterface     $logger      Logger
+     * @param string              $userId      User ID
      */
     public function __construct(
         $appName,
@@ -88,7 +89,7 @@ class ViewController extends Controller
         $this->smapper = $smapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
-        $this->logger = $logger;
+        $this->_logger = $logger;
     }
 
     /**
@@ -122,19 +123,20 @@ class ViewController extends Controller
     }
 
     /**
-     * returns all deposits for a user with the filter query parameter.
+     * Returns all deposits for a user with the filter query parameter.
      * possible filters:
      *     'all': get all deposits
      *     'pending': get pending deposits
      *     'publish': get published deposits
      *     'failed': get failed deposits
      *
-     * @return JSONResponse
-     *
-     * @throws          Exception
-     * @throws          DoesNotExistException
-     * @throws          MultipleObjectsReturnedException
+     * @throws Exception
+     * @throws DoesNotExistException
+     * @throws MultipleObjectsReturnedException
+     * 
      * @NoAdminRequired
+     * 
+     * @return JSONResponse
      */
     public function depositList(): JSONResponse
     {
@@ -192,7 +194,7 @@ class ViewController extends Controller
             $error = 'No user configured for session';
         }
         if (($error)) {
-            $this->logger->error($error, ['app' => Application::APP_ID]);
+            $this->_logger->error($error, ['app' => Application::APP_ID]);
             return new JSONResponse(
                 [
                     'message' => 'Internal server error, contact the EUDAT helpdesk',
@@ -203,7 +205,7 @@ class ViewController extends Controller
         }
 
 
-        $this->logger->info(
+        $this->_logger->info(
             'saving API token',
             ['app' => Application::APP_ID]
         );
@@ -219,19 +221,22 @@ class ViewController extends Controller
     /**
      * XHR request endpoint for token setter
      *
-     * @param           $id
-     * @return          JSONResponse
-     * @throws          PreConditionNotMetException
+     * @param $id Token ID
+     * 
+     * @throws PreConditionNotMetException
+     * 
      * @NoAdminRequired
+     * 
+     * @return JSONResponse
      */
     public function deleteToken($id): JSONResponse
     {
-        $this->logger->info(
+        $this->_logger->info(
             'Deleting API token',
             ['app' => Application::APP_ID]
         );
         if (strlen($this->userId) <= 0) {
-            $this->logger->info(
+            $this->_logger->info(
                 'No user configured for session',
                 ['app' => Application::APP_ID]
             );
@@ -253,11 +258,13 @@ class ViewController extends Controller
     }
 
     /**
-     * request endpoint for gettin users tokens
+     * Request endpoint for gettin users tokens
      *
-     * @return          JSONResponse
      * @NoAdminRequired
-     * @throws          Exception
+     * 
+     * @throws Exception
+     * 
+     * @return JSONResponse
      */
     public function getTokens(): JSONResponse
     {

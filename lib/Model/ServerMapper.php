@@ -21,8 +21,22 @@ use OCP\DB\Exception;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 
+/**
+ * Maps B2SHARE Server to Database table 
+ * 
+ * @category Nextcloud
+ * @package  B2shareBridge
+ * @author   EUDAT <b2drop-devel@postit.csc.fi>
+ * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
+ */
 class ServerMapper extends QBMapper
 {
+    /**
+     * Construct ServerMapper
+     * 
+     * @param \OCP\IDBConnection $db Database Connection
+     */
     public function __construct(IDBConnection $db)
     {
         parent::__construct(
@@ -33,9 +47,11 @@ class ServerMapper extends QBMapper
     }
 
     /**
-     * @throws DoesNotExistException
-     * @throws MultipleObjectsReturnedException
-     * @throws Exception
+     * Find a Server by ID
+     * 
+     * @param int $id Server ID
+     * 
+     * @return Server
      */
     public function find(int $id): Server
     {
@@ -48,7 +64,10 @@ class ServerMapper extends QBMapper
     }
 
     /**
+     * Find all servers
+     * 
      * @throws Exception
+     * @return array of entities
      */
     public function findAll(): array
     {

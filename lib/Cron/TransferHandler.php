@@ -55,14 +55,14 @@ class TransferHandler extends QueuedJob
     /**
      * Create the database mapper
      *
-     * @param ITimeFactory|null        $time
+     * @param ITimeFactory|null        $time       Time
      * @param DepositStatusMapper|null $mapper     the database mapper for transfers
      * @param DepositFileMapper|null   $dfmapper   ORM for DepositFile
      * @param IPublish|null            $publisher  publishing backend to use
-     * @param ServerMapper|null        $smapper
-     * @param CommunityMapper|null     $cmapper
-     * @param LoggerInterface|null     $logger
-     * @param IManager|null            $notManager
+     * @param ServerMapper|null        $smapper    Server Mapper
+     * @param CommunityMapper|null     $cmapper    Community Mapper
+     * @param IManager|null            $notManager Manager
+     * @param LoggerInterface|null     $logger     LoggerInterface
      */
     public function __construct(
         ITimeFactory $time = null,
@@ -94,6 +94,8 @@ class TransferHandler extends QueuedJob
     /**
      * A Cron that is executed in the background needs to create the Application
      * because its not coming form the user context
+     * 
+     * @return void
      */
     protected function fixTransferForCron()
     {
@@ -111,6 +113,8 @@ class TransferHandler extends QueuedJob
      * Check if current user is the requested user
      *
      * @param array $args array of arguments
+     * 
+     * @return void
      */
     public function run($args)
     {

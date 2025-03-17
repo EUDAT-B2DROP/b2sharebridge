@@ -35,17 +35,18 @@ use OCA\B2shareBridge\Model\ServerMapper;
 class Admin implements ISettings
 {
     private IConfig $_config;
-    private ServerMapper $mapper;
+    private ServerMapper $_mapper;
 
     /**
      * Constructors construct.
      *
-     * @param IConfig $config Nextcloud config container
+     * @param IConfig      $config Nextcloud config container
+     * @param ServerMapper $mapper Server Mapper
      */
     public function __construct(IConfig $config, ServerMapper $mapper)
     {
         $this->_config = $config;
-        $this->mapper = $mapper;
+        $this->_mapper = $mapper;
     }
 
 
@@ -57,7 +58,7 @@ class Admin implements ISettings
      */
     public function getForm(): TemplateResponse
     {
-        $this->mapper->findAll();
+        $this->_mapper->findAll();
         /*$params = [
             'max_uploads' => $this->_config->getAppValue(
                 Application::APP_ID, 'max_uploads'

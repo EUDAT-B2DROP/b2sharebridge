@@ -56,11 +56,11 @@ class PublishController extends Controller
     protected string $userId;
     protected IManager $notManager;
     protected LoggerInterface $logger;
-    private ITimeFactory $time;
-    private B2share $publisher;
-    private ServerMapper $smapper;
-    private CommunityMapper $cmapper;
-    private IJobList $jobList;
+    private ITimeFactory $_time;
+    private B2share $_publisher;
+    private ServerMapper $_smapper;
+    private CommunityMapper $_cmapper;
+    private IJobList $_jobList;
 
     /**
      * Creates the AppFramwork Controller
@@ -68,9 +68,16 @@ class PublishController extends Controller
      * @param string              $appName     name of the app
      * @param IRequest            $request     request object
      * @param IConfig             $config      config object
-     * @param DepositStatusMapper $mapper      whatever
+     * @param DepositStatusMapper $mapper      Deposit Status Mapper
      * @param DepositFileMapper   $dfmapper    ORM for DepositFile objects
-     * @param StatusCodes         $statusCodes whatever
+     * @param StatusCodes         $statusCodes Status Code Mapper
+     * @param ITimeFactory        $time        Time
+     * @param B2share             $publisher   B2SHARE
+     * @param ServerMapper        $smapper     Server Mapper
+     * @param CommunityMapper     $cmapper     Community Mapper
+     * @param IManager            $notManager  Manager
+     * @param LoggerInterface     $logger      Logger
+     * @param IJobList            $jobList     Nextcloud Job List Interface
      * @param string              $userId      userid
      */
     public function __construct(
@@ -95,12 +102,12 @@ class PublishController extends Controller
         $this->dfmapper = $dfmapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
-        $this->time = $time;
-        $this->publisher = $publisher;
-        $this->smapper = $smapper;
-        $this->cmapper = $cmapper;
+        $this->_time = $time;
+        $this->_publisher = $publisher;
+        $this->_smapper = $smapper;
+        $this->_cmapper = $cmapper;
         $this->logger = $logger;
-        $this->jobList = $jobList;
+        $this->_jobList = $jobList;
         $this->notManager = $notManager;
     }
 
@@ -150,7 +157,7 @@ class PublishController extends Controller
         }
 
         try {
-            $server = $this->smapper->find($serverId);
+            $server = $this->_smapper->find($serverId);
         } catch (DoesNotExistException $e) {
             return new JSONResponse(
                 [
@@ -160,7 +167,7 @@ class PublishController extends Controller
                 Http::STATUS_BAD_REQUEST
             );
         }
-        $this->publisher->setCheckSSL($server->getCheckSsl());
+        $this->_publisher->setCheckSSL($server->getCheckSsl());
 
         $active_uploads = count(
             $this->mapper->findAllForUserAndStateString(
@@ -173,16 +180,16 @@ class PublishController extends Controller
             $view = Filesystem::getView();
             $filesize = 0;
             foreach ($ids as $id) {
-                $filesize = $filesize + $view->filesize(Filesystem::getPath($id));
+                $filesize += $view->filesize(Filesystem::getPath($id));
             }
             if ($filesize < $server->getMaxUploadFilesize() * 1024 * 1024) {
                 $job = new TransferHandler(
-                    $this->time,
+                    $this->_time,
                     $this->mapper,
                     $this->dfmapper,
-                    $this->publisher,
-                    $this->smapper,
-                    $this->cmapper,
+                    $this->_publisher,
+                    $this->_smapper,
+                    $this->_cmapper,
                     $this->notManager,
                     $this->logger
                 );
@@ -229,7 +236,7 @@ class PublishController extends Controller
 
 
         // register transfer cron
-        $this->jobList->add(
+        $this->_jobList->add(
             $job,
             [
                 'transferId' => $fcStatus->getId(),

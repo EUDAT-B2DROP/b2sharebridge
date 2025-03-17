@@ -66,8 +66,11 @@ class CommunityMapper extends QBMapper
     /**
      * Return all communities for server with id
      *
+     * @param $serverId Server ID
+     * 
+     * @throws Exception
+     * 
      * @return array(Entity)
-     * @throws Exception if more th one
      */
     public function findForServer($serverId): array
     {
@@ -99,10 +102,12 @@ class CommunityMapper extends QBMapper
     /**
      * Returns community name by given id.
      *
-     * @param  string $uid      internal uid of the community
-     * @param  string $serverId internal uid of the server
-     * @return Community
+     * @param string $uid      internal uid of the community
+     * @param string $serverId internal uid of the server
+     * 
      * @throws Exception|MultipleObjectsReturnedException|DoesNotExistException
+     * 
+     * @return Community
      */
     public function find(string $uid, string $serverId): Community
     {

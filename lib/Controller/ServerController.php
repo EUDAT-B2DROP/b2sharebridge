@@ -28,14 +28,32 @@ use OCP\IRequest;
 use OCA\B2shareBridge\Cron\B2shareCommunityFetcher;
 use Psr\Log\LoggerInterface;
 
-
+/**
+ * Implement a nextcloud Controller for B2SHARE Servers
+ *
+ * @category Nextcloud
+ * @package  B2shareBridge
+ * @author   EUDAT <b2drop-devel@postit.csc.fi>
+ * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
+ */
 class ServerController extends Controller
 {
-    private string $userId;
-    private ServerMapper $mapper;
-    private IJobList $joblist;
-    private LoggerInterface $logger;
+    private string $_userId;
+    private ServerMapper $_mapper;
+    private IJobList $_joblist;
+    private LoggerInterface $_logger;
 
+    /**
+     * Summary of __construct
+     *
+     * @param string          $appName App Name
+     * @param IRequest        $request Request
+     * @param ServerMapper    $mapper  Server Mapper
+     * @param IJobList        $jobList Nextcloud Server Job List interface
+     * @param LoggerInterface $logger  Logger
+     * @param string          $userId  User ID
+     */
     public function __construct(
         $appName,
         IRequest $request,
@@ -45,30 +63,40 @@ class ServerController extends Controller
         $userId
     ) {
         parent::__construct($appName, $request);
-        $this->mapper = $mapper;
-        $this->userId = $userId;
-        $this->joblist = $jobList;
-        $this->logger = $logger;
+        $this->_mapper = $mapper;
+        $this->_userId = $userId;
+        $this->_joblist = $jobList;
+        $this->_logger = $logger;
     }
 
     /**
+     * List all B2SHARE Servers
+     * 
      * @NoAdminRequired
      *
      * @throws Exception
+     * 
+     * @return array List of Servers
      */
     public function listServers(): array
     {
-        return $this->mapper->findAll();
+        return $this->_mapper->findAll();
     }
 
     /**
+     * Save B2SHARE Server
+     * 
+     * @param $server B2SHARE Server, see ServerMapper
+     * 
      * @throws MultipleObjectsReturnedException
      * @throws DoesNotExistException
      * @throws Exception
+     * 
+     * @return JSONResponse
      */
     public function saveServer($server): JSONResponse
     {
-        if (!$this->checkServer($server)) {
+        if (!$this->_checkServer($server)) {
             return new JSONResponse(
                 [
                     "message" => "Validation failed",
@@ -80,10 +108,10 @@ class ServerController extends Controller
         // get server entity
         $server_exists = array_key_exists("id", $server);
         if ($server_exists) {
-            $server_entity = $this->mapper->find($server['id']);
+            $server_entity = $this->_mapper->find($server['id']);
             $update_communities = $server['publishUrl'] !== $server_entity->getPublishUrl();
         } else {
-            $this->logger->info("Creating new b2share server", ["app" => Application::APP_ID]);
+            $this->_logger->info("Creating new b2share server", ["app" => Application::APP_ID]);
             $server_entity = new Server();
             $update_communities = true;
         }
@@ -103,17 +131,17 @@ class ServerController extends Controller
 
         // update database
         if ($server_exists) {
-            $this->mapper->update($server_entity);
-            $this->logger->info("User " . $this->userId . " updated '" . $server['name'] . "'", ["app" => Application::APP_ID]);
+            $this->_mapper->update($server_entity);
+            $this->_logger->info("User " . $this->_userId . " updated '" . $server['name'] . "'", ["app" => Application::APP_ID]);
         } else {
-            $this->mapper->insert($server_entity);
-            $this->logger->info("User " . $this->userId . " created '" . $server['name'] . "'", ["app" => Application::APP_ID]);
+            $this->_mapper->insert($server_entity);
+            $this->_logger->info("User " . $this->_userId . " created '" . $server['name'] . "'", ["app" => Application::APP_ID]);
         }
 
         // replace job to get communities instantly if required
         if ($update_communities) {
-            $this->joblist->remove(B2shareCommunityFetcher::class);
-            $this->joblist->add(B2shareCommunityFetcher::class);
+            $this->_joblist->remove(B2shareCommunityFetcher::class);
+            $this->_joblist->add(B2shareCommunityFetcher::class);
         }
 
         return new JSONResponse(
@@ -125,41 +153,54 @@ class ServerController extends Controller
     }
 
     /**
-     * @depreacted use saveServer instead
-     * @throws     MultipleObjectsReturnedException
-     * @throws     DoesNotExistException
-     * @throws     Exception
+     * Save multiple servers at once
+     * 
+     * @param array $servers List of Servers
+     * 
+     * @deprecated use saveServer instead
+     * 
+     * @throws MultipleObjectsReturnedException
+     * @throws DoesNotExistException
+     * @throws Exception
+     * 
+     * @return array List of All Servers
      */
     public function saveServers($servers): array
     {
         foreach ($servers as $server) {
             if (array_key_exists('id', $server)) {
-                $old = $this->mapper->find($server['id']);
+                $old = $this->_mapper->find($server['id']);
                 $old->setName($server['name']);
                 $old->setPublishUrl($server['publishUrl']);
-                $this->mapper->update($old);
+                $this->_mapper->update($old);
             } else {
                 $newServer = new Server();
                 $newServer->setName($server['name']);
                 $newServer->setPublishUrl($server['publishUrl']);
-                $this->mapper->insert($newServer);
+                $this->_mapper->insert($newServer);
             }
         }
         // replace job to get communities instantly
-        $this->joblist->remove(B2shareCommunityFetcher::class);
-        $this->joblist->add(B2shareCommunityFetcher::class);
+        $this->_joblist->remove(B2shareCommunityFetcher::class);
+        $this->_joblist->add(B2shareCommunityFetcher::class);
 
-        return $this->mapper->findAll();
+        return $this->_mapper->findAll();
     }
 
     /**
+     * Delete Server by ID
+     * 
+     * @param $id Server ID
+     * 
      * @throws MultipleObjectsReturnedException
      * @throws Exception
+     * 
+     * @return JSONResponse
      */
     public function deleteServer($id): JSONResponse
     {
         try {
-            $this->mapper->delete($this->mapper->find($id));
+            $this->_mapper->delete($this->_mapper->find($id));
         } catch (DoesNotExistException) {
             return new JSONResponse(
                 [
@@ -177,7 +218,14 @@ class ServerController extends Controller
 
     }
 
-    private function checkServer($server): bool
+    /**
+     * Check Server attributes
+     * 
+     * @param mixed $server Dict for example
+     * 
+     * @return bool
+     */
+    private function _checkServer($server): bool
     {
         $required_keys = array("name", "publishUrl");
         foreach ($required_keys as $key) {

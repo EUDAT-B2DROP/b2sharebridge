@@ -34,12 +34,13 @@ use Psr\Log\LoggerInterface;
  */
 class DepositStatusMapper extends QBMapper
 {
-    private LoggerInterface $logger;
+    private LoggerInterface $_logger;
 
     /**
      * Create the database mapper
      *
-     * @param IDBConnection $db the database connection to use
+     * @param IDBConnection   $db     the database connection to use
+     * @param LoggerInterface $logger logger
      */
     public function __construct(IDBConnection $db, LoggerInterface $logger)
     {
@@ -48,7 +49,7 @@ class DepositStatusMapper extends QBMapper
             'b2sharebridge_status',
             DepositStatus::class,
         );
-        $this->logger = $logger;
+        $this->_logger = $logger;
     }
 
     /**

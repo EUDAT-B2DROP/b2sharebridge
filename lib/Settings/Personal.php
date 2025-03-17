@@ -34,21 +34,21 @@ use OCA\B2shareBridge\Model\ServerMapper;
 class Personal implements ISettings
 {
     private IConfig $_config;
-    private ServerMapper $mapper;
-    private string $userId;
+    private ServerMapper $_mapper;
+    private string $_userId;
 
     /**
      * Constructors construct.
      *
      * @param IConfig      $config Nextcloud config container
-     * @param ServerMapper $mapper
-     * @param string       $userId
+     * @param ServerMapper $mapper Server Mapper
+     * @param string       $userId User ID
      */
     public function __construct(IConfig $config, ServerMapper $mapper, string $userId)
     {
         $this->_config = $config;
-        $this->mapper = $mapper;
-        $this->userId = $userId;
+        $this->_mapper = $mapper;
+        $this->_userId = $userId;
     }
 
     /**

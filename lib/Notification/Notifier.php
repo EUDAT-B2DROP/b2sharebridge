@@ -1,26 +1,15 @@
 <?php
-
-declare(strict_types=1);
 /**
- * @copyright Copyright (c) 2024 Ferdinand Thiessen <opensource@fthiessen.de>
+ * OwnCloud - B2sharebridge App
  *
- * @author Ferdinand Thiessen <opensource@fthiessen.de>
- * @author Joas Schilling <coding@schilljs.com>
+ * PHP Version 8
  *
- * @license AGPL-3.0-or-later
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @category  Nextcloud
+ * @package   B2shareBridge
+ * @author    EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright 2025 EUDAT
+ * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
 namespace OCA\B2shareBridge\Notification;
@@ -32,6 +21,15 @@ use OCP\Notification\INotification;
 use OCP\Notification\INotifier;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Implement nextcloud notifications for successful and unsuccessful deposits
+ *
+ * @category Nextcloud
+ * @package  B2shareBridge
+ * @author   EUDAT <b2drop-devel@postit.csc.fi>
+ * @license  AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link     https://github.com/EUDAT-B2DROP/b2sharebridge.git
+ */
 class Notifier implements INotifier
 {
 
@@ -39,6 +37,13 @@ class Notifier implements INotifier
     protected $url;
     protected $logger;
 
+    /**
+     * Summary of __construct
+     * 
+     * @param IFactory        $factory      Factory Interface
+     * @param IURLGenerator   $urlGenerator UrlGeneratorInterface
+     * @param LoggerInterface $logger       Logger
+     */
     public function __construct(
         IFactory $factory,
         IURLGenerator $urlGenerator,
@@ -49,6 +54,11 @@ class Notifier implements INotifier
         $this->logger = $logger;
     }
 
+    /**
+     * Summary of getID
+     * 
+     * @return string
+     */
     public function getID(): string
     {
         return 'b2sharebridge';
@@ -56,6 +66,8 @@ class Notifier implements INotifier
 
     /**
      * Human readable name describing the notifier
+     * 
+     * @return string Name
      */
     public function getName(): string
     {
@@ -63,8 +75,12 @@ class Notifier implements INotifier
     }
 
     /**
-     * @param INotification $notification
+     * Prepare a notification
+     * 
+     * @param INotification $notification Notification
      * @param string        $languageCode The code of the language that should be used to prepare the notification
+     * 
+     * @return INotification Notification
      */
     public function prepare(INotification $notification, string $languageCode): INotification
     {
@@ -87,7 +103,7 @@ class Notifier implements INotifier
                 ->setLink($this->url->linkToRouteAbsolute(Application::APP_ID . '.View.index'));
 
 
-            return $this->setErrorNotificationSubject($notification, $l);
+            return $this->_setErrorNotificationSubject($notification, $l);
         case 'upload_successful':
             $parameters = $notification->getSubjectParameters();
             $notification->setIcon($this->url->getAbsoluteURL($this->url->imagePath('core', 'actions/checkmark.svg')))
@@ -116,7 +132,17 @@ class Notifier implements INotifier
         }
     }
 
-    private function setErrorNotificationSubject($notification, $l): INotification
+    /**
+     * Summary of setErrorNotificationSubject
+     * 
+     * @param INotification $notification Notification
+     * @param $l            language
+     * 
+     * @throws \InvalidArgumentException
+     * 
+     * @return INotification
+     */
+    private function _setErrorNotificationSubject($notification, $l): INotification
     {
         $parameters = $notification->getSubjectParameters();
         switch ($notification->getSubject()) {
@@ -152,7 +178,9 @@ class Notifier implements INotifier
      * since Nextcloud 26, but in case you would like to return simpler or other strings,
      * this function allows you to take over.
      *
-     * @param INotification $notification
+     * @param INotification $notification Notification
+     * 
+     * @return void
      */
     protected function setParsedSubjectFromRichSubject(INotification $notification): void
     {

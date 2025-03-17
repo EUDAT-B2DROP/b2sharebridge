@@ -55,6 +55,11 @@ class Community extends Entity implements JsonSerializable
             ' and name: ' . $this->getName();
     }
 
+    /**
+     * To JSON
+     * 
+     * @return array{id: int, name: mixed, serverId: mixed}
+     */
     public function jsonSerialize(): array
     {
         return [

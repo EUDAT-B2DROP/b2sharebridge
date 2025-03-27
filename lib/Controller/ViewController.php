@@ -26,6 +26,7 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\Authentication\Exceptions\InvalidTokenException;
 use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\IRequest;
@@ -171,6 +172,35 @@ class ViewController extends Controller
     }
 
     /**
+     * Returns all Records of a user, either draft or not.
+     * $size is limited to 50
+     * 
+     * @param bool $draft only draft or published records
+     * @param int  $page  page number
+     * @param int  $size  size per page
+     * 
+     * @NoAdminRequired
+     * 
+     * @return JSONResponse
+     */
+    public function publicationList($draft, $page, $size): JSONResponse
+    {
+        if(!$this->userId)
+            return new JSONResponse(["message" => "missing user id"]);
+        $size = $size > 50 ? 50 : $size;
+        $serverResponses = [];
+        $servers = $this->smapper->findAll();
+        foreach ($servers as $server) {
+            $serverUrl = $server->getPublishUrl();
+            $records = $this->getUserRecords($server->getId(), $serverUrl, $draft, $page, $size);
+            if ($records) {
+                $serverResponses[$serverUrl] = $records;
+            }
+        }
+        return new JSONResponse($serverResponses);
+    }
+
+    /**
      * XHR request endpoint for token setter
      *
      * @return          JSONResponse
@@ -193,7 +223,7 @@ class ViewController extends Controller
         if (strlen($this->userId) <= 0) {
             $error = 'No user configured for session';
         }
-        if (($error)) {
+        if ($error) {
             $this->_logger->error($error, ['app' => Application::APP_ID]);
             return new JSONResponse(
                 [
@@ -273,12 +303,8 @@ class ViewController extends Controller
         $servers = $this->smapper->findAll();
         foreach ($servers as $server) {
             $serverId = $server->getId();
-            $token = $this->config->getUserValue($this->userId, $this->appName, 'token_' . $serverId, null);
-            if ($token) {
-                $ret[$serverId] = $token;
-            } else {
-                $ret[$serverId] = "";
-            }
+            $token = $this->getB2shareAccessToken($serverId);
+            $ret[$serverId] = $token ?? "";
         }
         return new JSONResponse($ret);
     }
@@ -293,5 +319,105 @@ class ViewController extends Controller
     public function getTabViewContent(): array
     {
         return $this->cMapper->getCommunityList();
+    }
+
+    /**
+     * Gets user records for a single server
+     * 
+     * @param int    $serverId  ID of the configured server, e.g. 0, 1, ...
+     * @param string $serverUrl server URL, e.g. b2share.eudat.eu
+     * @param bool   $draft     true for (only) draft records, else false
+     * @param int    $page      page number, you are limited to 50 records by B2SHARE Api
+     * @param int    $size      page size, number of records per page
+     * 
+     * @NoAdminRequired
+     * 
+     * @return array
+     */
+    private function getUserRecords($serverId, $serverUrl, $draft, $page, $size): array
+    {
+        $token = $this->getB2shareAccessToken($serverId);
+        if (!$token) {
+            return [];
+        }
+        // https://doc.eudat.eu/b2share/httpapi/#search-drafts
+        if ($draft) {
+            $urlPath = "$serverUrl/api/records/?drafts&access_token=$token"
+            . "&page=" . $page
+            . "&size=" . $size;
+        } else {
+            $ownerID = $this->getB2shareUserId($serverUrl, $token);
+            if ($ownerID == null) {
+                return [];
+            }
+            $urlPath = "$serverUrl/api/records/?sort=mostrecent"
+            . "&page=" . $page
+            . "&size=" . $size
+            . "&q=owners:$ownerID";
+        }
+
+        $this->_logger->debug("B2SHARE records URL: $urlPath", ['app' => Application::APP_ID]);
+
+        $output = $this->curlRequest($urlPath);
+
+        if (!$output) {
+            return [];
+        }
+        $records = json_decode($output, true);
+        if(array_key_exists("hits", $records)) {
+            return $records["hits"];
+        }
+        return [];
+    }
+
+    /**
+     * Get B2SHARE token of a user by $serverId
+     * 
+     * @param string $serverId
+     * 
+     * @return ?string
+     * 
+     * @NoAdminRequired
+     */
+    private function getB2shareAccessToken($serverId): ?string
+    {
+        return $this->config->getUserValue($this->userId, $this->appName, 'token_' . $serverId, null);
+    }
+
+    /**
+     * Gets the B2SHARE User ID with the b2share API token
+     * 
+     * @param mixed $serverUrl baseUrl of the server
+     * @param mixed $token     B2SHARE API token
+     * 
+     * @return ?string
+     * 
+     * @NoAdminRequired
+     */
+    private function getB2shareUserId($serverUrl, $token): ?string
+    {
+        $response = $this->curlRequest("$serverUrl/api/user/?access_token=$token");
+        if (!$response) {
+            return null;
+        }
+        $b2accessIdResponse = json_decode($response, true);
+        if (array_key_exists("id", $b2accessIdResponse))
+            return $b2accessIdResponse["id"];
+        return null;
+    }
+
+    /**
+     * Send a curl get request to $urlPath
+     * @param string $urlPath
+     * @return bool|string
+     */
+    private function curlRequest($urlPath): bool|string
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $urlPath);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $output = curl_exec($ch);
+        curl_close($ch);
+        return $output;
     }
 }

@@ -38,7 +38,12 @@ return [
         ],
         [
             'name' => 'View#depositList',
-            'url' => '/deposits',
+            'url' => '/uploads',
+            'verb' => 'GET'
+        ],
+        [
+            'name' => 'View#publicationList',
+            'url' => '/publications',
             'verb' => 'GET'
         ],
         [

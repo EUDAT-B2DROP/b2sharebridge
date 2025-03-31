@@ -2,8 +2,8 @@
 	<table class="sortable-table">
 		<thead>
 			<tr>
-				<template v-for="( field, index ) in fields">
-					<th v-if="fields.at(index).active" :key="index">
+				<template v-for="(field, index) in fields">
+					<th v-if="fields.at(index).active" :key="'header-fields' + index">
 						<div class="sortheader">
 							{{ field.name }}
 							<span class="sortbuttons">
@@ -32,9 +32,9 @@
 			</tr>
 		</thead>
 		<tbody>
-			<tr v-for="row in sortedRows" :key="row">
-				<template v-for="( field, index ) in fields">
-					<td v-if="field.active" :key="index" :class="field.extraClass">
+			<tr v-for="(row, index) in sortedRows" :key="'rows' + index">
+				<template v-for="(field, findex) in fields">
+					<td v-if="field.active" :key="'body-fields' + findex" :class="field.extraClass">
 						<a v-if="field.type === 'link'" :href="row[field.label]">
 							{{ row[field.label] }}
 						</a>

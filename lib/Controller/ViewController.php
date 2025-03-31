@@ -108,7 +108,7 @@ class ViewController extends Controller
     public function index(): TemplateResponse
     {
         Util::addStyle(Application::APP_ID, 'style');
-        Util::addStyle('files', 'files');
+        //Util::addStyle('files', 'files');
         $params = [
             'user' => $this->userId,
             'statuscodes' => $this->statusCodes,
@@ -185,16 +185,18 @@ class ViewController extends Controller
      */
     public function publicationList($draft, $page, $size): JSONResponse
     {
-        if(!$this->userId)
+        if (!$this->userId) {
             return new JSONResponse(["message" => "missing user id"]);
+        }
         $size = $size > 50 ? 50 : $size;
         $serverResponses = [];
         $servers = $this->smapper->findAll();
         foreach ($servers as $server) {
             $serverUrl = $server->getPublishUrl();
-            $records = $this->getUserRecords($server->getId(), $serverUrl, $draft, $page, $size);
+            $records = $this->_getUserRecords($server->getId(), $serverUrl, $draft, $page, $size);
             if ($records) {
                 $serverResponses[$serverUrl] = $records;
+                $serverResponses[$serverUrl]["server_id"] = $server->getId();
             }
         }
         return new JSONResponse($serverResponses);
@@ -303,7 +305,7 @@ class ViewController extends Controller
         $servers = $this->smapper->findAll();
         foreach ($servers as $server) {
             $serverId = $server->getId();
-            $token = $this->getB2shareAccessToken($serverId);
+            $token = $this->_getB2shareAccessToken($serverId);
             $ret[$serverId] = $token ?? "";
         }
         return new JSONResponse($ret);
@@ -322,6 +324,30 @@ class ViewController extends Controller
     }
 
     /**
+     * Delete a draft with ID from server
+     *
+     * @param mixed $serverId ID of the server
+     * @param mixed $recordId ID of the draft
+     * 
+     * @NoAdminRequired
+     * 
+     * @return array
+     */
+    public function deleteRecord($serverId, $recordId)
+    {
+        $token = $this->_getB2shareAccessToken($serverId);
+        if (!$token) {
+            return [];
+        }
+        $server = $this->smapper->find($serverId);
+        $serverUrl = $server->getPublishUrl();
+        $urlPath = "$serverUrl/api/records/$recordId/draft?access_token=$token";
+        $this->_logger->debug($urlPath, ["b2sharebridge"]);
+        $output = $this->_curlRequest($urlPath, "DELETE");
+        return json_decode($output, true);
+    }
+
+    /**
      * Gets user records for a single server
      * 
      * @param int    $serverId  ID of the configured server, e.g. 0, 1, ...
@@ -334,9 +360,9 @@ class ViewController extends Controller
      * 
      * @return array
      */
-    private function getUserRecords($serverId, $serverUrl, $draft, $page, $size): array
+    private function _getUserRecords($serverId, $serverUrl, $draft, $page, $size): array
     {
-        $token = $this->getB2shareAccessToken($serverId);
+        $token = $this->_getB2shareAccessToken($serverId);
         if (!$token) {
             return [];
         }
@@ -344,9 +370,10 @@ class ViewController extends Controller
         if ($draft) {
             $urlPath = "$serverUrl/api/records/?drafts&access_token=$token"
             . "&page=" . $page
-            . "&size=" . $size;
+            . "&size=" . $size
+            . "&sort=mostrecent";
         } else {
-            $ownerID = $this->getB2shareUserId($serverUrl, $token);
+            $ownerID = $this->_getB2shareUserId($serverUrl, $token);
             if ($ownerID == null) {
                 return [];
             }
@@ -358,13 +385,13 @@ class ViewController extends Controller
 
         $this->_logger->debug("B2SHARE records URL: $urlPath", ['app' => Application::APP_ID]);
 
-        $output = $this->curlRequest($urlPath);
+        $output = $this->_curlRequest($urlPath);
 
         if (!$output) {
             return [];
         }
         $records = json_decode($output, true);
-        if(array_key_exists("hits", $records)) {
+        if (array_key_exists("hits", $records)) {
             return $records["hits"];
         }
         return [];
@@ -373,13 +400,13 @@ class ViewController extends Controller
     /**
      * Get B2SHARE token of a user by $serverId
      * 
-     * @param string $serverId
+     * @param string $serverId Server ID
      * 
      * @return ?string
      * 
      * @NoAdminRequired
      */
-    private function getB2shareAccessToken($serverId): ?string
+    private function _getB2shareAccessToken($serverId): ?string
     {
         return $this->config->getUserValue($this->userId, $this->appName, 'token_' . $serverId, null);
     }
@@ -394,27 +421,34 @@ class ViewController extends Controller
      * 
      * @NoAdminRequired
      */
-    private function getB2shareUserId($serverUrl, $token): ?string
+    private function _getB2shareUserId($serverUrl, $token): ?string
     {
-        $response = $this->curlRequest("$serverUrl/api/user/?access_token=$token");
+        $response = $this->_curlRequest("$serverUrl/api/user/?access_token=$token");
         if (!$response) {
             return null;
         }
         $b2accessIdResponse = json_decode($response, true);
-        if (array_key_exists("id", $b2accessIdResponse))
+        if (array_key_exists("id", $b2accessIdResponse)) {
             return $b2accessIdResponse["id"];
+        }
         return null;
     }
 
     /**
      * Send a curl get request to $urlPath
-     * @param string $urlPath
+     *
+     * @param string $urlPath URL
+     * @param string $type    REST type, e.g. GET, DELETE, PUT, ...
+     * 
      * @return bool|string
      */
-    private function curlRequest($urlPath): bool|string
+    private function _curlRequest($urlPath, $type = 'GET'): bool|string
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $urlPath);
+        if ($type != 'GET') {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type);
+        }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
         curl_close($ch);

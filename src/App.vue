@@ -79,20 +79,28 @@
 					sort-dir="desc" />
 			</div>
 			<div v-else-if="!loadedPublications">
-				<h2 style="text-align: center;">
+				<h2 v-if="currentState === BridgeState.RECORDS_PUBLISHED" style="text-align: center;">
 					{{ t('b2sharebridge', 'Loading publications ...') }}
+				</h2>
+				<h2 v-if="currentState === BridgeState.RECORDS_DRAFT" style="text-align: center;">
+					{{ t('b2sharebridge', 'Loading drafts ...') }}
 				</h2>
 			</div>
 			<div v-else-if="Publications.length === 0">
-				<div v-if="currentState === BridgeState.RECORDS_PUBLISHED">
+				<div v-if="currentState === BridgeState.RECORDS_PUBLISHED || currentState === BridgeState.RECORDS_DRAFT">
 					<h2 style="text-align: center;">
-						{{ t('b2sharebridge', 'You don\'t have any publications') }}
+						{{ t('b2sharebridge', 'Missing API Token') }}
 					</h2>
-				</div>
-				<div v-if="currentState === BridgeState.RECORDS_DRAFT">
-					<h2 style="text-align: center;">
-						{{ t('b2sharebridge', 'You don\'t have any drafts') }}
-					</h2>
+					<div>
+						<p>Please set a valid API token</p>
+						<NcButton label="Set API Token"
+							:href="generateUrl('/settings/user/b2sharebridge')"
+							type="Primary"
+							area-label="Set API Token"
+							@click="redirect('/settings/user/b2sharebridge')">
+							"Set API Token"
+						</NcButton>
+					</div>
 				</div>
 			</div>
 			<div v-else>
@@ -101,9 +109,12 @@
 				</h2>
 				<RecordsPages id="records-pages"
 					:records="Publications"
-					:numRecords="numRecords"
+					:draft="currentState === BridgeState.RECORDS_DRAFT"
+					:page="page"
+					:page-size="pageSize"
 					@page-update="updatePage"
-					@page-size-update="updatePageSize"/>
+					@page-size-update="updatePageSize"
+					@refresh="refreshRecords" />
 			</div>
 		</NcAppContent>
 	</NcContent>
@@ -161,27 +172,43 @@ export default {
 			sortDesc: true,
 			updating: false,
 			loading: true,
-			currentState: BridgeState.UPLOAD_ALL,
+			currentState: BridgeState.RECORDS_PUBLISHED,
 			timer: null,
 			lastUploadUpdate: null,
 			BridgeState, // https://stackoverflow.com/questions/57538539/how-to-use-enums-or-const-in-vuejs
 			UploadFields,
 			Publications: [],
 			loadedPublications: false,
-			pageSize: 50,
+			pageSize: 10,
 			page: 0,
-			numRecords: 0,
 		}
 	},
 	/**
 	 * Fetch list of Uploads when the component is loaded
 	 */
 	async mounted() {
-		try {
-			await this.showAllUploads()
-		} catch (e) {
-			console.error(e)
-			showError(t('b2sharebridge', 'Could not fetch Uploads'))
+		const urlParams = new URLSearchParams(window.location.search)
+		if (urlParams.has('uploads')) {
+			this.currentState = BridgeState.UPLOAD_ALL
+		} else if (urlParams.has('publications')) {
+			this.currentState = BridgeState.RECORDS_PUBLISHED
+		} else if (urlParams.has('drafts')) {
+			this.currentState = BridgeState.RECORDS_DRAFT
+		}
+		if (this.currentState === BridgeState.RECORDS_DRAFT || this.currentState === BridgeState.RECORDS_PUBLISHED) {
+			try {
+				await this.loadPublications(this.currentState)
+			} catch (e) {
+				console.error(e)
+				showError(t('b2sharebridge', 'Could not fetch Records'))
+			}
+		} else {
+			try {
+				await this.showAllUploads()
+			} catch (e) {
+				console.error(e)
+				showError(t('b2sharebridge', 'Could not fetch Uploads'))
+			}
 		}
 		this.loading = false
 	},
@@ -192,8 +219,7 @@ export default {
 
 	methods: {
 		async loadUploads(filter) {
-			if (this.currentState === BridgeState.RECORDS_DRAFT || this.currentState === BridgeState.RECORDS_PUBLISHED)
-				return;
+			if (this.currentState === BridgeState.RECORDS_DRAFT || this.currentState === BridgeState.RECORDS_PUBLISHED) { return }
 			if (this.timer !== null) {
 				clearInterval(this.timer)
 			}
@@ -218,25 +244,24 @@ export default {
 
 		async loadPublications(state) {
 			this.loadedPublications = false
-			let draft = state === BridgeState.RECORDS_PUBLISHED ? false : true;
-			let urlArr = [
+			const draft = state !== BridgeState.RECORDS_PUBLISHED
+			const urlArr = [
 				'/apps/b2sharebridge/publications?draft=',
 				draft,
 				'&page=',
 				this.page + 1,
 				'&size=',
-				this.pageSize
+				this.pageSize,
 			]
-			console.debug("URL: " + urlArr.join(''))
+			console.debug('URL: ' + urlArr.join(''))
 			return axios
 				.get(generateUrl(urlArr.join('')))
 				.then((response) => {
-					console.debug("Publication data:")
+					console.debug('Publication data:')
 					console.debug(response.data)
 					this.Publications = response.data
 					this.loadedPublications = true
-					//TODO maybe change layout of data
-					//TODO set this.numRecords
+					// TODO maybe change layout of data
 				})
 				.catch((error) => {
 					console.error(error)
@@ -364,35 +389,25 @@ export default {
 		},
 
 		isUpload() {
-			return this.currentState != BridgeState.RECORDS_DRAFT && this.currentState != BridgeState.RECORDS_PUBLISHED
+			return this.currentState !== BridgeState.RECORDS_DRAFT && this.currentState !== BridgeState.RECORDS_PUBLISHED
 		},
 
-		updatePage(pageString) {
-			const lastPage = Math.floor(this.numRecords / this.pageSize)
-			if(pageString == "+1") {
-				this.page += 1
-				if(this.page > lastPage) {
-					this.page = lastPage
-				}
-			}
-			else if(pageString == "-1") {
-				this.page -= 1
-				if(this.page < 0) {
-					this.page = 0
-				}
-			}
-			else if(pageString == "first") {
-				this.page = 0
-			}
-			else if(pageString == "last") {
-				this.page = lastPage
-			}
+		updatePage(page) {
+			this.page = page
+			console.debug('page updated: ' + this.page)
+			this.loadPublications(this.currentState)
 		},
 
 		updatePageSize(size) {
 			this.page = 0
 			this.pageSize = size
-		}
+			console.debug('size updated: ' + this.pageSize)
+			this.loadPublications(this.currentState)
+		},
+
+		refreshRecords() {
+			this.updatePageSize(this.pageSize)
+		},
 	},
 }
 </script>
@@ -469,7 +484,7 @@ textarea {
 	width: 30%;
 }
 
-.bridgelink a{
+.bridgelink a {
 	color: blue;
 }
 

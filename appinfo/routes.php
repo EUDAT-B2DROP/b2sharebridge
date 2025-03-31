@@ -47,6 +47,11 @@ return [
             'verb' => 'GET'
         ],
         [
+            'name' => 'View#deleteRecord',
+            'url' => '/drafts/{serverId}/{recordId}',
+            'verb' => 'DELETE'
+        ],
+        [
             'name' => 'View#setToken',
             'url' => '/apitoken',
             'verb' => 'POST'

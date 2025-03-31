@@ -358,8 +358,8 @@ export default {
 						{
 							label: 'Show Deposit',
 							type: 'primary',
-							callback: () => (this.redirect('/apps/b2sharebridge')),
-							href: generateUrl('/apps/b2sharebridge'),
+							callback: () => (this.redirect('/apps/b2sharebridge/?uploads')),
+							href: generateUrl('/apps/b2sharebridge/?uploads'),
 						},
 					]
 				})

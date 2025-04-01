@@ -33,6 +33,7 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\IJobList;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IRequest;
@@ -230,6 +231,7 @@ class Application extends App implements IBootstrap
                     $c->get(CommunityMapper::class),
                     $c->get(ServerMapper::class),
                     $c->get(StatusCodes::class),
+                    $c->get(IRootFolder::class),
                     $c->get(LoggerInterface::class),
                     $c->get("userId")
                 );

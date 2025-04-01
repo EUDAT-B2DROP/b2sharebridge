@@ -24,12 +24,17 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
+use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\UserRateLimit;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\Authentication\Exceptions\InvalidTokenException;
 use OCP\DB\Exception;
+use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IRequest;
+use OCP\Notification\IManager;
 use OCP\PreConditionNotMetException;
 use OCP\Util;
 use OCA\B2shareBridge\AppInfo\Application;
@@ -53,8 +58,10 @@ class ViewController extends Controller
     protected $config;
     protected $cMapper;
     protected $smapper;
+    protected IManager $notManager;
 
     private LoggerInterface $_logger;
+    private IRootFolder $_storage;
 
     /**
      * Creates the AppFramwork Controller
@@ -67,6 +74,7 @@ class ViewController extends Controller
      * @param CommunityMapper     $cMapper     Community mapper
      * @param ServerMapper        $smapper     Server Mapper
      * @param StatusCodes         $statusCodes Status Code Mapper
+     * @param IManager            $manager     IManager for Notifications
      * @param LoggerInterface     $logger      Logger
      * @param string              $userId      User ID
      */
@@ -79,6 +87,8 @@ class ViewController extends Controller
         CommunityMapper $cMapper,
         ServerMapper $smapper,
         StatusCodes $statusCodes,
+        IRootFolder $storage,
+        IManager $manager,
         LoggerInterface $logger,
         string $userId,
     ) {
@@ -90,6 +100,8 @@ class ViewController extends Controller
         $this->smapper = $smapper;
         $this->statusCodes = $statusCodes;
         $this->config = $config;
+        $this->_storage = $storage;
+        $this->notManager = $manager;
         $this->_logger = $logger;
     }
 
@@ -101,10 +113,9 @@ class ViewController extends Controller
      *          add it to any other method if you don't exactly know what it does
      *
      * @return TemplateResponse
-     *
-     * @NoAdminRequired
-     * @NoCSRFRequired
-     * */
+     */
+    #[NoAdminRequired]
+    #[NoCSRFRequired]
     public function index(): TemplateResponse
     {
         Util::addStyle(Application::APP_ID, 'style');
@@ -135,10 +146,9 @@ class ViewController extends Controller
      * @throws DoesNotExistException
      * @throws MultipleObjectsReturnedException
      * 
-     * @NoAdminRequired
-     * 
      * @return JSONResponse
      */
+    #[NoAdminRequired]
     public function depositList(): JSONResponse
     {
         $param = $this->request->getParams();
@@ -179,10 +189,9 @@ class ViewController extends Controller
      * @param int  $page  page number
      * @param int  $size  size per page
      * 
-     * @NoAdminRequired
-     * 
      * @return JSONResponse
      */
+    #[NoAdminRequired]
     public function publicationList($draft, $page, $size): JSONResponse
     {
         if (!$this->userId) {
@@ -206,9 +215,9 @@ class ViewController extends Controller
      * XHR request endpoint for token setter
      *
      * @return          JSONResponse
-     * @NoAdminRequired
      * @throws          PreConditionNotMetException
      */
+    #[NoAdminRequired]
     public function setToken(): JSONResponse
     {
         $param = $this->request->getParams();
@@ -257,10 +266,9 @@ class ViewController extends Controller
      * 
      * @throws PreConditionNotMetException
      * 
-     * @NoAdminRequired
-     * 
      * @return JSONResponse
      */
+    #[NoAdminRequired]
     public function deleteToken($id): JSONResponse
     {
         $this->_logger->info(
@@ -291,13 +299,12 @@ class ViewController extends Controller
 
     /**
      * Request endpoint for gettin users tokens
-     *
-     * @NoAdminRequired
      * 
      * @throws Exception
      * 
      * @return JSONResponse
      */
+    #[NoAdminRequired]
     public function getTokens(): JSONResponse
     {
         $ret = [];
@@ -329,10 +336,9 @@ class ViewController extends Controller
      * @param mixed $serverId ID of the server
      * @param mixed $recordId ID of the draft
      * 
-     * @NoAdminRequired
-     * 
      * @return array
      */
+    #[NoAdminRequired]
     public function deleteRecord($serverId, $recordId)
     {
         $token = $this->_getB2shareAccessToken($serverId);
@@ -348,6 +354,188 @@ class ViewController extends Controller
     }
 
     /**
+     * download record files and put them into user storage
+     * 
+     * @param number $serverId ID of the server
+     * @param array  $record   a full json like object
+     * 
+     * @return JSONResponse
+     */
+    #[UserRateLimit(limit: 5, period: 120)]
+    #[NoAdminRequired]
+    public function downloadRecordFiles($serverId)
+    {
+        // check parameter
+        $param = $this->request->getParams();
+        if (!array_key_exists("record", $param)) {
+            return new JSONResponse(
+                [
+                    "message" => "Missing record",
+                    "status" => "error",
+                    "code" => "1",
+                ],
+                Http::STATUS_BAD_REQUEST
+            );
+        }
+        $record = $param["record"];
+
+        $neededKeys = ["links", "id", "metadata"];
+
+        // Validation
+        $error = False;
+        $errorKey = '';
+        foreach ($neededKeys as $key) {
+            if (!array_key_exists($key, $record)) {
+                $errorKey = $key;
+                $error = True;
+                break;
+            }
+        }
+        if (!$error) {
+            if (!array_key_exists("files", $record["links"])) {
+                $errorKey = "[links][files]";
+                $error = True;
+            } elseif (!array_key_exists("titles", $record["metadata"])) {
+                $errorKey = "[metadata][titles]";
+                $error = True;
+            } elseif (count($record["metadata"]["titles"]) == 0) {
+                $errorKey = "[metadata][titles][0]";
+                $error = True;
+            } elseif (!array_key_exists("title", $record["metadata"]["titles"][0])) {
+                $errorKey = "[metadata][titles][0][title]";
+                $error = True;
+            }
+        }
+        if ($error) {
+            return new JSONResponse(
+                [
+                    "message" => "Missing key in record: $errorKey",
+                    "status" => "error",
+                    "code" => "2",
+                ],
+                Http::STATUS_BAD_REQUEST
+            );
+        }
+
+        // get data
+        $title = $record["metadata"]["titles"][0]["title"];
+        $recordId = $record["id"];
+        $server = $this->smapper->find($serverId);
+        $userFolder = $this->_storage->getUserFolder($this->userId);
+        $accessToken = $this->_getB2shareAccessToken($server->getId());
+        $filesUrl = $record["links"]["files"] . "?access_token=$accessToken";
+
+        // check file sizes and user space
+        if (!str_starts_with($filesUrl, $server->getPublishUrl())) {
+            return new JSONResponse(
+                [
+                    "message" => "Did you really think I wouldn't check?",
+                    "status" => "error",
+                    "code" => "3",
+                ],
+                Http::STATUS_BAD_REQUEST
+            );
+        }
+
+        $outputRaw = $this->_curlRequest($filesUrl);
+        $output = json_decode($outputRaw, true);
+
+        if (!array_key_exists("contents", $output)) {
+            return new JSONResponse(
+                [
+                    "message" => "Bad response from " . $server->getPublishUrl(),
+                    "status" => "error",
+                    "code" => "4",
+                ],
+                Http::STATUS_BAD_GATEWAY
+            );
+        }
+
+        $files = $output["contents"];
+
+        //$this->_logger->debug("output: $output", ["b2sharebridge"]);
+        //$this->_logger->debug("files url:" . $filesUrl, ["b2sharebridge"]);
+        $requiredSize = 4; // start directory
+        foreach ($files as $file) {
+            // validate file
+            if (
+                !array_key_exists("links", $file) ||
+                !array_key_exists("size", $file) ||
+                !array_key_exists("key", $file) ||
+                !array_key_exists("self", $file["links"])
+            ) {
+                $this->_logger->debug($file, ["b2sharebridge"]);
+                return new JSONResponse(
+                    [
+                        "message" => "Bad response from " . $server->getPublishUrl(),
+                        "status" => "error",
+                        "code" => "5",
+                    ],
+                    Http::STATUS_BAD_GATEWAY
+                );
+            }
+            $requiredSize += $file["size"];
+        }
+
+        if ($userFolder->getFreeSpace() < $requiredSize) {
+            return new JSONResponse(
+                [
+                    "message" => "You don't have enough storage space",
+                    "status" => "error",
+                    "code" => "6",
+                ],
+                Http::STATUS_BAD_REQUEST,
+            );
+        }
+
+        // create data
+        try {
+            if ($userFolder->get($title)) {
+                return new JSONResponse(
+                    [
+                        "message" => "Directory '$title' exists already! Please rename, move or delete it manually first",
+                        "status" => "error",
+                        "code" => "7",
+                    ],
+                    Http::STATUS_BAD_REQUEST,
+                );
+            }
+        } catch (\OCP\Files\NotFoundException $e) {
+            // TODO rewrite this as soon as you find out how to do this exceptionless
+        }
+
+        try {
+            $folder = $userFolder->newFolder($title);
+            foreach ($files as $file) {
+                $urlFilePath = $file["links"]["self"] . "?access_token=$accessToken";
+                $content = $this->_curlRequest($urlFilePath);
+                $folder->newFile($file["key"], $content);
+            }
+        } catch (\OCP\Files\NotPermittedException $e) {
+            return new JSONResponse(
+                [
+                    "message" => "File creation failed",
+                    "status" => "error",
+                    "code" => "8",
+                ],
+                Http::STATUS_INTERNAL_SERVER_ERROR
+            );
+        }
+
+        //$message = "";
+        //$this->_notifiyUser($message, "Download: $title is ready");
+
+        return new JSONResponse(
+            [
+                "message" => "success",
+                "status" => "success",
+                "url" => $folder->getName(),
+            ],
+            Http::STATUS_OK
+        );
+    }
+
+    /**
      * Gets user records for a single server
      * 
      * @param int    $serverId  ID of the configured server, e.g. 0, 1, ...
@@ -355,8 +543,6 @@ class ViewController extends Controller
      * @param bool   $draft     true for (only) draft records, else false
      * @param int    $page      page number, you are limited to 50 records by B2SHARE Api
      * @param int    $size      page size, number of records per page
-     * 
-     * @NoAdminRequired
      * 
      * @return array
      */
@@ -369,18 +555,18 @@ class ViewController extends Controller
         // https://doc.eudat.eu/b2share/httpapi/#search-drafts
         if ($draft) {
             $urlPath = "$serverUrl/api/records/?drafts&access_token=$token"
-            . "&page=" . $page
-            . "&size=" . $size
-            . "&sort=mostrecent";
+                . "&page=" . $page
+                . "&size=" . $size
+                . "&sort=mostrecent";
         } else {
             $ownerID = $this->_getB2shareUserId($serverUrl, $token);
             if ($ownerID == null) {
                 return [];
             }
             $urlPath = "$serverUrl/api/records/?sort=mostrecent"
-            . "&page=" . $page
-            . "&size=" . $size
-            . "&q=owners:$ownerID";
+                . "&page=" . $page
+                . "&size=" . $size
+                . "&q=owners:$ownerID";
         }
 
         $this->_logger->debug("B2SHARE records URL: $urlPath", ['app' => Application::APP_ID]);
@@ -403,8 +589,6 @@ class ViewController extends Controller
      * @param string $serverId Server ID
      * 
      * @return ?string
-     * 
-     * @NoAdminRequired
      */
     private function _getB2shareAccessToken($serverId): ?string
     {
@@ -418,8 +602,6 @@ class ViewController extends Controller
      * @param mixed $token     B2SHARE API token
      * 
      * @return ?string
-     * 
-     * @NoAdminRequired
      */
     private function _getB2shareUserId($serverUrl, $token): ?string
     {
@@ -453,5 +635,13 @@ class ViewController extends Controller
         $output = curl_exec($ch);
         curl_close($ch);
         return $output;
+    }
+
+    private function _notifiyUser($message, $title) {
+        $notification = $this->notManager->createNotification();
+        $notification->setApp(Application::APP_ID);
+        $notification->setUser($this->userId);
+        $notification->setSubject($title);
+        $this->notManager->notify($notification);
     }
 }

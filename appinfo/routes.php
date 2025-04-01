@@ -52,6 +52,11 @@ return [
             'verb' => 'DELETE'
         ],
         [
+            'name' => 'View#downloadRecordFiles',
+            'url' => '/download/{serverId}',
+            'verb' => 'POST'
+        ],
+        [
             'name' => 'View#setToken',
             'url' => '/apitoken',
             'verb' => 'POST'

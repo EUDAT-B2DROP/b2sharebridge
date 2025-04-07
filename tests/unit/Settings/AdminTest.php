@@ -14,6 +14,8 @@
 
 namespace OCA\B2shareBridge\Tests\Settings;
 
+use OCA\B2shareBridge\Model\ServerMapper;
+use OCA\B2shareBridge\Settings\Admin;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IConfig;
 use PHPUnit\Framework\TestCase;
@@ -28,14 +30,16 @@ class AdminTest extends TestCase
      * @var IConfig|\PHPUnit\Framework\MockObject\MockObject 
      */
     private $config;
+    private ServerMapper $serverMapper;
 
     public function setUp(): void
     {
         $this->config = $this->createMock(IConfig::class);
-        $this->serverMapper = $this->getMockBuilder('OCA\B2shareBridge\Model\ServerMapper')
+        $this->serverMapper = $this->getMockBuilder(ServerMapper::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->admin = new \OCA\B2shareBridge\Settings\Admin(
+
+        $this->admin = new Admin(
             $this->config,
             $this->serverMapper
         );

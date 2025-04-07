@@ -16,8 +16,11 @@ use OCA\B2shareBridge\Model\DepositStatus;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
+use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IRequest;
+use OCP\IURLGenerator;
+use OCP\Notification\IManager;
 use PHPUnit\Framework\TestCase;
 
 use OCP\AppFramework\Http\JSONResponse;
@@ -48,9 +51,9 @@ class ViewControllerTest extends TestCase
             ->getMock();
         $deposit_file_mapper =
             $this->getMockBuilder(DepositFileMapper::class)
-            ->onlyMethods(['getFileCount'])
-            ->disableOriginalConstructor()
-            ->getMock();
+                ->onlyMethods(['getFileCount'])
+                ->disableOriginalConstructor()
+                ->getMock();
         $community_mapper = $this->getMockBuilder(CommunityMapper::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -62,6 +65,15 @@ class ViewControllerTest extends TestCase
 
         $logger = $this->getMockBuilder(LoggerInterface::class)
             ->disableOriginalConstructor()
+            ->getMock();
+
+        $storage = $this->getMockBuilder(IRootFolder::class)
+            ->getMock();
+
+        $manager = $this->getMockBuilder(IManager::class)
+            ->getMock();
+
+        $urlGenerator = $this->getMockBuilder(IURLGenerator::class)
             ->getMock();
 
         $this->data = [
@@ -80,9 +92,19 @@ class ViewControllerTest extends TestCase
             ->willReturn(1);
 
         $this->controller = new ViewController(
-            'b2sharebridge', $this->request, $config, $this->deposit_mapper,
-            $deposit_file_mapper, $community_mapper, $server_mapper,
-            $this->statusCodes, $logger, $this->userId
+            'b2sharebridge',
+            $this->request,
+            $config,
+            $this->deposit_mapper,
+            $deposit_file_mapper,
+            $community_mapper,
+            $server_mapper,
+            $this->statusCodes,
+            $storage,
+            $manager,
+            $urlGenerator,
+            $logger,
+            $this->userId
         );
     }
 
@@ -113,7 +135,8 @@ class ViewControllerTest extends TestCase
             ->willReturn($params);
 
         $filtered_data = array_filter(
-            $this->data, function (DepositStatus $entity) use ($filter) {
+            $this->data,
+            function (DepositStatus $entity) use ($filter) {
                 return in_array($entity->getStatus(), $this->deposit_mapper->mapFilterToStates($filter));
             }
         );

@@ -29,6 +29,7 @@ use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\IJobList;
@@ -114,11 +115,12 @@ class PublishController extends Controller
     /**
      * XHR request endpoint for getting Publish command
      *
-     * @return          JSONResponse
-     * @NoAdminRequired
-     * @throws          Exception
-     * @throws          MultipleObjectsReturnedException
+     * @return JSONResponse
+     * 
+     * @throws Exception
+     * @throws MultipleObjectsReturnedException
      */
+    #[NoAdminRequired]
     public function publish(): JSONResponse
     {
         $param = $this->request->getParams();

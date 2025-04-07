@@ -76,6 +76,7 @@ class ViewController extends Controller
      * @param CommunityMapper     $cMapper      Community mapper
      * @param ServerMapper        $smapper      Server Mapper
      * @param StatusCodes         $statusCodes  Status Code Mapper
+     * @param IRootFolder         $storage      Storage Interface for file creation
      * @param IManager            $manager      IManager for Notifications
      * @param IURLGenerator       $urlGenerator Url Generator
      * @param LoggerInterface     $logger       Logger
@@ -124,13 +125,12 @@ class ViewController extends Controller
     public function index(): TemplateResponse
     {
         Util::addStyle(Application::APP_ID, 'style');
-        //Util::addStyle('files', 'files');
+        Util::addScript(Application::APP_ID, 'b2sharebridge-main');
+
         $params = [
             'user' => $this->userId,
             'statuscodes' => $this->statusCodes,
         ];
-
-        Util::addScript(Application::APP_ID, 'b2sharebridge-main');
 
         return new TemplateResponse(
             Application::APP_ID,
@@ -178,12 +178,23 @@ class ViewController extends Controller
                 $filter
             );
         }
+
+        $servers = $this->smapper->findAll();
+        $data = [];
         foreach ($publications as $publication) {
             $publication->setFileCount(
                 $this->fdmapper->getFileCount($publication->getId())
             );
+            $raw_data = json_decode(json_encode($publication), true);
+            foreach ($servers as $server) {
+                if ($server->getId() == $publication->getServerId()) {
+                    $raw_data["server_name"] = $server->getName();
+                    $raw_data["server_version"] = $server->getVersion();
+                }
+            }
+            $data[] = $raw_data;
         }
-        return new JSONResponse($publications);
+        return new JSONResponse($data);
     }
 
     /**
@@ -207,10 +218,13 @@ class ViewController extends Controller
         $servers = $this->smapper->findAll();
         foreach ($servers as $server) {
             $serverUrl = $server->getPublishUrl();
+            $serverId = $server->getId();
             $records = $this->_getUserRecords($server->getId(), $serverUrl, $draft, $page, $size);
             if ($records) {
-                $serverResponses[$serverUrl] = $records;
-                $serverResponses[$serverUrl]["server_id"] = $server->getId();
+                $serverResponses[$serverId] = $records;
+                $serverResponses[$serverId]["server_url"] = $serverUrl;
+                $serverResponses[$serverId]["server_version"] = $server->getVersion();
+                $serverResponses[$serverId]["server_name"] = $server->getName();
             }
         }
         return new JSONResponse($serverResponses);
@@ -219,8 +233,8 @@ class ViewController extends Controller
     /**
      * XHR request endpoint for token setter
      *
-     * @return          JSONResponse
-     * @throws          PreConditionNotMetException
+     * @return JSONResponse
+     * @throws PreConditionNotMetException
      */
     #[NoAdminRequired]
     public function setToken(): JSONResponse
@@ -326,10 +340,11 @@ class ViewController extends Controller
     /**
      * XHR request endpoint for getting communities list dropdown for tabview
      *
-     * @return          array
-     * @NoAdminRequired
-     * @throws          Exception
+     * @return array
+     * 
+     * @throws Exception
      */
+    #[NoAdminRequired]
     public function getTabViewContent(): array
     {
         return $this->cMapper->getCommunityList();
@@ -359,10 +374,9 @@ class ViewController extends Controller
     }
 
     /**
-     * download record files and put them into user storage
+     * Download record files and put them into user storage. Requires to POST a record
      * 
      * @param number $serverId ID of the server
-     * @param array  $record   a full json like object
      * 
      * @return JSONResponse
      */
@@ -388,28 +402,28 @@ class ViewController extends Controller
         $neededKeys = ["links", "id", "metadata"];
 
         // Validation
-        $error = False;
+        $error = false;
         $errorKey = '';
         foreach ($neededKeys as $key) {
             if (!array_key_exists($key, $record)) {
                 $errorKey = $key;
-                $error = True;
+                $error = true;
                 break;
             }
         }
         if (!$error) {
             if (!array_key_exists("files", $record["links"])) {
                 $errorKey = "[links][files]";
-                $error = True;
+                $error = true;
             } elseif (!array_key_exists("titles", $record["metadata"])) {
                 $errorKey = "[metadata][titles]";
-                $error = True;
+                $error = true;
             } elseif (count($record["metadata"]["titles"]) == 0) {
                 $errorKey = "[metadata][titles][0]";
-                $error = True;
+                $error = true;
             } elseif (!array_key_exists("title", $record["metadata"]["titles"][0])) {
                 $errorKey = "[metadata][titles][0][title]";
-                $error = True;
+                $error = true;
             }
         }
         if ($error) {
@@ -461,17 +475,13 @@ class ViewController extends Controller
         }
 
         $files = $output["contents"];
-
-        //$this->_logger->debug("output: $output", ["b2sharebridge"]);
-        //$this->_logger->debug("files url:" . $filesUrl, ["b2sharebridge"]);
         $requiredSize = 4; // start directory
         foreach ($files as $file) {
             // validate file
-            if (
-                !array_key_exists("links", $file) ||
-                !array_key_exists("size", $file) ||
-                !array_key_exists("key", $file) ||
-                !array_key_exists("self", $file["links"])
+            if (!array_key_exists("links", $file)
+                || !array_key_exists("size", $file)
+                || !array_key_exists("key", $file)
+                || !array_key_exists("self", $file["links"])
             ) {
                 $this->_logger->debug($file, ["b2sharebridge"]);
                 $this->_notifiyUser("error_download_downstream", ["code" => "5", "url" => $server->getPublishUrl()]);
@@ -535,8 +545,6 @@ class ViewController extends Controller
             );
         }
 
-        //$message = "";
-        //$this->_notifiyUser($message, "Download: $title is ready");
         //e.g. http://127.0.0.1/index.php/apps/files/?dir=/multiple_files_test
         $urlParts = [
             $this->_urlGenerator->getBaseUrl(),
@@ -582,21 +590,10 @@ class ViewController extends Controller
             return [];
         }
         // https://doc.eudat.eu/b2share/httpapi/#search-drafts
-        if ($draft) {
-            $urlPath = "$serverUrl/api/records/?drafts&access_token=$token"
-                . "&page=" . $page
-                . "&size=" . $size
-                . "&sort=mostrecent";
-        } else {
-            $ownerID = $this->_getB2shareUserId($serverUrl, $token);
-            if ($ownerID == null) {
-                return [];
-            }
-            $urlPath = "$serverUrl/api/records/?sort=mostrecent"
-                . "&page=" . $page
-                . "&size=" . $size
-                . "&q=owners:$ownerID";
-        }
+        $urlPath = "$serverUrl/api/records/?drafts&access_token=$token"
+            . "&page=" . $page
+            . "&size=" . $size
+            . "&sort=mostrecent";
 
         $this->_logger->debug("B2SHARE records URL: $urlPath", ['app' => Application::APP_ID]);
 
@@ -605,9 +602,24 @@ class ViewController extends Controller
         if (!$output) {
             return [];
         }
-        $records = json_decode($output, true);
-        if (array_key_exists("hits", $records)) {
-            return $records["hits"];
+        $outputRecords = json_decode($output, true);
+        if (array_key_exists("hits", $outputRecords)) {
+            $records = $outputRecords["hits"];
+
+            if (array_key_exists("hits", $records)) {
+                //filter records
+                $records["hits"] = array_filter(
+                    $records["hits"], function ($record) use ($draft) {
+                        if (array_key_exists("metadata", $record) && array_key_exists("publication_state", $record["metadata"])) {
+                            $isDraft = $record["metadata"]["publication_state"] == "draft";
+                            return ($draft && $isDraft) || (!$draft && !$isDraft);
+                        }
+                        return false;
+                    }
+                );
+                $records["total"] = count($records["hits"]);
+                return $records;
+            }
         }
         return [];
     }
@@ -668,8 +680,10 @@ class ViewController extends Controller
 
     /**
      * Create a notification
-     * @param string $subject   notification type string
-     * @param array $parameters parameters for later template filling
+     *
+     * @param string $subject    notification type string
+     * @param array  $parameters parameters for later template filling
+     * 
      * @return void
      */
     private function _notifiyUser($subject, $parameters = [])

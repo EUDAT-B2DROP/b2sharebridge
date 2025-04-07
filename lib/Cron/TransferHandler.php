@@ -154,7 +154,7 @@ class TransferHandler extends QueuedJob
                 $args['community'],
                 $args['open_access'],
                 $args['title'],
-                $server->getPublishUrl()
+                $server,
             );
 
             if ($create_result) {

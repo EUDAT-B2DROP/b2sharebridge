@@ -16,6 +16,7 @@ namespace OCA\B2shareBridge\Publish;
 
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
+use OCA\B2shareBridge\Model\Server;
 
 /**
  * Create a interface that must be implemented by publishing backends
@@ -51,15 +52,15 @@ interface IPublish
     /**
      * Placeholder for actually creating a deposit
      *
-     * @param string $token        users access token
-     * @param string $community    Community
-     * @param string $open_access  Open Access
-     * @param string $title        Title
-     * @param string $api_endpoint API Endpoint
+     * @param string $token       users access token
+     * @param string $community   Community
+     * @param string $open_access Open Access
+     * @param string $title       Title
+     * @param Server $server      b2share server
      * 
      * @return string
      */
-    public function create(string $token, string $community, string $open_access, string $title, string $api_endpoint): string;
+    public function create(string $token, string $community, string $open_access, string $title, Server $server): string;
 
     /**
      * Placeholder for upload

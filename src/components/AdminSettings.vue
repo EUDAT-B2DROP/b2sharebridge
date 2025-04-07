@@ -1,7 +1,7 @@
 <template>
 	<div id="admin-settings" class="bridgeadmin">
 		<h2>EUDAT B2SHARE Bridge</h2>
-		<div class="bridgeservers">
+		<div id="create">
 			<h3>Create a new Server:</h3>
 			<ServerEditor :id="dummy_server.id"
 				:name="dummy_server.name"
@@ -9,9 +9,10 @@
 				:maxuploads="dummy_server.maxUploads"
 				:maxuploadfilesize="dummy_server.maxUploadFilesize"
 				:checkssl="dummy_server.checkSsl"
+				:version="dummy_server.version"
 				@server-change="loadServers" />
 		</div>
-		<div v-if="loaded && servers.length" class="bridgeservers">
+		<div v-if="loaded && servers.length">
 			<h3>Servers:</h3>
 			<ul>
 				<li v-for="server in servers" :key="server.id">
@@ -21,6 +22,7 @@
 						:maxuploads="server.maxUploads"
 						:maxuploadfilesize="server.maxUploadFilesize"
 						:checkssl="server.checkSsl === 1"
+						:version="server.version"
 						@server-change="loadServers" />
 				</li>
 			</ul>
@@ -49,6 +51,7 @@ export default {
 				maxUploads: 5,
 				maxUploadFilesize: 512,
 				checkSsl: false,
+				version: 3,
 			},
 			servers: [],
 			loaded: false,
@@ -86,13 +89,6 @@ export default {
 <style>
 .bridgeadmin {
 	padding: 10px;
-	border-radius: var(--border-radius-rounded);
 }
 
-div.servers {
-	margin-top: 10px;
-	background-color: var(--color-background-plain);
-	padding: 10px;
-	border-radius: var(--border-radius-large);
-}
 </style>

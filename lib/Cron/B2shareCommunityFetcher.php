@@ -23,6 +23,7 @@ use OCP\IConfig;
 use Psr\Log\LoggerInterface;
 use OCP\IDBConnection;
 use OCP\BackgroundJob\TimedJob;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Utility\ITimeFactory;
 
 /**
@@ -75,7 +76,7 @@ class B2shareCommunityFetcher extends TimedJob
         $communityMapper = new CommunityMapper($this->_dbconnection);
         $servers = $serverMapper->findAll();
         foreach ($servers as $server) {
-            $b2share_communities_url = $server->getPublishUrl() . '/api/communities/';
+            $b2share_communities_url = $server->getVersion() == 2 ? "{$server->getPublishUrl()}/api/communities/" : "{$server->getPublishUrl()}/api/communities";
             $json = $this->_getUrlContent($b2share_communities_url);
             if (!$json) {
                 $this->_logger->error(
@@ -103,11 +104,20 @@ class B2shareCommunityFetcher extends TimedJob
                     ' and restricted_submission: ' . $community['restricted_submission'] . ' from server ' . $server->getName(),
                     ['app' => Application::APP_ID]
                 );
-                if ($community['restricted_submission'] !== true) {
-                    $communities_b2share[$community['id']] = $community['name'];
+                if ($server->getVersion() == 2) {
+                    if ($community['restricted_submission'] !== true) {
+                        $communities_b2share[$community['id']] = $community['name'];
+                    } else {
+                        $communities_b2share[$community['id']] = $community['name'] . ' ' .
+                            "\u{0001F512}";
+                    }
                 } else {
-                    $communities_b2share[$community['id']] = $community['name'] . ' ' .
-                        "\u{0001F512}";
+                    if ($community['access']['record_policy'] !== 'open') {
+                        $communities_b2share[$community['id']] = $community['metadata']['title'];
+                    } else {
+                        $communities_b2share[$community['id']] = $community['metadata']['title'] . ' ' .
+                            "\u{0001F512}";
+                    }
                 }
             }
 
@@ -167,9 +177,8 @@ class B2shareCommunityFetcher extends TimedJob
      * @param string $url URL to fetch
      *
      * @return bool|string Response
-     *
-     * @NoAdminRequired
      */
+    #[NoAdminRequired]
     private function _getUrlContent(string $url): bool|string
     {
         $ch = curl_init();

@@ -51,6 +51,7 @@ export default {
 				return
 			}
 			if (this.mutable_token.length !== 60) {
+				console.debug('token has wrong length!', this.mutable_token.length)
 				return
 			}
 			const data = {

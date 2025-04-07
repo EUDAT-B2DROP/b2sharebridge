@@ -34,6 +34,7 @@ use OCP\DB\Exception;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use OCP\Notification\IManager;
 use OCP\PreConditionNotMetException;
 use OCP\Util;
@@ -62,21 +63,23 @@ class ViewController extends Controller
 
     private LoggerInterface $_logger;
     private IRootFolder $_storage;
+    private IURLGenerator $_urlGenerator;
 
     /**
      * Creates the AppFramwork Controller
      *
-     * @param string              $appName     Name of the app
-     * @param IRequest            $request     Request
-     * @param IConfig             $config      Config
-     * @param DepositStatusMapper $mapper      Deposit Status Mapper
-     * @param DepositFileMapper   $fdmapper    ORM for DepositFile
-     * @param CommunityMapper     $cMapper     Community mapper
-     * @param ServerMapper        $smapper     Server Mapper
-     * @param StatusCodes         $statusCodes Status Code Mapper
-     * @param IManager            $manager     IManager for Notifications
-     * @param LoggerInterface     $logger      Logger
-     * @param string              $userId      User ID
+     * @param string              $appName      Name of the app
+     * @param IRequest            $request      Request
+     * @param IConfig             $config       Config
+     * @param DepositStatusMapper $mapper       Deposit Status Mapper
+     * @param DepositFileMapper   $fdmapper     ORM for DepositFile
+     * @param CommunityMapper     $cMapper      Community mapper
+     * @param ServerMapper        $smapper      Server Mapper
+     * @param StatusCodes         $statusCodes  Status Code Mapper
+     * @param IManager            $manager      IManager for Notifications
+     * @param IURLGenerator       $urlGenerator Url Generator
+     * @param LoggerInterface     $logger       Logger
+     * @param string              $userId       User ID
      */
     public function __construct(
         $appName,
@@ -89,6 +92,7 @@ class ViewController extends Controller
         StatusCodes $statusCodes,
         IRootFolder $storage,
         IManager $manager,
+        IURLGenerator $urlGenerator,
         LoggerInterface $logger,
         string $userId,
     ) {
@@ -102,6 +106,7 @@ class ViewController extends Controller
         $this->config = $config;
         $this->_storage = $storage;
         $this->notManager = $manager;
+        $this->_urlGenerator = $urlGenerator;
         $this->_logger = $logger;
     }
 
@@ -368,6 +373,7 @@ class ViewController extends Controller
         // check parameter
         $param = $this->request->getParams();
         if (!array_key_exists("record", $param)) {
+            $this->_notifiyUser("error_download_record", ["code" => "1"]);
             return new JSONResponse(
                 [
                     "message" => "Missing record",
@@ -407,6 +413,7 @@ class ViewController extends Controller
             }
         }
         if ($error) {
+            $this->_notifiyUser("error_download_record", ["code" => "2"]);
             return new JSONResponse(
                 [
                     "message" => "Missing key in record: $errorKey",
@@ -427,6 +434,7 @@ class ViewController extends Controller
 
         // check file sizes and user space
         if (!str_starts_with($filesUrl, $server->getPublishUrl())) {
+            $this->_notifiyUser("error_download_malicious", ["code" => "3"]);
             return new JSONResponse(
                 [
                     "message" => "Did you really think I wouldn't check?",
@@ -441,6 +449,7 @@ class ViewController extends Controller
         $output = json_decode($outputRaw, true);
 
         if (!array_key_exists("contents", $output)) {
+            $this->_notifiyUser("error_download_downstream", ["code" => "4", "url" => $server->getPublishUrl()]);
             return new JSONResponse(
                 [
                     "message" => "Bad response from " . $server->getPublishUrl(),
@@ -465,6 +474,7 @@ class ViewController extends Controller
                 !array_key_exists("self", $file["links"])
             ) {
                 $this->_logger->debug($file, ["b2sharebridge"]);
+                $this->_notifiyUser("error_download_downstream", ["code" => "5", "url" => $server->getPublishUrl()]);
                 return new JSONResponse(
                     [
                         "message" => "Bad response from " . $server->getPublishUrl(),
@@ -478,6 +488,7 @@ class ViewController extends Controller
         }
 
         if ($userFolder->getFreeSpace() < $requiredSize) {
+            $this->_notifiyUser("error_download_space", ["code" => "6", "title" => $title, "sizeFiles" => $requiredSize, "freeSpace" => $userFolder->getFreeSpace()]);
             return new JSONResponse(
                 [
                     "message" => "You don't have enough storage space",
@@ -491,6 +502,7 @@ class ViewController extends Controller
         // create data
         try {
             if ($userFolder->get($title)) {
+                $this->_notifiyUser("error_download_exists", ["code" => "7", "url" => $server->getPublishUrl(), "title" => $title]);
                 return new JSONResponse(
                     [
                         "message" => "Directory '$title' exists already! Please rename, move or delete it manually first",
@@ -512,6 +524,7 @@ class ViewController extends Controller
                 $folder->newFile($file["key"], $content);
             }
         } catch (\OCP\Files\NotPermittedException $e) {
+            $this->_notifiyUser("error_download_permissions", ["code" => "8", "title" => $title]);
             return new JSONResponse(
                 [
                     "message" => "File creation failed",
@@ -524,7 +537,23 @@ class ViewController extends Controller
 
         //$message = "";
         //$this->_notifiyUser($message, "Download: $title is ready");
-
+        //e.g. http://127.0.0.1/index.php/apps/files/?dir=/multiple_files_test
+        $urlParts = [
+            $this->_urlGenerator->getBaseUrl(),
+            "index.php/apps/files/?dir=",
+            $folder->getName()
+        ];
+        $url = implode("/", $urlParts);
+        $this->_notifiyUser(
+            "success_download",
+            [
+                "title" => $title,
+                "fileId" => (string) $folder->getId(),
+                "fileName" => $folder->getName(),
+                "filePath" => $url,
+                "fileUrl" => $url,
+            ]
+        );
         return new JSONResponse(
             [
                 "message" => "success",
@@ -637,11 +666,20 @@ class ViewController extends Controller
         return $output;
     }
 
-    private function _notifiyUser($message, $title) {
+    /**
+     * Create a notification
+     * @param string $subject   notification type string
+     * @param array $parameters parameters for later template filling
+     * @return void
+     */
+    private function _notifiyUser($subject, $parameters = [])
+    {
         $notification = $this->notManager->createNotification();
-        $notification->setApp(Application::APP_ID);
-        $notification->setUser($this->userId);
-        $notification->setSubject($title);
+        $notification->setApp(Application::APP_ID)
+            ->setDateTime(new \DateTime())
+            ->setObject('b2sharebridge', $subject)
+            ->setUser($this->userId)
+            ->setSubject($subject, $parameters);
         $this->notManager->notify($notification);
     }
 }

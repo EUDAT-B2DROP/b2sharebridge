@@ -37,6 +37,7 @@ use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use OCP\Notification\IManager;
 use OCP\Util;
 use Psr\Container\ContainerExceptionInterface;
@@ -232,6 +233,8 @@ class Application extends App implements IBootstrap
                     $c->get(ServerMapper::class),
                     $c->get(StatusCodes::class),
                     $c->get(IRootFolder::class),
+                    $c->get(IManager::class),
+                    $c->get(IURLGenerator::class),
                     $c->get(LoggerInterface::class),
                     $c->get("userId")
                 );

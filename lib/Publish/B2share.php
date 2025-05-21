@@ -151,8 +151,7 @@ class B2share implements IPublish
             $body = substr($response, $header_size);
             $body_encoded = mb_convert_encoding($body, 'UTF-8', mb_list_encodings());
             $results = json_decode($body_encoded, false);
-            if (
-                property_exists($results, 'links')
+            if (property_exists($results, 'links')
                 && property_exists($results->links, 'self')
                 && property_exists($results->links, 'files')
             ) {

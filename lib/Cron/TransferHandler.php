@@ -81,8 +81,7 @@ class TransferHandler extends QueuedJob
         IRootFolder $rootFolder = null
     ) {
         parent::__construct($time);
-        if (
-            $dfmapper === null or $mapper === null or $publisher === null or $smapper === null or $cmapper === null
+        if ($dfmapper === null or $mapper === null or $publisher === null or $smapper === null or $cmapper === null
             or $logger === null or $notManager === null or $rootFolder === null
         ) {
             $this->fixTransferForCron();
@@ -130,6 +129,15 @@ class TransferHandler extends QueuedJob
         $this->notManager->notify($notification);
     }
 
+    /**
+     * Uploads files configured by args to B2SHARE using curl
+     * 
+     * @param mixed $args array of arguments, need to have the right list of fields
+     * 
+     * @throws \BadMethodCallException
+     * 
+     * @return INotification
+     */
     private function _uploadFiles($args): INotification
     {
         if (!$this->_publisher instanceof B2SHARE) {
@@ -137,8 +145,7 @@ class TransferHandler extends QueuedJob
             throw new \BadMethodCallException("Not implemented!");
         }
 
-        if (
-            !array_key_exists('transferId', $args)
+        if (!array_key_exists('transferId', $args)
             || !array_key_exists('token', $args)
             || !array_key_exists('community', $args)
             || !array_key_exists('open_access', $args)

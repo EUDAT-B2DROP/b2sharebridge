@@ -131,8 +131,7 @@ class PublishController extends Controller
         $param = $this->request->getParams();
 
         // check params
-        if (
-            !array_key_exists('ids', $param)
+        if (!array_key_exists('ids', $param)
             || !array_key_exists('community', $param)
             || !array_key_exists('server_id', $param)
             || !array_key_exists('title', $param)

@@ -2,7 +2,8 @@
 	<div class="bridgeserver">
 		<div class="bridgeserver__input">
 			<h4>{{ id == -1 ? "New Server" : mutable_name }}</h4>
-			<NcTextField v-model="mutable_maxUploads"
+			<NcTextField
+				v-model="mutable_maxUploads"
 				label="# of uploads per user at the same time"
 				trailing-cutton-icon="close"
 				:show-trailing-button="true"
@@ -13,7 +14,8 @@
 					<UploadMultiple :size="20" />
 				</template>
 			</NcTextField>
-			<NcTextField v-model="mutable_maxUploadFilesize"
+			<NcTextField
+				v-model="mutable_maxUploadFilesize"
 				label="MB, maximum filesize per upload"
 				trailing-cutton-icon="close"
 				:show-trailing-button="true"
@@ -27,7 +29,8 @@
 			<NcCheckboxRadioSwitch :id="getCheckboxName" v-model="mutable_checkSsl">
 				Check SSL
 			</NcCheckboxRadioSwitch>
-			<NcTextField v-model="mutable_publishUrl"
+			<NcTextField
+				v-model="mutable_publishUrl"
 				label="Publish URL"
 				trailing-cutton-icon="close"
 				:show-trailing-button="true"
@@ -38,7 +41,8 @@
 					<Web :size="20" />
 				</template>
 			</NcTextField>
-			<NcTextField v-model="mutable_name"
+			<NcTextField
+				v-model="mutable_name"
 				label="Your Server Name"
 				trailing-cutton-icon="close"
 				:show-trailing-button="true"
@@ -50,11 +54,12 @@
 			</NcTextField>
 			<div class="bridgeserver__row bridgeserver__input__div">
 				<p>B2SHARE API-version:</p>
-				<NcSelect v-bind="version_options"
+				<NcSelect
+					v-bind="version_options"
 					v-model="mutable_version"
 					class="bridgeserver__input__div__select"
 					:label-outside="true"
-					@update:modelValue="updateVersion" />
+					@update:model-value="updateVersion" />
 			</div>
 		</div>
 		<div class="bridgeserver__buttons bridgeserver__row">
@@ -64,7 +69,8 @@
 			<NcButton v-if="id !== -1" @click="deleteServer">
 				Delete
 			</NcButton>
-			<NcButton v-if="id === -1"
+			<NcButton
+				v-if="id === -1"
 				id="reset"
 				:disabled="!hasChanged()"
 				@click="resetProps">
@@ -77,10 +83,10 @@
 <script>
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
-import { NcSelect, NcButton, NcTextField, NcCheckboxRadioSwitch } from '@nextcloud/vue'
-import UploadMultiple from 'vue-material-design-icons/UploadMultiple.vue'
+import { NcButton, NcCheckboxRadioSwitch, NcSelect, NcTextField } from '@nextcloud/vue'
 import FileUploadOutline from 'vue-material-design-icons/FileUploadOutline.vue'
 import TagEditOutline from 'vue-material-design-icons/TagEditOutline.vue'
+import UploadMultiple from 'vue-material-design-icons/UploadMultiple.vue'
 import Web from 'vue-material-design-icons/Web.vue'
 
 export default {
@@ -95,9 +101,7 @@ export default {
 		TagEditOutline,
 		Web,
 	},
-	model: {
-		event: 'server-change',
-	},
+
 	props: {
 		id: { type: Number, required: true },
 		name: { default: '', required: false, type: String },
@@ -107,6 +111,9 @@ export default {
 		checkssl: { default: false, type: Boolean },
 		version: { default: 3, type: Number },
 	},
+
+	emits: ['server-change'],
+
 	data() {
 		return {
 			mutable_name: this.name,
@@ -120,11 +127,13 @@ export default {
 			},
 		}
 	},
+
 	computed: {
 		getCheckboxName() {
 			return 'checkSsl' + (this.id === -1 ? '' : this.id)
 		},
 	},
+
 	methods: {
 		resetProps() {
 			this.mutable_name = ''
@@ -160,7 +169,7 @@ export default {
 			console.debug(JSON.stringify(data))
 
 			axios.post(generateUrl('/apps/b2sharebridge/server'), { server: data })
-				.then((response) => {
+				.then(() => {
 					this.$emit('server-change', this.id === -1 ? 0 : this.id)
 				})
 				.catch((error) => {
@@ -172,7 +181,7 @@ export default {
 		deleteServer() {
 			if (this.id) {
 				axios.delete(generateUrl('/apps/b2sharebridge/servers/' + this.id))
-					.then((response) => {
+					.then(() => {
 						console.debug("Deleted server '" + this.name + "'")
 						this.$emit('server-change', this.id)
 					})

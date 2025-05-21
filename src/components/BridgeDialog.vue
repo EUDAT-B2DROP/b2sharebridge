@@ -1,13 +1,14 @@
 <template>
-	<NcModal v-if="info.message !== ''"
+	<NcModal
+		v-if="info.message !== ''"
 		id="infodial"
-		ref="modalRef"
 		name="">
 		<div class="modal__content">
 			<h2>{{ info.heading }}</h2>
 			<p>{{ info.message }}</p>
 			<span class="button-container">
-				<NcButton v-for="button in info.buttons"
+				<NcButton
+					v-for="button in info.buttons"
 					:key="button.label"
 					:href="button.href"
 					:type="button.type"
@@ -18,13 +19,14 @@
 			</span>
 		</div>
 	</NcModal>
-	<NcModal v-else-if="showDialog"
+	<NcModal
+		v-else-if="showDialog"
 		id="bridgedial"
-		ref="modalRef"
 		name="">
 		<div class="modal__content">
 			<h2>Create a B2SHARE deposit</h2>
-			<NcTextField v-model="title.text"
+			<NcTextField
+				v-model="title.text"
 				label="Title"
 				placeholder="Please enter a title"
 				:error="title.error"
@@ -32,28 +34,32 @@
 				minlength="3"
 				maxlength="128"
 				:helper-text="title.helpertext"
-				@update:modelValue="validate">
+				@update:model-value="validate">
 				<PencilIcon :size="20" />
 			</NcTextField>
-			<NcSelect v-bind="serverprops"
+			<NcSelect
+				v-bind="serverprops"
 				v-model="serverprops.value"
 				required
 				:class="{ selecterror: serverprops.error }"
 				@input="onChangeServer" />
-			<NcSelect v-bind="communityprops"
+			<NcSelect
+				v-bind="communityprops"
 				v-model="communityprops.value"
 				required
 				:class="{ selecterror: communityprops.error }"
 				@input="validate" />
-			<NcCheckboxRadioSwitch :checked.sync="openAccess">
+			<NcCheckboxRadioSwitch v-model="openAccess">
 				Open Access
 			</NcCheckboxRadioSwitch>
 			<span class="button-container">
-				<NcButton aria-label="close"
+				<NcButton
+					aria-label="close"
 					@click="closeModal">
 					Cancel
 				</NcButton>
-				<NcButton :disabled="publish.disabled"
+				<NcButton
+					:disabled="publish.disabled"
 					type="primary"
 					aria-label="publish"
 					@click="createDeposit">
@@ -63,10 +69,11 @@
 		</div>
 	</NcModal>
 </template>
+
 <script>
-import { NcModal, NcButton, NcTextField, NcSelect, NcCheckboxRadioSwitch } from '@nextcloud/vue'
-import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
+import { generateUrl } from '@nextcloud/router'
+import { NcButton, NcCheckboxRadioSwitch, NcModal, NcSelect, NcTextField } from '@nextcloud/vue'
 import PencilIcon from 'vue-material-design-icons/Pencil.vue'
 export default {
 	name: 'BridgeDialog',
@@ -78,12 +85,14 @@ export default {
 		NcButton,
 		PencilIcon,
 	},
+
 	props: {
 		selectedFiles: {
 			type: Array,
 			required: true,
-		}
+		},
 	},
+
 	data() {
 		return {
 			showDialog: false,
@@ -91,24 +100,28 @@ export default {
 				disabled: true,
 				pressedOnce: false,
 			},
+
 			title: {
 				success: false,
 				error: false,
 				text: '',
 				helpertext: '',
 			},
+
 			serverprops: {
 				inputLabel: 'Server',
 				options: [],
 				value: null,
 				error: false,
 			},
+
 			communityprops: {
 				inputLabel: 'Community',
 				options: [],
 				value: null,
 				error: false,
 			},
+
 			openAccess: false,
 			info: {
 				heading: 'Error',
@@ -124,7 +137,7 @@ export default {
 
 			// Technical fields
 			tokens: [],
-			servers: []
+			servers: [],
 		}
 	},
 
@@ -166,7 +179,7 @@ export default {
 		}
 
 		if (this.servers.length !== 0) {
-			this.servers.forEach(server => {
+			this.servers.forEach((server) => {
 				const hasToken = this.tokens[server.id] !== ''
 				if (hasToken) {
 					const serverOption = {
@@ -191,7 +204,7 @@ export default {
 		loadServers() {
 			const urlPath
 				= '/apps/b2sharebridge/servers?requesttoken='
-				+ encodeURIComponent(OC.requestToken)
+					+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(urlPath))
@@ -210,7 +223,7 @@ export default {
 		loadCommunities() {
 			const urlPath
 				= '/apps/b2sharebridge/gettabviewcontent?requesttoken='
-				+ encodeURIComponent(OC.requestToken)
+					+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(urlPath))
@@ -229,7 +242,7 @@ export default {
 		loadTokens() {
 			const urlPath
 				= '/apps/b2sharebridge/apitoken?requesttoken='
-				+ encodeURIComponent(OC.requestToken)
+					+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(urlPath))
@@ -259,7 +272,7 @@ export default {
 
 			if (this.serverprops.value !== null) {
 				// set communities for new server
-				this.communities.forEach((community, index) => {
+				this.communities.forEach((community, _index) => {
 					if (Object.hasOwn(community, 'serverId') && parseInt(community.serverId) === parseInt(this.serverprops.value.id)) {
 						const communityOption = {
 							id: community.id,
@@ -281,7 +294,7 @@ export default {
 				return false
 			}
 			let validTokenFound = false
-			Object.keys(this.tokens).forEach(key => {
+			Object.keys(this.tokens).forEach((key) => {
 				if (this.tokens[key] !== '') {
 					validTokenFound = true
 				}
@@ -289,7 +302,7 @@ export default {
 			return validTokenFound
 		},
 
-		validate(event) {
+		validate(_event) {
 			let isValid = true
 			this.title.error = false
 			this.title.helpertext = ''
@@ -342,14 +355,16 @@ export default {
 			}
 
 			axios
-				.post(generateUrl('/apps/b2sharebridge/publish'),
+				.post(
+					generateUrl('/apps/b2sharebridge/publish'),
 					{
 						ids: this.selectedFiles,
 						community: this.communityprops.value.id,
 						open_access: this.openAccess,
 						title: this.title.text,
 						server_id: this.serverprops.value.id,
-					})
+					},
+				)
 				.then(() => {
 					this.info.heading = 'Transferring to B2SHARE'
 					this.info.message = 'Your files are transfarred in the background. This may take a few minutes. You\'ll '
@@ -381,7 +396,6 @@ export default {
 					}
 					console.error(error)
 				})
-
 		},
 
 		closeModal() {

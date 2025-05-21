@@ -7,7 +7,8 @@
 						<div class="sortheader">
 							{{ field.name }}
 							<span class="sortbuttons">
-								<NcButton type="secondary"
+								<NcButton
+									type="secondary"
 									aria-label="Ascending Sort"
 									class="sorttop"
 									:disabled="sortBy === field.label && sortDir === 'asc'"
@@ -16,7 +17,8 @@
 										<Triangle :size="10" />
 									</template>
 								</NcButton>
-								<NcButton type="secondary"
+								<NcButton
+									type="secondary"
 									aria-label="Descending Sort"
 									class="sortbottom"
 									:disabled="sortBy === field.label && sortDir === 'desc'"
@@ -49,9 +51,9 @@
 </template>
 
 <script>
+import { NcButton } from '@nextcloud/vue'
 import Triangle from 'vue-material-design-icons/Triangle.vue'
 import TriangleDown from 'vue-material-design-icons/TriangleDown.vue'
-import { NcButton } from '@nextcloud/vue'
 export default {
 	name: 'SortableTable',
 	components: {
@@ -59,22 +61,26 @@ export default {
 		TriangleDown,
 		NcButton,
 	},
+
 	props: {
 		fields: {
 			type: Array,
 			required: true,
 		},
+
 		rows: {
 			type: Array,
 			required: true,
 		},
 	},
+
 	data() {
 		return {
 			sortBy: 'createdAt',
 			sortDir: 'desc',
 		}
 	},
+
 	computed: {
 		sortedRows() {
 			if (!this.sortBy) {
@@ -89,6 +95,7 @@ export default {
 			return rowsSorted
 		},
 	},
+
 	methods: {
 		sortByColumn(columnName, direction) {
 			this.sortBy = columnName

@@ -1,10 +1,11 @@
 <template>
-	<div id="bridgepersonal" class="section">
+	<div id="bridgepersonal">
 		<h2>EUDAT B2SHARE Bridge</h2>
-		<div v-if="loaded && servers.length" class="servers">
+		<div v-if="loaded && servers.length">
 			<ul>
 				<li v-for="server in servers" :key="server.id">
-					<TokenEditor :id="parseInt(server.id)"
+					<TokenEditor
+						:id="parseInt(server.id)"
 						:name="server.name"
 						:url="server.publishUrl"
 						:token="getToken(server.id)"
@@ -28,6 +29,7 @@ export default {
 	components: {
 		TokenEditor,
 	},
+
 	data() {
 		return {
 			servers: [],
@@ -45,6 +47,7 @@ export default {
 		await promise
 		this.loaded = true
 	},
+
 	methods: {
 		loadServers() {
 			const urlPath = '/apps/b2sharebridge/servers?requesttoken=' + encodeURIComponent(OC.requestToken)
@@ -91,11 +94,7 @@ export default {
 </script>
 
 <style>
-#bridgepersonal .servers {
-	margin-top: 10px;
-	/*background: var(--color-background-plain);*/
-	border: 5px solid var(--color-border);
+#bridgepersonal {
 	padding: 10px;
-	border-radius: var(--border-radius-rounded);
 }
 </style>

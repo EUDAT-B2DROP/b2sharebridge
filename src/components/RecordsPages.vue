@@ -6,19 +6,22 @@
 
 			<div class="rp__selectors__select">
 				<p>B2SHARE instance:</p>
-				<NcSelect v-model="selectedServer.value"
+				<NcSelect
+					v-model="selectedServer.value"
 					:label-outside="true"
 					:options="selectedServer.options"
-					@update:modelValue="updateServer" />
+					@update:model-value="updateServer" />
 			</div>
 			<div class="rp__selectors__select">
 				<p>Page Size:</p>
-				<NcSelect v-model="selectPageSize.value"
+				<NcSelect
+					v-model="selectPageSize.value"
 					:label-outside="true"
 					:options="selectPageSize.options"
-					@update:modelValue="updatePageSize" />
+					@update:model-value="updatePageSize" />
 			</div>
-			<PageButtons class="rp__selectors__pagebuttons"
+			<PageButtons
+				class="rp__selectors__pagebuttons"
 				:page="page"
 				:num-pages="getNumPages()"
 				@page-update="updatePage" />
@@ -34,7 +37,8 @@
 						</div>
 					</a>
 					<div class="rp__records__record__buttons">
-						<NcButton v-if="draft"
+						<NcButton
+							v-if="draft"
 							class="rp__records__record__buttons__publish"
 							aria-label="publish draft to B2SHARE"
 							:href="getLink(record)"
@@ -44,7 +48,8 @@
 							</template>
 							Publish
 						</NcButton>
-						<NcButton v-if="!draft"
+						<NcButton
+							v-if="!draft"
 							class="rp__records__record__buttons__download"
 							aria-label="Download B2SHARE contents to B2DROP"
 							@click="downloadRecord(record)">
@@ -52,7 +57,8 @@
 								<CloudDownload :size="30" />
 							</template>
 						</NcButton>
-						<NcButton v-if="draft"
+						<NcButton
+							v-if="draft"
 							class="rp__records__record__buttons__delete"
 							aria-label="Delete Draft"
 							@click="showDeleteModal(record)">
@@ -79,7 +85,8 @@
 		<!-- Bottom of Listing, with less selectors: -->
 		<div class="rp__selectors__bottom">
 			<p>{{ getResultsOverview() }}</p>
-			<PageButtons class="rp__selectors__pagebuttons"
+			<PageButtons
+				class="rp__selectors__pagebuttons"
 				:page="page"
 				:num-pages="getNumPages()"
 				@page-update="updatePage" />
@@ -114,16 +121,15 @@
 		</NcModal>
 	</div>
 </template>
+
 <script>
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
-
+import { NcButton, NcModal, NcSelect } from '@nextcloud/vue'
 import CloudDownload from 'vue-material-design-icons/CloudDownload.vue'
 import EarthArrowUp from 'vue-material-design-icons/EarthArrowUp.vue'
 import TrashCan from 'vue-material-design-icons/TrashCan.vue'
 import PageButtons from './PageButtons.vue'
-
-import { NcSelect, NcButton, NcModal } from '@nextcloud/vue'
 const selectPageSize = {
 	options: [
 		'10',
@@ -149,24 +155,31 @@ export default {
 		TrashCan,
 		EarthArrowUp,
 	},
+
 	props: {
 		records: {
 			type: Object,
 			required: true,
 		},
+
 		draft: {
 			type: Boolean,
 			required: true,
 		},
+
 		page: {
 			type: Number,
 			required: true,
 		},
+
 		pageSize: {
 			type: Number,
 			required: true,
 		},
 	},
+
+	emits: ['page-size-update', 'page-update', 'refresh'],
+
 	data() {
 		return {
 			sortBy: 'createdAt',
@@ -177,6 +190,7 @@ export default {
 				show: false,
 				record: null,
 			},
+
 			modalDownload: {
 				show: false,
 				record: null,
@@ -185,12 +199,14 @@ export default {
 			},
 		}
 	},
+
 	computed: {
 
 	},
+
 	async mounted() {
 		selectedServer.options = []
-		Object.keys(this.records).forEach(key => {
+		Object.keys(this.records).forEach((key) => {
 			selectedServer.options.push({
 				id: key,
 				label: this.records[key].server_name,
@@ -198,28 +214,37 @@ export default {
 		})
 		selectedServer.value = selectedServer.options.length ? selectedServer.options[0] : { id: null, label: 'None' }
 	},
+
 	methods: {
 		getResultsOverview() {
 			const results = this.getNumRecords()
-			if (!results) { return '0 results' }
+			if (!results) {
+				return '0 results'
+			}
 			const startIndex = this.page * this.pageSize + 1
 			const endIndex = Math.min((this.page + 1) * this.pageSize, results)
 			return `${startIndex} - ${endIndex} of ${results} results`
 		},
 
 		getRecords() {
-			if (selectedServer.value && selectedServer.value.id) { return this.records[selectedServer.value.id].hits }
+			if (selectedServer.value && selectedServer.value.id) {
+				return this.records[selectedServer.value.id].hits
+			}
 			return []
 		},
 
 		getNumRecords() {
-			if (selectedServer.value && selectedServer.value.id) { return this.records[selectedServer.value.id].total }
+			if (selectedServer.value && selectedServer.value.id) {
+				return this.records[selectedServer.value.id].total
+			}
 			return 0
 		},
 
 		getNumPages() {
 			const numRecords = this.getNumRecords()
-			if (!numRecords) { return 0 }
+			if (!numRecords) {
+				return 0
+			}
 			return Math.floor(numRecords / this.pageSize) + 1
 		},
 
@@ -240,22 +265,26 @@ export default {
 		},
 
 		getDate(record) {
-			return new Date(record.created).toDateString()
+			return new Date(record.created)
+				.toDateString()
 		},
 
 		getLink(record) {
 			const id = record.id
 			const server = this.records[selectedServer.value.id]
-			if (server.server_version === 2) { return `${server.server_url}/records/${id}/edit` } else { return `${server.server_url}/uploads/${id}` }
+			if (server.server_version === 2) {
+				return `${server.server_url}/records/${id}/edit`
+			} else {
+				return `${server.server_url}/uploads/${id}`
+			}
 		},
 
 		showDeleteModal(record) {
-
 			this.modalDelete.record = record
 			this.modalDelete.show = true
 		},
 
-		showDownloadModal(record) {
+		showDownloadModal() {
 
 		},
 
@@ -312,9 +341,15 @@ export default {
 					} else {
 						this.modalDownload.message = response.message
 
-						if (response.status === 'error') { this.modalDownload.code = response.code }
+						if (response.status === 'error') {
+							this.modalDownload.code = response.code
+						}
 
-						if (response.status >= 500) { this.modalDownload.title = 'Server Error' } else { this.modalDownload.title = 'Bad Request' }
+						if (response.status >= 500) {
+							this.modalDownload.title = 'Server Error'
+						} else {
+							this.modalDownload.title = 'Bad Request'
+						}
 					}
 
 					this.modalDownload.show = true
@@ -337,6 +372,7 @@ export default {
 	},
 }
 </script>
+
 <style lang="scss" scoped>
 .rp {
 	margin: 10px;

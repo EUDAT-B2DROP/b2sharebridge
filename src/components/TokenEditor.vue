@@ -1,28 +1,31 @@
 <template>
 	<div class="bridgetoken">
 		<h3>{{ name }}</h3>
-		<a :href="url + '/user'">{{ url }}</a>
-		<NcPasswordField v-model="mutable_token"
-			label="Token"
-			placeholder="Token"
-			:minlength="60"
-			:maxlength="60"
-			:success="token.length === 60"
-			:helper-text="token.length === 60 ? 'Token saved' : ''"
-			@valid="saveToken"
-			@update:value="saveToken" />
-		<NcButton type="error"
-			aria-label="Delete Token"
-			@click="deleteToken">
-			Delete Token
-		</NcButton>
+		<div class="bridgetoken__fields">
+			<a :href="url + '/user'">{{ url }}</a>
+			<NcPasswordField
+				v-model="mutable_token"
+				label="Token"
+				placeholder="Token"
+				:minlength="60"
+				:maxlength="60"
+				:success="token.length === 60"
+				:helper-text="token.length === 60 ? 'Token saved' : ''"
+				@valid="saveToken"
+				@update:value="saveToken" />
+			<div class="bridgetoken__fields__buttons">
+				<NcButton type="error" aria-label="Delete Token" @click="deleteToken">
+					Delete Token
+				</NcButton>
+			</div>
+		</div>
 	</div>
 </template>
 
 <script>
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
-import { NcPasswordField, NcButton } from '@nextcloud/vue'
+import { NcButton, NcPasswordField } from '@nextcloud/vue'
 
 export default {
 	name: 'TokenEditor',
@@ -30,21 +33,23 @@ export default {
 		NcPasswordField,
 		NcButton,
 	},
-	model: {
-		event: 'token-change',
-	},
+
 	props: {
 		id: { required: true, type: Number },
 		name: { required: true, type: String },
 		url: { required: true, type: String },
 		token: { default: '', type: String },
 	},
+
+	emits: ['token-change'],
+
 	data() {
 		return {
 			mutable_token: this.token,
 			helpertext: '',
 		}
 	},
+
 	methods: {
 		saveToken() {
 			if (!this.canSave()) {
@@ -60,7 +65,7 @@ export default {
 				serverid: this.id,
 			}
 			axios.post(generateUrl('/apps/b2sharebridge/apitoken'), data)
-				.then((response) => {
+				.then(() => {
 					console.info('Saved token!')
 					this.$emit('token-change', this.id)
 				})
@@ -72,7 +77,7 @@ export default {
 
 		deleteToken() {
 			axios.delete(generateUrl('/apps/b2sharebridge/apitoken/' + this.id))
-				.then((response) => {
+				.then(() => {
 					console.info('Deleted token!')
 					this.mutable_token = ''
 					this.$emit('token-change', this.id)
@@ -89,27 +94,20 @@ export default {
 	},
 }
 </script>
-<style>
+
+<style lang="scss" scoped>
 .bridgetoken {
-	background: var(--color-main-background);
-	padding: 10px;
-	border-radius: var(--border-radius-large);
-	margin-top: 2px;
-	border: 5px solid var(--color-border);
-}
+	border-bottom: 1px solid var(--color-border);
 
-.bridgetoken input {
-	border-radius: var(--border-radius-large);
-}
+	&__fields {
+		max-width: 600px;
+		margin-bottom: 10px;
 
-em.validation {
-	align-self: center;
-	grid-column: 2;
-}
-
-span.validation {
-	display: grid;
-	column-gap: 7px;
-	grid-template-columns: 400px;
+		&__buttons {
+			display: flex;
+			flex-direction: column;
+			align-items: end;
+		}
+	}
 }
 </style>

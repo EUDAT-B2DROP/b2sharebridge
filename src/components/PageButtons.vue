@@ -1,6 +1,7 @@
 <template>
 	<div v-if="numPages" class="pagebuttons">
-		<NcButton class="pagebuttons__left"
+		<NcButton
+			class="pagebuttons__left"
 			aria-label="First Page"
 			:disabled="isFirstPage"
 			@click="updatePageFirst">
@@ -8,7 +9,8 @@
 				<PageFirst :size="20" />
 			</template>
 		</NcButton>
-		<NcButton class="pagebuttons__middle"
+		<NcButton
+			class="pagebuttons__middle"
 			aria-label="Previous Page"
 			:disabled="isFirstPage"
 			@click="updatePageDecrement">
@@ -16,7 +18,8 @@
 				<ChevronLeft :size="20" />
 			</template>
 		</NcButton>
-		<NcButton class="pagebuttons__middle"
+		<NcButton
+			class="pagebuttons__middle"
 			aria-label="Next Page"
 			:disabled="isLastPage"
 			@click="updatePageIncrement">
@@ -24,7 +27,8 @@
 				<ChevronRight :size="20" />
 			</template>
 		</NcButton>
-		<NcButton class="pagebuttons__right"
+		<NcButton
+			class="pagebuttons__right"
 			aria-label="Last Page"
 			:disabled="isLastPage"
 			@click="updatePageLast">
@@ -34,13 +38,13 @@
 		</NcButton>
 	</div>
 </template>
+
 <script>
 import { NcButton } from '@nextcloud/vue'
-
+import ChevronLeft from 'vue-material-design-icons/ChevronLeft.vue'
+import ChevronRight from 'vue-material-design-icons/ChevronRight.vue'
 import PageFirst from 'vue-material-design-icons/PageFirst.vue'
 import PageLast from 'vue-material-design-icons/PageLast.vue'
-import ChevronRight from 'vue-material-design-icons/ChevronRight.vue'
-import ChevronLeft from 'vue-material-design-icons/ChevronLeft.vue'
 export default {
 	name: 'PageButtons',
 	components: {
@@ -50,16 +54,21 @@ export default {
 		ChevronLeft,
 		ChevronRight,
 	},
+
 	props: {
 		page: {
 			type: Number,
 			required: true,
 		},
+
 		numPages: {
 			type: Number,
 			required: true,
 		},
 	},
+
+	emits: ['page-update'],
+
 	computed: {
 		isLastPage() {
 			return this.page >= this.numPages - 1
@@ -69,6 +78,7 @@ export default {
 			return this.page === 0
 		},
 	},
+
 	methods: {
 		updatePage(pageString) {
 			const lastPage = this.numPages - 1
@@ -111,6 +121,7 @@ export default {
 }
 
 </script>
+
 <style lang="scss" scoped>
 .pagebuttons {
     display: flex;

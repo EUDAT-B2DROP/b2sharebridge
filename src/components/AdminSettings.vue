@@ -3,7 +3,8 @@
 		<h2>EUDAT B2SHARE Bridge</h2>
 		<div id="create">
 			<h3>Create a new Server:</h3>
-			<ServerEditor :id="dummy_server.id"
+			<ServerEditor
+				:id="dummy_server.id"
 				:name="dummy_server.name"
 				:publishurl="dummy_server.publishUrl"
 				:maxuploads="dummy_server.maxUploads"
@@ -16,7 +17,8 @@
 			<h3>Servers:</h3>
 			<ul>
 				<li v-for="server in servers" :key="server.id">
-					<ServerEditor :id="parseInt(server.id)"
+					<ServerEditor
+						:id="parseInt(server.id)"
 						:name="server.name"
 						:publishurl="server.publishUrl"
 						:maxuploads="server.maxUploads"
@@ -42,6 +44,7 @@ export default {
 		// NcAppContent,
 		ServerEditor,
 	},
+
 	data() {
 		return {
 			dummy_server: {
@@ -53,6 +56,7 @@ export default {
 				checkSsl: false,
 				version: 3,
 			},
+
 			servers: [],
 			loaded: false,
 		}
@@ -65,6 +69,7 @@ export default {
 		await this.loadServers()
 		this.loaded = true
 	},
+
 	methods: {
 		loadServers() {
 			const urlPath = '/apps/b2sharebridge/servers?requesttoken=' + encodeURIComponent(OC.requestToken)

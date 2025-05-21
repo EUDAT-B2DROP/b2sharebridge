@@ -1,37 +1,43 @@
 <template>
 	<NcContent id="bridgecontent" app-name="b2sharebridge" class="app-b2sharebridge">
 		<NcAppNavigation>
-			<NcAppNavigationNew v-if="!loading"
+			<NcAppNavigationNew
+				v-if="!loading"
 				:text="t('b2sharebridge', 'Publications')"
 				:disabled="currentState === BridgeState.RECORDS_PUBLISHED"
 				button-id="records-published"
 				button-class="icon-add"
 				@click="showRecordsPublished" />
-			<NcAppNavigationNew v-if="!loading"
+			<NcAppNavigationNew
+				v-if="!loading"
 				:text="t('b2sharebridge', 'Drafts')"
 				:disabled="currentState === BridgeState.RECORDS_DRAFT"
 				button-id="records-published"
 				button-class="icon-add"
 				@click="showRecordsDrafted" />
-			<NcAppNavigationNew v-if="!loading"
+			<NcAppNavigationNew
+				v-if="!loading"
 				:text="t('b2sharebridge', 'All Uploads')"
 				:disabled="currentState === BridgeState.UPLOAD_ALL"
 				button-id="upload-all-button"
 				button-class="icon-add"
 				@click="showAllUploads" />
-			<NcAppNavigationNew v-if="!loading"
+			<NcAppNavigationNew
+				v-if="!loading"
 				:text="t('b2sharebridge', 'Pending Uploads')"
 				:disabled="currentState === BridgeState.UPLOAD_PENDING"
 				button-id="upload-pending-button"
 				button-class="icon-add"
 				@click="showPendingUploads" />
-			<NcAppNavigationNew v-if="!loading"
+			<NcAppNavigationNew
+				v-if="!loading"
 				:text="t('b2sharebridge', 'Published Uploads')"
 				:disabled="currentState === BridgeState.UPLOAD_PUBLISHED"
 				button-id="upload-published-button"
 				button-class="icon-add"
 				@click="showPublishedUploads" />
-			<NcAppNavigationNew v-if="!loading"
+			<NcAppNavigationNew
+				v-if="!loading"
 				:text="t('b2sharebridge', 'Failed Uploads')"
 				:disabled="currentState === BridgeState.UPLOAD_FAILED"
 				button-id="upload-failed-button"
@@ -70,7 +76,8 @@
 				<h2 id="upload-table-name" style="text-align: center;">
 					{{ getTableName() }}
 				</h2>
-				<SortableTable id="upload-table"
+				<SortableTable
+					id="upload-table"
 					striped
 					hover
 					:rows="Uploads"
@@ -87,13 +94,15 @@
 				</h2>
 			</div>
 			<div v-else-if="Publications.length === 0">
-				<div v-if="currentState === BridgeState.RECORDS_PUBLISHED || currentState === BridgeState.RECORDS_DRAFT">
+				<div
+					v-if="currentState === BridgeState.RECORDS_PUBLISHED || currentState === BridgeState.RECORDS_DRAFT">
 					<h2 style="text-align: center;">
 						{{ t('b2sharebridge', 'Missing API Token') }}
 					</h2>
 					<div>
 						<p>Please set a valid API token</p>
-						<NcButton label="Set API Token"
+						<NcButton
+							label="Set API Token"
 							:href="generateUrl('/settings/user/b2sharebridge')"
 							type="Primary"
 							area-label="Set API Token"
@@ -107,7 +116,8 @@
 				<h2 id="records-pages-name" style="text-align: center;">
 					{{ getTableName() }}
 				</h2>
-				<RecordsPages id="records-pages"
+				<RecordsPages
+					id="records-pages"
 					:records="Publications"
 					:draft="currentState === BridgeState.RECORDS_DRAFT"
 					:page="page"
@@ -119,18 +129,19 @@
 		</NcAppContent>
 	</NcContent>
 </template>
+
 <script>
 import axios from '@nextcloud/axios'
-import SortableTable from './components/SortableTable.vue'
-import RecordsPages from './components/RecordsPages.vue'
-import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
-
+import { generateUrl } from '@nextcloud/router'
 // import NcActionButton from '@nextcloud/vue/dist/Components/ActionButton.cjs'
 import NcAppContent from '@nextcloud/vue/components/NcAppContent'
 import NcAppNavigation from '@nextcloud/vue/components/NcAppNavigation'
 import NcAppNavigationNew from '@nextcloud/vue/components/NcAppNavigationNew'
+import NcButton from '@nextcloud/vue/components/NcButton'
 import NcContent from '@nextcloud/vue/components/NcContent'
+import RecordsPages from './components/RecordsPages.vue'
+import SortableTable from './components/SortableTable.vue'
 
 const BridgeState = {
 	UPLOAD_ALL: 'all',
@@ -160,6 +171,7 @@ export default {
 		NcAppContent,
 		NcAppNavigation,
 		NcAppNavigationNew,
+		NcButton,
 		SortableTable,
 		RecordsPages,
 	},
@@ -183,6 +195,7 @@ export default {
 			page: 0,
 		}
 	},
+
 	/**
 	 * Fetch list of Uploads when the component is loaded
 	 */
@@ -213,13 +226,15 @@ export default {
 		this.loading = false
 	},
 
-	beforeDestroy() { // might need to switch to beforeUnmount in the future
+	beforeUnmount() { // might need to switch to beforeUnmount in the future
 		clearInterval(this.timer)
 	},
 
 	methods: {
 		async loadUploads(filter) {
-			if (this.currentState === BridgeState.RECORDS_DRAFT || this.currentState === BridgeState.RECORDS_PUBLISHED) { return }
+			if (this.currentState === BridgeState.RECORDS_DRAFT || this.currentState === BridgeState.RECORDS_PUBLISHED) {
+				return
+			}
 			if (this.timer !== null) {
 				clearInterval(this.timer)
 			}
@@ -305,20 +320,20 @@ export default {
 
 		getTableName() {
 			switch (this.currentState) {
-			case BridgeState.UPLOAD_ALL:
-				return 'All Uploads'
-			case BridgeState.UPLOAD_PENDING:
-				return 'Pending Uploads'
-			case BridgeState.UPLOAD_PUBLISHED:
-				return 'Published Uploads'
-			case BridgeState.UPLOAD_FAILED:
-				return 'Failed Uploads'
-			case BridgeState.RECORDS_PUBLISHED:
-				return 'Published Records'
-			case BridgeState.RECORDS_DRAFT:
-				return 'Drafted Records'
-			default:
-				return 'Error Table'
+				case BridgeState.UPLOAD_ALL:
+					return 'All Uploads'
+				case BridgeState.UPLOAD_PENDING:
+					return 'Pending Uploads'
+				case BridgeState.UPLOAD_PUBLISHED:
+					return 'Published Uploads'
+				case BridgeState.UPLOAD_FAILED:
+					return 'Failed Uploads'
+				case BridgeState.RECORDS_PUBLISHED:
+					return 'Published Records'
+				case BridgeState.RECORDS_DRAFT:
+					return 'Drafted Records'
+				default:
+					return 'Error Table'
 			}
 		},
 
@@ -329,20 +344,20 @@ export default {
 		translateUploadstatus(Uploadstatus) {
 			if ('status' in Uploadstatus) {
 				switch (Uploadstatus.status) {
-				case 0:
-					Uploadstatus.status = this.capitalizeFirstLetter(BridgeState.UPLOAD_PUBLISHED)
-					break
-				case 1:
-				case 2:
-					Uploadstatus.status = this.capitalizeFirstLetter(BridgeState.UPLOAD_PENDING)
-					break
-				case 3:
-				case 4:
-				case 5:
-					Uploadstatus.status = this.capitalizeFirstLetter(BridgeState.UPLOAD_FAILED)
-					break
-				default:
-					break
+					case 0:
+						Uploadstatus.status = this.capitalizeFirstLetter(BridgeState.UPLOAD_PUBLISHED)
+						break
+					case 1:
+					case 2:
+						Uploadstatus.status = this.capitalizeFirstLetter(BridgeState.UPLOAD_PENDING)
+						break
+					case 3:
+					case 4:
+					case 5:
+						Uploadstatus.status = this.capitalizeFirstLetter(BridgeState.UPLOAD_FAILED)
+						break
+					default:
+						break
 				}
 			}
 			// TODO query server id?
@@ -373,17 +388,17 @@ export default {
 		getExtraClass(fieldName) {
 			let extraClass = 'columnWidthInt'
 			switch (fieldName) {
-			case 'url':
-				extraClass = 'bridgelink'
-				break
-			case 'title':
-				extraClass = 'columnWidthTitle'
-				break
-			case 'createdAt':
-			case 'updatedAt':
-				extraClass = 'columnWidthDate'
-				break
-			default: extraClass = 'columnWidthInt'
+				case 'url':
+					extraClass = 'bridgelink'
+					break
+				case 'title':
+					extraClass = 'columnWidthTitle'
+					break
+				case 'createdAt':
+				case 'updatedAt':
+					extraClass = 'columnWidthDate'
+					break
+				default: extraClass = 'columnWidthInt'
 			}
 			return extraClass
 		},
@@ -411,6 +426,7 @@ export default {
 	},
 }
 </script>
+
 <style>
 #upload-table-name,
 #records-pages-name {

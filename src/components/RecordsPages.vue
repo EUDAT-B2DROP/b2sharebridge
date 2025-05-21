@@ -25,8 +25,8 @@
 		</div>
 		<!-- Listed Records: -->
 		<div class="rp__records">
-			<template v-for="record in getRecords()">
-				<div :key="record['id']" class="rp__records__record">
+			<template v-for="record in getRecords()" :key="record['id']">
+				<div class="rp__records__record">
 					<a :href="getLink(record)" target="_blank">
 						<div class="rp__records__record__info">
 							<p class="rp__records__record__title">{{ getTitle(record) }}</p>

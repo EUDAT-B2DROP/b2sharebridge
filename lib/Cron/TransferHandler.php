@@ -27,9 +27,12 @@ use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\QueuedJob;
 use OCP\Notification\IManager;
-use OC\Files\Filesystem;
+use OCP\Files\IRootFolder;
 use OCP\DB\Exception;
+use OCP\Notification\INotification;
 use Psr\Log\LoggerInterface;
+
+use OC\Files\Filesystem;
 
 
 /**
@@ -51,6 +54,7 @@ class TransferHandler extends QueuedJob
     private CommunityMapper $_cmapper;
     protected IManager $notManager;
     protected LoggerInterface $logger;
+    private IRootFolder $_rootFolder;
 
     /**
      * Create the database mapper
@@ -63,6 +67,7 @@ class TransferHandler extends QueuedJob
      * @param CommunityMapper|null     $cmapper    Community Mapper
      * @param IManager|null            $notManager Manager
      * @param LoggerInterface|null     $logger     LoggerInterface
+     * @param IRootFolder|null         $rootFolder RootFolder
      */
     public function __construct(
         ITimeFactory $time = null,
@@ -72,11 +77,13 @@ class TransferHandler extends QueuedJob
         ServerMapper $smapper = null,
         Communitymapper $cmapper = null,
         IManager $notManager = null,
-        LoggerInterface $logger = null
+        LoggerInterface $logger = null,
+        IRootFolder $rootFolder = null
     ) {
         parent::__construct($time);
-        if ($dfmapper === null or $mapper === null or $publisher === null or $smapper === null or $cmapper === null
-            or $logger === null or $notManager === null
+        if (
+            $dfmapper === null or $mapper === null or $publisher === null or $smapper === null or $cmapper === null
+            or $logger === null or $notManager === null or $rootFolder === null
         ) {
             $this->fixTransferForCron();
         } else {
@@ -87,8 +94,8 @@ class TransferHandler extends QueuedJob
             $this->_cmapper = $cmapper;
             $this->logger = $logger;
             $this->notManager = $notManager;
+            $this->_rootFolder = $rootFolder;
         }
-
     }
 
     /**
@@ -107,6 +114,7 @@ class TransferHandler extends QueuedJob
         $this->_cmapper = $application->getContainer()->get(CommunityMapper::class);
         $this->notManager = $application->getContainer()->get(IManager::class);
         $this->logger = $application->getContainer()->get(LoggerInterface::class);
+        $this->_rootFolder = $application->getContainer()->get(IRootFolder::class);
     }
 
     /**
@@ -118,18 +126,31 @@ class TransferHandler extends QueuedJob
      */
     public function run($args)
     {
-        if (!array_key_exists('transferId', $args)
+        $notification = $this->_uploadFiles($args);
+        $this->notManager->notify($notification);
+    }
+
+    private function _uploadFiles($args): INotification
+    {
+        if (!$this->_publisher instanceof B2SHARE) {
+            $this->logger->error("Not implemented!");
+            throw new \BadMethodCallException("Not implemented!");
+        }
+
+        if (
+            !array_key_exists('transferId', $args)
             || !array_key_exists('token', $args)
             || !array_key_exists('community', $args)
             || !array_key_exists('open_access', $args)
             || !array_key_exists('title', $args)
-            || !array_key_exists('serverId', $args)
+            || !array_key_exists('server_id', $args)
         ) {
+            $message = 'Can not handle w/o id, token, community, open_access, title';
             $this->logger->error(
-                'Can not handle w/o id, token, community, open_access, title',
+                $message,
                 ['app' => Application::APP_ID]
             );
-            return;
+            throw new \BadMethodCallException($message);
         }
 
         $fcStatus = null;
@@ -146,7 +167,7 @@ class TransferHandler extends QueuedJob
             $user = $fcStatus->getOwner();
 
             $notification->setUser($user);
-            $server = $this->_smapper->find($args['serverId']);
+            $server = $this->_smapper->find($args['server_id']);
             $this->_publisher->setCheckSSL($server->getCheckSsl());
 
             $create_result = $this->_publisher->create(
@@ -157,63 +178,12 @@ class TransferHandler extends QueuedJob
                 $server,
             );
 
-            if ($create_result) {
-                $file_upload_link = $this->_publisher->getFileUploadUrlPart();
-                Filesystem::init($user, '/');
-                $view = Filesystem::getView();
-                $files = $this->_dfmapper->findAllForDeposit($fcStatus->getId());
-                $upload_result = true;
-
-                foreach ($files as $file) {
-                    $filename = $file->getFilename();
-                    $fileid = $file->getFileid();
-                    $path = Filesystem::getPath($fileid);
-                    $has_access = Filesystem::isReadable($path);
-                    if ($has_access) {
-                        $handle = $view->fopen($path, 'rb');
-                        $size = $view->filesize($path);
-                        $upload_url = $file_upload_link . "/" . urlencode($filename);
-                        $upload_url = $upload_url .
-                            "?access_token=" . $args['token'];
-                        $upload_result = $upload_result &&
-                            $this->_publisher->upload(
-                                $upload_url,
-                                $handle,
-                                $size
-                            );
-                    } else {
-                        /*
-                         * External error: during uploading file
-                         */
-                        $this->logger->error(
-                            "File not accessible" . $file->getFilename(),
-                            ['app' => Application::APP_ID]
-                        );
-                        $fcStatus->setStatus(3);
-                        $notification->setSubject('not_accessible');
-                    }
-                }
-                if ($upload_result) {
-                    $fcStatus->setStatus(0);//status = published
-                    $fcStatus->setUrl($create_result);
-                    $notification->setSubject('upload_successful', ['url' => $create_result]);
-                } else {
-                    /*
-                     * External error: during uploading file
-                     */
-                    $this->logger->error(
-                        'No upload result',
-                        ['app' => Application::APP_ID]
-                    );
-                    $fcStatus->setErrorMessage("No upload result, please check your drafts, as it may be created anyway!");
-                    $fcStatus->setStatus(3);
-                    $notification->setSubject('no_upload_result', ['url' => $server->getPublishUrl(),]);
-                }
-            } else {
+            if (!$create_result) {
                 /*
                  * External error: during creating deposit
                  */
                 $fcStatus->setStatus(4);
+
                 if (str_starts_with($this->_publisher->getErrorMessage(), '403')) {
                     $community = $this->_cmapper->find($args['community'], $server->getId());
                     $unauthorized_message = 'You are not allowed to upload to "' . $community->getName() . '"';
@@ -231,7 +201,79 @@ class TransferHandler extends QueuedJob
                     $fcStatus->setErrorMessage($this->_publisher->getErrorMessage());
                     $notification->setSubject('external_error', ['publisher_url' => $server->getPublishUrl()]);
                 }
+                $this->_mapper->update($fcStatus);
+                return $notification;
             }
+
+            $file_upload_link = $this->_publisher->getFileUploadUrlPart();
+            $rootFolder = $this->_rootFolder->getUserFolder($user);
+            $files = $this->_dfmapper->findAllForDeposit($fcStatus->getId());
+            $upload_result = true;
+
+            $this->logger->warning("#upload files" . count($files), ['app' => Application::APP_ID]);
+
+            foreach ($files as $file) {
+                $fileid = $file->getFileid();
+
+                $fileNodes = $rootFolder->getById($fileid);
+                if (count($fileNodes) > 1) {
+                    $this->logger->warning("Ambiguous upload, multiple files with same ID", ['app' => Application::APP_ID]);
+                }
+                foreach ($fileNodes as $fileNode) {
+                    if ($fileNode->getType() != \OCP\Files\FileInfo::TYPE_FILE) {
+                        $this->logger->warning("User somehow managed to upload a folder" . get_class($fileNode), ['app' => Application::APP_ID]);
+                        continue;
+                    }
+
+                    $filename = $fileNode->getName();
+
+                    if (!$fileNode->isReadable()) {
+                        /*
+                         * External error: during uploading file
+                         */
+                        $this->logger->error(
+                            "File not accessible $filename",
+                            ['app' => Application::APP_ID]
+                        );
+                        $fcStatus->setStatus(3);
+                        $notification->setSubject('not_accessible');
+                        $this->_mapper->update($fcStatus);
+                        return $notification;
+                    }
+
+                    $handle = $fileNode->fopen('rb');
+                    $size = $fileNode->getSize();
+                    $upload_url = $file_upload_link . "/" . urlencode($filename);
+                    $upload_url = $upload_url .
+                        "?access_token=" . $args['token'];
+                    $this->logger->debug("File upload URL: $upload_url", ['app' => Application::APP_ID]);
+                    $upload_result = $upload_result &&
+                        $this->_publisher->upload(
+                            $upload_url,
+                            $handle,
+                            $size
+                        );
+                }
+
+            }
+            if (!$upload_result) {
+                /*
+                 * External error: during uploading file
+                 */
+                $this->logger->error(
+                    'No upload result',
+                    ['app' => Application::APP_ID]
+                );
+                $fcStatus->setErrorMessage("No upload result, please check your drafts, as it may be created anyway!");
+                $fcStatus->setStatus(3);
+                $this->_mapper->update($fcStatus);
+                $notification->setSubject('no_upload_result', ['url' => $server->getPublishUrl(),]);
+                return $notification;
+            }
+
+            $fcStatus->setStatus(0);//status = published
+            $fcStatus->setUrl($create_result);
+            $notification->setSubject('upload_successful', ['url' => $create_result]);
             $fcStatus->setUpdatedAt(time());
             $this->_mapper->update($fcStatus);
             $this->logger->info(
@@ -254,42 +296,8 @@ class TransferHandler extends QueuedJob
             );
             $notification->setSubject('internal_error');
         }
-        $this->notManager->notify($notification);
-    }
-
-    /**
-     * Check if current user is the requested user
-     *
-     * @param string $userId userid
-     *
-     * @return boolean
-     */
-    public function isPublishingUser(string $userId): bool
-    {
-        return is_array($this->argument) &&
-            array_key_exists('userId', $this->argument) &&
-            $this->argument['userId'] === $userId;
-    }
-
-    /**
-     * Get actual filename for fileId
-     *
-     * @return string
-     */
-    public function getFilename(): string
-    {
-        Filesystem::init($this->argument['userId'], '/');
-        return Filesystem::getPath($this->argument['fileId']);
-    }
-
-    /**
-     * Check if current user is the requested user
-     *
-     * @return string
-     */
-    public function getRequestDate(): string
-    {
-        return $this->argument['requestDate'];
+        $this->_mapper->update($fcStatus);
+        return $notification;
     }
 }
 

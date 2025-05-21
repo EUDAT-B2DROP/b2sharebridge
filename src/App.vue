@@ -127,10 +127,10 @@ import { generateUrl } from '@nextcloud/router'
 import { showError } from '@nextcloud/dialogs'
 
 // import NcActionButton from '@nextcloud/vue/dist/Components/ActionButton.cjs'
-import NcAppContent from '@nextcloud/vue/dist/Components/NcAppContent.js'
-import NcAppNavigation from '@nextcloud/vue/dist/Components/NcAppNavigation.js'
-import NcAppNavigationNew from '@nextcloud/vue/dist/Components/NcAppNavigationNew.js'
-import NcContent from '@nextcloud/vue/dist/Components/NcContent.js'
+import NcAppContent from '@nextcloud/vue/components/NcAppContent'
+import NcAppNavigation from '@nextcloud/vue/components/NcAppNavigation'
+import NcAppNavigationNew from '@nextcloud/vue/components/NcAppNavigationNew'
+import NcContent from '@nextcloud/vue/components/NcContent'
 
 const BridgeState = {
 	UPLOAD_ALL: 'all',

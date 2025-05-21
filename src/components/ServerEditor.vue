@@ -1,7 +1,7 @@
 <template>
 	<div class="bridgeserver">
 		<div class="bridgeserver__input">
-			<h4>{{ id == null ? "New Server" : mutable_name }}</h4>
+			<h4>{{ id == -1 ? "New Server" : mutable_name }}</h4>
 			<NcTextField v-model="mutable_maxUploads"
 				label="# of uploads per user at the same time"
 				trailing-cutton-icon="close"
@@ -32,7 +32,7 @@
 				trailing-cutton-icon="close"
 				:show-trailing-button="true"
 				:success="String(mutable_publishUrl).trim().startsWith('https://') && !String(mutable_publishUrl).trim().endsWith('/')"
-				:error="mutable_publishUrl && (!String(mutable_publishUrl).trim().startsWith('https://') || String(mutable_publishUrl).trim().endsWith('/'))"
+				:error="String(mutable_publishUrl).length > 0 && (!String(mutable_publishUrl).trim().startsWith('https://') || String(mutable_publishUrl).trim().endsWith('/'))"
 				@trailing-button-click="mutable_publishUrl = ''">
 				<template #icon>
 					<Web :size="20" />
@@ -42,7 +42,7 @@
 				label="Your Server Name"
 				trailing-cutton-icon="close"
 				:show-trailing-button="true"
-				:success="mutable_name && String(mutable_name).length > 0"
+				:success="String(mutable_name).length > 0"
 				@trailing-button-click="mutable_name = ''">
 				<template #icon>
 					<TagEditOutline :size="20" />
@@ -61,10 +61,10 @@
 			<NcButton id="save" :disabled="!hasChanged()" @click="saveServer">
 				Save
 			</NcButton>
-			<NcButton v-if="id !== null" @click="deleteServer">
+			<NcButton v-if="id !== -1" @click="deleteServer">
 				Delete
 			</NcButton>
-			<NcButton v-if="id === null"
+			<NcButton v-if="id === -1"
 				id="reset"
 				:disabled="!hasChanged()"
 				@click="resetProps">
@@ -99,7 +99,7 @@ export default {
 		event: 'server-change',
 	},
 	props: {
-		id: { default: null, type: Number },
+		id: { type: Number, required: true },
 		name: { default: '', required: false, type: String },
 		publishurl: { default: '', required: false, type: String },
 		maxuploads: { default: 5, type: Number },
@@ -122,13 +122,13 @@ export default {
 	},
 	computed: {
 		getCheckboxName() {
-			return 'checkSsl' + (this.id === null ? '' : this.id)
+			return 'checkSsl' + (this.id === -1 ? '' : this.id)
 		},
 	},
 	methods: {
 		resetProps() {
-			this.mutable_name = null
-			this.mutable_publishUrl = null
+			this.mutable_name = ''
+			this.mutable_publishUrl = ''
 			this.mutable_maxUploads = 5
 			this.mutable_maxUploadFilesize = 512
 			this.mutable_checkSsl = false
@@ -161,7 +161,7 @@ export default {
 
 			axios.post(generateUrl('/apps/b2sharebridge/server'), { server: data })
 				.then((response) => {
-					this.$emit('server-change', this.id === null ? 0 : this.id)
+					this.$emit('server-change', this.id === -1 ? 0 : this.id)
 				})
 				.catch((error) => {
 					console.error('Could not save server')

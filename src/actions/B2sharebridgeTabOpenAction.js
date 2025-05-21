@@ -1,20 +1,12 @@
-import Vue from 'vue'
+import { createApp, h } from 'vue'
 import { Permission, FileAction, FileType } from '@nextcloud/files'
-import { spawnDialog } from '@nextcloud/vue/dist/Functions/dialog.js'
+import { spawnDialog } from '@nextcloud/vue/functions/dialog'
 import BridgeDialog from '../components/BridgeDialog.vue'
 
 const filepicker = async (nodes) => {
 	const FileIds = nodes.map(node => node.fileid)
-	const bridgeVueComponent = Vue.extend({
-		extends: BridgeDialog,
-		data() {
-			return {
-				selectedFiles: FileIds,
-			}
-		},
-	})
-
-	spawnDialog(bridgeVueComponent)
+	console.debug(FileIds)
+	spawnDialog(BridgeDialog, {selectedFiles: FileIds})
 	return true
 }
 

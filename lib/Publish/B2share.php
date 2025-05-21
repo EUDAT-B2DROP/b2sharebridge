@@ -15,6 +15,7 @@
 namespace OCA\B2shareBridge\Publish;
 
 use CurlHandle;
+use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Model\Server;
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
@@ -150,7 +151,8 @@ class B2share implements IPublish
             $body = substr($response, $header_size);
             $body_encoded = mb_convert_encoding($body, 'UTF-8', mb_list_encodings());
             $results = json_decode($body_encoded, false);
-            if (property_exists($results, 'links')
+            if (
+                property_exists($results, 'links')
                 && property_exists($results->links, 'self')
                 && property_exists($results->links, 'files')
             ) {
@@ -191,7 +193,7 @@ class B2share implements IPublish
     {
         $this->curl_client = curl_init();
 
-        $config2 = array(
+        $config2 = [
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_URL => $file_upload_url,
             CURLOPT_INFILE => $filehandle,
@@ -202,16 +204,20 @@ class B2share implements IPublish
             CURLOPT_TIMEOUT => 4,
             CURLOPT_HEADER => true,
             CURLINFO_HEADER_OUT => true,
-            CURLOPT_HTTPHEADER => array(
+            CURLOPT_HTTPHEADER => [
                 'Accept:application/json',
                 'Content-Type: application/octet-stream'
-            )
-        );
+            ]
+        ];
         curl_setopt_array($this->curl_client, $config2);
 
         $response = curl_exec($this->curl_client);
         curl_close($this->curl_client);
         if (!$response) {
+            $info = curl_getinfo($this->curl_client);
+            $errors = curl_error($this->curl_client);
+            $this->logger->debug("CURL INFO: " . print_r($info, true), ['app' => Application::APP_ID]);
+            $this->logger->debug("CURL ERROR: " . print_r($errors, true), ['app' => Application::APP_ID]);
             return false;
         } else {
             return true;

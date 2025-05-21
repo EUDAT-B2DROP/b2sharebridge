@@ -24,7 +24,7 @@
 		name="">
 		<div class="modal__content">
 			<h2>Create a B2SHARE deposit</h2>
-			<NcTextField :value.sync="title.text"
+			<NcTextField v-model="title.text"
 				label="Title"
 				placeholder="Please enter a title"
 				:error="title.error"
@@ -32,7 +32,7 @@
 				minlength="3"
 				maxlength="128"
 				:helper-text="title.helpertext"
-				@update:value="validate">
+				@update:modelValue="validate">
 				<PencilIcon :size="20" />
 			</NcTextField>
 			<NcSelect v-bind="serverprops"
@@ -78,6 +78,12 @@ export default {
 		NcButton,
 		PencilIcon,
 	},
+	props: {
+		selectedFiles: {
+			type: Array,
+			required: true,
+		}
+	},
 	data() {
 		return {
 			showDialog: false,
@@ -118,8 +124,7 @@ export default {
 
 			// Technical fields
 			tokens: [],
-			servers: [],
-			selectedFiles: [],
+			servers: []
 		}
 	},
 
@@ -308,13 +313,13 @@ export default {
 
 			if (this.title.text.length <= 3 || this.title.text.length > 128) {
 				isValid = false
+				this.title.success = false
 				if (this.publish.pressedOnce) {
 					// Note both can be false
 					this.title.error = true
-					this.title.success = false
 					this.title.helpertext = 'Please set a title with a length between 3 and 128 characters'
 				}
-			} else if (this.publish.pressedOnce) {
+			} else {
 				this.title.error = false
 				this.title.success = true
 			}

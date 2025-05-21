@@ -340,14 +340,14 @@ class ViewController extends Controller
     /**
      * XHR request endpoint for getting communities list dropdown for tabview
      *
-     * @return array
+     * @return JSONResponse
      * 
      * @throws Exception
      */
     #[NoAdminRequired]
-    public function getTabViewContent(): array
+    public function getTabViewContent(): JSONResponse
     {
-        return $this->cMapper->getCommunityList();
+        return new JSONResponse($this->cMapper->getCommunityList());
     }
 
     /**
@@ -356,7 +356,7 @@ class ViewController extends Controller
      * @param mixed $serverId ID of the server
      * @param mixed $recordId ID of the draft
      * 
-     * @return array
+     * @return JSONResponse
      */
     #[NoAdminRequired]
     public function deleteRecord($serverId, $recordId)
@@ -370,7 +370,7 @@ class ViewController extends Controller
         $urlPath = "$serverUrl/api/records/$recordId/draft?access_token=$token";
         $this->_logger->debug($urlPath, ["b2sharebridge"]);
         $output = $this->_curlRequest($urlPath, "DELETE");
-        return json_decode($output, true);
+        return new JSONResponse(json_decode($output, true));
     }
 
     /**
@@ -589,11 +589,21 @@ class ViewController extends Controller
         if (!$token) {
             return [];
         }
-        // https://doc.eudat.eu/b2share/httpapi/#search-drafts
-        $urlPath = "$serverUrl/api/records/?drafts&access_token=$token"
-            . "&page=" . $page
-            . "&size=" . $size
-            . "&sort=mostrecent";
+
+        $params = [
+            'page' => $page,
+            'size' => $size,
+            'sort' => 'mostrecent'
+        ];
+        if ($draft) {
+            // https://doc.eudat.eu/b2share/httpapi/#search-drafts
+            $params = ["drafts" => 1, "access_token" => $token] + $params;
+        } else {
+            $userId = $this->_getB2shareUserId($serverUrl, $token);
+            $params["q"] = "owners:$userId";
+        }
+        $httpParams = http_build_query($params);
+        $urlPath = "$serverUrl/api/records/?$httpParams";
 
         $this->_logger->debug("B2SHARE records URL: $urlPath", ['app' => Application::APP_ID]);
 
@@ -607,17 +617,6 @@ class ViewController extends Controller
             $records = $outputRecords["hits"];
 
             if (array_key_exists("hits", $records)) {
-                //filter records
-                $records["hits"] = array_filter(
-                    $records["hits"], function ($record) use ($draft) {
-                        if (array_key_exists("metadata", $record) && array_key_exists("publication_state", $record["metadata"])) {
-                            $isDraft = $record["metadata"]["publication_state"] == "draft";
-                            return ($draft && $isDraft) || (!$draft && !$isDraft);
-                        }
-                        return false;
-                    }
-                );
-                $records["total"] = count($records["hits"]);
                 return $records;
             }
         }

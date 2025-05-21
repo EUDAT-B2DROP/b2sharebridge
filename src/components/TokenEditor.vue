@@ -2,7 +2,7 @@
 	<div class="bridgetoken">
 		<h3>{{ name }}</h3>
 		<a :href="url + '/user'">{{ url }}</a>
-		<NcPasswordField :value.sync="mutable_token"
+		<NcPasswordField v-model="mutable_token"
 			label="Token"
 			placeholder="Token"
 			:minlength="60"

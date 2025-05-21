@@ -19,6 +19,7 @@ use OCP\IURLGenerator;
 use OCP\L10N\IFactory;
 use OCP\Notification\INotification;
 use OCP\Notification\INotifier;
+use OCP\Notification\UnknownNotificationException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -61,7 +62,7 @@ class Notifier implements INotifier
      */
     public function getID(): string
     {
-        return 'b2sharebridge';
+        return Application::APP_ID;
     }
 
     /**
@@ -86,7 +87,7 @@ class Notifier implements INotifier
     {
         if ($notification->getApp() !== Application::APP_ID) {
             // Not my app => throw
-            throw new \InvalidArgumentException('Unknown App');
+            throw new UnknownNotificationException('Unknown App');
         }
 
         // Read the language from the notification
@@ -154,7 +155,7 @@ class Notifier implements INotifier
 
         default:
             // Unknown subject => Unknown notification => throw
-            throw new \InvalidArgumentException('Unknown subject "' . $notification->getSubject() . '"');
+            throw new UnknownNotificationException('Unknown subject "' . $notification->getSubject() . '"');
         }
     }
 
@@ -164,7 +165,7 @@ class Notifier implements INotifier
      * @param INotification $notification Notification
      * @param $l            language
      * 
-     * @throws \InvalidArgumentException
+     * @throws UnknownNotificationException
      * 
      * @return INotification
      */
@@ -190,7 +191,7 @@ class Notifier implements INotifier
             break;
         default:
             // Unknown subject => Unknown notification => throw
-            throw new \InvalidArgumentException('Unknown subject "' . $notification->getSubject() . '"');
+            throw new UnknownNotificationException('Unknown subject "' . $notification->getSubject() . '"');
         }
         return $notification;
     }
@@ -201,7 +202,7 @@ class Notifier implements INotifier
      * @param INotification $notification Notification
      * @param $l            language
      * 
-     * @throws \InvalidArgumentException
+     * @throws UnknownNotificationException
      * 
      * @return INotification
      */
@@ -244,7 +245,7 @@ class Notifier implements INotifier
             break;
         default:
             // Unknown subject => Unknown notification => throw
-            throw new \InvalidArgumentException('Unknown subject "' . $notification->getSubject() . '"');
+            throw new UnknownNotificationException('Unknown subject "' . $notification->getSubject() . '"');
         }
 
         $code = $parameters["code"];

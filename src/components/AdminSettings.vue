@@ -45,9 +45,9 @@ export default {
 	data() {
 		return {
 			dummy_server: {
-				id: null,
-				name: null,
-				publishUrl: null,
+				id: -1,
+				name: '',
+				publishUrl: '',
 				maxUploads: 5,
 				maxUploadFilesize: 512,
 				checkSsl: false,

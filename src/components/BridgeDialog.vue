@@ -59,13 +59,14 @@
 					Cancel
 				</NcButton>
 				<NcButton
-					:disabled="publish.disabled"
+					:disabled="publish.disabled || publish.publishing"
 					type="primary"
 					aria-label="publish"
 					@click="createDeposit">
 					Publish
 				</NcButton>
 			</span>
+			<NcProgressBar v-if="publish.publishTime" :value="getProgressBar()" size="medium" />
 		</div>
 	</NcModal>
 </template>
@@ -73,7 +74,7 @@
 <script>
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
-import { NcButton, NcCheckboxRadioSwitch, NcModal, NcSelect, NcTextField } from '@nextcloud/vue'
+import { NcButton, NcCheckboxRadioSwitch, NcModal, NcProgressBar, NcSelect, NcTextField } from '@nextcloud/vue'
 import PencilIcon from 'vue-material-design-icons/Pencil.vue'
 export default {
 	name: 'BridgeDialog',
@@ -83,6 +84,7 @@ export default {
 		NcSelect,
 		NcCheckboxRadioSwitch,
 		NcButton,
+		NcProgressBar,
 		PencilIcon,
 	},
 
@@ -98,6 +100,8 @@ export default {
 			showDialog: false,
 			publish: {
 				disabled: true,
+				publishing: false,
+				publishTime: null,
 				pressedOnce: false,
 			},
 
@@ -138,6 +142,7 @@ export default {
 			// Technical fields
 			tokens: [],
 			servers: [],
+			progress: 0,
 		}
 	},
 
@@ -354,6 +359,10 @@ export default {
 				return
 			}
 
+			// update progress bar
+			this.publish.publishTime = Date.now()
+			this.publish.publishing = true
+
 			axios
 				.post(
 					generateUrl('/apps/b2sharebridge/publish'),
@@ -382,6 +391,8 @@ export default {
 							href: generateUrl('/apps/b2sharebridge/?uploads'),
 						},
 					]
+					this.publish.publishing = false
+					this.publish.publishTime = null
 				})
 				.catch((error) => {
 					if (error.response) {
@@ -395,12 +406,23 @@ export default {
 						console.error(this.info.message)
 					}
 					console.error(error)
+					this.publish.publishing = false
+					this.publish.publishTime = null
 				})
 		},
 
 		closeModal() {
 			this.showDialog = false
 			this.info.message = ''
+		},
+
+		getProgressBar() {
+			if (!this.publish.publishTime) {
+				return 0
+			}
+			const seconds = (Date.now() - this.publish.publishTime) / 1000.0
+			const progress = Math.max(Math.min(Math.round(seconds * 20), 99), 10)
+			return progress
 		},
 	},
 }

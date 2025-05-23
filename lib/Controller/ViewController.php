@@ -211,7 +211,7 @@ class ViewController extends Controller
     public function publicationList($draft, $page, $size): JSONResponse
     {
         if (!$this->userId) {
-            return new JSONResponse(["message" => "missing user id"]);
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
         }
         $size = $size > 50 ? 50 : $size;
         $serverResponses = [];

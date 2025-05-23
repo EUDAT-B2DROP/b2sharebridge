@@ -1,8 +1,5 @@
 <template>
-	<NcModal
-		v-if="info.message !== ''"
-		id="infodial"
-		name="">
+	<NcModal v-if="info.message !== ''" id="infodial" name="">
 		<div class="modal__content">
 			<h2>{{ info.heading }}</h2>
 			<p>{{ info.message }}</p>
@@ -19,16 +16,21 @@
 			</span>
 		</div>
 	</NcModal>
-	<NcModal
-		v-else-if="showDialog"
-		id="bridgedial"
-		name="">
+	<NcModal v-else-if="showDialog" id="bridgedial" name="">
 		<div class="modal__content">
-			<h2>Create a B2SHARE deposit</h2>
+			<h2>Upload data to B2SHARE</h2>
+			<NcSelect
+				v-bind="modeprops"
+				v-model="modeprops.value"
+				required
+				:class="{ selecterror: modeprops.error }"
+				@input="onChangeMode" />
 			<NcTextField
+				v-if="!modeprops.value || modeprops.value.id === 'create'"
 				v-model="title.text"
 				label="Title"
 				placeholder="Please enter a title"
+				:disabled="!modeprops.value"
 				:error="title.error"
 				:success="title.success"
 				minlength="3"
@@ -44,18 +46,28 @@
 				:class="{ selecterror: serverprops.error }"
 				@input="onChangeServer" />
 			<NcSelect
+				v-if="modeprops.value && modeprops.value.id === 'attach'"
+				v-bind="depositselectprops"
+				v-model="depositselectprops.value"
+				required
+				:class="{ selecterror: depositselectprops.error }"
+				@input="validate" />
+			<NcSelect
+				v-if="!modeprops.value || modeprops.value.id === 'create'"
 				v-bind="communityprops"
 				v-model="communityprops.value"
+				:disabled="!modeprops.value"
 				required
 				:class="{ selecterror: communityprops.error }"
 				@input="validate" />
-			<NcCheckboxRadioSwitch v-model="openAccess">
+			<NcCheckboxRadioSwitch
+				v-if="!modeprops.value || modeprops.value.id === 'create'"
+				v-model="openAccess"
+				:disabled="!modeprops.value">
 				Open Access
 			</NcCheckboxRadioSwitch>
 			<span class="button-container">
-				<NcButton
-					aria-label="close"
-					@click="closeModal">
+				<NcButton aria-label="close" @click="closeModal">
 					Cancel
 				</NcButton>
 				<NcButton
@@ -119,6 +131,31 @@ export default {
 				error: false,
 			},
 
+			modeprops: {
+				inputLabel: 'Mode',
+				options: [
+					{
+						id: 'create',
+						label: 'Create a new deposit',
+					},
+					{
+						id: 'attach',
+						label: 'Attach to existing deposit',
+					},
+				],
+
+				value: null,
+				error: false,
+			},
+
+			depositselectprops: {
+				inputLabel: 'Select Deposit',
+				options: [],
+				deposits: null,
+				value: null,
+				error: false,
+			},
+
 			communityprops: {
 				inputLabel: 'Community',
 				options: [],
@@ -142,7 +179,6 @@ export default {
 			// Technical fields
 			tokens: [],
 			servers: [],
-			progress: 0,
 		}
 	},
 
@@ -206,7 +242,7 @@ export default {
 
 	methods: {
 		// API stuff
-		loadServers() {
+		async loadServers() {
 			const urlPath
 				= '/apps/b2sharebridge/servers?requesttoken='
 					+ encodeURIComponent(OC.requestToken)
@@ -225,7 +261,7 @@ export default {
 				})
 		},
 
-		loadCommunities() {
+		async loadCommunities() {
 			const urlPath
 				= '/apps/b2sharebridge/gettabviewcontent?requesttoken='
 					+ encodeURIComponent(OC.requestToken)
@@ -244,7 +280,7 @@ export default {
 				})
 		},
 
-		loadTokens() {
+		async loadTokens() {
 			const urlPath
 				= '/apps/b2sharebridge/apitoken?requesttoken='
 					+ encodeURIComponent(OC.requestToken)
@@ -265,6 +301,22 @@ export default {
 					console.error(this.info.message)
 					console.error(error)
 				})
+		},
+
+		updateDespositList() {
+			if (!this.depositselectprops.deposits || !this.serverprops.value) {
+				return
+			}
+
+			this.depositselectprops.options = []
+			const deposits = this.depositselectprops.deposits[this.serverprops.value.id].hits
+			deposits.forEach((deposit) => {
+				const depositOption = {
+					id: deposit.id,
+					label: deposit.metadata.titles[0].title,
+				}
+				this.depositselectprops.options.push(depositOption)
+			})
 		},
 
 		// Events
@@ -290,8 +342,89 @@ export default {
 						}
 					}
 				})
+
+				// update deposit list in attach mode
+				this.updateDespositList()
 			}
 			this.validate()
+		},
+
+		onChangeMode() {
+			console.debug('Updating b2share draft list')
+
+			if (!this.depositselectprops.deposits) {
+				this.fetchAllDrafts()
+			}
+
+			this.validate()
+		},
+
+		async fetchAllDrafts() {
+			const size = 50
+
+			/**
+			 *
+			 * @param page page number
+			 */
+			function createUrl(page) {
+				const urlArr = [
+					'/apps/b2sharebridge/publications?draft=',
+					true,
+					'&page=',
+					page,
+					'&size=',
+					size,
+					'&requesttoken=',
+					encodeURIComponent(OC.requestToken),
+				]
+				return generateUrl(urlArr.join(''))
+			}
+
+			// catch the first result and calculate if more are needed
+			const depositData = {}
+			try {
+				const firstRes = await axios.get(createUrl(1))
+				const servers = Object.keys(firstRes.data)
+				let totalNumber = 0
+				for (const server of servers) {
+					const total = firstRes.data[server].total
+					if (total > totalNumber) {
+						totalNumber = total
+					}
+					const serverData = {
+						hits: firstRes.data[server].hits,
+						total,
+					}
+					depositData[server] = serverData
+				}
+
+				// catch other results
+				if (totalNumber > size) {
+					// promises
+					const requests = []
+					for (let page = 2; (page - 1) * size < totalNumber; page++) {
+						requests.push(axios.get(createUrl(page)))
+					}
+
+					const responses = await Promise.all(requests)
+
+					// append missing deposits
+					for (const res of responses) {
+						for (const server of servers) {
+							depositData[server].hits.push(...res.data[server].hits)
+						}
+					}
+				}
+			} catch (_error) {
+				console.error('Could not fetch deposits')
+				return
+			}
+
+			// save results
+			this.depositselectprops.deposits = depositData
+
+			// update deposit list
+			this.updateDespositList()
 		},
 
 		hasValidTokens() {
@@ -313,8 +446,11 @@ export default {
 			this.title.helpertext = ''
 			this.serverprops.error = false
 			this.communityprops.error = false
+			this.modeprops.error = false
+			this.depositselectprops.error = false
 
 			// run checks
+			// check server
 			if (this.serverprops.value === null) {
 				isValid = false
 				if (this.publish.pressedOnce) {
@@ -322,24 +458,42 @@ export default {
 				}
 			}
 
-			if (this.communityprops.value === null) {
+			// check mode
+			if (this.modeprops.value === null) {
 				isValid = false
 				if (this.publish.pressedOnce) {
-					this.communityprops.error = true
+					this.modeprops.error = true
 				}
-			}
+			} else if (this.modeprops.value.id === 'attach') {
+				// mode attach: check deposit selected
+				if (this.depositselectprops.value === null) {
+					isValid = false
+					if (this.publish.pressedOnce) {
+						this.depositselectprops.error = true
+					}
+				}
+			} else if (this.modeprops.value.id === 'create') {
+				// mode create: check community
+				if (this.communityprops.value === null) {
+					isValid = false
+					if (this.publish.pressedOnce) {
+						this.communityprops.error = true
+					}
+				}
 
-			if (this.title.text.length <= 3 || this.title.text.length > 128) {
-				isValid = false
-				this.title.success = false
-				if (this.publish.pressedOnce) {
-					// Note both can be false
-					this.title.error = true
-					this.title.helpertext = 'Please set a title with a length between 3 and 128 characters'
+				// mode create: check title
+				if (this.title.text.length <= 3 || this.title.text.length > 128) {
+					isValid = false
+					this.title.success = false
+					if (this.publish.pressedOnce) {
+						// Note both can be false
+						this.title.error = true
+						this.title.helpertext = 'Please set a title with a length between 3 and 128 characters'
+					}
+				} else {
+					this.title.error = false
+					this.title.success = true
 				}
-			} else {
-				this.title.error = false
-				this.title.success = true
 			}
 
 			// Change publishable with validation

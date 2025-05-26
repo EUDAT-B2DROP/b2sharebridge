@@ -20,6 +20,7 @@ use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
+use OCA\B2shareBridge\Util\Curl;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -64,6 +65,7 @@ class ViewController extends Controller
     private LoggerInterface $_logger;
     private IRootFolder $_storage;
     private IURLGenerator $_urlGenerator;
+    private Curl $_curl;
 
     /**
      * Creates the AppFramwork Controller
@@ -79,6 +81,7 @@ class ViewController extends Controller
      * @param IRootFolder         $storage      Storage Interface for file creation
      * @param IManager            $manager      IManager for Notifications
      * @param IURLGenerator       $urlGenerator Url Generator
+     * @param Curl                $curl         Curl
      * @param LoggerInterface     $logger       Logger
      * @param string              $userId       User ID
      */
@@ -94,6 +97,7 @@ class ViewController extends Controller
         IRootFolder $storage,
         IManager $manager,
         IURLGenerator $urlGenerator,
+        Curl $curl,
         LoggerInterface $logger,
         string $userId,
     ) {
@@ -108,6 +112,7 @@ class ViewController extends Controller
         $this->_storage = $storage;
         $this->notManager = $manager;
         $this->_urlGenerator = $urlGenerator;
+        $this->_curl = $curl;
         $this->_logger = $logger;
     }
 
@@ -363,13 +368,13 @@ class ViewController extends Controller
     {
         $token = $this->_getB2shareAccessToken($serverId);
         if (!$token) {
-            return [];
+            return new JSONResponse([], Http::STATUS_BAD_REQUEST);
         }
         $server = $this->smapper->find($serverId);
         $serverUrl = $server->getPublishUrl();
         $urlPath = "$serverUrl/api/records/$recordId/draft?access_token=$token";
         $this->_logger->debug($urlPath, ["b2sharebridge"]);
-        $output = $this->_curlRequest($urlPath, "DELETE");
+        $output = $this->_curl->request($urlPath, "DELETE");
         return new JSONResponse(json_decode($output, true));
     }
 
@@ -459,7 +464,7 @@ class ViewController extends Controller
             );
         }
 
-        $outputRaw = $this->_curlRequest($filesUrl);
+        $outputRaw = $this->_curl->request($filesUrl);
         $output = json_decode($outputRaw, true);
 
         if (!array_key_exists("contents", $output)) {
@@ -530,7 +535,7 @@ class ViewController extends Controller
             $folder = $userFolder->newFolder($title);
             foreach ($files as $file) {
                 $urlFilePath = $file["links"]["self"] . "?access_token=$accessToken";
-                $content = $this->_curlRequest($urlFilePath);
+                $content = $this->_curl->request($urlFilePath);
                 $folder->newFile($file["key"], $content);
             }
         } catch (\OCP\Files\NotPermittedException $e) {
@@ -607,7 +612,7 @@ class ViewController extends Controller
 
         $this->_logger->debug("B2SHARE records URL: $urlPath", ['app' => Application::APP_ID]);
 
-        $output = $this->_curlRequest($urlPath);
+        $output = $this->_curl->request($urlPath);
 
         if (!$output) {
             return [];
@@ -645,7 +650,7 @@ class ViewController extends Controller
      */
     private function _getB2shareUserId($serverUrl, $token): ?string
     {
-        $response = $this->_curlRequest("$serverUrl/api/user/?access_token=$token");
+        $response = $this->_curl->request("$serverUrl/api/user/?access_token=$token");
         if (!$response) {
             return null;
         }
@@ -654,27 +659,6 @@ class ViewController extends Controller
             return $b2accessIdResponse["id"];
         }
         return null;
-    }
-
-    /**
-     * Send a curl get request to $urlPath
-     *
-     * @param string $urlPath URL
-     * @param string $type    REST type, e.g. GET, DELETE, PUT, ...
-     * 
-     * @return bool|string
-     */
-    private function _curlRequest($urlPath, $type = 'GET'): bool|string
-    {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $urlPath);
-        if ($type != 'GET') {
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type);
-        }
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($ch);
-        curl_close($ch);
-        return $output;
     }
 
     /**

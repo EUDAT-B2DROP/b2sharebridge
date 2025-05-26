@@ -14,9 +14,8 @@
 
 namespace OCA\B2shareBridge\Publish;
 
-use CurlHandle;
-use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Model\Server;
+use OCA\B2shareBridge\Util\Curl;
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
 
@@ -32,10 +31,10 @@ use Psr\Log\LoggerInterface;
 class B2share implements IPublish
 {
     protected LoggerInterface $logger;
-    protected CurlHandle $curl_client;
     protected string $file_upload_url;
     protected string $error_message;
 
+    private Curl $_curl;
 
     /**
      * Create object for actual upload
@@ -43,10 +42,10 @@ class B2share implements IPublish
      * @param IConfig         $_config ignored
      * @param LoggerInterface $logger  logger
      */
-    public function __construct(IConfig $_config, LoggerInterface $logger)
+    public function __construct(IConfig $_config, LoggerInterface $logger, Curl $curl)
     {
         $this->logger = $logger;
-        $this->curl_client = curl_init();
+        $this->_curl = $curl;
     }
 
     /**
@@ -58,16 +57,7 @@ class B2share implements IPublish
      */
     public function setCheckSSL(bool $checkSsl)
     {
-        $defaults = array(
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_TIMEOUT => 4,
-            CURLOPT_HEADER => 1,
-        );
-        if (!$checkSsl) {
-            $defaults[CURLOPT_SSL_VERIFYHOST] = 0;
-            $defaults[CURLOPT_SSL_VERIFYPEER] = 0;
-        }
-        curl_setopt_array($this->curl_client, $defaults);
+
     }
 
     /**
@@ -131,23 +121,11 @@ class B2share implements IPublish
         $version_slash = $server->getVersion() == 2 ? '/' : '';
         $post_url = "{$server->getPublishUrl()}/api/records{$version_slash}?access_token={$token}";
 
-        $config = array(
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_POSTREDIR => 3,
-            CURLOPT_URL => $post_url,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => $data,
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($data)
-            )
-        );
-        curl_setopt_array($this->curl_client, $config);
-        $response = curl_exec($this->curl_client);
+        $response = $this->_curl->post($post_url, $data);
         if (!$response) {
             return "";
         } else {
-            $header_size = curl_getinfo($this->curl_client, CURLINFO_HEADER_SIZE);
+            $header_size = $this->_curl->getInfo();
             $body = substr($response, $header_size);
             $body_encoded = mb_convert_encoding($body, 'UTF-8', mb_list_encodings());
             $results = json_decode($body_encoded, false);
@@ -157,16 +135,7 @@ class B2share implements IPublish
             ) {
                 $this->file_upload_url
                     = $results->links->files;
-                if ($server->getVersion() == 2) {
-                    return str_replace(
-                        'draft',
-                        'edit',
-                        str_replace('/api', '', $results->links->self)
-                    );
-                } else {
-                    $edit_url = "{$server->getPublishUrl()}/uploads/{$results->id}";
-                    return $edit_url;
-                }
+                return $this->getDraftUrl($server, $results->id);
             } else {
                 $this->error_message = "Something went wrong in uploading.";
                 if (property_exists($results, 'status')) {
@@ -176,6 +145,22 @@ class B2share implements IPublish
                 }
                 return "";
             }
+        }
+    }
+
+    public function getDraft(Server $server, string $draftId, string $token)
+    {
+        $url = "{$this->getDraftUrl($server, $draftId)}?access_token={$token}";
+        $res = $this->_curl->request($url);
+        return json_decode($res, true);
+    }
+
+    public function getDraftUrl(Server $server, string $draftId)
+    {
+        if ($server->getVersion() == 2) {
+            return "{$server->getPublishUrl()}/records/{$draftId}/edit";
+        } else {
+            return "{$server->getPublishUrl()}/uploads/{$draftId}";
         }
     }
 
@@ -190,36 +175,6 @@ class B2share implements IPublish
      */
     public function upload(string $file_upload_url, mixed $filehandle, string $filesize): bool
     {
-        $this->curl_client = curl_init();
-
-        $config2 = [
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_URL => $file_upload_url,
-            CURLOPT_INFILE => $filehandle,
-            CURLOPT_INFILESIZE => $filesize,
-            CURLOPT_PUT => true,
-            CURLOPT_CUSTOMREQUEST => 'PUT',
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_TIMEOUT => 4,
-            CURLOPT_HEADER => true,
-            CURLINFO_HEADER_OUT => true,
-            CURLOPT_HTTPHEADER => [
-                'Accept:application/json',
-                'Content-Type: application/octet-stream'
-            ]
-        ];
-        curl_setopt_array($this->curl_client, $config2);
-
-        $response = curl_exec($this->curl_client);
-        curl_close($this->curl_client);
-        if (!$response) {
-            $info = curl_getinfo($this->curl_client);
-            $errors = curl_error($this->curl_client);
-            $this->logger->debug("CURL INFO: " . print_r($info, true), ['app' => Application::APP_ID]);
-            $this->logger->debug("CURL ERROR: " . print_r($errors, true), ['app' => Application::APP_ID]);
-            return false;
-        } else {
-            return true;
-        }
+        return $this->_curl->upload($file_upload_url, $filehandle, $filesize);
     }
 }

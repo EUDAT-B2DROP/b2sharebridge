@@ -37,6 +37,11 @@ return [
             'verb' => 'POST'
         ],
         [
+            'name' => 'Publish#attach',
+            'url' => '/attach',
+            'verb' => 'POST'
+        ],
+        [
             'name' => 'View#depositList',
             'url' => '/uploads',
             'verb' => 'GET'

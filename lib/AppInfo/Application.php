@@ -25,6 +25,7 @@ use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Notification\Notifier;
 use OCA\B2shareBridge\Publish\B2share;
+use OCA\B2shareBridge\Util\Curl;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -165,6 +166,16 @@ class Application extends App implements IBootstrap
             function (ContainerInterface $c): B2share {
                 return new B2share(
                     $c->get(IConfig::class),
+                    $c->get(LoggerInterface::class),
+                    $c->get(Curl::class)
+                );
+            }
+        );
+
+        $context->registerService(
+            Curl::class,
+            function (ContainerInterface $c): Curl {
+                return new Curl(
                     $c->get(LoggerInterface::class)
                 );
             }
@@ -236,6 +247,7 @@ class Application extends App implements IBootstrap
                     $c->get(IRootFolder::class),
                     $c->get(IManager::class),
                     $c->get(IURLGenerator::class),
+                    $c->get(Curl::class),
                     $c->get(LoggerInterface::class),
                     $c->get("userId")
                 );

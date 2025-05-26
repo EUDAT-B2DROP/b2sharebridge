@@ -15,12 +15,15 @@
 namespace OCA\B2shareBridge\Cron;
 
 use OCA\B2shareBridge\AppInfo\Application;
+use OCA\B2shareBridge\Exception\UploadNotificationException;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Publish\B2share;
 use OCA\B2shareBridge\Publish\IPublish;
+use OCA\B2shareBridge\Util\Curl;
+use OCA\B2shareBridge\Util\Helper;
 
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -31,9 +34,6 @@ use OCP\Files\IRootFolder;
 use OCP\DB\Exception;
 use OCP\Notification\INotification;
 use Psr\Log\LoggerInterface;
-
-use OC\Files\Filesystem;
-
 
 /**
  * Create an owncloud QueuedJob to transfer files in the background
@@ -55,6 +55,7 @@ class TransferHandler extends QueuedJob
     protected IManager $notManager;
     protected LoggerInterface $logger;
     private IRootFolder $_rootFolder;
+    private Curl $_curl;
 
     /**
      * Create the database mapper
@@ -78,11 +79,12 @@ class TransferHandler extends QueuedJob
         Communitymapper $cmapper = null,
         IManager $notManager = null,
         LoggerInterface $logger = null,
-        IRootFolder $rootFolder = null
+        IRootFolder $rootFolder = null,
+        Curl $curl = null,
     ) {
         parent::__construct($time);
         if ($dfmapper === null or $mapper === null or $publisher === null or $smapper === null or $cmapper === null
-            or $logger === null or $notManager === null or $rootFolder === null
+            or $logger === null or $notManager === null or $rootFolder === null or $curl === null
         ) {
             $this->fixTransferForCron();
         } else {
@@ -94,6 +96,7 @@ class TransferHandler extends QueuedJob
             $this->logger = $logger;
             $this->notManager = $notManager;
             $this->_rootFolder = $rootFolder;
+            $this->_curl = $curl;
         }
     }
 
@@ -114,6 +117,7 @@ class TransferHandler extends QueuedJob
         $this->notManager = $application->getContainer()->get(IManager::class);
         $this->logger = $application->getContainer()->get(LoggerInterface::class);
         $this->_rootFolder = $application->getContainer()->get(IRootFolder::class);
+        $this->_curl = $application->getContainer()->get(Curl::class);
     }
 
     /**
@@ -125,8 +129,11 @@ class TransferHandler extends QueuedJob
      */
     public function run($args)
     {
+        // handle file uploads
         $notification = $this->_uploadFiles($args);
         $this->notManager->notify($notification);
+
+        // TODO: remove old passed uploads
     }
 
     /**
@@ -140,82 +147,50 @@ class TransferHandler extends QueuedJob
      */
     private function _uploadFiles($args): INotification
     {
-        if (!$this->_publisher instanceof B2SHARE) {
-            $this->logger->error("Not implemented!");
-            throw new \BadMethodCallException("Not implemented!");
-        }
-
-        if (!array_key_exists('transferId', $args)
-            || !array_key_exists('token', $args)
-            || !array_key_exists('community', $args)
-            || !array_key_exists('open_access', $args)
-            || !array_key_exists('title', $args)
-            || !array_key_exists('server_id', $args)
-        ) {
-            $message = 'Can not handle w/o id, token, community, open_access, title';
-            $this->logger->error(
-                $message,
-                ['app' => Application::APP_ID]
-            );
-            throw new \BadMethodCallException($message);
-        }
+        $this->_validateUploadParams($args);
+        
+        /**
+         * @var B2share $publisher 
+         */
+        $publisher = $this->_publisher;
+        $mode = $args['mode'];
+        $token = $args['token'];
+        $transferId = $args['transferId'];
+        $serverId = $args['server_id'];
 
         $fcStatus = null;
         $notification = $this->notManager->createNotification();
         $notification->setApp(Application::APP_ID)
             ->setDateTime(new \DateTime())
-            ->setObject('b2sharebridge', $args['transferId']);
+            ->setObject('b2sharebridge', $transferId);
 
         try {
             // get the file transfer object for current Cron
-            $fcStatus = $this->_mapper->find($args['transferId']);
+            $fcStatus = $this->_mapper->find($transferId);
             $fcStatus->setStatus(2); //status = processing
             $this->_mapper->update($fcStatus);
             $user = $fcStatus->getOwner();
 
             $notification->setUser($user);
-            $server = $this->_smapper->find($args['server_id']);
-            $this->_publisher->setCheckSSL($server->getCheckSsl());
+            $server = $this->_smapper->find($serverId);
+            $publisher->setCheckSSL($server->getCheckSsl());
 
-            $create_result = $this->_publisher->create(
-                $args['token'],
-                $args['community'],
-                $args['open_access'],
-                $args['title'],
-                $server,
-            );
-
-            if (!$create_result) {
-                /*
-                 * External error: during creating deposit
-                 */
-                $fcStatus->setStatus(4);
-
-                if (str_starts_with($this->_publisher->getErrorMessage(), '403')) {
-                    $community = $this->_cmapper->find($args['community'], $server->getId());
-                    $unauthorized_message = 'You are not allowed to upload to "' . $community->getName() . '"';
-                    $this->logger->debug(
-                        $unauthorized_message,
-                        ['app' => Application::APP_ID]
-                    );
-                    $fcStatus->setErrorMessage($unauthorized_message);
-                    $notification->setSubject('unauthorized', ['publisher_url' => $server->getPublishUrl(), 'community' => $community->getName()]);
-                } else {
-                    $this->logger->error(
-                        "No create result, there was an error during deposit creation",
-                        ['app' => Application::APP_ID]
-                    );
-                    $fcStatus->setErrorMessage($this->_publisher->getErrorMessage());
-                    $notification->setSubject('external_error', ['publisher_url' => $server->getPublishUrl()]);
-                }
-                $this->_mapper->update($fcStatus);
-                return $notification;
+            // create draft or get file upload link
+            $draftId = null;
+            if ($mode == 'create') {
+                $draftId = $this->_createNewDraft($args, $server, $fcStatus);
+                $file_upload_link = $publisher->getFileUploadUrlPart();
+            } else if ($mode == 'attach') {
+                $draftId = $args['draftId'];
+                $draft = $publisher->getDraft($server, $draftId, $token);
+                $this->logger->debug(print_r($draft, true));
+                $file_upload_link = $draft->links->files;
             }
 
-            $file_upload_link = $this->_publisher->getFileUploadUrlPart();
+            // upload files
             $rootFolder = $this->_rootFolder->getUserFolder($user);
             $files = $this->_dfmapper->findAllForDeposit($fcStatus->getId());
-            $upload_result = true;
+            $uploadSuccess = true;
 
             $this->logger->warning("#upload files" . count($files), ['app' => Application::APP_ID]);
 
@@ -227,43 +202,11 @@ class TransferHandler extends QueuedJob
                     $this->logger->warning("Ambiguous upload, multiple files with same ID", ['app' => Application::APP_ID]);
                 }
                 foreach ($fileNodes as $fileNode) {
-                    if ($fileNode->getType() != \OCP\Files\FileInfo::TYPE_FILE) {
-                        $this->logger->warning("User somehow managed to upload a folder" . get_class($fileNode), ['app' => Application::APP_ID]);
-                        continue;
-                    }
-
-                    $filename = $fileNode->getName();
-
-                    if (!$fileNode->isReadable()) {
-                        /*
-                         * External error: during uploading file
-                         */
-                        $this->logger->error(
-                            "File not accessible $filename",
-                            ['app' => Application::APP_ID]
-                        );
-                        $fcStatus->setStatus(3);
-                        $notification->setSubject('not_accessible');
-                        $this->_mapper->update($fcStatus);
-                        return $notification;
-                    }
-
-                    $handle = $fileNode->fopen('rb');
-                    $size = $fileNode->getSize();
-                    $upload_url = $file_upload_link . "/" . urlencode($filename);
-                    $upload_url = $upload_url .
-                        "?access_token=" . $args['token'];
-                    $this->logger->debug("File upload URL: $upload_url", ['app' => Application::APP_ID]);
-                    $upload_result = $upload_result &&
-                        $this->_publisher->upload(
-                            $upload_url,
-                            $handle,
-                            $size
-                        );
+                    $uploadSuccess &= $this->_uploadFile($fileNode, $fcStatus, $file_upload_link, $token);
                 }
 
             }
-            if (!$upload_result) {
+            if (!$uploadSuccess) {
                 /*
                  * External error: during uploading file
                  */
@@ -273,14 +216,13 @@ class TransferHandler extends QueuedJob
                 );
                 $fcStatus->setErrorMessage("No upload result, please check your drafts, as it may be created anyway!");
                 $fcStatus->setStatus(3);
-                $this->_mapper->update($fcStatus);
-                $notification->setSubject('no_upload_result', ['url' => $server->getPublishUrl(),]);
-                return $notification;
+                throw new UploadNotificationException('no_upload_result', ['url' => $server->getPublishUrl()]);
             }
 
+            $editDraftUrl = $publisher->getDraftUrl($server, $draftId);
             $fcStatus->setStatus(0);//status = published
-            $fcStatus->setUrl($create_result);
-            $notification->setSubject('upload_successful', ['url' => $create_result]);
+            $fcStatus->setUrl($editDraftUrl);
+            $notification->setSubject('upload_successful', ['url' => $editDraftUrl]);
             $fcStatus->setUpdatedAt(time());
             $this->_mapper->update($fcStatus);
             $this->logger->info(
@@ -302,9 +244,142 @@ class TransferHandler extends QueuedJob
                 ['app' => Application::APP_ID]
             );
             $notification->setSubject('internal_error');
+        } catch (UploadNotificationException $e) {
+            $notification->setSubject($e->getMessage(), $e->getSubjectParameters());
         }
         $this->_mapper->update($fcStatus);
         return $notification;
+    }
+
+    /**
+     * Validate input parameters, throws if parameters are wrong
+     *
+     * @param  mixed $args
+     * @throws \BadMethodCallException
+     * @return void
+     */
+    private function _validateUploadParams($args)
+    {
+        if (!$this->_publisher instanceof B2SHARE) {
+            $this->logger->error("Not implemented!");
+            throw new \BadMethodCallException("Not implemented!");
+        }
+
+        if (!Helper::arrayKeysExist(['transferId', 'token', 'server_id', 'mode', 'ids'], $args)) {
+            $message = 'Can not handle w/o id, token, community, open_access, title';
+            $this->logger->debug(print_r($args, true));
+            $this->logger->error(
+                $message,
+                ['app' => Application::APP_ID]
+            );
+            throw new \BadMethodCallException($message);
+        }
+
+        $mode = $args['mode'];
+        if ((!Helper::arrayKeysExist(['title', 'community', 'open_access'], $args) && $mode == 'create')
+            || (!Helper::arrayKeysExist(['draftId'], $args) && $mode == 'attach')
+        ) {
+            $message = 'Missing parameters for mode';
+            $this->logger->error(
+                $message,
+                ['app' => Application::APP_ID]
+            );
+            throw new \BadMethodCallException($message);
+        }
+    }
+
+    /**
+     * Summary of _createNewDraft
+     *
+     * @param  array $args     array of arguments
+     * @param  mixed $server   server object
+     * @param  mixed $fcStatus Deposit status object
+     * @throws UploadNotificationException
+     * @return string (browser) url where a user can edit a draft
+     */
+    private function _createNewDraft($args, $server, $fcStatus)
+    {
+        /**
+         * @var B2share $publisher 
+         */
+        $publisher = $this->_publisher;
+        $editDraftUrl = $this->_publisher->create(
+            $args['token'],
+            $args['community'],
+            $args['open_access'],
+            $args['title'],
+            $server,
+        );
+
+        if (!$editDraftUrl) {
+            /*
+             * External error: during creating deposit
+             */
+            $fcStatus->setStatus(4);
+
+            if (str_starts_with($publisher->getErrorMessage(), '403')) {
+                $community = $this->_cmapper->find($args['community'], $server->getId());
+                $unauthorized_message = 'You are not allowed to upload to "' . $community->getName() . '"';
+                $this->logger->debug(
+                    $unauthorized_message,
+                    ['app' => Application::APP_ID]
+                );
+                $fcStatus->setErrorMessage($unauthorized_message);
+                throw new UploadNotificationException('unauthorized', ['publisher_url' => $server->getPublishUrl(), 'community' => $community->getName()]);
+                
+            } else {
+                $this->logger->error(
+                    "No create result, there was an error during deposit creation",
+                    ['app' => Application::APP_ID]
+                );
+                $fcStatus->setErrorMessage($publisher->getErrorMessage());
+                throw new UploadNotificationException('external_error', ['publisher_url' => $server->getPublishUrl()]);
+            }
+        }
+        return $editDraftUrl;
+    }
+
+    /**
+     * Uploads a single file to the publisher
+     *
+     * @param  \OCP\Files\Node $fileNode         file Node
+     * @param  mixed           $fcStatus         deposit status object
+     * @param  mixed           $file_upload_link (api) upload url for files
+     * @param  mixed           $token            b2share token of the user
+     * @throws UploadNotificationException
+     * @return bool                              success of the upload
+     */
+    private function _uploadFile($fileNode, $fcStatus, $file_upload_link, $token):bool
+    {
+        if ($fileNode->getType() != \OCP\Files\FileInfo::TYPE_FILE) {
+            $this->logger->warning("User somehow managed to upload a folder" . get_class($fileNode), ['app' => Application::APP_ID]);
+            return true; // ignore this error
+        }
+
+        $filename = $fileNode->getName();
+
+        if (!$fileNode->isReadable()) {
+            /*
+             * External error: during uploading file
+             */
+            $this->logger->error(
+                "File not accessible $filename",
+                ['app' => Application::APP_ID]
+            );
+            $fcStatus->setStatus(3);
+            throw new UploadNotificationException('not_accessible', []);
+        }
+
+        $handle = $fileNode->fopen('rb');
+        $size = $fileNode->getSize();
+        $upload_url = $file_upload_link . "/" . urlencode($filename);
+        $upload_url = "$upload_url?access_token=$token";
+        $this->logger->debug("File upload URL: $upload_url", ['app' => Application::APP_ID]);
+        return $this->_publisher->upload(
+            $upload_url,
+            $handle,
+            $size
+        );
     }
 }
 

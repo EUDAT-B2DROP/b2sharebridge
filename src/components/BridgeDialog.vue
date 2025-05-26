@@ -4,13 +4,8 @@
 			<h2>{{ info.heading }}</h2>
 			<p>{{ info.message }}</p>
 			<span class="button-container">
-				<NcButton
-					v-for="button in info.buttons"
-					:key="button.label"
-					:href="button.href"
-					:type="button.type"
-					:area-label="button.label"
-					@click="button.callback">
+				<NcButton v-for="button in info.buttons" :key="button.label" :href="button.href" :type="button.type"
+					:area-label="button.label" @click="button.callback">
 					{{ button.label }}
 				</NcButton>
 			</span>
@@ -19,50 +14,23 @@
 	<NcModal v-else-if="showDialog" id="bridgedial" name="">
 		<div class="modal__content">
 			<h2>Upload data to B2SHARE</h2>
-			<NcSelect
-				v-bind="modeprops"
-				v-model="modeprops.value"
-				required
-				:class="{ selecterror: modeprops.error }"
-				@input="onChangeMode" />
-			<NcTextField
-				v-if="!modeprops.value || modeprops.value.id === 'create'"
-				v-model="title.text"
-				label="Title"
-				placeholder="Please enter a title"
-				:disabled="!modeprops.value"
-				:error="title.error"
-				:success="title.success"
-				minlength="3"
-				maxlength="128"
-				:helper-text="title.helpertext"
+			<NcSelect v-bind="modeprops" v-model="modeprops.value" required :class="{ selecterror: modeprops.error }"
+				@update:model-value="onChangeMode" />
+			<NcTextField v-if="!modeprops.value || modeprops.value.id === 'create'" v-model="title.text" label="Title"
+				placeholder="Please enter a title" :disabled="!modeprops.value" :error="title.error"
+				:success="title.success" minlength="3" maxlength="128" :helper-text="title.helpertext"
 				@update:model-value="validate">
 				<PencilIcon :size="20" />
 			</NcTextField>
-			<NcSelect
-				v-bind="serverprops"
-				v-model="serverprops.value"
-				required
-				:class="{ selecterror: serverprops.error }"
-				@input="onChangeServer" />
-			<NcSelect
-				v-if="modeprops.value && modeprops.value.id === 'attach'"
-				v-bind="depositselectprops"
-				v-model="depositselectprops.value"
-				required
-				:class="{ selecterror: depositselectprops.error }"
-				@input="validate" />
-			<NcSelect
-				v-if="!modeprops.value || modeprops.value.id === 'create'"
-				v-bind="communityprops"
-				v-model="communityprops.value"
-				:disabled="!modeprops.value"
-				required
-				:class="{ selecterror: communityprops.error }"
-				@input="validate" />
-			<NcCheckboxRadioSwitch
-				v-if="!modeprops.value || modeprops.value.id === 'create'"
-				v-model="openAccess"
+			<NcSelect v-bind="serverprops" v-model="serverprops.value" required
+				:class="{ selecterror: serverprops.error }" @update:model-value="onChangeServer" />
+			<NcSelect v-if="modeprops.value && modeprops.value.id === 'attach'" v-bind="depositselectprops"
+				v-model="depositselectprops.value" required :class="{ selecterror: depositselectprops.error }"
+				@update:model-value="validate" />
+			<NcSelect v-if="!modeprops.value || modeprops.value.id === 'create'" v-bind="communityprops"
+				v-model="communityprops.value" :disabled="!modeprops.value" required
+				:class="{ selecterror: communityprops.error }" @update:model-value="validate" />
+			<NcCheckboxRadioSwitch v-if="!modeprops.value || modeprops.value.id === 'create'" v-model="openAccess"
 				:disabled="!modeprops.value">
 				Open Access
 			</NcCheckboxRadioSwitch>
@@ -70,12 +38,9 @@
 				<NcButton aria-label="close" @click="closeModal">
 					Cancel
 				</NcButton>
-				<NcButton
-					:disabled="publish.disabled || publish.publishing"
-					type="primary"
-					aria-label="publish"
+				<NcButton :disabled="publish.disabled || publish.publishing" type="primary" aria-label="publish"
 					@click="createDeposit">
-					Publish
+					{{ getPublishLabel() }}
 				</NcButton>
 			</span>
 			<NcProgressBar v-if="publish.publishTime" :value="getProgressBar()" size="medium" />
@@ -88,6 +53,7 @@ import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
 import { NcButton, NcCheckboxRadioSwitch, NcModal, NcProgressBar, NcSelect, NcTextField } from '@nextcloud/vue'
 import PencilIcon from 'vue-material-design-icons/Pencil.vue'
+
 export default {
 	name: 'BridgeDialog',
 	components: {
@@ -136,11 +102,11 @@ export default {
 				options: [
 					{
 						id: 'create',
-						label: 'Create a new deposit',
+						label: 'Create a new draft',
 					},
 					{
 						id: 'attach',
-						label: 'Attach to existing deposit',
+						label: 'Attach to existing draft',
 					},
 				],
 
@@ -149,7 +115,7 @@ export default {
 			},
 
 			depositselectprops: {
-				inputLabel: 'Select Deposit',
+				inputLabel: 'Select Draft',
 				options: [],
 				deposits: null,
 				value: null,
@@ -245,7 +211,7 @@ export default {
 		async loadServers() {
 			const urlPath
 				= '/apps/b2sharebridge/servers?requesttoken='
-					+ encodeURIComponent(OC.requestToken)
+				+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(urlPath))
@@ -264,7 +230,7 @@ export default {
 		async loadCommunities() {
 			const urlPath
 				= '/apps/b2sharebridge/gettabviewcontent?requesttoken='
-					+ encodeURIComponent(OC.requestToken)
+				+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(urlPath))
@@ -283,7 +249,7 @@ export default {
 		async loadTokens() {
 			const urlPath
 				= '/apps/b2sharebridge/apitoken?requesttoken='
-					+ encodeURIComponent(OC.requestToken)
+				+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(urlPath))
@@ -517,21 +483,38 @@ export default {
 			this.publish.publishTime = Date.now()
 			this.publish.publishing = true
 
+			let url = ''
+			let props = {}
+			if (this.modeprops.value.id === 'attach') {
+				const draft = this.getCurrentDraft()
+				url = '/apps/b2sharebridge/attach'
+				props = {
+					ids: this.selectedFiles,
+					draftId: this.depositselectprops.value.id,
+					server_id: this.serverprops.value.id,
+				}
+			}
+			else if (this.modeprops.value.id === 'create') {
+				url = '/apps/b2sharebridge/publish'
+				props = {
+					ids: this.selectedFiles,
+					community: this.communityprops.value.id,
+					open_access: this.openAccess,
+					title: this.title.text,
+					server_id: this.serverprops.value.id,
+				}
+			}
+			else {
+				return
+			}
 			axios
 				.post(
-					generateUrl('/apps/b2sharebridge/publish'),
-					{
-						ids: this.selectedFiles,
-						community: this.communityprops.value.id,
-						open_access: this.openAccess,
-						title: this.title.text,
-						server_id: this.serverprops.value.id,
-					},
+					generateUrl(url),
+					props,
 				)
-				.then(() => {
+				.then((response) => {
 					this.info.heading = 'Transferring to B2SHARE'
-					this.info.message = 'Your files are transfarred in the background. This may take a few minutes. You\'ll '
-						+ 'get notified after the transfer finished.'
+					this.info.message = response.response.message
 					this.info.buttons = [
 						{
 							label: 'Ok',
@@ -578,6 +561,24 @@ export default {
 			const progress = Math.max(Math.min(Math.round(seconds * 20), 99), 10)
 			return progress
 		},
+
+		getPublishLabel() {
+			if (!this.modeprops.value || this.modeprops.value.id === 'create') { return 'Publish' } else if (this.modeprops.value.id === 'attach') { return 'Attach' } else {
+				console.error('Unknown mode, please tell an administrator')
+				return 'Unknown'
+			}
+		},
+
+		redirect(url) {
+			this.$router.push(generateUrl(url))
+		},
+
+		getCurrentDraft() {
+			if (this.serverprops.value && this.depositselectprops.value) {
+				return this.depositselectprops.deposits[this.serverprops.value.id].hits.find(deposit => deposit.id == this.depositselectprops.value.id)
+			}
+			return null
+		}
 	},
 }
 </script>

@@ -7,6 +7,7 @@
 			<div class="rp__selectors__select">
 				<p>B2SHARE instance:</p>
 				<NcSelect
+					v-bind="selectedServer"
 					v-model="selectedServer.value"
 					:label-outside="true"
 					:options="selectedServer.options"
@@ -15,6 +16,7 @@
 			<div class="rp__selectors__select">
 				<p>Page Size:</p>
 				<NcSelect
+					v-bind="selectPageSize"
 					v-model="selectPageSize.value"
 					:label-outside="true"
 					:options="selectPageSize.options"
@@ -130,19 +132,6 @@ import CloudDownload from 'vue-material-design-icons/CloudDownload.vue'
 import EarthArrowUp from 'vue-material-design-icons/EarthArrowUp.vue'
 import TrashCan from 'vue-material-design-icons/TrashCan.vue'
 import PageButtons from './PageButtons.vue'
-const selectPageSize = {
-	options: [
-		'10',
-		'25',
-		'50',
-	],
-	value: '10',
-}
-
-const selectedServer = {
-	options: [],
-	value: null,
-}
 
 export default {
 	name: 'RecordsPages',
@@ -184,8 +173,21 @@ export default {
 		return {
 			sortBy: 'createdAt',
 			sortDir: 'desc',
-			selectPageSize,
-			selectedServer,
+			selectPageSize: {
+				options: [
+					'10',
+					'25',
+					'50',
+				],
+
+				value: '10',
+			},
+
+			selectedServer: {
+				options: [],
+				value: null,
+			},
+
 			modalDelete: {
 				show: false,
 				record: null,
@@ -205,14 +207,14 @@ export default {
 	},
 
 	async mounted() {
-		selectedServer.options = []
+		this.selectedServer.options = []
 		Object.keys(this.records).forEach((key) => {
-			selectedServer.options.push({
+			this.selectedServer.options.push({
 				id: key,
 				label: this.records[key].server_name,
 			})
 		})
-		selectedServer.value = selectedServer.options.length ? selectedServer.options[0] : { id: null, label: 'None' }
+		this.selectedServer.value = this.selectedServer.options.length ? this.selectedServer.options[0] : { id: null, label: 'None' }
 	},
 
 	methods: {
@@ -227,15 +229,15 @@ export default {
 		},
 
 		getRecords() {
-			if (selectedServer.value && selectedServer.value.id) {
-				return this.records[selectedServer.value.id].hits
+			if (this.selectedServer.value && this.selectedServer.value.id) {
+				return this.records[this.selectedServer.value.id].hits
 			}
 			return []
 		},
 
 		getNumRecords() {
-			if (selectedServer.value && selectedServer.value.id) {
-				return this.records[selectedServer.value.id].total
+			if (this.selectedServer.value && this.selectedServer.value.id) {
+				return this.records[this.selectedServer.value.id].total
 			}
 			return 0
 		},
@@ -249,7 +251,7 @@ export default {
 		},
 
 		updateServer(serverValue) {
-			selectedServer.value = serverValue
+			this.selectedServer.value = serverValue
 		},
 
 		updatePageSize(size) {
@@ -271,7 +273,7 @@ export default {
 
 		getLink(record) {
 			const id = record.id
-			const server = this.records[selectedServer.value.id]
+			const server = this.records[this.selectedServer.value.id]
 			if (server.server_version === 2) {
 				return `${server.server_url}/records/${id}/edit`
 			} else {
@@ -298,7 +300,7 @@ export default {
 		deleteRecord(record) {
 			const urlArr = [
 				'/apps/b2sharebridge/drafts/',
-				selectedServer.value.id,
+				this.selectedServer.value.id,
 				'/',
 				record.id,
 			]
@@ -310,14 +312,14 @@ export default {
 				})
 				.catch((error) => {
 					console.error(error)
-					console.error(`Could not delete draft with ID ${record.id} from server ${selectedServer.value.label}`)
+					console.error(`Could not delete draft with ID ${record.id} from server ${this.selectedServer.value.label}`)
 				})
 		},
 
 		downloadRecord(record) {
 			const urlArr = [
 				'/apps/b2sharebridge/download/',
-				selectedServer.value.id,
+				this.selectedServer.value.id,
 			]
 			axios
 				.post(generateUrl(urlArr.join('')), {
@@ -332,7 +334,7 @@ export default {
 				})
 				.catch((error) => {
 					console.error(error)
-					console.error(`Could not download record with ID ${record.id} from server ${selectedServer.value.label}`)
+					console.error(`Could not download record with ID ${record.id} from server ${this.selectedServer.value.label}`)
 					const response = error.response.data
 					if (Number(error.status) === 429) {
 						this.modalDownload.message = 'You are rate limited due to your last download(s), please come back later'
@@ -357,15 +359,15 @@ export default {
 		},
 
 		getServerUrl() {
-			if (selectedServer.value) {
-				return this.records[selectedServer.value.id].server_url
+			if (this.selectedServer.value) {
+				return this.records[this.selectedServer.value.id].server_url
 			}
 			return ''
 		},
 
 		getServerLabel() {
-			if (selectedServer.value) {
-				return selectedServer.value.label
+			if (this.selectedServer.value) {
+				return this.selectedServer.value.label
 			}
 			return 'None'
 		},

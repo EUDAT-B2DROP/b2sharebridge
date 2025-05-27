@@ -117,6 +117,7 @@
 					{{ getTableName() }}
 				</h2>
 				<RecordsPages
+					v-if="Publications"
 					id="records-pages"
 					:records="Publications"
 					:draft="currentState === BridgeState.RECORDS_DRAFT"
@@ -189,7 +190,7 @@ export default {
 			lastUploadUpdate: null,
 			BridgeState, // https://stackoverflow.com/questions/57538539/how-to-use-enums-or-const-in-vuejs
 			UploadFields,
-			Publications: [],
+			Publications: null,
 			loadedPublications: false,
 			pageSize: 10,
 			page: 0,

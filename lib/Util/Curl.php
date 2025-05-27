@@ -28,7 +28,10 @@ class Curl
         $defaults = [
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,
-            CURLOPT_HEADER => 1,
+            CURLOPT_HEADER => 0,
+            CURLOPT_HTTPHEADER => [
+                'Accept:application/json',
+            ],
         ];
         if (!$ssl) {
             $defaults[CURLOPT_SSL_VERIFYHOST] = 0;
@@ -84,7 +87,9 @@ class Curl
             CURLOPT_PUT => true,
             CURLOPT_CUSTOMREQUEST => 'PUT',
             CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_TIMEOUT => 4,
+            CURLOPT_TIMEOUT => 0, // do not timeout, instead break on low speed
+            CURLOPT_LOW_SPEED_TIME => 60, // low speed settings
+            CURLOPT_LOW_SPEED_LIMIT => 30,
             CURLOPT_HEADER => true,
             CURLINFO_HEADER_OUT => true,
             CURLOPT_HTTPHEADER => [

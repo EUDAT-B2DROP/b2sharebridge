@@ -24,7 +24,7 @@
 						:maxuploads="server.maxUploads"
 						:maxuploadfilesize="server.maxUploadFilesize"
 						:checkssl="server.checkSsl === 1"
-						:version="server.version"
+						:version="{ id: server.version, label: `API-Version ${server.version}` }"
 						@server-change="loadServers" />
 				</li>
 			</ul>
@@ -54,7 +54,10 @@ export default {
 				maxUploads: 5,
 				maxUploadFilesize: 512,
 				checkSsl: false,
-				version: 3,
+				version: {
+					id: 2,
+					label: 'API-Version 2',
+				},
 			},
 
 			servers: [],

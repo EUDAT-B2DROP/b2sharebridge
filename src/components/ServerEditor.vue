@@ -59,6 +59,7 @@
 					v-model="mutable_version"
 					class="bridgeserver__input__div__select"
 					:label-outside="true"
+					:disabled="true"
 					@update:model-value="updateVersion" />
 			</div>
 		</div>
@@ -109,7 +110,16 @@ export default {
 		maxuploads: { default: 5, type: Number },
 		maxuploadfilesize: { default: 512, type: Number },
 		checkssl: { default: false, type: Boolean },
-		version: { default: 3, type: Number },
+		version: {
+			default: () => {
+				return {
+					id: 2,
+					label: 'API-Version 2',
+				}
+			},
+
+			type: Object,
+		},
 	},
 
 	emits: ['server-change'],
@@ -123,7 +133,16 @@ export default {
 			mutable_checkSsl: this.checkssl,
 			mutable_version: this.version,
 			version_options: {
-				options: [2, 3],
+				options: [
+					{
+						id: 2,
+						label: 'API-Version 2',
+					},
+					{
+						id: 3,
+						label: 'API-Version 3',
+					},
+				],
 			},
 		}
 	},
@@ -141,7 +160,10 @@ export default {
 			this.mutable_maxUploads = 5
 			this.mutable_maxUploadFilesize = 512
 			this.mutable_checkSsl = false
-			this.mutable_version = 3
+			this.mutable_version = {
+				id: 2,
+				label: 'API-Version 2',
+			}
 		},
 
 		hasChanged() {
@@ -150,7 +172,7 @@ export default {
 				|| this.mutable_maxUploads !== this.maxuploads
 				|| this.mutable_maxUploadFilesize !== this.maxuploadfilesize
 				|| this.mutable_checkSsl !== this.checkssl
-				|| this.mutable_version !== this.version
+				|| this.mutable_version.id !== this.version.id
 		},
 
 		saveServer() {
@@ -164,7 +186,7 @@ export default {
 			data.maxUploads = this.mutable_maxUploads
 			data.maxUploadFilesize = this.mutable_maxUploadFilesize
 			data.checkSsl = this.mutable_checkSsl
-			data.version = this.mutable_version
+			data.version = this.mutable_version.id
 
 			console.debug(JSON.stringify(data))
 
@@ -215,9 +237,11 @@ export default {
 
 		&__div {
 			margin-top: 6px;
+
 			p {
 				margin-right: auto;
 			}
+
 			&__select {
 				max-width: 600px;
 			}

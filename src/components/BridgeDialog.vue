@@ -546,8 +546,9 @@ export default {
 					props,
 				)
 				.then((response) => {
+					console.debug(response)
 					this.info.heading = 'Transferring to B2SHARE'
-					this.info.message = response.response.message
+					this.info.message = response.data.message
 					this.info.buttons = [
 						{
 							label: 'Ok',

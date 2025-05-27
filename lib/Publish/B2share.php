@@ -93,7 +93,7 @@ class B2share implements IPublish
      * @param string $title       actual title of the deposit
      * @param Server $server      b2share server
      *
-     * @return string  file URL in b2access
+     * @return string             draftId
      */
     public function create(
         string $token,
@@ -126,17 +126,16 @@ class B2share implements IPublish
         if (!$response) {
             return "";
         } else {
-            $header_size = $this->_curl->getInfo();
-            $body = substr($response, $header_size);
-            $body_encoded = mb_convert_encoding($body, 'UTF-8', mb_list_encodings());
+            $body_encoded = mb_convert_encoding($response, 'UTF-8', mb_list_encodings());
             $results = json_decode($body_encoded, false);
+
             if (property_exists($results, 'links')
                 && property_exists($results->links, 'self')
                 && property_exists($results->links, 'files')
             ) {
                 $this->file_upload_url
                     = $results->links->files;
-                return $this->getDraftUrl($server, $results->id);
+                return "{$results->id}";
             } else {
                 $this->error_message = "Something went wrong in uploading.";
                 if (property_exists($results, 'status')) {

@@ -294,7 +294,7 @@ class TransferHandler extends QueuedJob
      * @param  mixed $server   server object
      * @param  mixed $fcStatus Deposit status object
      * @throws UploadNotificationException
-     * @return string (browser) url where a user can edit a draft
+     * @return string          draftId
      */
     private function _createNewDraft($args, $server, $fcStatus)
     {
@@ -302,7 +302,7 @@ class TransferHandler extends QueuedJob
          * @var B2share $publisher 
          */
         $publisher = $this->_publisher;
-        $editDraftUrl = $this->_publisher->create(
+        $draftId = $this->_publisher->create(
             $args['token'],
             $args['community'],
             $args['open_access'],
@@ -310,7 +310,7 @@ class TransferHandler extends QueuedJob
             $server,
         );
 
-        if (!$editDraftUrl) {
+        if (!$draftId) {
             /*
              * External error: during creating deposit
              */
@@ -335,7 +335,7 @@ class TransferHandler extends QueuedJob
                 throw new UploadNotificationException('external_error', ['publisher_url' => $server->getPublishUrl()]);
             }
         }
-        return $editDraftUrl;
+        return $draftId;
     }
 
     /**

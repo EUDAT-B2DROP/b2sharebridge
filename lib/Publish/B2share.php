@@ -41,7 +41,7 @@ class B2share implements IPublish
      *
      * @param IConfig         $_config ignored
      * @param LoggerInterface $logger  logger
-     * @param Curl $curl               curl
+     * @param Curl            $curl    curl
      */
     public function __construct(IConfig $_config, LoggerInterface $logger, Curl $curl)
     {

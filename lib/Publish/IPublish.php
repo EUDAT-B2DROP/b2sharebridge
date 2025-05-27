@@ -35,7 +35,7 @@ interface IPublish
      *
      * @param IConfig         $config access to nextcloud configuration
      * @param LoggerInterface $logger a logger
-     * @param Curl $curl              curl
+     * @param Curl            $curl   curl
      *
      * @return null
      */

@@ -183,8 +183,7 @@ class TransferHandler extends QueuedJob
             } else if ($mode == 'attach') {
                 $draftId = $args['draftId'];
                 $draft = $publisher->getDraft($server, $draftId, $token);
-                $this->logger->debug(print_r($draft, true));
-                $file_upload_link = $draft->links->files;
+                $file_upload_link = $draft["links"]["files"];
             }
 
             // upload files
@@ -372,8 +371,9 @@ class TransferHandler extends QueuedJob
 
         $handle = $fileNode->fopen('rb');
         $size = $fileNode->getSize();
-        $upload_url = $file_upload_link . "/" . urlencode($filename);
-        $upload_url = "$upload_url?access_token=$token";
+
+        $filenameEncoded = rawurlencode($filename);
+        $upload_url = "$file_upload_link/$filenameEncoded?access_token=$token";
         $this->logger->debug("File upload URL: $upload_url", ['app' => Application::APP_ID]);
         return $this->_publisher->upload(
             $upload_url,

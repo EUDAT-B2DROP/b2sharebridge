@@ -373,7 +373,6 @@ class ViewController extends Controller
         $server = $this->smapper->find($serverId);
         $serverUrl = $server->getPublishUrl();
         $urlPath = "$serverUrl/api/records/$recordId/draft?access_token=$token";
-        $this->_logger->debug($urlPath, ["b2sharebridge"]);
         $output = $this->_curl->request($urlPath, "DELETE");
         return new JSONResponse(json_decode($output, true));
     }
@@ -609,8 +608,6 @@ class ViewController extends Controller
         }
         $httpParams = http_build_query($params);
         $urlPath = "$serverUrl/api/records/?$httpParams";
-
-        $this->_logger->debug("B2SHARE records URL: $urlPath", ['app' => Application::APP_ID]);
 
         $output = $this->_curl->request($urlPath);
 

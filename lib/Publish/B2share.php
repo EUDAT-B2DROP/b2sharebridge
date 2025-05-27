@@ -41,6 +41,7 @@ class B2share implements IPublish
      *
      * @param IConfig         $_config ignored
      * @param LoggerInterface $logger  logger
+     * @param Curl $curl               curl
      */
     public function __construct(IConfig $_config, LoggerInterface $logger, Curl $curl)
     {
@@ -150,8 +151,10 @@ class B2share implements IPublish
 
     public function getDraft(Server $server, string $draftId, string $token)
     {
-        $url = "{$this->getDraftUrl($server, $draftId)}?access_token={$token}";
+        $url = "{$server->getPublishUrl()}/api/records/{$draftId}/draft?access_token={$token}";
         $res = $this->_curl->request($url);
+        $this->logger->debug($url);
+        $this->logger->debug($res);
         return json_decode($res, true);
     }
 

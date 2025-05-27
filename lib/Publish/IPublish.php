@@ -17,6 +17,7 @@ namespace OCA\B2shareBridge\Publish;
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
 use OCA\B2shareBridge\Model\Server;
+use OCA\B2shareBridge\Util\Curl;
 
 /**
  * Create a interface that must be implemented by publishing backends
@@ -34,10 +35,11 @@ interface IPublish
      *
      * @param IConfig         $config access to nextcloud configuration
      * @param LoggerInterface $logger a logger
+     * @param Curl $curl              curl
      *
      * @return null
      */
-    public function __construct(IConfig $config, LoggerInterface $logger);
+    public function __construct(IConfig $config, LoggerInterface $logger, Curl $curl);
 
 
     /**

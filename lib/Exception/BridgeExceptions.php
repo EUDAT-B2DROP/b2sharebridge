@@ -12,10 +12,11 @@
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 namespace OCA\B2shareBridge\Exception;
+use Exception;
 /**
  * General Controller exception that contains a Http status code
  */
-class ControllerValidationException extends \Exception
+class ControllerValidationException extends Exception
 {
     private int $statusCodeHttp;
     public function __construct(string $message, int $statusCode, ?\Throwable $previous = null)
@@ -35,7 +36,7 @@ class ControllerValidationException extends \Exception
     }
 }
 
-class UploadNotificationException extends \Exception
+class UploadNotificationException extends Exception
 {
     private array $parameters;
     public function __construct(string $message, array $parameters, ?\Throwable $previous = null)

@@ -14,7 +14,6 @@
 
 namespace OCA\B2shareBridge\Controller;
 
-use Helper\ValidationException;
 use OCP\Files\IRootFolder;
 use OCP\Files\File;
 use OCA\B2shareBridge\AppInfo\Application;
@@ -195,7 +194,6 @@ class PublishController extends Controller
             $serverId = $param['server_id'];
             $ids = $param['ids'];
             $title = $param['title'] ?? null;
-            $this->logger->debug("ids: " . print_r($ids, true), ['app' => Application::APP_ID]);
 
             $token = $this->config->getUserValue($this->userId, $this->appName, "token_$serverId");
 
@@ -318,10 +316,6 @@ class PublishController extends Controller
                     $depositFile->setFilename($file->getName());
                     $depositFile->setFileid($id);
                     $depositFile->setDepositStatusId($depositStatus->getId());
-                    $this->logger->debug(
-                        "Inserting " . $depositFile->getFilename(),
-                        ['app' => Application::APP_ID]
-                    );
                     $this->dfmapper->insert($depositFile);
                 } else {
                     $this->logger->debug("Invalid file type", ['app' => Application::APP_ID]);

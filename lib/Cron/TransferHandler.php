@@ -23,9 +23,7 @@ use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Publish\B2ShareV2;
 use OCA\B2shareBridge\Publish\B2ShareV3;
 use OCA\B2shareBridge\Publish\B2ShareAPI;
-use OCA\B2shareBridge\Util\Curl;
 use OCA\B2shareBridge\Util\Helper;
-
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Utility\ITimeFactory;
@@ -34,6 +32,7 @@ use OCP\Notification\IManager;
 use OCP\Files\IRootFolder;
 use OCP\DB\Exception;
 use OCP\Notification\INotification;
+use PhpParser\Node\NullableType;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -55,7 +54,6 @@ class TransferHandler extends QueuedJob
     protected IManager $notManager;
     protected LoggerInterface $logger;
     private IRootFolder $_rootFolder;
-    private Curl $_curl;
 
     /**
      * Create the database mapper
@@ -68,7 +66,6 @@ class TransferHandler extends QueuedJob
      * @param IManager|null            $notManager Manager
      * @param LoggerInterface|null     $logger     LoggerInterface
      * @param IRootFolder|null         $rootFolder RootFolder
-     * @param Curl|null                $curl       Curl
      */
     public function __construct(
         ITimeFactory $time = null,
@@ -79,11 +76,10 @@ class TransferHandler extends QueuedJob
         IManager $notManager = null,
         LoggerInterface $logger = null,
         IRootFolder $rootFolder = null,
-        Curl $curl = null,
     ) {
         parent::__construct($time);
         if ($dfmapper === null or $mapper === null or $smapper === null or $cmapper === null
-            or $logger === null or $notManager === null or $rootFolder === null or $curl === null
+            or $logger === null or $notManager === null or $rootFolder === null
         ) {
             $this->fixTransferForCron();
         } else {
@@ -94,7 +90,6 @@ class TransferHandler extends QueuedJob
             $this->logger = $logger;
             $this->notManager = $notManager;
             $this->_rootFolder = $rootFolder;
-            $this->_curl = $curl;
         }
     }
 
@@ -114,7 +109,6 @@ class TransferHandler extends QueuedJob
         $this->notManager = $application->getContainer()->get(IManager::class);
         $this->logger = $application->getContainer()->get(LoggerInterface::class);
         $this->_rootFolder = $application->getContainer()->get(IRootFolder::class);
-        $this->_curl = $application->getContainer()->get(Curl::class);
     }
 
     /**

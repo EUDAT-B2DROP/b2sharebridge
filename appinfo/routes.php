@@ -22,7 +22,7 @@
  */
 
 
-namespace OCA\B2sharebridge\AppInfo;
+namespace OCA\B2shareBridge\AppInfo;
 
 return [
     'routes' => [

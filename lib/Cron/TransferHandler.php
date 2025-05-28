@@ -69,6 +69,7 @@ class TransferHandler extends QueuedJob
      * @param IManager|null            $notManager Manager
      * @param LoggerInterface|null     $logger     LoggerInterface
      * @param IRootFolder|null         $rootFolder RootFolder
+     * @param Curl|null                $curl       Curl
      */
     public function __construct(
         ITimeFactory $time = null,
@@ -143,14 +144,16 @@ class TransferHandler extends QueuedJob
      * 
      * @throws \BadMethodCallException
      * 
-     * @return INotification
+     * @return INotification Returns a Notification
      */
     private function _uploadFiles($args): INotification
     {
         $this->_validateUploadParams($args);
         
         /**
-         * @var B2share $publisher 
+         *  B2SHARE API
+         *
+         * @var B2share $publisher
          */
         $publisher = $this->_publisher;
         $mode = $args['mode'];
@@ -253,8 +256,10 @@ class TransferHandler extends QueuedJob
     /**
      * Validate input parameters, throws if parameters are wrong
      *
-     * @param  mixed $args
+     * @param array $args Array of parameters
+     * 
      * @throws \BadMethodCallException
+     * 
      * @return void
      */
     private function _validateUploadParams($args)
@@ -290,15 +295,19 @@ class TransferHandler extends QueuedJob
     /**
      * Summary of _createNewDraft
      *
-     * @param  array $args     array of arguments
-     * @param  mixed $server   server object
-     * @param  mixed $fcStatus Deposit status object
+     * @param array $args     array of arguments
+     * @param mixed $server   server object
+     * @param mixed $fcStatus Deposit status object
+     * 
      * @throws UploadNotificationException
+     * 
      * @return string          draftId
      */
     private function _createNewDraft($args, $server, $fcStatus)
     {
         /**
+         * B2SHARE API
+         * 
          * @var B2share $publisher 
          */
         $publisher = $this->_publisher;
@@ -341,11 +350,13 @@ class TransferHandler extends QueuedJob
     /**
      * Uploads a single file to the publisher
      *
-     * @param  \OCP\Files\Node $fileNode         file Node
-     * @param  mixed           $fcStatus         deposit status object
-     * @param  mixed           $file_upload_link (api) upload url for files
-     * @param  mixed           $token            b2share token of the user
+     * @param \OCP\Files\Node $fileNode         file Node
+     * @param mixed           $fcStatus         deposit status object
+     * @param mixed           $file_upload_link (api) upload url for files
+     * @param mixed           $token            b2share token of the 
+     * 
      * @throws UploadNotificationException
+     * 
      * @return bool                              success of the upload
      */
     private function _uploadFile($fileNode, $fcStatus, $file_upload_link, $token):bool

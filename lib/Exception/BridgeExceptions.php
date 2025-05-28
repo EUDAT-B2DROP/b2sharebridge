@@ -1,28 +1,46 @@
 <?php
 /**
- * OwnCloud - B2sharebridge App
+ * Nextcloud - B2sharebridge App
  *
- * PHP Version 5-7
+ * PHP Version 8
  *
- * @category  Owncloud
+ * @category  Nextcloud
  * @package   B2shareBridge
  * @author    EUDAT <b2drop-devel@postit.csc.fi>
- * @copyright 2015 EUDAT
+ * @copyright 2025 EUDAT
  * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
+
 namespace OCA\B2shareBridge\Exception;
+
 use Exception;
+
 /**
  * General Controller exception that contains a Http status code
+ * 
+ * @category  Nextcloud
+ * @package   B2shareBridge
+ * @author    EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright 2025 EUDAT
+ * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 class ControllerValidationException extends Exception
 {
-    private int $statusCodeHttp;
+    private int $_statusCodeHttp;
+
+    /**
+     * Summary of __construct
+     * 
+     * @param string $message    Text Message
+     * @param int    $statusCode Http Status code
+     * @param mixed  $previous   Previous exception
+     */
     public function __construct(string $message, int $statusCode, ?\Throwable $previous = null)
     {
         parent::__construct($message, 0, $previous);
-        $this->statusCodeHttp = $statusCode;
+        $this->_statusCodeHttp = $statusCode;
     }
 
     /**
@@ -32,21 +50,44 @@ class ControllerValidationException extends Exception
      */
     public function getStatusCode(): int
     {
-        return $this->statusCodeHttp;
+        return $this->_statusCodeHttp;
     }
 }
 
+/**
+ * Exception to pass a notification through
+ * 
+ * @category  Nextcloud
+ * @package   B2shareBridge
+ * @author    EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright 2025 EUDAT
+ * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
+ */
 class UploadNotificationException extends Exception
 {
-    private array $parameters;
+    private array $_parameters;
+
+    /**
+     * Summary of __construct
+     * 
+     * @param string $message    Message
+     * @param array  $parameters Notification parameters
+     * @param mixed  $previous   Previous exception
+     */
     public function __construct(string $message, array $parameters, ?\Throwable $previous = null)
     {
         parent::__construct($message, 0, $previous);
-        $this->parameters = $parameters;
+        $this->_parameters = $parameters;
     }
 
+    /**
+     * Getter for notification parameters
+     * 
+     * @return array
+     */
     public function getSubjectParameters()
     {
-        return $this->parameters;
+        return $this->_parameters;
     }
 }

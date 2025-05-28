@@ -58,7 +58,7 @@ class B2share implements IPublish
      */
     public function setCheckSSL(bool $checkSsl)
     {
-
+        $this->_curl->setSSL($checkSsl);
     }
 
     /**
@@ -148,7 +148,16 @@ class B2share implements IPublish
         }
     }
 
-    public function getDraft(Server $server, string $draftId, string $token)
+    /**
+     * Fetch a draft fully
+     * 
+     * @param Server $server  Server to get a draft from
+     * @param string $draftId Id of the draft
+     * @param string $token   B2share token
+     * 
+     * @return mixed JSON of the draft
+     */
+    public function getDraft(Server $server, string $draftId, string $token): mixed
     {
         $url = "{$server->getPublishUrl()}/api/records/{$draftId}/draft?access_token={$token}";
         $res = $this->_curl->request($url);
@@ -157,6 +166,14 @@ class B2share implements IPublish
         return json_decode($res, true);
     }
 
+    /**
+     * Returns the EDIT url of a draft
+     * 
+     * @param Server $server  Server
+     * @param string $draftId Id of the draft
+     * 
+     * @return string Edit url
+     */
     public function getDraftUrl(Server $server, string $draftId)
     {
         if ($server->getVersion() == 2) {

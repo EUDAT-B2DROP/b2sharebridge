@@ -133,7 +133,7 @@ class PublishController extends Controller
         $param = $this->request->getParams();
 
         // check params
-        if (!Helper::arrayKeysExist(['community', 'open_access'], $param)) {
+        if (!Helper::arrayKeysExist(['community', 'open_access', 'title'], $param)) {
             return new JSONResponse(
                 [
                     'message' => 'Missing parameters for publishing',
@@ -177,7 +177,9 @@ class PublishController extends Controller
     /**
      * Summary of _scheduleFileUploads
      *
-     * @return JSONResponse status
+     * @param array $param Array of parameters, which needs to contain 'ids', 'server_id', 'mode' and more depending on the mode.
+     * 
+     * @return JSONResponse Status
      */
     private function _scheduleFileUploads($param): JSONResponse
     {
@@ -185,9 +187,6 @@ class PublishController extends Controller
             // check params
             if (!Helper::arrayKeysExist(['ids', 'server_id', 'mode'], $param)) {
                 throw new ControllerValidationException('Missing parameters for file uploads', Http::STATUS_BAD_REQUEST);
-            }
-            if (!Helper::arrayKeysExist(['title'], $param) && $param['mode'] == 'create') {
-                throw new ControllerValidationException('Missing parameters for file uploads (mode)', Http::STATUS_BAD_REQUEST);
             }
 
             // get params
@@ -232,6 +231,15 @@ class PublishController extends Controller
         }
     }
 
+    /**
+     * Checks if a user has too many pending uploads on a server
+     * 
+     * @param mixed $server Server to check
+     * 
+     * @throws \OCA\B2shareBridge\Exception\ControllerValidationException
+     * 
+     * @return void
+     */
     private function _checkExistingUploads($server)
     {
         // check existing uploads
@@ -248,6 +256,16 @@ class PublishController extends Controller
         }
     }
 
+    /**
+     * Checks if a deposit contains files, that are too big, or the deposit itself is too big
+     * 
+     * @param mixed $ids    File ids to check
+     * @param mixed $server Server to check allowed file sizes to
+     * 
+     * @throws \OCA\B2shareBridge\Exception\ControllerValidationException
+     * 
+     * @return int Total deposit size in bytes
+     */
     private function _checkDepositSize($ids, $server): int
     {
         $rootFolder = $this->_rootFolder->getUserFolder($this->userId);
@@ -282,10 +300,11 @@ class PublishController extends Controller
     /**
      * Prepares database entries for a future file upload
      *
-     * @param  int         $serverId ID of the server
-     * @param  array       $ids      array of file ids
-     * @param  string|null $title    deposit title
-     * @return int                  DepositStatus ID
+     * @param int         $serverId ID of the server
+     * @param array       $ids      array of file ids
+     * @param string|null $title    deposit title
+     * 
+     * @return int DepositStatus ID
      */
     private function _createFileStatus(int $serverId, array $ids, string|null $title):int
     {
@@ -297,7 +316,7 @@ class PublishController extends Controller
         $currentTime = time();
         $fcStatus->setCreatedAt($currentTime);
         $fcStatus->setUpdatedAt($currentTime);
-        if($title) {
+        if ($title) {
             $fcStatus->setTitle($title);
         } else {
             $fcStatus->setTitle("AttachToDraft-$currentTime");
@@ -325,6 +344,16 @@ class PublishController extends Controller
         return $depositStatus->getId();
     }
 
+    /**
+     * Create and schedule or run a transfer job, pushing the files to b2share
+     * 
+     * @param array  $param           Parameters needed for the file transfer
+     * @param string $token           Users b2share token
+     * @param int    $depositStatusId Id of the deposit status object in the database
+     * @param bool   $direct          Run the job directly or schedule it for later
+     * 
+     * @return JSONResponse Response for the api endpoints
+     */
     private function _prepareTransferJob(array $param, string $token, int $depositStatusId, bool $direct): JSONResponse
     {
         // prepare transfer job

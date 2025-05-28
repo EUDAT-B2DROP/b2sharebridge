@@ -16,15 +16,23 @@ namespace OCA\B2shareBridge\Util;
 
 /**
  * Util class for widely used functions
+ * 
+ * @category  Nextcloud
+ * @package   B2shareBridge
+ * @author    EUDAT <b2drop-devel@postit.csc.fi>
+ * @copyright 2025 EUDAT
+ * @license   AGPL3 https://github.com/EUDAT-B2DROP/b2sharebridge/blob/master/LICENSE
+ * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 class Helper
 {
     /**
      * Summary of arrayKeysExist
      *
-     * @param  mixed $keys  array of keys to check for existance
-     * @param  mixed $array array to check if it contains the keys
-     * @return bool
+     * @param mixed $keys  array of keys to check for existance
+     * @param mixed $array array to check if it contains the keys
+     * 
+     * @return bool exists or not
      */
     public static function arrayKeysExist($keys, $array)
     {

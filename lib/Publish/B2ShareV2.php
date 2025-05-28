@@ -155,9 +155,9 @@ class B2ShareV2 extends B2ShareAPI
     /**
      * Delete a draft by ID
      * 
-     * @param \OCA\B2shareBridge\Model\Server $server Server to delete draft from
-     * @param string $draftId Draft ID
-     * @param string $token B2share token
+     * @param \OCA\B2shareBridge\Model\Server $server  Server to delete draft from
+     * @param string                          $draftId Draft ID
+     * @param string                          $token   B2share token
      * 
      * @return bool|string Server answer
      */
@@ -172,12 +172,12 @@ class B2ShareV2 extends B2ShareAPI
     /**
      * Get the B2Share API token
      * 
-     * @param Server $server 
-     * @param string $userId
+     * @param Server $server Server obj
+     * @param string $userId User id
      * 
      * @return string B2Share API token
      */
-    public function getAccessToken(Server $server, string$userId): string
+    public function getAccessToken(Server $server, string $userId): string
     {
         return $this->config->getUserValue($userId, $this->appName, 'token_' . $server->getId(), null);
     }
@@ -186,7 +186,7 @@ class B2ShareV2 extends B2ShareAPI
      * Gets the B2Share user id
      * 
      * @param \OCA\B2shareBridge\Model\Server $server Server obj
-     * @param string $token B2Share API token
+     * @param string                          $token  B2Share API token
      * 
      * @return string|null
      */
@@ -202,5 +202,18 @@ class B2ShareV2 extends B2ShareAPI
             return $b2accessIdResponse["id"];
         }
         return null;
+    }
+
+    /**
+     * Fetch communities from B2Share
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server Server obj
+     * 
+     * @return bool|string False or request answer
+     */
+    public function fetchCommunities(Server $server): string|null
+    {
+        $b2share_communities_url = "{$server->getPublishUrl()}/api/communities/";
+        return $this->curl->request($b2share_communities_url);
     }
 }

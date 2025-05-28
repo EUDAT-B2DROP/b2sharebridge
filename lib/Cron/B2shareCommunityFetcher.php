@@ -76,11 +76,11 @@ class B2shareCommunityFetcher extends TimedJob
         $communityMapper = new CommunityMapper($this->_dbconnection);
         $servers = $serverMapper->findAll();
         foreach ($servers as $server) {
-            $b2share_communities_url = $server->getVersion() == 2 ? "{$server->getPublishUrl()}/api/communities/" : "{$server->getPublishUrl()}/api/communities";
-            $json = $this->_getUrlContent($b2share_communities_url);
+            $publisher = $server->getPublisher();
+            $json = $publisher->fetchCommunities();
             if (!$json) {
                 $this->_logger->error(
-                    'Fetching the B2SHARE communities API at ' . $b2share_communities_url .
+                    'Fetching the B2SHARE communities API at ' . $server->getPublishUrl() .
                     ' was not possible.',
                     ['app' => Application::APP_ID]
                 );
@@ -89,7 +89,7 @@ class B2shareCommunityFetcher extends TimedJob
             $communities_fetched = json_decode($json, true)['hits']['hits'];
             if ($communities_fetched === null) {
                 $this->_logger->error(
-                    'Fetching the B2SHARE communities API at ' . $b2share_communities_url .
+                    'Fetching the B2SHARE communities API at ' . $server->getPublishUrl() .
                     ' did not return a valid JSON.',
                     ['app' => Application::APP_ID]
                 );
@@ -170,44 +170,4 @@ class B2shareCommunityFetcher extends TimedJob
             }
         }
     }
-
-    /**
-     * Fetch url for json, opt-in to disable ssl
-     *
-     * @param string $url URL to fetch
-     *
-     * @return bool|string Response
-     */
-    #[NoAdminRequired]
-    private function _getUrlContent(string $url): bool|string
-    {
-        $ch = curl_init();
-        $config = array(
-            CURLOPT_HEADER => false,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_URL => $url,
-            CURLOPT_REFERER => $url,
-            CURLOPT_RETURNTRANSFER => true
-        );
-        $check_ssl = $this->_config->getAppValue(
-            Application::APP_ID,
-            'check_ssl',
-            '1'
-        );
-        if (!$check_ssl) {
-            $config[CURLOPT_SSL_VERIFYHOST] = false;
-            $config[CURLOPT_SSL_VERIFYPEER] = false;
-        }
-
-        curl_setopt_array($ch, $config);
-
-        $result = curl_exec($ch);
-        curl_close($ch);
-        if (!$result) {
-            return false;
-        } else {
-            return $result;
-        }
-    }
 }
-

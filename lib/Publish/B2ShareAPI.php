@@ -40,9 +40,9 @@ abstract class B2ShareAPI
      * Placeholder for actually creating a deposit
      *
      * @param string          $appName AppName
-     * @param IConfig         $config access to nextcloud configuration
-     * @param LoggerInterface $logger a logger
-     * @param Curl            $curl   curl
+     * @param IConfig         $config  access to nextcloud configuration
+     * @param LoggerInterface $logger  a logger
+     * @param Curl            $curl    curl
      *
      * @return null
      */
@@ -115,13 +115,22 @@ abstract class B2ShareAPI
      */
     abstract public function getDraftUrl(Server $server, string $draftId): string;
 
+    /**
+     * Delete a draft by ID
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server  Server to delete draft from
+     * @param string                          $draftId Draft ID
+     * @param string                          $token   B2share token
+     * 
+     * @return bool|string Server answer
+     */
     abstract public function deleteDraft(Server $server, string $draftId, string $token);
 
     /**
      * General request with a validation check
      * 
-     * @param \OCA\B2shareBridge\Model\Server $server Server to check and request from
-     * @param string $filesUrl url to request
+     * @param \OCA\B2shareBridge\Model\Server $server   Server to check and request from
+     * @param string                          $filesUrl url to request
      * 
      * @return bool|string False or the result of the request
      */
@@ -133,11 +142,11 @@ abstract class B2ShareAPI
         return $this->curl->request($filesUrl);
     }
 
-        /**
+    /**
      * Get the B2Share API token
      * 
-     * @param Server $server 
-     * @param string $userId
+     * @param Server $server Server obj
+     * @param string $userId User id
      * 
      * @return string B2Share API token
      */
@@ -147,9 +156,19 @@ abstract class B2ShareAPI
      * Gets the B2Share user id
      * 
      * @param \OCA\B2shareBridge\Model\Server $server Server obj
-     * @param string $token B2Share API token
+     * @param string                          $token  B2Share API token
      * 
      * @return string|null
      */
     abstract public function getB2ShareUserId(Server $server, string $token): string|null;
+
+
+    /**
+     * Fetch communities from B2Share
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server Server obj
+     * 
+     * @return bool|string False or request answer
+     */
+    abstract public function fetchCommunities(Server $server): string|null;
 }

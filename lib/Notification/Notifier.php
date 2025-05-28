@@ -19,6 +19,7 @@ use OCP\IURLGenerator;
 use OCP\L10N\IFactory;
 use OCP\Notification\INotification;
 use OCP\Notification\INotifier;
+use OCP\Notification\UnknownNotificationException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -61,7 +62,7 @@ class Notifier implements INotifier
      */
     public function getID(): string
     {
-        return 'b2sharebridge';
+        return Application::APP_ID;
     }
 
     /**
@@ -86,14 +87,15 @@ class Notifier implements INotifier
     {
         if ($notification->getApp() !== Application::APP_ID) {
             // Not my app => throw
-            throw new \InvalidArgumentException('Unknown App');
+            throw new UnknownNotificationException('Unknown App');
         }
 
         // Read the language from the notification
         $l = $this->factory->get(Application::APP_ID, $languageCode);
 
         switch ($notification->getSubject()) {
-            // Deal with known subjects
+
+        // Deal with known subjects
         case 'internal_error':
         case 'external_error':
         case 'no_upload_result':
@@ -113,22 +115,47 @@ class Notifier implements INotifier
             // and https://github.com/nextcloud/server/blob/master/lib/public/RichObjectStrings/Definitions.php
             // for a list of defined objects and their parameters.
             $notification->setRichSubject(
-                $l->t('Your transfer to B2SHARE was successful. Finalize your publication at: {share}'), [
-                'share' => [
-                    'type' => 'pending-federated-share',
-                    'id' => $notification->getObjectId(),
-                    'name' => $parameters['url'],
-                ]
+                $l->t('Your transfer to B2SHARE was successful. Finalize your publication at: {share}'),
+                [
+                    'share' => [
+                        'type' => 'pending-federated-share',
+                        'id' => $notification->getObjectId(),
+                        'name' => $parameters['url'],
                     ]
+                ]
             );
+            return $notification;
+        case 'error_download_record':
+        case 'error_download_malicious':
+        case 'error_download_downstream':
+        case 'error_download_space':
+        case 'error_download_exists':
+        case 'error_download_permission':
+            $notification->setIcon($this->url->getAbsoluteURL($this->url->imagePath('core', 'actions/error.svg')))
+                ->setLink($this->url->linkToRouteAbsolute(Application::APP_ID . '.View.index'));
+            return $this->_setErrorNotificationSubjectDownload($notification, $l);
+        case 'success_download':
+            $parameters = $notification->getSubjectParameters();
+            $notification->setIcon($this->url->getAbsoluteURL($this->url->imagePath('core', 'actions/checkmark.svg')))
+                ->setLink($parameters['fileUrl']);
 
-            // Set the plain text subject automatically
-            $this->setParsedSubjectFromRichSubject($notification);
+            $notification->setRichSubject(
+                $l->t('Your download from B2SHARE was successful. You can find your data here: {file}'),
+                [
+                    'file' => [
+                        'type' => 'file',
+                        'id' => $parameters['fileId'],
+                        'name' => $parameters['fileName'],
+                        'path' => $parameters['filePath'],
+                        'link' => $parameters['fileUrl'],
+                    ]
+                ]
+            );
             return $notification;
 
         default:
             // Unknown subject => Unknown notification => throw
-            throw new \InvalidArgumentException('Unknown subject "' . $notification->getSubject() . '"');
+            throw new UnknownNotificationException('Unknown subject "' . $notification->getSubject() . '"');
         }
     }
 
@@ -138,7 +165,7 @@ class Notifier implements INotifier
      * @param INotification $notification Notification
      * @param $l            language
      * 
-     * @throws \InvalidArgumentException
+     * @throws UnknownNotificationException
      * 
      * @return INotification
      */
@@ -154,46 +181,76 @@ class Notifier implements INotifier
             $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. An external server error occured!'));
             break;
         case 'no_upload_result':
-            $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. Your upload returned no result! Please check '. $parameters['url'] . ', if your draft was created.'));
+            $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. Your upload returned no result! Please check ' . $parameters['url'] . ', if your draft was created.'));
             break;
         case 'not_accessible':
             $notification->setRichSubject($l->t('Your transfer to B2SHARE had issues. Some file was not accessible.'));
             break;
         case 'unauthorized':
-            $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. You are not allowed to upload to the community "'. $parameters['community'] . '".'));
+            $notification->setRichSubject($l->t('Your transfer to B2SHARE failed. You are not allowed to upload to the community "' . $parameters['community'] . '".'));
             break;
         default:
             // Unknown subject => Unknown notification => throw
-            throw new \InvalidArgumentException('Unknown subject "' . $notification->getSubject() . '"');
+            throw new UnknownNotificationException('Unknown subject "' . $notification->getSubject() . '"');
         }
-
-        // Set the plain text subject automatically
-        $this->setParsedSubjectFromRichSubject($notification);
         return $notification;
     }
 
     /**
-     * This is a little helper function which automatically sets the simple parsed subject
-     * based on the rich subject you set. This is also the default behaviour of the API
-     * since Nextcloud 26, but in case you would like to return simpler or other strings,
-     * this function allows you to take over.
-     *
-     * @param INotification $notification Notification
+     * Summary of _setErrorNotificationSubjectDownload
      * 
-     * @return void
+     * @param INotification $notification Notification
+     * @param $l            language
+     * 
+     * @throws UnknownNotificationException
+     * 
+     * @return INotification
      */
-    protected function setParsedSubjectFromRichSubject(INotification $notification): void
+    private function _setErrorNotificationSubjectDownload($notification, $l): INotification
     {
-        $placeholders = $replacements = [];
-        foreach ($notification->getRichSubjectParameters() as $placeholder => $parameter) {
-            $placeholders[] = '{' . $placeholder . '}';
-            if ($parameter['type'] === 'file') {
-                $replacements[] = $parameter['path'];
-            } else {
-                $replacements[] = $parameter['name'];
-            }
+        $parameters = $notification->getSubjectParameters();
+        $message = $l->t('Your download from B2SHARE failed.');
+        $message .= ' ';
+
+        $helpdesk = "https://eudat.eu/contact-support-request?service=B2DROP";
+
+        switch ($notification->getSubject()) {
+            // Deal with known subjects
+        case 'error_download_record':
+            $message .= $l->t('Your record is invalid.');
+            break;
+        case 'error_download_malicious':
+            $message .= $l->t('Your record contains a file download to an external site. This incident is reported to the administrators. ');
+            $message .= $l->t("If you got this message somehow on accident, please write a ticket at the helpdesk at $helpdesk.");
+            break;
+        case 'error_download_downstream':
+            $url = $parameters["url"];
+            $message .= $l->t("The downstream server $url send a bad response");
+            break;
+        case 'error_download_space':
+            $sizeFilesHuman = \OC_Helper::humanFileSize($parameters["sizeFiles"]);
+            $freeSpaceHuman = \OC_Helper::humanFileSize($parameters["freeSpace"]);
+            $sizeFiles = $parameters["sizeFiles"];
+            $freeSpace = $parameters["freeSpace"];
+            $title = $parameters["title"];
+            $message .= $l->t("You don't have enough storage left, download size of '$title': $sizeFilesHuman ($sizeFiles Bytes), free space: $freeSpaceHuman ($freeSpace Bytes)");
+            break;
+        case 'error_download_exists':
+            $title = $parameters["title"];
+            $message .= $l->t("A directory with the name '$title' exists already");
+            break;
+        case 'error_download_permission':
+            $title = $parameters["title"];
+            $message .= $l->t("Could not create '$title' directory. Please write a ticket as the helpdesk at $helpdesk");
+            break;
+        default:
+            // Unknown subject => Unknown notification => throw
+            throw new UnknownNotificationException('Unknown subject "' . $notification->getSubject() . '"');
         }
 
-        $notification->setParsedSubject(str_replace($placeholders, $replacements, $notification->getRichSubject()));
+        $code = $parameters["code"];
+        $message .= "(Code $code)";
+        $notification->setRichSubject($message);
+        return $notification;
     }
 }

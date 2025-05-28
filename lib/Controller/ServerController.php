@@ -21,6 +21,7 @@ use OCA\B2shareBridge\Model\ServerMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\BackgroundJob\IJobList;
 use OCP\DB\Exception;
@@ -71,16 +72,15 @@ class ServerController extends Controller
 
     /**
      * List all B2SHARE Servers
-     * 
-     * @NoAdminRequired
      *
      * @throws Exception
      * 
-     * @return array List of Servers
+     * @return JSONResponse List of Servers
      */
-    public function listServers(): array
+    #[NoAdminRequired]
+    public function listServers(): JSONResponse
     {
-        return $this->_mapper->findAll();
+        return new JSONResponse($this->_mapper->findAll());
     }
 
     /**
@@ -127,6 +127,9 @@ class ServerController extends Controller
         }
         if (array_key_exists("checkSsl", $server)) {
             $server_entity->setCheckSsl($server['checkSsl']);
+        }
+        if (array_key_exists("version", $server)) {
+            $server_entity->setVersion($server['version']);
         }
 
         // update database

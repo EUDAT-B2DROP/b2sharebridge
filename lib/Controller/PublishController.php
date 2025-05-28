@@ -14,9 +14,11 @@
 
 namespace OCA\B2shareBridge\Controller;
 
-use OC\Files\Filesystem;
+use OCP\Files\IRootFolder;
+use OCP\Files\File;
 use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Cron\TransferHandler;
+use OCA\B2shareBridge\Exceptions\ControllerValidationException;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatus;
 use OCA\B2shareBridge\Model\DepositFile;
@@ -25,10 +27,12 @@ use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Publish\B2share;
+use OCA\B2shareBridge\Util\Helper;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\AppFramework\Http;
+use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\IJobList;
@@ -61,6 +65,7 @@ class PublishController extends Controller
     private ServerMapper $_smapper;
     private CommunityMapper $_cmapper;
     private IJobList $_jobList;
+    private IRootFolder $_rootFolder;
 
     /**
      * Creates the AppFramwork Controller
@@ -77,7 +82,8 @@ class PublishController extends Controller
      * @param CommunityMapper     $cmapper     Community Mapper
      * @param IManager            $notManager  Manager
      * @param LoggerInterface     $logger      Logger
-     * @param IJobList            $jobList     Nextcloud Job List Interface
+     * @param IJobList            $jobList     NC job interface
+     * @param IRootFolder         $rootFolder  Nextcloud filesystem interface
      * @param string              $userId      userid
      */
     public function __construct(
@@ -94,6 +100,7 @@ class PublishController extends Controller
         IManager $notManager,
         LoggerInterface $logger,
         IJobList $jobList,
+        IRootFolder $rootFolder,
         string $userId
     ) {
         parent::__construct($appName, $request);
@@ -108,151 +115,279 @@ class PublishController extends Controller
         $this->_cmapper = $cmapper;
         $this->logger = $logger;
         $this->_jobList = $jobList;
+        $this->_rootFolder = $rootFolder;
         $this->notManager = $notManager;
     }
 
     /**
      * XHR request endpoint for getting Publish command
      *
-     * @return          JSONResponse
-     * @NoAdminRequired
-     * @throws          Exception
-     * @throws          MultipleObjectsReturnedException
+     * @return JSONResponse
+     * 
+     * @throws Exception
+     * @throws MultipleObjectsReturnedException
      */
+    #[NoAdminRequired]
     public function publish(): JSONResponse
     {
         $param = $this->request->getParams();
-        //TODO what if token wasn't set? We couldn't have gotten here
-        //but still a check seems in place.
 
-        if (!array_key_exists('ids', $param)
-            || !array_key_exists('community', $param)
-            || !array_key_exists('server_id', $param)
-            || !array_key_exists('title', $param)
-            || !array_key_exists('open_access', $param)
-        ) {
+        // check params
+        if (!Helper::arrayKeysExist(['community', 'open_access', 'title'], $param)) {
             return new JSONResponse(
                 [
-                    'message' => 'Missing parameters',
+                    'message' => 'Missing parameters for publishing',
                     'status' => 'error'
                 ],
                 Http::STATUS_BAD_REQUEST
             );
         }
-        $serverId = $param['server_id'];
-        $ids = $param['ids'];
-        $community = $param['community'];
-        $open_access = $param['open_access'];
-        $title = $param['title'];
+        $param['mode'] = 'create';
+        return $this->_scheduleFileUploads($param);
+    }
 
-        $token = $this->config->getUserValue($this->userId, $this->appName, "token_" . $serverId);
-        if (!is_string($token)) {
+
+    /**
+     * Endpoint for attaching files to an existing deposit
+     *
+     * @return JSONResponse
+     * 
+     * @throws Exception
+     * @throws MultipleObjectsReturnedException
+     */
+    #[NoAdminRequired]
+    public function attach(): JSONResponse
+    {
+        $param = $this->request->getParams();
+
+        // check params
+        if (!Helper::arrayKeysExist(['draftId'], $param)) {
             return new JSONResponse(
                 [
-                    'message' => 'Could not find token for user',
+                    'message' => 'Missing parameters for publishing',
                     'status' => 'error'
                 ],
-                Http::STATUS_INTERNAL_SERVER_ERROR
+                Http::STATUS_BAD_REQUEST
             );
         }
+        $param['mode'] = 'attach';
+        return $this->_scheduleFileUploads($param);
+    }
 
+    /**
+     * Summary of _scheduleFileUploads
+     *
+     * @param array $param Array of parameters, which needs to contain 'ids', 'server_id', 'mode' and more depending on the mode.
+     * 
+     * @return JSONResponse Status
+     */
+    private function _scheduleFileUploads($param): JSONResponse
+    {
         try {
-            $server = $this->_smapper->find($serverId);
-        } catch (DoesNotExistException $e) {
+            // check params
+            if (!Helper::arrayKeysExist(['ids', 'server_id', 'mode'], $param)) {
+                throw new ControllerValidationException('Missing parameters for file uploads', Http::STATUS_BAD_REQUEST);
+            }
+
+            // get params
+            $serverId = $param['server_id'];
+            $ids = $param['ids'];
+            $title = $param['title'] ?? null;
+
+            $token = $this->config->getUserValue($this->userId, $this->appName, "token_$serverId");
+
+            // validate token
+            if (!is_string($token)) {
+                throw new ControllerValidationException('Could not find token for user', Http::STATUS_INTERNAL_SERVER_ERROR);
+            }
+
+            try {
+                $server = $this->_smapper->find($serverId);
+            } catch (DoesNotExistException $e) {
+                throw new ControllerValidationException('Invalid server id', Http::STATUS_BAD_REQUEST, $e);
+            }
+            $this->_publisher->setCheckSSL($server->getCheckSsl());
+
+            // rate limit
+            $this->_checkExistingUploads($server);
+
+            // check file size
+            $filesize = $this->_checkDepositSize($ids, $server);
+
+            // create database entries
+            $depositStatusId = $this->_createFileStatus($serverId, $ids, $title);
+
+            // upload
+            $direct = $filesize < 250 * 1024 * 1024;
+            return $this->_prepareTransferJob($param, $token, $depositStatusId, $direct);
+        } catch (ControllerValidationException $e) {
             return new JSONResponse(
                 [
-                    'message' => 'Invalid server id',
+                    'message' => $e->getMessage(),
                     'status' => 'error'
                 ],
-                Http::STATUS_BAD_REQUEST
+                $e->getStatusCode()
             );
         }
-        $this->_publisher->setCheckSSL($server->getCheckSsl());
+    }
 
+    /**
+     * Checks if a user has too many pending uploads on a server
+     * 
+     * @param mixed $server Server to check
+     * 
+     * @throws \OCA\B2shareBridge\Exceptions\ControllerValidationException
+     * 
+     * @return void
+     */
+    private function _checkExistingUploads($server)
+    {
+        // check existing uploads
         $active_uploads = count(
             $this->mapper->findAllForUserAndStateString(
                 $this->userId,
                 'pending'
             )
         );
-        if ($active_uploads < $server->getMaxUploads()) {
-            Filesystem::init($this->userId, '/');
-            $view = Filesystem::getView();
-            $filesize = 0;
-            foreach ($ids as $id) {
-                $filesize += $view->filesize(Filesystem::getPath($id));
-            }
-            if ($filesize < $server->getMaxUploadFilesize() * 1024 * 1024) {
-                $job = new TransferHandler(
-                    $this->_time,
-                    $this->mapper,
-                    $this->dfmapper,
-                    $this->_publisher,
-                    $this->_smapper,
-                    $this->_cmapper,
-                    $this->notManager,
-                    $this->logger
-                );
-                $fcStatus = new DepositStatus();
-                $fcStatus->setOwner($this->userId);
-                $fcStatus->setStatus(1);
-                $fcStatus->setCreatedAt(time());
-                $fcStatus->setUpdatedAt(time());
-                $fcStatus->setTitle($title);
-                $fcStatus->setServerId($serverId);
-                $depositId = $this->mapper->insert($fcStatus);
-                foreach ($ids as $id) {
-                    $depositFile = new DepositFile();
-                    $depositFile->setFilename(basename(Filesystem::getPath($id)));
-                    $depositFile->setFileid($id);
-                    $depositFile->setDepositStatusId($depositId->getId());
-                    $this->logger->debug(
-                        "Inserting " . $depositFile->getFilename(),
-                        ['app' => Application::APP_ID]
-                    );
-                    $this->dfmapper->insert($depositFile);
-                }
-            } else {
-                return new JSONResponse(
-                    [
-                        'message' => 'We currently only support 
-                        files smaller then ' . $server->getMaxUploadFilesize() . ' MB',
-                        'status' => 'error'
-                    ],
-                    Http::STATUS_REQUEST_ENTITY_TOO_LARGE
-                );
-            }
-        } else {
-            return new JSONResponse(
-                [
-                    'message' => 'Until your ' . $server->getMaxUploads() . ' deposits 
-                        are done, you are not allowed to create further deposits.',
-                    'status' => 'error'
-                ],
-                Http::STATUS_TOO_MANY_REQUESTS
-            );
+        if ($active_uploads >= $server->getMaxUploads()) {
+            $message = 'Until your ' . $server->getMaxUploads() . ' deposits 
+                                    are done, you are not allowed to create further deposits.';
+            throw new ControllerValidationException($message, Http::STATUS_TOO_MANY_REQUESTS);
         }
-        // create the actual transfer Cron in the database
+    }
 
+    /**
+     * Checks if a deposit contains files, that are too big, or the deposit itself is too big
+     * 
+     * @param mixed $ids    File ids to check
+     * @param mixed $server Server to check allowed file sizes to
+     * 
+     * @throws \OCA\B2shareBridge\Exceptions\ControllerValidationException
+     * 
+     * @return int Total deposit size in bytes
+     */
+    private function _checkDepositSize($ids, $server): int
+    {
+        $rootFolder = $this->_rootFolder->getUserFolder($this->userId);
 
-        // register transfer cron
-        $this->_jobList->add(
-            $job,
-            [
-                'transferId' => $fcStatus->getId(),
-                'token' => $token,
-                '_userId' => $this->userId,
-                'community' => $community,
-                'open_access' => $open_access,
-                'title' => $title,
-                'serverId' => $serverId
-            ]
+        // check deposit size
+        $filesize = 0;
+        foreach ($ids as $id) {
+            $fileArr = $rootFolder->getById($id);
+            if (count($fileArr) > 1) {
+                $this->logger->debug("Ambiguous upload may interfere with file sizes", ['app' => Application::APP_ID]);
+            }
+            foreach ($fileArr as $file) {
+                if ($file instanceof File) {
+                    $currentSize = $file->getSize();
+                    $filesize += $currentSize;
+
+                    if ($currentSize >= $server->getMaxUploadFilesize() * 1024 * 1024) {
+                        $message = 'We currently only support 
+                                    files smaller then ' . $server->getMaxUploadFilesize() . ' MB';
+                        throw new ControllerValidationException($message, Http::STATUS_REQUEST_ENTITY_TOO_LARGE);
+                    }
+                }
+            }
+        }
+
+        if ($filesize >= 8 * 1024 * 1024 * 1024) {
+            throw new  ControllerValidationException('You can\'t upload more than 8 GB at once', Http::STATUS_REQUEST_ENTITY_TOO_LARGE);
+        }
+        return $filesize;
+    }
+
+    /**
+     * Prepares database entries for a future file upload
+     *
+     * @param int         $serverId ID of the server
+     * @param array       $ids      array of file ids
+     * @param string|null $title    deposit title
+     * 
+     * @return int DepositStatus ID
+     */
+    private function _createFileStatus(int $serverId, array $ids, string|null $title):int
+    {
+        $rootFolder = $this->_rootFolder->getUserFolder($this->userId);
+        // create new file status
+        $fcStatus = new DepositStatus();
+        $fcStatus->setOwner($this->userId);
+        $fcStatus->setStatus(1);
+        $currentTime = time();
+        $fcStatus->setCreatedAt($currentTime);
+        $fcStatus->setUpdatedAt($currentTime);
+        if ($title) {
+            $fcStatus->setTitle($title);
+        } else {
+            $fcStatus->setTitle("AttachToDraft-$currentTime");
+        }
+        $fcStatus->setServerId($serverId);
+        $depositStatus = $this->mapper->insert($fcStatus);
+        foreach ($ids as $id) {
+            $fileArr = $rootFolder->getById($id);
+            if (count($fileArr) > 1) {
+                $this->logger->debug("Ambiguous upload, maybe too many files will be inserted", ['app' => Application::APP_ID]);
+            }
+            foreach ($fileArr as $file) {
+                if ($file instanceof File) {
+                    $depositFile = new DepositFile();
+
+                    $depositFile->setFilename($file->getName());
+                    $depositFile->setFileid($id);
+                    $depositFile->setDepositStatusId($depositStatus->getId());
+                    $this->dfmapper->insert($depositFile);
+                } else {
+                    $this->logger->debug("Invalid file type", ['app' => Application::APP_ID]);
+                }
+            }
+        }
+        return $depositStatus->getId();
+    }
+
+    /**
+     * Create and schedule or run a transfer job, pushing the files to b2share
+     * 
+     * @param array  $param           Parameters needed for the file transfer
+     * @param string $token           Users b2share token
+     * @param int    $depositStatusId Id of the deposit status object in the database
+     * @param bool   $direct          Run the job directly or schedule it for later
+     * 
+     * @return JSONResponse Response for the api endpoints
+     */
+    private function _prepareTransferJob(array $param, string $token, int $depositStatusId, bool $direct): JSONResponse
+    {
+        // prepare transfer job
+        $param["transferId"] = $depositStatusId;
+        $param["_userId"] = $this->userId;
+        $param["token"] = $token;
+
+        $job = new TransferHandler(
+            $this->_time,
+            $this->mapper,
+            $this->dfmapper,
+            $this->_publisher,
+            $this->_smapper,
+            $this->_cmapper,
+            $this->notManager,
+            $this->logger,
+            $this->_rootFolder
         );
 
+        if ($direct) {
+            // do small jobs directly, under 250 MB should go in under 5 seconds
+            $job->run($param);
+            $message = 'Successfully transferred file(s) to B2SHARE. Review the status in the B2SHARE app.';
+        } else {
+            // register transfer cron
+            $this->_jobList->add(
+                $job,
+                $param,
+            );
+            $message = 'Transferring file(s) to B2SHARE in the Background. Review the status in the B2SHARE app.';
+        }
         return new JSONResponse(
             [
-                "message" => 'Transferring file to B2SHARE in the Background. ' .
-                    'Review the status in B2SHARE app.',
+                'message' => $message,
                 'status' => 'success'
             ]
         );

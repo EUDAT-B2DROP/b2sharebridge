@@ -2,12 +2,13 @@
 	<table class="sortable-table">
 		<thead>
 			<tr>
-				<template v-for="( field, index ) in fields">
-					<th v-if="fields.at(index).active" :key="index">
+				<template v-for="(field, index) in fields">
+					<th v-if="fields.at(index).active" :key="'header-fields' + index">
 						<div class="sortheader">
 							{{ field.name }}
 							<span class="sortbuttons">
-								<NcButton type="secondary"
+								<NcButton
+									type="secondary"
 									aria-label="Ascending Sort"
 									class="sorttop"
 									:disabled="sortBy === field.label && sortDir === 'asc'"
@@ -16,7 +17,8 @@
 										<Triangle :size="10" />
 									</template>
 								</NcButton>
-								<NcButton type="secondary"
+								<NcButton
+									type="secondary"
 									aria-label="Descending Sort"
 									class="sortbottom"
 									:disabled="sortBy === field.label && sortDir === 'desc'"
@@ -32,9 +34,9 @@
 			</tr>
 		</thead>
 		<tbody>
-			<tr v-for="row in sortedRows" :key="row">
-				<template v-for="( field, index ) in fields">
-					<td v-if="field.active" :key="index" :class="field.extraClass">
+			<tr v-for="(row, index) in sortedRows" :key="'rows' + index">
+				<template v-for="(field, findex) in fields">
+					<td v-if="field.active" :key="'body-fields' + findex" :class="field.extraClass">
 						<a v-if="field.type === 'link'" :href="row[field.label]">
 							{{ row[field.label] }}
 						</a>
@@ -49,9 +51,9 @@
 </template>
 
 <script>
+import { NcButton } from '@nextcloud/vue'
 import Triangle from 'vue-material-design-icons/Triangle.vue'
 import TriangleDown from 'vue-material-design-icons/TriangleDown.vue'
-import { NcButton } from '@nextcloud/vue'
 export default {
 	name: 'SortableTable',
 	components: {
@@ -59,22 +61,26 @@ export default {
 		TriangleDown,
 		NcButton,
 	},
+
 	props: {
 		fields: {
 			type: Array,
 			required: true,
 		},
+
 		rows: {
 			type: Array,
 			required: true,
 		},
 	},
+
 	data() {
 		return {
 			sortBy: 'createdAt',
 			sortDir: 'desc',
 		}
 	},
+
 	computed: {
 		sortedRows() {
 			if (!this.sortBy) {
@@ -89,6 +95,7 @@ export default {
 			return rowsSorted
 		},
 	},
+
 	methods: {
 		sortByColumn(columnName, direction) {
 			this.sortBy = columnName

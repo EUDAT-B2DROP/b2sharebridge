@@ -22,7 +22,7 @@
  */
 
 
-namespace OCA\B2sharebridge\AppInfo;
+namespace OCA\B2shareBridge\AppInfo;
 
 return [
     'routes' => [
@@ -37,9 +37,29 @@ return [
             'verb' => 'POST'
         ],
         [
+            'name' => 'Publish#attach',
+            'url' => '/attach',
+            'verb' => 'POST'
+        ],
+        [
             'name' => 'View#depositList',
-            'url' => '/deposits',
+            'url' => '/uploads',
             'verb' => 'GET'
+        ],
+        [
+            'name' => 'View#publicationList',
+            'url' => '/publications',
+            'verb' => 'GET'
+        ],
+        [
+            'name' => 'View#deleteRecord',
+            'url' => '/drafts/{serverId}/{recordId}',
+            'verb' => 'DELETE'
+        ],
+        [
+            'name' => 'View#downloadRecordFiles',
+            'url' => '/download/{serverId}',
+            'verb' => 'POST'
         ],
         [
             'name' => 'View#setToken',

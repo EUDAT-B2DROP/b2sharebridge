@@ -36,6 +36,7 @@ class Server extends Entity implements JsonSerializable
     protected $maxUploads;
     protected $maxUploadFilesize;
     protected $checkSsl;
+    protected $version;
 
     /**
      * Construct B2SHARE Server
@@ -48,6 +49,7 @@ class Server extends Entity implements JsonSerializable
         $this->addType('maxUploads', 'integer');
         $this->addType('maxUploadFilesize', 'integer');
         $this->addType('checkSsl', 'integer');
+        $this->addType('version', 'integer');
     }
 
     /**
@@ -63,7 +65,8 @@ class Server extends Entity implements JsonSerializable
             'publishUrl' => $this->getPublishUrl(),
             'maxUploads' => $this->getMaxUploads(),
             'maxUploadFilesize' => $this->getMaxUploadFilesize(),
-            'checkSsl' => $this->getCheckSsl()
+            'checkSsl' => $this->getCheckSsl(),
+            'version' => $this->getVersion(),
         ];
     }
 
@@ -74,6 +77,6 @@ class Server extends Entity implements JsonSerializable
      */
     public function __toString(): string
     {
-        return "Server with id " . $this->id . " and name " . $this->getName() . " and publishUrl " . $this->getPublishUrl();
+        return "Server with id " . $this->id . " and name " . $this->getName() . " and publishUrl " . $this->getPublishUrl() . " v" . $this->getVersion();
     }
 }

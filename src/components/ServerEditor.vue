@@ -1,84 +1,129 @@
 <template>
 	<div class="bridgeserver">
-		<h4>{{ id == null ? "New Server" : mutable_name }}</h4>
-		<p id="maxB2shareUploadsPerUser">
-			<input v-model="mutable_maxUploads"
-				title="max_uploads"
-				type="text"
-				name="max_uploads"
-				placeholder="5"
-				style="width: 400px">
-			<em># of uploads per user at the same time</em>
-		</p>
-		<p id="maxB2shareUploadSizePerFile">
-			<input v-model="mutable_maxUploadFilesize"
-				title="max_upload_filesize"
-				type="text"
-				name="max_upload_filesize"
-				placeholder="512"
-				style="width: 400px">
-			<em>MB maximum filesize per upload</em>
-		</p>
-		<p>
-			<input :id="getCheckboxName"
-				v-model="mutable_checkSsl"
-				type="checkbox"
-				:name="getCheckboxName"
-				class="checkbox"
-				:checked="mutable_checkSsl"
-				style="width: 400px">
-			<label :for="getCheckboxName">Check SSL</label>
-		</p>
-		<p id="b2shareUrlField">
-			<input v-model="mutable_publishUrl"
-				title="publishurl"
-				type="text"
-				name="publish_baseurl"
-				placeholder="https://b2share.eudat.eu"
-				style="width: 400px">
-			<em>Publish URL</em>
-		</p>
-		<p id="b2shareNameField">
-			<input v-model="mutable_name"
-				title="name"
-				type="text"
-				name="name"
-				style="width: 400px"
-				placeholder="Your Server Name">
-			<em>Server name</em>
-		</p>
-		<button id="save" :disabled="!hasChanged()" @click="saveServer">
-			Save
-		</button>
-		<button v-if="id !== null" @click="deleteServer">
-			Delete
-		</button>
-		<button v-if="id === null"
-			id="reset"
-			:disabled="!hasChanged()"
-			@click="resetProps">
-			Reset
-		</button>
+		<div class="bridgeserver__input">
+			<h4>{{ id == -1 ? "New Server" : mutable_name }}</h4>
+			<NcTextField
+				v-model="mutable_maxUploads"
+				label="# of uploads per user at the same time"
+				trailing-cutton-icon="close"
+				:show-trailing-button="true"
+				:success="parseInt(mutable_maxUploads) > 0"
+				:error="isNaN(parseInt(mutable_maxUploads))"
+				@trailing-button-click="mutable_maxUploads = 5">
+				<template #icon>
+					<UploadMultiple :size="20" />
+				</template>
+			</NcTextField>
+			<NcTextField
+				v-model="mutable_maxUploadFilesize"
+				label="MB, maximum filesize per upload"
+				trailing-cutton-icon="close"
+				:show-trailing-button="true"
+				:success="parseInt(mutable_maxUploadFilesize) > 0"
+				:error="isNaN(parseInt(mutable_maxUploadFilesize))"
+				@trailing-button-click="mutable_maxUploadFilesize = 512">
+				<template #icon>
+					<FileUploadOutline :size="20" />
+				</template>
+			</NcTextField>
+			<NcCheckboxRadioSwitch :id="getCheckboxName" v-model="mutable_checkSsl">
+				Check SSL
+			</NcCheckboxRadioSwitch>
+			<NcTextField
+				v-model="mutable_publishUrl"
+				label="Publish URL"
+				trailing-cutton-icon="close"
+				:show-trailing-button="true"
+				:success="String(mutable_publishUrl).trim().startsWith('https://') && !String(mutable_publishUrl).trim().endsWith('/')"
+				:error="String(mutable_publishUrl).length > 0 && (!String(mutable_publishUrl).trim().startsWith('https://') || String(mutable_publishUrl).trim().endsWith('/'))"
+				@trailing-button-click="mutable_publishUrl = ''">
+				<template #icon>
+					<Web :size="20" />
+				</template>
+			</NcTextField>
+			<NcTextField
+				v-model="mutable_name"
+				label="Your Server Name"
+				trailing-cutton-icon="close"
+				:show-trailing-button="true"
+				:success="String(mutable_name).length > 0"
+				@trailing-button-click="mutable_name = ''">
+				<template #icon>
+					<TagEditOutline :size="20" />
+				</template>
+			</NcTextField>
+			<div class="bridgeserver__row bridgeserver__input__div">
+				<p>B2SHARE API-version:</p>
+				<NcSelect
+					v-bind="version_options"
+					v-model="mutable_version"
+					class="bridgeserver__input__div__select"
+					:label-outside="true"
+					:disabled="true"
+					@update:model-value="updateVersion" />
+			</div>
+		</div>
+		<div class="bridgeserver__buttons bridgeserver__row">
+			<NcButton id="save" :disabled="!hasChanged()" @click="saveServer">
+				Save
+			</NcButton>
+			<NcButton v-if="id !== -1" @click="deleteServer">
+				Delete
+			</NcButton>
+			<NcButton
+				v-if="id === -1"
+				id="reset"
+				:disabled="!hasChanged()"
+				@click="resetProps">
+				Reset
+			</NcButton>
+		</div>
 	</div>
 </template>
 
 <script>
 import axios from '@nextcloud/axios'
 import { generateUrl } from '@nextcloud/router'
+import { NcButton, NcCheckboxRadioSwitch, NcSelect, NcTextField } from '@nextcloud/vue'
+import FileUploadOutline from 'vue-material-design-icons/FileUploadOutline.vue'
+import TagEditOutline from 'vue-material-design-icons/TagEditOutline.vue'
+import UploadMultiple from 'vue-material-design-icons/UploadMultiple.vue'
+import Web from 'vue-material-design-icons/Web.vue'
 
 export default {
 	name: 'ServerEditor',
-	model: {
-		event: 'server-change',
+	components: {
+		NcButton,
+		NcSelect,
+		NcTextField,
+		NcCheckboxRadioSwitch,
+		UploadMultiple,
+		FileUploadOutline,
+		TagEditOutline,
+		Web,
 	},
+
 	props: {
-		id: { default: null, type: Number },
+		id: { type: Number, required: true },
 		name: { default: '', required: false, type: String },
 		publishurl: { default: '', required: false, type: String },
 		maxuploads: { default: 5, type: Number },
 		maxuploadfilesize: { default: 512, type: Number },
 		checkssl: { default: false, type: Boolean },
+		version: {
+			default: () => {
+				return {
+					id: 2,
+					label: 'API-Version 2',
+				}
+			},
+
+			type: Object,
+		},
 	},
+
+	emits: ['server-change'],
+
 	data() {
 		return {
 			mutable_name: this.name,
@@ -86,20 +131,39 @@ export default {
 			mutable_maxUploads: this.maxuploads,
 			mutable_maxUploadFilesize: this.maxuploadfilesize,
 			mutable_checkSsl: this.checkssl,
+			mutable_version: this.version,
+			version_options: {
+				options: [
+					{
+						id: 2,
+						label: 'API-Version 2',
+					},
+					{
+						id: 3,
+						label: 'API-Version 3',
+					},
+				],
+			},
 		}
 	},
+
 	computed: {
 		getCheckboxName() {
-			return 'checkSsl' + (this.id === null ? '' : this.id)
+			return 'checkSsl' + (this.id === -1 ? '' : this.id)
 		},
 	},
+
 	methods: {
 		resetProps() {
-			this.mutable_name = null
-			this.mutable_publishUrl = null
+			this.mutable_name = ''
+			this.mutable_publishUrl = ''
 			this.mutable_maxUploads = 5
 			this.mutable_maxUploadFilesize = 512
 			this.mutable_checkSsl = false
+			this.mutable_version = {
+				id: 2,
+				label: 'API-Version 2',
+			}
 		},
 
 		hasChanged() {
@@ -108,6 +172,7 @@ export default {
 				|| this.mutable_maxUploads !== this.maxuploads
 				|| this.mutable_maxUploadFilesize !== this.maxuploadfilesize
 				|| this.mutable_checkSsl !== this.checkssl
+				|| this.mutable_version.id !== this.version.id
 		},
 
 		saveServer() {
@@ -121,10 +186,13 @@ export default {
 			data.maxUploads = this.mutable_maxUploads
 			data.maxUploadFilesize = this.mutable_maxUploadFilesize
 			data.checkSsl = this.mutable_checkSsl
+			data.version = this.mutable_version.id
+
 			console.debug(JSON.stringify(data))
+
 			axios.post(generateUrl('/apps/b2sharebridge/server'), { server: data })
-				.then((response) => {
-					this.$emit('server-change', this.id === null ? 0 : this.id)
+				.then(() => {
+					this.$emit('server-change', this.id === -1 ? 0 : this.id)
 				})
 				.catch((error) => {
 					console.error('Could not save server')
@@ -135,7 +203,7 @@ export default {
 		deleteServer() {
 			if (this.id) {
 				axios.delete(generateUrl('/apps/b2sharebridge/servers/' + this.id))
-					.then((response) => {
+					.then(() => {
 						console.debug("Deleted server '" + this.name + "'")
 						this.$emit('server-change', this.id)
 					})
@@ -147,19 +215,52 @@ export default {
 		},
 
 		stripTrailingSlash(str) {
+			str = str.trim()
 			return str.endsWith('/')
 				? str.slice(0, -1)
 				: str
+		},
+
+		updateVersion(version) {
+			this.mutable_version = version
 		},
 	},
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
 .bridgeserver {
-	padding: 10px;
-	border-radius: var(--border-radius-large);
-	margin-top: 2px;
-	border: 5px solid var(--color-border);
+	border-bottom: 1px solid var(--color-border);
+
+	&__input {
+		max-width: 600px;
+
+		&__div {
+			margin-top: 6px;
+
+			p {
+				margin-right: auto;
+			}
+
+			&__select {
+				max-width: 600px;
+			}
+		}
+	}
+
+	&__row {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+	}
+
+	&__buttons {
+		max-width: 600px;
+		margin-bottom: 10px;
+
+		#save {
+			margin-left: auto;
+		}
+	}
 }
 </style>

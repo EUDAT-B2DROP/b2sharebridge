@@ -1,27 +1,18 @@
-import Vue from 'vue'
-import { Permission, FileAction, FileType } from '@nextcloud/files'
-import { spawnDialog } from '@nextcloud/vue/dist/Functions/dialog.js'
+import { FileAction, FileType, Permission } from '@nextcloud/files'
+import { spawnDialog } from '@nextcloud/vue/functions/dialog'
 import BridgeDialog from '../components/BridgeDialog.vue'
 
 const filepicker = async (nodes) => {
-	const FileIds = nodes.map(node => node.fileid)
-	const bridgeVueComponent = Vue.extend({
-		extends: BridgeDialog,
-		data() {
-			return {
-				selectedFiles: FileIds,
-			}
-		},
-	})
-
-	spawnDialog(bridgeVueComponent)
+	const FileIds = nodes.map((node) => node.fileid)
+	console.debug(FileIds)
+	spawnDialog(BridgeDialog, { selectedFiles: FileIds })
 	return true
 }
 
 export const action = new FileAction({
 	id: 'b2sharebridge-action',
 
-	title(nodes) {
+	title(_nodes) {
 		return 'B2SharebridgeFileActionTitle'
 	},
 
@@ -32,19 +23,19 @@ export const action = new FileAction({
 
 	enabled(nodes) {
 		if (nodes.length) {
-			return !nodes.some(node => node.type === FileType.Folder) && nodes.every(node => node.permissions !== Permission.NONE)
+			return !nodes.some((node) => node.type === FileType.Folder) && nodes.every((node) => node.permissions !== Permission.NONE)
 		}
 		return false
 	},
 
-	async exec(node, view, dir) {
+	async exec(node, _view, _dir) {
 		await filepicker([node])
 		return null
 	},
 
-	async execBatch(nodes, view, dir) {
+	async execBatch(nodes, _view, _dir) {
 		await filepicker(nodes)
-		return Promise.all(nodes.map(node => null)) // return null for every node duh
+		return Promise.all(nodes.map((_node) => null)) // return null for every node duh
 	},
 
 	inline: () => false,

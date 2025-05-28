@@ -1,16 +1,11 @@
-import Vue from 'vue'
-import PersonalSettings from './components/PersonalSettings.vue'
 import { generateFilePath } from '@nextcloud/router'
+import { createApp } from 'vue'
+import PersonalSettings from './components/PersonalSettings.vue'
 
-// eslint-disable-next-line
 __webpack_nonce__ = btoa(OC.requestToken)
 // eslint-disable-next-line
 __webpack_public_path__ = generateFilePath('b2sharebridge', '', 'js/')
 
-Vue.extend(PersonalSettings)
-Vue.mixin({ methods: { t, n } })
-
-export default new Vue({
-	el: '#b2sharebridge-personal-settings',
-	render: h => h(PersonalSettings),
-})
+const app = createApp(PersonalSettings)
+app.mixin({ methods: { t, n } })
+app.mount('#b2sharebridge-personal-settings')

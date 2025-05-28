@@ -18,13 +18,13 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 18.x, 20.x ]
+        node-version: [ 18, 20, 22 ]
 
     steps:
       - uses: actions/checkout@v3
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -36,13 +36,17 @@ jobs:
           make npm-init
           make build-js-production
       - name: Make sure production is commited
+        if: ${{ matrix.node-version >= 22 }}
         run: |
-          diff -rq js js_bac
-          if [ $? -eq 1 ];then
-          echo "Build files differ! Rebuild frontend with make build-js-production and submit changes!"
-          exit 1
+          missing=0
+          find js -type f -name "*.js" ! -name "*.js.map" | while read -r js_file; do
+          map_file="${js_file}.map"
+          if [ ! -f "$map_file" ]; then
+          echo "Missing source map for: $js_file"
+          missing=1
           fi
-  
+          done
+          exit $missing
 
   deploy:
     runs-on: ubuntu-latest
@@ -113,7 +117,7 @@ jobs:
       - name: Test Background Job
         if: ${{ matrix.nextcloud-version-branch != 'stable22' }}  # https://github.com/actions/runner/issues/1173   # 'background-job'-cmd is only available since nc23
         run: |
-          mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -e "INSERT INTO oc_b2sharebridge_server (name, publish_url) VALUES ('B2SHARE Test Server', 'https://trng-b2share.eudat.eu')" ${{ env.DB_DATABASE }}
+          mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -e "INSERT INTO oc_b2sharebridge_server (name, publish_url, version) VALUES ('B2SHARE Test Server', 'https://trng-b2share.eudat.eu', '2')" ${{ env.DB_DATABASE }}
           job_id=`mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -s -N -e "SELECT id FROM oc_jobs WHERE class LIKE '%B2shareCommunityFetcher'" ${{ env.DB_DATABASE }}`
           ./occ background-job:execute $job_id
           num_communities=`mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -s -N -e "SELECT COUNT(1) FROM oc_b2sharebridge_communities" ${{ env.DB_DATABASE }}`

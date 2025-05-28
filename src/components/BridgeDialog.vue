@@ -1,13 +1,11 @@
 <template>
-	<NcModal v-if="info.message !== ''"
-		id="infodial"
-		ref="modalRef"
-		name="">
+	<NcModal v-if="info.message !== ''" id="infodial" name="">
 		<div class="modal__content">
 			<h2>{{ info.heading }}</h2>
 			<p>{{ info.message }}</p>
 			<span class="button-container">
-				<NcButton v-for="button in info.buttons"
+				<NcButton
+					v-for="button in info.buttons"
 					:key="button.label"
 					:href="button.href"
 					:type="button.type"
@@ -18,56 +16,79 @@
 			</span>
 		</div>
 	</NcModal>
-	<NcModal v-else-if="showDialog"
-		id="bridgedial"
-		ref="modalRef"
-		name="">
+	<NcModal v-else-if="showDialog" id="bridgedial" name="">
 		<div class="modal__content">
-			<h2>Create a B2SHARE deposit</h2>
-			<NcTextField :value.sync="title.text"
+			<h2>Upload data to B2SHARE</h2>
+			<NcSelect
+				v-bind="modeprops"
+				v-model="modeprops.value"
+				required
+				:class="{ selecterror: modeprops.error }"
+				@update:model-value="onChangeMode" />
+			<NcTextField
+				v-if="!modeprops.value || modeprops.value.id === 'create'"
+				v-model="title.text"
 				label="Title"
 				placeholder="Please enter a title"
+				:disabled="!modeprops.value"
 				:error="title.error"
 				:success="title.success"
 				minlength="3"
 				maxlength="128"
 				:helper-text="title.helpertext"
-				@update:value="validate">
+				@update:model-value="validate">
 				<PencilIcon :size="20" />
 			</NcTextField>
-			<NcSelect v-bind="serverprops"
+			<NcSelect
+				v-bind="serverprops"
 				v-model="serverprops.value"
 				required
 				:class="{ selecterror: serverprops.error }"
-				@input="onChangeServer" />
-			<NcSelect v-bind="communityprops"
+				@update:model-value="onChangeServer" />
+			<NcSelect
+				v-if="modeprops.value && modeprops.value.id === 'attach'"
+				v-bind="depositselectprops"
+				v-model="depositselectprops.value"
+				required
+				:class="{ selecterror: depositselectprops.error }"
+				@update:model-value="validate" />
+			<NcSelect
+				v-if="!modeprops.value || modeprops.value.id === 'create'"
+				v-bind="communityprops"
 				v-model="communityprops.value"
+				:disabled="!modeprops.value"
 				required
 				:class="{ selecterror: communityprops.error }"
-				@input="validate" />
-			<NcCheckboxRadioSwitch :checked.sync="openAccess">
+				@update:model-value="validate" />
+			<NcCheckboxRadioSwitch
+				v-if="!modeprops.value || modeprops.value.id === 'create'"
+				v-model="openAccess"
+				:disabled="!modeprops.value">
 				Open Access
 			</NcCheckboxRadioSwitch>
 			<span class="button-container">
-				<NcButton aria-label="close"
-					@click="closeModal">
+				<NcButton aria-label="close" @click="closeModal">
 					Cancel
 				</NcButton>
-				<NcButton :disabled="publish.disabled"
+				<NcButton
+					:disabled="publish.disabled || publish.publishing"
 					type="primary"
 					aria-label="publish"
 					@click="createDeposit">
-					Publish
+					{{ getPublishLabel() }}
 				</NcButton>
 			</span>
+			<NcProgressBar v-if="publish.publishTime" :value="getProgressBar()" size="medium" />
 		</div>
 	</NcModal>
 </template>
+
 <script>
-import { NcModal, NcButton, NcTextField, NcSelect, NcCheckboxRadioSwitch } from '@nextcloud/vue'
-import { generateUrl } from '@nextcloud/router'
 import axios from '@nextcloud/axios'
+import { generateUrl } from '@nextcloud/router'
+import { NcButton, NcCheckboxRadioSwitch, NcModal, NcProgressBar, NcSelect, NcTextField } from '@nextcloud/vue'
 import PencilIcon from 'vue-material-design-icons/Pencil.vue'
+
 export default {
 	name: 'BridgeDialog',
 	components: {
@@ -76,33 +97,73 @@ export default {
 		NcSelect,
 		NcCheckboxRadioSwitch,
 		NcButton,
+		NcProgressBar,
 		PencilIcon,
 	},
+
+	props: {
+		selectedFiles: {
+			type: Array,
+			required: true,
+		},
+	},
+
 	data() {
 		return {
 			showDialog: false,
 			publish: {
 				disabled: true,
+				publishing: false,
+				publishTime: null,
 				pressedOnce: false,
 			},
+
 			title: {
 				success: false,
 				error: false,
 				text: '',
 				helpertext: '',
 			},
+
 			serverprops: {
 				inputLabel: 'Server',
 				options: [],
 				value: null,
 				error: false,
 			},
+
+			modeprops: {
+				inputLabel: 'Mode',
+				options: [
+					{
+						id: 'create',
+						label: 'Create a new draft',
+					},
+					{
+						id: 'attach',
+						label: 'Attach to existing draft',
+					},
+				],
+
+				value: null,
+				error: false,
+			},
+
+			depositselectprops: {
+				inputLabel: 'Select Draft',
+				options: [],
+				deposits: null,
+				value: null,
+				error: false,
+			},
+
 			communityprops: {
 				inputLabel: 'Community',
 				options: [],
 				value: null,
 				error: false,
 			},
+
 			openAccess: false,
 			info: {
 				heading: 'Error',
@@ -119,7 +180,6 @@ export default {
 			// Technical fields
 			tokens: [],
 			servers: [],
-			selectedFiles: [],
 		}
 	},
 
@@ -161,7 +221,7 @@ export default {
 		}
 
 		if (this.servers.length !== 0) {
-			this.servers.forEach(server => {
+			this.servers.forEach((server) => {
 				const hasToken = this.tokens[server.id] !== ''
 				if (hasToken) {
 					const serverOption = {
@@ -183,10 +243,10 @@ export default {
 
 	methods: {
 		// API stuff
-		loadServers() {
+		async loadServers() {
 			const urlPath
 				= '/apps/b2sharebridge/servers?requesttoken='
-				+ encodeURIComponent(OC.requestToken)
+					+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(urlPath))
@@ -202,10 +262,10 @@ export default {
 				})
 		},
 
-		loadCommunities() {
+		async loadCommunities() {
 			const urlPath
 				= '/apps/b2sharebridge/gettabviewcontent?requesttoken='
-				+ encodeURIComponent(OC.requestToken)
+					+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(urlPath))
@@ -221,10 +281,10 @@ export default {
 				})
 		},
 
-		loadTokens() {
+		async loadTokens() {
 			const urlPath
 				= '/apps/b2sharebridge/apitoken?requesttoken='
-				+ encodeURIComponent(OC.requestToken)
+					+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(urlPath))
@@ -244,6 +304,22 @@ export default {
 				})
 		},
 
+		updateDespositList() {
+			if (!this.depositselectprops.deposits || !this.serverprops.value) {
+				return
+			}
+
+			this.depositselectprops.options = []
+			const deposits = this.depositselectprops.deposits[this.serverprops.value.id].hits
+			deposits.forEach((deposit) => {
+				const depositOption = {
+					id: deposit.id,
+					label: deposit.metadata.titles[0].title,
+				}
+				this.depositselectprops.options.push(depositOption)
+			})
+		},
+
 		// Events
 		onChangeServer() {
 			console.debug('Updating community options')
@@ -254,7 +330,7 @@ export default {
 
 			if (this.serverprops.value !== null) {
 				// set communities for new server
-				this.communities.forEach((community, index) => {
+				this.communities.forEach((community, _index) => {
 					if (Object.hasOwn(community, 'serverId') && parseInt(community.serverId) === parseInt(this.serverprops.value.id)) {
 						const communityOption = {
 							id: community.id,
@@ -267,8 +343,89 @@ export default {
 						}
 					}
 				})
+
+				// update deposit list in attach mode
+				this.updateDespositList()
 			}
 			this.validate()
+		},
+
+		onChangeMode() {
+			console.debug('Updating b2share draft list')
+
+			if (!this.depositselectprops.deposits) {
+				this.fetchAllDrafts()
+			}
+
+			this.validate()
+		},
+
+		async fetchAllDrafts() {
+			const size = 50
+
+			/**
+			 *
+			 * @param page page number
+			 */
+			function createUrl(page) {
+				const urlArr = [
+					'/apps/b2sharebridge/publications?draft=',
+					true,
+					'&page=',
+					page,
+					'&size=',
+					size,
+					'&requesttoken=',
+					encodeURIComponent(OC.requestToken),
+				]
+				return generateUrl(urlArr.join(''))
+			}
+
+			// catch the first result and calculate if more are needed
+			const depositData = {}
+			try {
+				const firstRes = await axios.get(createUrl(1))
+				const servers = Object.keys(firstRes.data)
+				let totalNumber = 0
+				for (const server of servers) {
+					const total = firstRes.data[server].total
+					if (total > totalNumber) {
+						totalNumber = total
+					}
+					const serverData = {
+						hits: firstRes.data[server].hits,
+						total,
+					}
+					depositData[server] = serverData
+				}
+
+				// catch other results
+				if (totalNumber > size) {
+					// promises
+					const requests = []
+					for (let page = 2; (page - 1) * size < totalNumber; page++) {
+						requests.push(axios.get(createUrl(page)))
+					}
+
+					const responses = await Promise.all(requests)
+
+					// append missing deposits
+					for (const res of responses) {
+						for (const server of servers) {
+							depositData[server].hits.push(...res.data[server].hits)
+						}
+					}
+				}
+			} catch (_error) {
+				console.error('Could not fetch deposits')
+				return
+			}
+
+			// save results
+			this.depositselectprops.deposits = depositData
+
+			// update deposit list
+			this.updateDespositList()
 		},
 
 		hasValidTokens() {
@@ -276,7 +433,7 @@ export default {
 				return false
 			}
 			let validTokenFound = false
-			Object.keys(this.tokens).forEach(key => {
+			Object.keys(this.tokens).forEach((key) => {
 				if (this.tokens[key] !== '') {
 					validTokenFound = true
 				}
@@ -284,14 +441,17 @@ export default {
 			return validTokenFound
 		},
 
-		validate(event) {
+		validate(_event) {
 			let isValid = true
 			this.title.error = false
 			this.title.helpertext = ''
 			this.serverprops.error = false
 			this.communityprops.error = false
+			this.modeprops.error = false
+			this.depositselectprops.error = false
 
 			// run checks
+			// check server
 			if (this.serverprops.value === null) {
 				isValid = false
 				if (this.publish.pressedOnce) {
@@ -299,24 +459,42 @@ export default {
 				}
 			}
 
-			if (this.communityprops.value === null) {
+			// check mode
+			if (this.modeprops.value === null) {
 				isValid = false
 				if (this.publish.pressedOnce) {
-					this.communityprops.error = true
+					this.modeprops.error = true
 				}
-			}
+			} else if (this.modeprops.value.id === 'attach') {
+				// mode attach: check deposit selected
+				if (this.depositselectprops.value === null) {
+					isValid = false
+					if (this.publish.pressedOnce) {
+						this.depositselectprops.error = true
+					}
+				}
+			} else if (this.modeprops.value.id === 'create') {
+				// mode create: check community
+				if (this.communityprops.value === null) {
+					isValid = false
+					if (this.publish.pressedOnce) {
+						this.communityprops.error = true
+					}
+				}
 
-			if (this.title.text.length <= 3 || this.title.text.length > 128) {
-				isValid = false
-				if (this.publish.pressedOnce) {
-					// Note both can be false
-					this.title.error = true
+				// mode create: check title
+				if (this.title.text.length <= 3 || this.title.text.length > 128) {
+					isValid = false
 					this.title.success = false
-					this.title.helpertext = 'Please set a title with a length between 3 and 128 characters'
+					if (this.publish.pressedOnce) {
+						// Note both can be false
+						this.title.error = true
+						this.title.helpertext = 'Please set a title with a length between 3 and 128 characters'
+					}
+				} else {
+					this.title.error = false
+					this.title.success = true
 				}
-			} else if (this.publish.pressedOnce) {
-				this.title.error = false
-				this.title.success = true
 			}
 
 			// Change publishable with validation
@@ -336,19 +514,41 @@ export default {
 				return
 			}
 
+			// update progress bar
+			this.publish.publishTime = Date.now()
+			this.publish.publishing = true
+
+			let url = ''
+			let props = {}
+			if (this.modeprops.value.id === 'attach') {
+				/* const draft = this.getCurrentDraft() */
+				url = '/apps/b2sharebridge/attach'
+				props = {
+					ids: this.selectedFiles,
+					draftId: this.depositselectprops.value.id,
+					server_id: this.serverprops.value.id,
+				}
+			} else if (this.modeprops.value.id === 'create') {
+				url = '/apps/b2sharebridge/publish'
+				props = {
+					ids: this.selectedFiles,
+					community: this.communityprops.value.id,
+					open_access: this.openAccess,
+					title: this.title.text,
+					server_id: this.serverprops.value.id,
+				}
+			} else {
+				return
+			}
 			axios
-				.post(generateUrl('/apps/b2sharebridge/publish'),
-					{
-						ids: this.selectedFiles,
-						community: this.communityprops.value.id,
-						open_access: this.openAccess,
-						title: this.title.text,
-						server_id: this.serverprops.value.id,
-					})
-				.then(() => {
+				.post(
+					generateUrl(url),
+					props,
+				)
+				.then((response) => {
+					console.debug(response)
 					this.info.heading = 'Transferring to B2SHARE'
-					this.info.message = 'Your files are transfarred in the background. This may take a few minutes. You\'ll '
-						+ 'get notified after the transfer finished.'
+					this.info.message = response.data.message
 					this.info.buttons = [
 						{
 							label: 'Ok',
@@ -358,10 +558,12 @@ export default {
 						{
 							label: 'Show Deposit',
 							type: 'primary',
-							callback: () => (this.redirect('/apps/b2sharebridge')),
-							href: generateUrl('/apps/b2sharebridge'),
+							callback: () => (this.redirect('/apps/b2sharebridge/?uploads')),
+							href: generateUrl('/apps/b2sharebridge/?uploads'),
 						},
 					]
+					this.publish.publishing = false
+					this.publish.publishTime = null
 				})
 				.catch((error) => {
 					if (error.response) {
@@ -375,14 +577,46 @@ export default {
 						console.error(this.info.message)
 					}
 					console.error(error)
+					this.publish.publishing = false
+					this.publish.publishTime = null
 				})
-
 		},
 
 		closeModal() {
 			this.showDialog = false
 			this.info.message = ''
 		},
+
+		getProgressBar() {
+			if (!this.publish.publishTime) {
+				return 0
+			}
+			const seconds = (Date.now() - this.publish.publishTime) / 1000.0
+			const progress = Math.max(Math.min(Math.round(seconds * 20), 99), 10)
+			return progress
+		},
+
+		getPublishLabel() {
+			if (!this.modeprops.value || this.modeprops.value.id === 'create') {
+				return 'Publish'
+			} else if (this.modeprops.value.id === 'attach') {
+				return 'Attach'
+			} else {
+				console.error('Unknown mode, please tell an administrator')
+				return 'Unknown'
+			}
+		},
+
+		redirect(url) {
+			this.$router.push(generateUrl(url))
+		},
+
+		/* getCurrentDraft() {
+			if (this.serverprops.value && this.depositselectprops.value) {
+				return this.depositselectprops.deposits[this.serverprops.value.id].hits.find((deposit) => deposit.id === this.depositselectprops.value.id)
+			}
+			return null
+		}, */
 	},
 }
 </script>

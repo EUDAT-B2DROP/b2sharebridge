@@ -1,48 +1,54 @@
 {
   "name": "b2sharebridge",
-  "description": "An app to connect b2drop with b2share",
-  "version": "4.2.3",
-  "author": "EUDAT-B2DROP developers <info@eudat.eu>",
-  "repository": {
-    "url": "https://github.com/EUDAT-B2DROP/b2sharebridge",
-    "type": "git"
-  },
-  "homepage": "https://github.com/EUDAT-B2DROP/b2sharebridge",
-  "license": "GPLv3",
+  "version": "5.0.0",
   "private": true,
+  "description": "An app to connect b2drop with b2share",
+  "homepage": "https://github.com/EUDAT-B2DROP/b2sharebridge",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/EUDAT-B2DROP/b2sharebridge"
+  },
+  "license": "GPLv3",
+  "author": "EUDAT-B2DROP developers <info@eudat.eu>",
+  "type": "module",
   "scripts": {
     "build": "webpack --node-env production --progress",
     "dev": "webpack --node-env development --progress",
-    "watch": "webpack --node-env development --progress --watch",
-    "serve": "webpack --node-env development serve --progress",
     "lint": "eslint --ext .js,.vue src",
     "lint:fix": "eslint --ext .js,.vue src --fix",
+    "serve": "webpack --node-env development serve --progress",
     "stylelint": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue",
-    "stylelint:fix": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue --fix"
-  },
-  "dependencies": {
-    "@nextcloud/axios": "^2",
-    "@nextcloud/browserslist-config": "^3",
-    "@nextcloud/dialogs": "^6",
-    "@nextcloud/files": "^3",
-    "@nextcloud/router": "^3",
-    "@nextcloud/vue": "^8",
-    "@nextcloud/logger": "^3",
-    "vue": "^2.7.16",
-    "vue-material-design-icons": "^5.3.1"
+    "stylelint:fix": "stylelint css/*.css css/*.scss src/**/*.scss src/**/*.vue --fix",
+    "watch": "webpack --node-env development --progress --watch"
   },
   "browserslist": [
     "extends @nextcloud/browserslist-config"
   ],
+  "dependencies": {
+    "@nextcloud/axios": "^2",
+    "@nextcloud/browserslist-config": "^3",
+    "@nextcloud/dialogs": "7.0.0-rc.0",
+    "@nextcloud/files": "^3",
+    "@nextcloud/logger": "^3",
+    "@nextcloud/router": "^3",
+    "@nextcloud/vue": "9.0.0-rc.1",
+    "vue": "^3",
+    "vue-material-design-icons": "^5.3.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.27.0",
+    "@nextcloud/eslint-config": "9.0.0-rc.1",
+    "@nextcloud/stylelint-config": "^3.0.1",
+    "@nextcloud/webpack-vue-config": "^6",
+    "eslint": "^9.27.0",
+    "eslint-plugin-vue": "^10.1.0",
+    "globals": "^16.1.0",
+    "webpack": "^5",
+    "webpack-cli": "^6"
+  },
   "engines": {
     "node": ">18",
     "npm": ">8"
-  },
-  "devDependencies": {
-    "@nextcloud/eslint-config": "^8.4.2",
-    "@nextcloud/stylelint-config": "^3.0.1",
-    "@nextcloud/webpack-vue-config": "^6.2.0",
-    "webpack": "^5",
-    "webpack-cli": "^5"
   }
 }

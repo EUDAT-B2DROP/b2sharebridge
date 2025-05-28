@@ -25,6 +25,7 @@ use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Notification\Notifier;
 use OCA\B2shareBridge\Publish\B2share;
+use OCA\B2shareBridge\Util\Curl;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -33,9 +34,11 @@ use OCP\AppFramework\Bootstrap\IRegistrationContext;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\IJobList;
 use OCP\EventDispatcher\IEventDispatcher;
+use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IRequest;
+use OCP\IURLGenerator;
 use OCP\Notification\IManager;
 use OCP\Util;
 use Psr\Container\ContainerExceptionInterface;
@@ -163,6 +166,16 @@ class Application extends App implements IBootstrap
             function (ContainerInterface $c): B2share {
                 return new B2share(
                     $c->get(IConfig::class),
+                    $c->get(LoggerInterface::class),
+                    $c->get(Curl::class)
+                );
+            }
+        );
+
+        $context->registerService(
+            Curl::class,
+            function (ContainerInterface $c): Curl {
+                return new Curl(
                     $c->get(LoggerInterface::class)
                 );
             }
@@ -213,6 +226,7 @@ class Application extends App implements IBootstrap
                     $c->get(IManager::class),
                     $c->get(LoggerInterface::class),
                     $c->get(IJobList::class),
+                    $c->get(IRootFolder::class),
                     $c->get("userId")
                 );
             }
@@ -230,6 +244,10 @@ class Application extends App implements IBootstrap
                     $c->get(CommunityMapper::class),
                     $c->get(ServerMapper::class),
                     $c->get(StatusCodes::class),
+                    $c->get(IRootFolder::class),
+                    $c->get(IManager::class),
+                    $c->get(IURLGenerator::class),
+                    $c->get(Curl::class),
                     $c->get(LoggerInterface::class),
                     $c->get("userId")
                 );

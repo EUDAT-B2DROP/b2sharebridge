@@ -14,10 +14,8 @@
 
 namespace OCA\B2shareBridge\Publish;
 
-use CurlHandle;
-use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Model\Server;
-use OCA\B2shareBridge\Model\ServerMapper;
+use OCA\B2shareBridge\Util\Curl;
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
 
@@ -33,21 +31,22 @@ use Psr\Log\LoggerInterface;
 class B2share implements IPublish
 {
     protected LoggerInterface $logger;
-    protected CurlHandle $curl_client;
     protected string $file_upload_url;
     protected string $error_message;
 
+    private Curl $_curl;
 
     /**
      * Create object for actual upload
      *
      * @param IConfig         $_config ignored
      * @param LoggerInterface $logger  logger
+     * @param Curl            $curl    curl
      */
-    public function __construct(IConfig $_config, LoggerInterface $logger)
+    public function __construct(IConfig $_config, LoggerInterface $logger, Curl $curl)
     {
         $this->logger = $logger;
-        $this->curl_client = curl_init();
+        $this->_curl = $curl;
     }
 
     /**
@@ -59,16 +58,7 @@ class B2share implements IPublish
      */
     public function setCheckSSL(bool $checkSsl)
     {
-        $defaults = array(
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_TIMEOUT => 4,
-            CURLOPT_HEADER => 1,
-        );
-        if (!$checkSsl) {
-            $defaults[CURLOPT_SSL_VERIFYHOST] = 0;
-            $defaults[CURLOPT_SSL_VERIFYPEER] = 0;
-        }
-        curl_setopt_array($this->curl_client, $defaults);
+        $this->_curl->setSSL($checkSsl);
     }
 
     /**
@@ -97,20 +87,20 @@ class B2share implements IPublish
      * Publish to url via post, use uuid for filename. Use a token and set expect
      * to empty just as a workaround for local issues
      *
-     * @param string $token        users access token
-     * @param string $community    id of community metadata schema, defaults to EUDAT
-     * @param string $open_access  publish as open access, defaults to false
-     * @param string $title        actual title of the deposit
-     * @param string $api_endpoint api url
+     * @param string $token       users access token
+     * @param string $community   id of community metadata schema, defaults to EUDAT
+     * @param string $open_access publish as open access, defaults to false
+     * @param string $title       actual title of the deposit
+     * @param Server $server      b2share server
      *
-     * @return string  file URL in b2access
+     * @return string             draftId
      */
     public function create(
         string $token,
         string $community,
         string $open_access,
         string $title,
-        string $api_endpoint
+        Server $server
     ): string {
         //now settype("false","boolean") evaluates to true, so:
         $b_open_access = false;
@@ -120,43 +110,32 @@ class B2share implements IPublish
         $data = json_encode(
             [
                 'community' => $community,
-                'titles' => [[
-                    'title' => $title
-                ]],
+                'titles' => [
+                    [
+                        'title' => $title
+                    ]
+                ],
                 'open_access' => $b_open_access
             ]
         );
 
-        $config = array(
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_POSTREDIR => 3,
-            CURLOPT_URL =>
-                $api_endpoint . '/api/records/?access_token=' . $token,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POSTFIELDS => $data,
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($data))
-        );
-        curl_setopt_array($this->curl_client, $config);
-        $response = curl_exec($this->curl_client);
+        $version_slash = $server->getVersion() == 2 ? '/' : '';
+        $post_url = "{$server->getPublishUrl()}/api/records{$version_slash}?access_token={$token}";
+
+        $response = $this->_curl->post($post_url, $data);
         if (!$response) {
             return "";
         } else {
-            $header_size = curl_getinfo($this->curl_client, CURLINFO_HEADER_SIZE);
-            $body = substr($response, $header_size);
-            $results = json_decode(utf8_encode($body), false);
+            $body_encoded = mb_convert_encoding($response, 'UTF-8', mb_list_encodings());
+            $results = json_decode($body_encoded, false);
+
             if (property_exists($results, 'links')
-                and property_exists($results->links, 'self')
-                and property_exists($results->links, 'files')
+                && property_exists($results->links, 'self')
+                && property_exists($results->links, 'files')
             ) {
                 $this->file_upload_url
                     = $results->links->files;
-                return str_replace(
-                    'draft',
-                    'edit',
-                    str_replace('/api', '', $results->links->self)
-                );
+                return "{$results->id}";
             } else {
                 $this->error_message = "Something went wrong in uploading.";
                 if (property_exists($results, 'status')) {
@@ -166,6 +145,41 @@ class B2share implements IPublish
                 }
                 return "";
             }
+        }
+    }
+
+    /**
+     * Fetch a draft fully
+     * 
+     * @param Server $server  Server to get a draft from
+     * @param string $draftId Id of the draft
+     * @param string $token   B2share token
+     * 
+     * @return mixed JSON of the draft
+     */
+    public function getDraft(Server $server, string $draftId, string $token): mixed
+    {
+        $url = "{$server->getPublishUrl()}/api/records/{$draftId}/draft?access_token={$token}";
+        $res = $this->_curl->request($url);
+        $this->logger->debug($url);
+        $this->logger->debug($res);
+        return json_decode($res, true);
+    }
+
+    /**
+     * Returns the EDIT url of a draft
+     * 
+     * @param Server $server  Server
+     * @param string $draftId Id of the draft
+     * 
+     * @return string Edit url
+     */
+    public function getDraftUrl(Server $server, string $draftId)
+    {
+        if ($server->getVersion() == 2) {
+            return "{$server->getPublishUrl()}/records/{$draftId}/edit";
+        } else {
+            return "{$server->getPublishUrl()}/uploads/{$draftId}";
         }
     }
 
@@ -180,32 +194,6 @@ class B2share implements IPublish
      */
     public function upload(string $file_upload_url, mixed $filehandle, string $filesize): bool
     {
-        $this->curl_client = curl_init();
-
-        $config2 = array(
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_URL => $file_upload_url,
-            CURLOPT_INFILE => $filehandle,
-            CURLOPT_INFILESIZE => $filesize,
-            CURLOPT_PUT => true,
-            CURLOPT_CUSTOMREQUEST => 'PUT',
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_TIMEOUT => 4,
-            CURLOPT_HEADER => true,
-            CURLINFO_HEADER_OUT => true,
-            CURLOPT_HTTPHEADER => array(
-                'Accept:application/json',
-                'Content-Type: application/octet-stream'
-            )
-        );
-        curl_setopt_array($this->curl_client, $config2);
-
-        $response = curl_exec($this->curl_client);
-        curl_close($this->curl_client);
-        if (!$response) {
-            return false;
-        } else {
-            return true;
-        }
+        return $this->_curl->upload($file_upload_url, $filehandle, $filesize);
     }
 }

@@ -12,7 +12,7 @@
  * @link      https://github.com/EUDAT-B2DROP/b2sharebridge.git
  */
 
-namespace OCA\B2shareBridge\Exception;
+namespace OCA\B2shareBridge\Exceptions;
 
 use Exception;
 

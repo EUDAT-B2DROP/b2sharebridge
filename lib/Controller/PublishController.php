@@ -18,7 +18,7 @@ use OCP\Files\IRootFolder;
 use OCP\Files\File;
 use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Cron\TransferHandler;
-use OCA\B2shareBridge\Exception\ControllerValidationException;
+use OCA\B2shareBridge\Exceptions\ControllerValidationException;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatus;
 use OCA\B2shareBridge\Model\DepositFile;
@@ -236,7 +236,7 @@ class PublishController extends Controller
      * 
      * @param mixed $server Server to check
      * 
-     * @throws \OCA\B2shareBridge\Exception\ControllerValidationException
+     * @throws \OCA\B2shareBridge\Exceptions\ControllerValidationException
      * 
      * @return void
      */
@@ -262,7 +262,7 @@ class PublishController extends Controller
      * @param mixed $ids    File ids to check
      * @param mixed $server Server to check allowed file sizes to
      * 
-     * @throws \OCA\B2shareBridge\Exception\ControllerValidationException
+     * @throws \OCA\B2shareBridge\Exceptions\ControllerValidationException
      * 
      * @return int Total deposit size in bytes
      */

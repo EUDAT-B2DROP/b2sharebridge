@@ -15,7 +15,7 @@
 namespace OCA\B2shareBridge\Cron;
 
 use OCA\B2shareBridge\AppInfo\Application;
-use OCA\B2shareBridge\Exception\UploadNotificationException;
+use OCA\B2shareBridge\Exceptions\UploadNotificationException;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;

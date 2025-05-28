@@ -575,10 +575,10 @@ class ViewController extends Controller
     /**
      * Gets user records for a single server
      * 
-     * @param Server $server    Server object
-     * @param bool   $draft     true for (only) draft records, else false
-     * @param int    $page      page number, you are limited to 50 records by B2SHARE Api
-     * @param int    $size      page size, number of records per page
+     * @param Server $server Server object
+     * @param bool   $draft  true for (only) draft records, else false
+     * @param int    $page   page number, you are limited to 50 records by B2SHARE Api
+     * @param int    $size   page size, number of records per page
      * 
      * @return array
      */

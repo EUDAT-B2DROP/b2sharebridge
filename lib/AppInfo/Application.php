@@ -24,7 +24,8 @@ use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Notification\Notifier;
-use OCA\B2shareBridge\Publish\B2share;
+use OCA\B2shareBridge\Publish\B2ShareV2;
+use OCA\B2shareBridge\Publish\B2ShareV3;
 use OCA\B2shareBridge\Util\Curl;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
@@ -162,9 +163,20 @@ class Application extends App implements IBootstrap
         );
 
         $context->registerService(
-            B2share::class,
-            function (ContainerInterface $c): B2share {
-                return new B2share(
+            B2ShareV2::class,
+            function (ContainerInterface $c): B2shareV2 {
+                return new B2ShareV2(
+                    $c->get(IConfig::class),
+                    $c->get(LoggerInterface::class),
+                    $c->get(Curl::class)
+                );
+            }
+        );
+
+        $context->registerService(
+            B2ShareV3::class,
+            function (ContainerInterface $c): B2shareV3 {
+                return new B2ShareV3(
                     $c->get(IConfig::class),
                     $c->get(LoggerInterface::class),
                     $c->get(Curl::class)
@@ -220,7 +232,6 @@ class Application extends App implements IBootstrap
                     $c->get(DepositFileMapper::class),
                     $c->get(StatusCodes::class),
                     $c->get(ITimeFactory::class),
-                    $c->get(B2share::class),
                     $c->get(ServerMapper::class),
                     $c->get(CommunityMapper::class),
                     $c->get(IManager::class),

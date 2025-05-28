@@ -20,8 +20,9 @@ use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
-use OCA\B2shareBridge\Publish\B2share;
-use OCA\B2shareBridge\Publish\IPublish;
+use OCA\B2shareBridge\Publish\B2ShareV2;
+use OCA\B2shareBridge\Publish\B2ShareV3;
+use OCA\B2shareBridge\Publish\B2ShareAPI;
 use OCA\B2shareBridge\Util\Curl;
 use OCA\B2shareBridge\Util\Helper;
 
@@ -48,7 +49,6 @@ class TransferHandler extends QueuedJob
 {
 
     private DepositStatusMapper $_mapper;
-    private IPublish $_publisher;
     private DepositFileMapper $_dfmapper;
     private ServerMapper $_smapper;
     private CommunityMapper $_cmapper;
@@ -63,7 +63,6 @@ class TransferHandler extends QueuedJob
      * @param ITimeFactory|null        $time       Time
      * @param DepositStatusMapper|null $mapper     the database mapper for transfers
      * @param DepositFileMapper|null   $dfmapper   ORM for DepositFile
-     * @param IPublish|null            $publisher  publishing backend to use
      * @param ServerMapper|null        $smapper    Server Mapper
      * @param CommunityMapper|null     $cmapper    Community Mapper
      * @param IManager|null            $notManager Manager
@@ -75,7 +74,6 @@ class TransferHandler extends QueuedJob
         ITimeFactory $time = null,
         DepositStatusMapper $mapper = null,
         DepositFileMapper $dfmapper = null,
-        IPublish $publisher = null,
         ServerMapper $smapper = null,
         Communitymapper $cmapper = null,
         IManager $notManager = null,
@@ -84,14 +82,13 @@ class TransferHandler extends QueuedJob
         Curl $curl = null,
     ) {
         parent::__construct($time);
-        if ($dfmapper === null or $mapper === null or $publisher === null or $smapper === null or $cmapper === null
+        if ($dfmapper === null or $mapper === null or $smapper === null or $cmapper === null
             or $logger === null or $notManager === null or $rootFolder === null or $curl === null
         ) {
             $this->fixTransferForCron();
         } else {
             $this->_mapper = $mapper;
             $this->_dfmapper = $dfmapper;
-            $this->_publisher = $publisher;
             $this->_smapper = $smapper;
             $this->_cmapper = $cmapper;
             $this->logger = $logger;
@@ -112,13 +109,33 @@ class TransferHandler extends QueuedJob
         $application = new Application();
         $this->_mapper = $application->getContainer()->get(DepositStatusMapper::class);
         $this->_dfmapper = $application->getContainer()->get(DepositFileMapper::class);
-        $this->_publisher = $application->getContainer()->get(B2share::class);
         $this->_smapper = $application->getContainer()->get(ServerMapper::class);
         $this->_cmapper = $application->getContainer()->get(CommunityMapper::class);
         $this->notManager = $application->getContainer()->get(IManager::class);
         $this->logger = $application->getContainer()->get(LoggerInterface::class);
         $this->_rootFolder = $application->getContainer()->get(IRootFolder::class);
         $this->_curl = $application->getContainer()->get(Curl::class);
+    }
+
+    /**
+     * Returns the B2Share API depending on the server
+     *
+     * @param mixed $server Server object
+     * 
+     * @throws \BadMethodCallException when the server has an unknown version
+     * 
+     * @return \OCA\B2shareBridge\Publish\B2ShareAPI B2Share API object
+     */
+    private function _getPublisher($server): B2ShareAPI
+    {
+        $application = new Application();
+        if ($server->getVersion() == 2) {
+            return $application->getContainer()->get(B2ShareV2::class);
+        } else if ($server->getVersion() == 3) {
+            return $application->getContainer()->get(B2ShareV3::class);
+        }
+        $version = $server->getVersion();
+        throw new \BadMethodCallException("Unknown B2Share version v$version");
     }
 
     /**
@@ -149,13 +166,7 @@ class TransferHandler extends QueuedJob
     private function _uploadFiles($args): INotification
     {
         $this->_validateUploadParams($args);
-        
-        /**
-         *  B2SHARE API
-         *
-         * @var B2share $publisher
-         */
-        $publisher = $this->_publisher;
+
         $mode = $args['mode'];
         $token = $args['token'];
         $transferId = $args['transferId'];
@@ -176,13 +187,26 @@ class TransferHandler extends QueuedJob
 
             $notification->setUser($user);
             $server = $this->_smapper->find($serverId);
+
+            $publisher = $this->_getPublisher($server);
             $publisher->setCheckSSL($server->getCheckSsl());
 
             // create draft or get file upload link
             $draftId = null;
             if ($mode == 'create') {
-                $draftId = $this->_createNewDraft($args, $server, $fcStatus);
-                $file_upload_link = $publisher->getFileUploadUrlPart();
+                $createResult = $this->_createNewDraft($args, $server, $fcStatus, $publisher);
+                if (!$createResult) {
+                    $this->logger->error(
+                        'No upload result',
+                        ['app' => Application::APP_ID]
+                    );
+                    $fcStatus->setErrorMessage("No upload result, please check your drafts, as it may be created anyway!");
+                    $fcStatus->setStatus(3);
+                    throw new UploadNotificationException('no_upload_result', ['url' => $server->getPublishUrl()]);    
+                }
+
+                $draftId = $createResult[0];
+                $file_upload_link = $createResult[1];
             } else if ($mode == 'attach') {
                 $draftId = $args['draftId'];
                 $draft = $publisher->getDraft($server, $draftId, $token);
@@ -204,7 +228,7 @@ class TransferHandler extends QueuedJob
                     $this->logger->warning("Ambiguous upload, multiple files with same ID", ['app' => Application::APP_ID]);
                 }
                 foreach ($fileNodes as $fileNode) {
-                    $uploadSuccess &= $this->_uploadFile($fileNode, $fcStatus, $file_upload_link, $token);
+                    $uploadSuccess &= $this->_uploadFile($fileNode, $fcStatus, $file_upload_link, $token, $publisher);
                 }
 
             }
@@ -264,11 +288,6 @@ class TransferHandler extends QueuedJob
      */
     private function _validateUploadParams($args)
     {
-        if (!$this->_publisher instanceof B2SHARE) {
-            $this->logger->error("Not implemented!");
-            throw new \BadMethodCallException("Not implemented!");
-        }
-
         if (!Helper::arrayKeysExist(['transferId', 'token', 'server_id', 'mode', 'ids'], $args)) {
             $message = 'Can not handle w/o id, token, community, open_access, title';
             $this->logger->debug(print_r($args, true));
@@ -295,23 +314,18 @@ class TransferHandler extends QueuedJob
     /**
      * Summary of _createNewDraft
      *
-     * @param array $args     array of arguments
-     * @param mixed $server   server object
-     * @param mixed $fcStatus Deposit status object
+     * @param array      $args      array of arguments
+     * @param mixed      $server    server object
+     * @param mixed      $fcStatus  Deposit status object
+     * @param B2ShareAPI $publisher B2ShareAPI object
      * 
      * @throws UploadNotificationException
      * 
      * @return string          draftId
      */
-    private function _createNewDraft($args, $server, $fcStatus)
+    private function _createNewDraft($args, $server, $fcStatus, $publisher)
     {
-        /**
-         * B2SHARE API
-         * 
-         * @var B2share $publisher 
-         */
-        $publisher = $this->_publisher;
-        $draftId = $this->_publisher->create(
+        $draftId = $publisher->create(
             $args['token'],
             $args['community'],
             $args['open_access'],
@@ -319,32 +333,32 @@ class TransferHandler extends QueuedJob
             $server,
         );
 
-        if (!$draftId) {
-            /*
-             * External error: during creating deposit
-             */
-            $fcStatus->setStatus(4);
-
-            if (str_starts_with($publisher->getErrorMessage(), '403')) {
-                $community = $this->_cmapper->find($args['community'], $server->getId());
-                $unauthorized_message = 'You are not allowed to upload to "' . $community->getName() . '"';
-                $this->logger->debug(
-                    $unauthorized_message,
-                    ['app' => Application::APP_ID]
-                );
-                $fcStatus->setErrorMessage($unauthorized_message);
-                throw new UploadNotificationException('unauthorized', ['publisher_url' => $server->getPublishUrl(), 'community' => $community->getName()]);
-                
-            } else {
-                $this->logger->error(
-                    "No create result, there was an error during deposit creation",
-                    ['app' => Application::APP_ID]
-                );
-                $fcStatus->setErrorMessage($publisher->getErrorMessage());
-                throw new UploadNotificationException('external_error', ['publisher_url' => $server->getPublishUrl()]);
-            }
+        if ($draftId) {
+            return $draftId;
         }
-        return $draftId;
+
+        /*
+         * External error: during creating deposit
+         */
+        $fcStatus->setStatus(4);
+
+        if (str_starts_with($publisher->getErrorMessage(), '403')) {
+            $community = $this->_cmapper->find($args['community'], $server->getId());
+            $unauthorized_message = 'You are not allowed to upload to "' . $community->getName() . '"';
+            $this->logger->debug(
+                $unauthorized_message,
+                ['app' => Application::APP_ID]
+            );
+            $fcStatus->setErrorMessage($unauthorized_message);
+            throw new UploadNotificationException('unauthorized', ['publisher_url' => $server->getPublishUrl(), 'community' => $community->getName()]);
+        }
+
+        $this->logger->error(
+            "No create result, there was an error during deposit creation",
+            ['app' => Application::APP_ID]
+        );
+        $fcStatus->setErrorMessage($publisher->getErrorMessage());
+        throw new UploadNotificationException('external_error', ['publisher_url' => $server->getPublishUrl()]);
     }
 
     /**
@@ -353,13 +367,14 @@ class TransferHandler extends QueuedJob
      * @param \OCP\Files\Node $fileNode         file Node
      * @param mixed           $fcStatus         deposit status object
      * @param mixed           $file_upload_link (api) upload url for files
-     * @param mixed           $token            b2share token of the 
+     * @param mixed           $token            b2share token of the
+     * @param B2ShareAPI      $publisher        B2ShareAPI object
      * 
      * @throws UploadNotificationException
      * 
      * @return bool                              success of the upload
      */
-    private function _uploadFile($fileNode, $fcStatus, $file_upload_link, $token):bool
+    private function _uploadFile($fileNode, $fcStatus, $file_upload_link, $token, $publisher): bool
     {
         if ($fileNode->getType() != \OCP\Files\FileInfo::TYPE_FILE) {
             $this->logger->warning("User somehow managed to upload a folder" . get_class($fileNode), ['app' => Application::APP_ID]);
@@ -386,7 +401,7 @@ class TransferHandler extends QueuedJob
         $filenameEncoded = rawurlencode($filename);
         $upload_url = "$file_upload_link/$filenameEncoded?access_token=$token";
         $this->logger->debug("File upload URL: $upload_url", ['app' => Application::APP_ID]);
-        return $this->_publisher->upload(
+        return $publisher->upload(
             $upload_url,
             $handle,
             $size

@@ -26,7 +26,6 @@ use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
-use OCA\B2shareBridge\Publish\B2share;
 use OCA\B2shareBridge\Util\Helper;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
@@ -61,7 +60,6 @@ class PublishController extends Controller
     protected IManager $notManager;
     protected LoggerInterface $logger;
     private ITimeFactory $_time;
-    private B2share $_publisher;
     private ServerMapper $_smapper;
     private CommunityMapper $_cmapper;
     private IJobList $_jobList;
@@ -77,7 +75,6 @@ class PublishController extends Controller
      * @param DepositFileMapper   $dfmapper    ORM for DepositFile objects
      * @param StatusCodes         $statusCodes Status Code Mapper
      * @param ITimeFactory        $time        Time
-     * @param B2share             $publisher   B2SHARE
      * @param ServerMapper        $smapper     Server Mapper
      * @param CommunityMapper     $cmapper     Community Mapper
      * @param IManager            $notManager  Manager
@@ -94,7 +91,6 @@ class PublishController extends Controller
         DepositFileMapper $dfmapper,
         StatusCodes $statusCodes,
         ITimeFactory $time,
-        B2share $publisher,
         ServerMapper $smapper,
         CommunityMapper $cmapper,
         IManager $notManager,
@@ -110,7 +106,6 @@ class PublishController extends Controller
         $this->statusCodes = $statusCodes;
         $this->config = $config;
         $this->_time = $time;
-        $this->_publisher = $publisher;
         $this->_smapper = $smapper;
         $this->_cmapper = $cmapper;
         $this->logger = $logger;
@@ -206,7 +201,6 @@ class PublishController extends Controller
             } catch (DoesNotExistException $e) {
                 throw new ControllerValidationException('Invalid server id', Http::STATUS_BAD_REQUEST, $e);
             }
-            $this->_publisher->setCheckSSL($server->getCheckSsl());
 
             // rate limit
             $this->_checkExistingUploads($server);
@@ -365,7 +359,6 @@ class PublishController extends Controller
             $this->_time,
             $this->mapper,
             $this->dfmapper,
-            $this->_publisher,
             $this->_smapper,
             $this->_cmapper,
             $this->notManager,

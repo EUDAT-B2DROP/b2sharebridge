@@ -112,27 +112,6 @@ class TransferHandler extends QueuedJob
     }
 
     /**
-     * Returns the B2Share API depending on the server
-     *
-     * @param mixed $server Server object
-     * 
-     * @throws \BadMethodCallException when the server has an unknown version
-     * 
-     * @return \OCA\B2shareBridge\Publish\B2ShareAPI B2Share API object
-     */
-    private function _getPublisher($server): B2ShareAPI
-    {
-        $application = new Application();
-        if ($server->getVersion() == 2) {
-            return $application->getContainer()->get(B2ShareV2::class);
-        } else if ($server->getVersion() == 3) {
-            return $application->getContainer()->get(B2ShareV3::class);
-        }
-        $version = $server->getVersion();
-        throw new \BadMethodCallException("Unknown B2Share version v$version");
-    }
-
-    /**
      * Check if current user is the requested user
      *
      * @param array $args array of arguments
@@ -182,7 +161,7 @@ class TransferHandler extends QueuedJob
             $notification->setUser($user);
             $server = $this->_smapper->find($serverId);
 
-            $publisher = $this->_getPublisher($server);
+            $publisher = $server->getPublisher();
             $publisher->setCheckSSL($server->getCheckSsl());
 
             // create draft or get file upload link

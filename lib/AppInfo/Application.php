@@ -166,6 +166,7 @@ class Application extends App implements IBootstrap
             B2ShareV2::class,
             function (ContainerInterface $c): B2shareV2 {
                 return new B2ShareV2(
+                    $c->get('appName'),
                     $c->get(IConfig::class),
                     $c->get(LoggerInterface::class),
                     $c->get(Curl::class)
@@ -177,6 +178,7 @@ class Application extends App implements IBootstrap
             B2ShareV3::class,
             function (ContainerInterface $c): B2shareV3 {
                 return new B2ShareV3(
+                    $c->get('appName'),
                     $c->get(IConfig::class),
                     $c->get(LoggerInterface::class),
                     $c->get(Curl::class)
@@ -258,7 +260,6 @@ class Application extends App implements IBootstrap
                     $c->get(IRootFolder::class),
                     $c->get(IManager::class),
                     $c->get(IURLGenerator::class),
-                    $c->get(Curl::class),
                     $c->get(LoggerInterface::class),
                     $c->get("userId")
                 );

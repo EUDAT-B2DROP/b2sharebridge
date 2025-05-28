@@ -14,13 +14,12 @@
 
 namespace OCA\B2shareBridge\Controller;
 
-use OC\Files\Filesystem;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
+use OCA\B2shareBridge\Model\Server;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
-use OCA\B2shareBridge\Util\Curl;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -30,7 +29,6 @@ use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
 use OCP\AppFramework\Http\Attribute\UserRateLimit;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\AppFramework\Http\TemplateResponse;
-use OCP\Authentication\Exceptions\InvalidTokenException;
 use OCP\DB\Exception;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
@@ -65,7 +63,6 @@ class ViewController extends Controller
     private LoggerInterface $_logger;
     private IRootFolder $_storage;
     private IURLGenerator $_urlGenerator;
-    private Curl $_curl;
 
     /**
      * Creates the AppFramwork Controller
@@ -81,7 +78,6 @@ class ViewController extends Controller
      * @param IRootFolder         $storage      Storage Interface for file creation
      * @param IManager            $manager      IManager for Notifications
      * @param IURLGenerator       $urlGenerator Url Generator
-     * @param Curl                $curl         Curl
      * @param LoggerInterface     $logger       Logger
      * @param string              $userId       User ID
      */
@@ -97,7 +93,6 @@ class ViewController extends Controller
         IRootFolder $storage,
         IManager $manager,
         IURLGenerator $urlGenerator,
-        Curl $curl,
         LoggerInterface $logger,
         string $userId,
     ) {
@@ -112,7 +107,6 @@ class ViewController extends Controller
         $this->_storage = $storage;
         $this->notManager = $manager;
         $this->_urlGenerator = $urlGenerator;
-        $this->_curl = $curl;
         $this->_logger = $logger;
     }
 
@@ -222,12 +216,11 @@ class ViewController extends Controller
         $serverResponses = [];
         $servers = $this->smapper->findAll();
         foreach ($servers as $server) {
-            $serverUrl = $server->getPublishUrl();
+            $records = $this->_getUserRecords($server, $draft, $page, $size);
             $serverId = $server->getId();
-            $records = $this->_getUserRecords($server->getId(), $serverUrl, $draft, $page, $size);
             if ($records) {
                 $serverResponses[$serverId] = $records;
-                $serverResponses[$serverId]["server_url"] = $serverUrl;
+                $serverResponses[$serverId]["server_url"] = $server->getPublishUrl();
                 $serverResponses[$serverId]["server_version"] = $server->getVersion();
                 $serverResponses[$serverId]["server_name"] = $server->getName();
             }
@@ -335,8 +328,9 @@ class ViewController extends Controller
         //TODO catch errors and return HTTP 500
         $servers = $this->smapper->findAll();
         foreach ($servers as $server) {
+            $publisher = $server->getPublisher();
+            $token = $publisher->getAccessToken($server, $this->userId);
             $serverId = $server->getId();
-            $token = $this->_getB2shareAccessToken($serverId);
             $ret[$serverId] = $token ?? "";
         }
         return new JSONResponse($ret);
@@ -366,14 +360,14 @@ class ViewController extends Controller
     #[NoAdminRequired]
     public function deleteRecord($serverId, $recordId)
     {
-        $token = $this->_getB2shareAccessToken($serverId);
+        $server = $this->smapper->find($serverId);
+        $publisher = $server->getPublisher();
+        $token = $publisher->getAccessToken($serverId, $this->userId);
         if (!$token) {
             return new JSONResponse([], Http::STATUS_BAD_REQUEST);
         }
-        $server = $this->smapper->find($serverId);
-        $serverUrl = $server->getPublishUrl();
-        $urlPath = "$serverUrl/api/records/$recordId/draft?access_token=$token";
-        $output = $this->_curl->request($urlPath, "DELETE");
+
+        $output = $publisher->deleteDraft($server, $recordId, $token);
         return new JSONResponse(json_decode($output, true));
     }
 
@@ -416,6 +410,7 @@ class ViewController extends Controller
             }
         }
         if (!$error) {
+            // TODO if this fails, do a recovery strat
             if (!array_key_exists("files", $record["links"])) {
                 $errorKey = "[links][files]";
                 $error = true;
@@ -444,14 +439,16 @@ class ViewController extends Controller
 
         // get data
         $title = $record["metadata"]["titles"][0]["title"];
-        $recordId = $record["id"];
+        // $recordId = $record["id"];
         $server = $this->smapper->find($serverId);
+        $publisher = $server->getPublisher();
         $userFolder = $this->_storage->getUserFolder($this->userId);
-        $accessToken = $this->_getB2shareAccessToken($server->getId());
+        $accessToken = $publisher->getAccessToken($server, $this->userId);
         $filesUrl = $record["links"]["files"] . "?access_token=$accessToken";
+        $outputRaw = $publisher->request($server, $filesUrl);
 
         // check file sizes and user space
-        if (!str_starts_with($filesUrl, $server->getPublishUrl())) {
+        if (!$outputRaw) {
             $this->_notifiyUser("error_download_malicious", ["code" => "3"]);
             return new JSONResponse(
                 [
@@ -463,7 +460,6 @@ class ViewController extends Controller
             );
         }
 
-        $outputRaw = $this->_curl->request($filesUrl);
         $output = json_decode($outputRaw, true);
 
         if (!array_key_exists("contents", $output)) {
@@ -534,7 +530,7 @@ class ViewController extends Controller
             $folder = $userFolder->newFolder($title);
             foreach ($files as $file) {
                 $urlFilePath = $file["links"]["self"] . "?access_token=$accessToken";
-                $content = $this->_curl->request($urlFilePath);
+                $content = $publisher->request($server, $urlFilePath);
                 $folder->newFile($file["key"], $content);
             }
         } catch (\OCP\Files\NotPermittedException $e) {
@@ -579,17 +575,17 @@ class ViewController extends Controller
     /**
      * Gets user records for a single server
      * 
-     * @param int    $serverId  ID of the configured server, e.g. 0, 1, ...
-     * @param string $serverUrl server URL, e.g. b2share.eudat.eu
+     * @param Server $server    Server object
      * @param bool   $draft     true for (only) draft records, else false
      * @param int    $page      page number, you are limited to 50 records by B2SHARE Api
      * @param int    $size      page size, number of records per page
      * 
      * @return array
      */
-    private function _getUserRecords($serverId, $serverUrl, $draft, $page, $size): array
+    private function _getUserRecords($server, $draft, $page, $size): array
     {
-        $token = $this->_getB2shareAccessToken($serverId);
+        $publisher = $server->getPublisher();
+        $token = $publisher->getAccessToken($server, $this->userId);
         if (!$token) {
             return [];
         }
@@ -603,13 +599,14 @@ class ViewController extends Controller
             // https://doc.eudat.eu/b2share/httpapi/#search-drafts
             $params = ["drafts" => 1, "access_token" => $token] + $params;
         } else {
-            $userId = $this->_getB2shareUserId($serverUrl, $token);
+            $userId = $publisher->getB2shareUserId($server, $token);
             $params["q"] = "owners:$userId";
         }
         $httpParams = http_build_query($params);
+        $serverUrl = $server->getPublishUrl();
         $urlPath = "$serverUrl/api/records/?$httpParams";
 
-        $output = $this->_curl->request($urlPath);
+        $output = $publisher->request($server, $urlPath);
 
         if (!$output) {
             return [];
@@ -623,39 +620,6 @@ class ViewController extends Controller
             }
         }
         return [];
-    }
-
-    /**
-     * Get B2SHARE token of a user by $serverId
-     * 
-     * @param string $serverId Server ID
-     * 
-     * @return ?string
-     */
-    private function _getB2shareAccessToken($serverId): ?string
-    {
-        return $this->config->getUserValue($this->userId, $this->appName, 'token_' . $serverId, null);
-    }
-
-    /**
-     * Gets the B2SHARE User ID with the b2share API token
-     * 
-     * @param mixed $serverUrl baseUrl of the server
-     * @param mixed $token     B2SHARE API token
-     * 
-     * @return ?string
-     */
-    private function _getB2shareUserId($serverUrl, $token): ?string
-    {
-        $response = $this->_curl->request("$serverUrl/api/user/?access_token=$token");
-        if (!$response) {
-            return null;
-        }
-        $b2accessIdResponse = json_decode($response, true);
-        if (array_key_exists("id", $b2accessIdResponse)) {
-            return $b2accessIdResponse["id"];
-        }
-        return null;
     }
 
     /**

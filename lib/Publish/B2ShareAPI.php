@@ -33,20 +33,25 @@ abstract class B2ShareAPI
     protected LoggerInterface $logger;
 
     protected Curl $curl;
+    protected IConfig $config;
+    protected string $appName;
 
     /**
      * Placeholder for actually creating a deposit
      *
+     * @param string          $appName AppName
      * @param IConfig         $config access to nextcloud configuration
      * @param LoggerInterface $logger a logger
      * @param Curl            $curl   curl
      *
      * @return null
      */
-    public function __construct(IConfig $config, LoggerInterface $logger, Curl $curl)
+    public function __construct(string $appName, IConfig $config, LoggerInterface $logger, Curl $curl)
     {
         $this->curl = $curl;
         $this->logger = $logger;
+        $this->config = $config;
+        $this->appName = $appName;
     }
 
 
@@ -89,24 +94,62 @@ abstract class B2ShareAPI
         return $this->curl->upload($file_upload_url, $filehandle, $filesize);
     }
 
-        /**
-         * Fetch a draft fully
-         * 
-         * @param Server $server  Server to get a draft from
-         * @param string $draftId Id of the draft
-         * @param string $token   B2share token
-         * 
-         * @return mixed JSON of the draft
-         */
+    /**
+     * Fetch a draft fully
+     * 
+     * @param Server $server  Server to get a draft from
+     * @param string $draftId Id of the draft
+     * @param string $token   B2share token
+     * 
+     * @return mixed JSON of the draft
+     */
     abstract public function getDraft(Server $server, string $draftId, string $token): mixed;
 
-        /**
-         * Returns the EDIT url of a draft
-         * 
-         * @param Server $server  Server
-         * @param string $draftId Id of the draft
-         * 
-         * @return string Edit url
-         */
+    /**
+     * Returns the EDIT url of a draft
+     * 
+     * @param Server $server  Server
+     * @param string $draftId Id of the draft
+     * 
+     * @return string Edit url
+     */
     abstract public function getDraftUrl(Server $server, string $draftId): string;
+
+    abstract public function deleteDraft(Server $server, string $draftId, string $token);
+
+    /**
+     * General request with a validation check
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server Server to check and request from
+     * @param string $filesUrl url to request
+     * 
+     * @return bool|string False or the result of the request
+     */
+    public function request(Server $server, string $filesUrl): bool|string
+    {
+        if (!str_starts_with($filesUrl, $server->getPublishUrl())) {
+            return false;
+        }
+        return $this->curl->request($filesUrl);
+    }
+
+        /**
+     * Get the B2Share API token
+     * 
+     * @param Server $server 
+     * @param string $userId
+     * 
+     * @return string B2Share API token
+     */
+    abstract public function getAccessToken(Server $server, string $userId): string;
+
+    /**
+     * Gets the B2Share user id
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server Server obj
+     * @param string $token B2Share API token
+     * 
+     * @return string|null
+     */
+    abstract public function getB2ShareUserId(Server $server, string $token): string|null;
 }

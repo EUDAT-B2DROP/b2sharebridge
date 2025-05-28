@@ -38,13 +38,14 @@ class B2ShareV3 extends B2ShareAPI
     /**
      * Create object for actual upload
      *
-     * @param IConfig         $_config ignored
-     * @param LoggerInterface $logger  logger
-     * @param Curl            $curl    curl
+     * @param string          $appName AppName
+     * @param IConfig         $_config Config
+     * @param LoggerInterface $logger  Logger
+     * @param Curl            $curl    Curl
      */
-    public function __construct(IConfig $_config, LoggerInterface $logger, Curl $curl)
+    public function __construct(string $appName, IConfig $_config, LoggerInterface $logger, Curl $curl)
     {
-        parent::__construct($_config, $logger, $curl);
+        parent::__construct($appName, $_config, $logger, $curl);
     }
 
     /**
@@ -161,5 +162,60 @@ class B2ShareV3 extends B2ShareAPI
     public function getDraftUrl(Server $server, string $draftId): string
     {
         return "{$server->getPublishUrl()}/uploads/{$draftId}";
+    }
+
+        /**
+     * Delete a draft by ID
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server Server to delete draft from
+     * @param string $draftId Draft ID
+     * @param mixed $token B2share token
+     * 
+     * @return bool|string Server answer
+     */
+    public function deleteDraft(Server $server, string $draftId, $token)
+    {
+        $serverUrl = $server->getPublishUrl();
+        // TODO this URL might be incorrect
+        $urlPath = "$serverUrl/api/records/$draftId/draft?access_token=$token";
+        $output = $this->curl->request($urlPath, "DELETE");
+        return $output;
+    }
+
+    /**
+     * Get the B2Share API token
+     * 
+     * @param Server $server 
+     * @param string $userId
+     * 
+     * @return string B2Share API token
+     */
+    public function getAccessToken($server, $userId): string
+    {
+        // TODO this might change in the future
+        return $this->config->getUserValue($userId, $this->appName, 'token_' . $server->getId(), null);
+    }
+
+    /**
+     * Gets the B2Share user id
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server Server obj
+     * @param string $token B2Share API token
+     * 
+     * @return string|null
+     */
+    public function getB2ShareUserId(Server $server, string $token): string|null
+    {
+        // TODO this URL might be incorrect
+        $serverUrl = $server->getPublishUrl();
+        $response = $this->curl->request("$serverUrl/api/user/?access_token=$token");
+        if (!$response) {
+            return null;
+        }
+        $b2accessIdResponse = json_decode($response, true);
+        if (array_key_exists("id", $b2accessIdResponse)) {
+            return $b2accessIdResponse["id"];
+        }
+        return null;
     }
 }

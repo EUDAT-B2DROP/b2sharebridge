@@ -14,6 +14,9 @@
 
 namespace OCA\B2shareBridge\Model;
 
+use OCA\B2shareBridge\Publish\B2ShareAPI;
+use OCA\B2shareBridge\Publish\B2ShareV2;
+use OCA\B2shareBridge\Publish\B2ShareV3;
 use OCP\AppFramework\Db\Entity;
 use JsonSerializable;
 
@@ -78,5 +81,23 @@ class Server extends Entity implements JsonSerializable
     public function __toString(): string
     {
         return "Server with id " . $this->id . " and name " . $this->getName() . " and publishUrl " . $this->getPublishUrl() . " v" . $this->getVersion();
+    }
+
+    /**
+     * Returns the B2Share API depending on the server
+     * 
+     * @throws \BadMethodCallException when the server has an unknown version
+     * 
+     * @return \OCA\B2shareBridge\Publish\B2ShareAPI B2Share API object
+     */
+    public function getPublisher(): B2ShareAPI
+    {
+        if ($this->getVersion() == 2) {
+            return \OC::$server->query(B2ShareV2::class);
+        } else if ($this->getVersion() == 3) {
+            return \OC::$server->query(B2ShareV3::class);
+        }
+        $version = $this->getVersion();
+        throw new \BadMethodCallException("Unknown B2Share version v$version");
     }
 }

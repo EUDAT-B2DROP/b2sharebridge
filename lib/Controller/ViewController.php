@@ -410,10 +410,11 @@ class ViewController extends Controller
             }
         }
         if (!$error) {
-            // TODO if this fails, do a recovery strat
             if (!array_key_exists("files", $record["links"])) {
-                $errorKey = "[links][files]";
-                $error = true;
+                if (!array_key_exists("self", $record["links"])) {
+                    $errorKey = "[links][files] or [links][self]";
+                    $error = true;
+                }
             } elseif (!array_key_exists("titles", $record["metadata"])) {
                 $errorKey = "[metadata][titles]";
                 $error = true;
@@ -425,6 +426,25 @@ class ViewController extends Controller
                 $error = true;
             }
         }
+
+        $server = $this->smapper->find($serverId);
+        $publisher = $server->getPublisher();
+        $accessToken = $publisher->getAccessToken($server, $this->userId);
+
+        // do a recovery if necessary
+        if (!array_key_exists("files", $record["links"])) {
+            $selfPath = $record["links"]["self"] . "?access_token=$accessToken";
+            $content = $publisher->request($server, $selfPath);
+            
+            if ($content) {
+                $selfRecord = json_decode($content, true);
+                $record["links"]["files"] = $selfRecord["links"]["files"];
+            } else {
+                $errorKey = "self[links][files]";
+                $error = true;
+            }
+        }
+
         if ($error) {
             $this->_notifiyUser("error_download_record", ["code" => "2"]);
             return new JSONResponse(
@@ -437,13 +457,8 @@ class ViewController extends Controller
             );
         }
 
-        // get data
-        $title = $record["metadata"]["titles"][0]["title"];
-        // $recordId = $record["id"];
-        $server = $this->smapper->find($serverId);
-        $publisher = $server->getPublisher();
         $userFolder = $this->_storage->getUserFolder($this->userId);
-        $accessToken = $publisher->getAccessToken($server, $this->userId);
+        $title = $record["metadata"]["titles"][0]["title"];
         $filesUrl = $record["links"]["files"] . "?access_token=$accessToken";
         $outputRaw = $publisher->request($server, $filesUrl);
 

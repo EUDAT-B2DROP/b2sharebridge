@@ -51,7 +51,6 @@
 							Publish
 						</NcButton>
 						<NcButton
-							v-if="!draft"
 							class="rp__records__record__buttons__download"
 							aria-label="Download B2SHARE contents to B2DROP"
 							@click="downloadRecord(record)">

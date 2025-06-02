@@ -46,9 +46,11 @@ class Version050000Date20250512074739 extends SimpleMigrationStep
 		$schema = $schemaClosure();
 		$table = $schema->getTable('b2sharebridge_server');
 
-		$table->addColumn('version', \OCP\DB\Types::INTEGER, [
-			'notnull' => true,
-		]);
+		if (!$table->hasColumn('version')) {
+			$table->addColumn('version', \OCP\DB\Types::INTEGER, [
+				'notnull' => true,
+			]);
+		}
 		return $schema;
 	}
 

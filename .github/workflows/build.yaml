@@ -119,7 +119,7 @@ jobs:
         run: |
           mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -e "INSERT INTO oc_b2sharebridge_server (name, publish_url, version) VALUES ('B2SHARE Test Server', 'https://trng-b2share.eudat.eu', '2')" ${{ env.DB_DATABASE }}
           job_id=`mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -s -N -e "SELECT id FROM oc_jobs WHERE class LIKE '%B2shareCommunityFetcher'" ${{ env.DB_DATABASE }}`
-          ./occ background-job:execute $job_id
+          ./occ background-job:execute $job_id --force-execute
           num_communities=`mysql -u${{ env.DB_ROOT }} -p${{ env.DB_ROOT }} -s -N -e "SELECT COUNT(1) FROM oc_b2sharebridge_communities" ${{ env.DB_DATABASE }}`
           echo "$num_communities communities fetched!"
           exit $(($num_communities == 0))

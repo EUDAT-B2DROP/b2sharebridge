@@ -78,7 +78,7 @@
 					{{ getPublishLabel() }}
 				</NcButton>
 			</span>
-			<NcProgressBar v-if="publish.publishTime" :value="getProgressBar()" size="medium" />
+			<NcProgressBar v-if="publish.publishTime" :value="progress" size="medium" />
 		</div>
 	</NcModal>
 </template>
@@ -180,6 +180,7 @@ export default {
 			// Technical fields
 			tokens: [],
 			servers: [],
+			progress: 0, // progress bar
 		}
 	},
 
@@ -237,6 +238,9 @@ export default {
 				}
 			})
 		}
+
+		// add progress bar timer running indefinately
+		setInterval(this.updateProgressBar, 1000)
 
 		this.showDialog = true
 	},
@@ -587,13 +591,13 @@ export default {
 			this.info.message = ''
 		},
 
-		getProgressBar() {
+		updateProgressBar() {
 			if (!this.publish.publishTime) {
-				return 0
+				return
 			}
 			const seconds = (Date.now() - this.publish.publishTime) / 1000.0
-			const progress = Math.max(Math.min(Math.round(seconds * 20), 99), 10)
-			return progress
+			console.debug(seconds)
+			this.progress = Math.max(Math.min(Math.round(seconds * 20), 99), 10)
 		},
 
 		getPublishLabel() {

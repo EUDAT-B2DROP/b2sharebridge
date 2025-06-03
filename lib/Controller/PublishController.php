@@ -170,6 +170,60 @@ class PublishController extends Controller
     }
 
     /**
+     * Endpoint for attaching files to an existing deposit
+     * 
+     * @return JSONResponse
+     * 
+     * @throws Exception
+     * @throws MultipleObjectsReturnedException
+     */
+    #[NoAdminRequired]
+    public function nextVersion(): JSONResponse
+    {
+        $param = $this->request->getParams();
+        try {
+            if (!Helper::arrayKeysExist(['server_id', 'recordId'], $param)) {
+                throw new ControllerValidationException('Missing parameters for file uploads', Http::STATUS_BAD_REQUEST);
+            }
+            $serverId = $param['server_id'];
+            try {
+                $server = $this->_smapper->find($serverId);
+            } catch (DoesNotExistException $e) {
+                throw new ControllerValidationException('Invalid server id', Http::STATUS_BAD_REQUEST, $e);
+            }
+
+            $token = $this->config->getUserValue($this->userId, $this->appName, "token_$serverId");
+            $serverUrl = $server->getPublishUrl();
+            $recordId = $param['recordId'];
+            $publisher = $server->getPublisher();
+            $content = $publisher->nextVersion($server, $recordId, $token);
+            if (!$content) {
+                throw new ControllerValidationException("error on upstream server $serverUrl", Http::STATUS_BAD_GATEWAY);
+            }
+        } catch (ControllerValidationException $e) {
+            return new JSONResponse(
+                [
+                    'message' => $e->getMessage(),
+                    'status' => 'error'
+                ],
+                $e->getStatusCode()
+            );
+        }
+
+        $draft = json_decode($content, true);
+        if (array_key_exists('status', $draft)) {
+            if ($draft['status'] == 405) {
+                return new JSONResponse(
+                    [
+                    'message' => 'Method not allowed from upstream'
+                    ], Http::STATUS_METHOD_NOT_ALLOWED
+                );
+            }
+        }
+        return new JSONResponse($draft);
+    }
+
+    /**
      * Summary of _scheduleFileUploads
      *
      * @param array $param Array of parameters, which needs to contain 'ids', 'server_id', 'mode' and more depending on the mode.
@@ -286,7 +340,7 @@ class PublishController extends Controller
         }
 
         if ($filesize >= 8 * 1024 * 1024 * 1024) {
-            throw new  ControllerValidationException('You can\'t upload more than 8 GB at once', Http::STATUS_REQUEST_ENTITY_TOO_LARGE);
+            throw new ControllerValidationException('You can\'t upload more than 8 GB at once', Http::STATUS_REQUEST_ENTITY_TOO_LARGE);
         }
         return $filesize;
     }
@@ -300,7 +354,7 @@ class PublishController extends Controller
      * 
      * @return int DepositStatus ID
      */
-    private function _createFileStatus(int $serverId, array $ids, string|null $title):int
+    private function _createFileStatus(int $serverId, array $ids, string|null $title): int
     {
         $rootFolder = $this->_rootFolder->getUserFolder($this->userId);
         // create new file status

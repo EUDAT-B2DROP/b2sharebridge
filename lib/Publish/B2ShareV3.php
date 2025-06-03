@@ -226,9 +226,26 @@ class B2ShareV3 extends B2ShareAPI
      * 
      * @return bool|string False or request answer
      */
-    public function fetchCommunities(Server $server): string|null
+    public function fetchCommunities(Server $server): string|bool
     {
         $b2share_communities_url = "{$server->getPublishUrl()}/api/communities";
         return $this->curl->request($b2share_communities_url);
+    }
+
+
+    /**
+     * Create a new version (draft) out of a publication
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server   Server obj
+     * @param string                          $recordId Record ID
+     * @param string                          $token    B2Share API token
+     * 
+     * @return void
+     */
+    public function nextVersion(Server $server, string $recordId, string $token): string|bool
+    {
+        // TODO URL might be wrong
+        $createNextVersionUrl = "{$server->getPublishUrl()}/api/records/$recordId/draft?access_token=$token";
+        return $this->curl->post($createNextVersionUrl, '');
     }
 }

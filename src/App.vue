@@ -123,9 +123,12 @@
 					:draft="currentState === BridgeState.RECORDS_DRAFT"
 					:page="page"
 					:page-size="pageSize"
+					:server-id="serverId"
 					@page-update="updatePage"
 					@page-size-update="updatePageSize"
-					@refresh="refreshRecords" />
+					@refresh="refreshRecords"
+					@status="setBridgeState"
+					@server-update="serverUpdate" />
 			</div>
 		</NcAppContent>
 	</NcContent>
@@ -194,6 +197,7 @@ export default {
 			loadedPublications: false,
 			pageSize: 10,
 			page: 0,
+			serverId: null,
 		}
 	},
 
@@ -423,6 +427,20 @@ export default {
 
 		refreshRecords() {
 			this.updatePageSize(this.pageSize)
+		},
+
+		setBridgeState(event) {
+			if (event === 'draft') {
+				this.currentState = BridgeState.RECORDS_DRAFT
+			} else {
+				this.currentState = BridgeState.RECORDS_PUBLISHED
+			}
+			return this.loadPublications(this.currentState)
+		},
+
+		serverUpdate(serverId) {
+			console.debug('server id updated:' + serverId)
+			this.serverId = serverId
 		},
 	},
 }

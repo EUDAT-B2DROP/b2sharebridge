@@ -42,6 +42,11 @@ return [
             'verb' => 'POST'
         ],
         [
+            'name' => 'Publish#nextVersion',
+            'url' => '/next',
+            'verb' => 'POST'
+        ],
+        [
             'name' => 'View#depositList',
             'url' => '/uploads',
             'verb' => 'GET'

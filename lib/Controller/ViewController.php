@@ -362,7 +362,7 @@ class ViewController extends Controller
     {
         $server = $this->smapper->find($serverId);
         $publisher = $server->getPublisher();
-        $token = $publisher->getAccessToken($serverId, $this->userId);
+        $token = $publisher->getAccessToken($server, $this->userId);
         if (!$token) {
             return new JSONResponse([], Http::STATUS_BAD_REQUEST);
         }

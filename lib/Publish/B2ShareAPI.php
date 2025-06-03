@@ -170,5 +170,16 @@ abstract class B2ShareAPI
      * 
      * @return bool|string False or request answer
      */
-    abstract public function fetchCommunities(Server $server): string|null;
+    abstract public function fetchCommunities(Server $server): string|bool;
+
+    /**
+     * Create a new version (draft) out of a publication
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server   Server obj
+     * @param string                          $recordId Record ID
+     * @param string                          $token    B2Share API token
+     * 
+     * @return void
+     */
+    abstract public function nextVersion(Server $server, string $recordId, string $token): string|bool;
 }

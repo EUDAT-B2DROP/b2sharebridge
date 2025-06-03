@@ -40,6 +40,17 @@
 					</a>
 					<div class="rp__records__record__buttons">
 						<NcButton
+							v-if="!draft"
+							class="rp__records__record__buttons__next"
+							aria-label="Create a new Version"
+							target="_blank"
+							@click="nextVersion(record)">
+							<template #icon>
+								<Plus :size="30" />
+							</template>
+							New Version
+						</NcButton>
+						<NcButton
 							v-if="draft"
 							class="rp__records__record__buttons__publish"
 							aria-label="publish draft to B2SHARE"
@@ -120,6 +131,31 @@
 				</NcButton>
 			</div>
 		</NcModal>
+		<NcModal v-if="modalVersion.show" name="VersionModal" @close="closeModals">
+			<div class="rp__modal__version">
+				<h2>{{ modalVersion.title }}</h2>
+				<p>{{ modalVersion.message }}</p>
+				<span class="rp__modal__version__buttons">
+					<NcButton v-if="modalVersion.success" aria-label="Cancel" @click="closeModals">
+						Cancel
+					</NcButton>
+					<NcButton
+						v-if="modalVersion.success"
+						type="primary"
+						aria-label="Yes"
+						@click="changeStatus('draft')">
+						Ok
+					</NcButton>
+					<NcButton
+						v-else
+						type="primary"
+						aria-label="Yes"
+						@click="closeModals">
+						Ok
+					</NcButton>
+				</span>
+			</div>
+		</NcModal>
 	</div>
 </template>
 
@@ -129,6 +165,7 @@ import { generateUrl } from '@nextcloud/router'
 import { NcButton, NcModal, NcSelect } from '@nextcloud/vue'
 import CloudDownload from 'vue-material-design-icons/CloudDownload.vue'
 import EarthArrowUp from 'vue-material-design-icons/EarthArrowUp.vue'
+import Plus from 'vue-material-design-icons/Plus.vue'
 import TrashCan from 'vue-material-design-icons/TrashCan.vue'
 import PageButtons from './PageButtons.vue'
 
@@ -142,6 +179,7 @@ export default {
 		CloudDownload,
 		TrashCan,
 		EarthArrowUp,
+		Plus,
 	},
 
 	props: {
@@ -164,9 +202,15 @@ export default {
 			type: Number,
 			required: true,
 		},
+
+		serverId: {
+			type: Number,
+			required: false,
+			default: null,
+		},
 	},
 
-	emits: ['page-size-update', 'page-update', 'refresh'],
+	emits: ['page-size-update', 'page-update', 'server-update', 'refresh', 'status'],
 
 	data() {
 		return {
@@ -179,12 +223,15 @@ export default {
 					'50',
 				],
 
-				value: '10',
+				value: String(this.pageSize),
 			},
 
 			selectedServer: {
 				options: [],
-				value: null,
+				value: {
+					id: this.serverId,
+					label: this.serverId === null ? 'None' : this.records[this.serverId].server_name,
+				},
 			},
 
 			modalDelete: {
@@ -198,6 +245,13 @@ export default {
 				title: '',
 				code: -1,
 			},
+
+			modalVersion: {
+				show: false,
+				record: null,
+				title: '',
+				success: true,
+			},
 		}
 	},
 
@@ -206,14 +260,7 @@ export default {
 	},
 
 	async mounted() {
-		this.selectedServer.options = []
-		Object.keys(this.records).forEach((key) => {
-			this.selectedServer.options.push({
-				id: key,
-				label: this.records[key].server_name,
-			})
-		})
-		this.selectedServer.value = this.selectedServer.options.length ? this.selectedServer.options[0] : { id: null, label: 'None' }
+		this.updateServerOptions()
 	},
 
 	methods: {
@@ -250,10 +297,12 @@ export default {
 		},
 
 		updateServer(serverValue) {
-			this.selectedServer.value = serverValue
+			// this.selectedServer.value = this.selectedServer.options.find((server) => server.id == serverValue)
+			this.$emit('server-update', Number(serverValue.id))
 		},
 
 		updatePageSize(size) {
+			this.selectPageSize.value = size
 			this.$emit('page-size-update', Number(size))
 		},
 
@@ -285,8 +334,8 @@ export default {
 			this.modalDelete.show = true
 		},
 
-		showDownloadModal() {
-
+		changeStatus(status) {
+			this.$emit(status)
 		},
 
 		closeModals() {
@@ -294,6 +343,8 @@ export default {
 			this.modalDelete.record = null
 			this.modalDownload.show = false
 			this.modalDownload.record = null
+			this.modalVersion.show = false
+			this.modalVersion.record = null
 		},
 
 		deleteRecord(record) {
@@ -312,6 +363,32 @@ export default {
 				.catch((error) => {
 					console.error(error)
 					console.error(`Could not delete draft with ID ${record.id} from server ${this.selectedServer.value.label}`)
+				})
+		},
+
+		nextVersion(record) {
+			const url = '/apps/b2sharebridge/next'
+			const params = {
+				server_id: this.selectedServer.value.id,
+				recordId: record.id,
+			}
+			axios
+				.post(generateUrl(url), params)
+				.then((response) => {
+					console.debug(response)
+					this.modalVersion.title = 'New Version created!'
+					this.modalVersion.message = 'Successfully created a new version. You can see it under your drafts. Would you like to switch to draft view?'
+					this.modalVersion.success = true
+					this.modalVersion.show = true
+				})
+				.catch((error) => {
+					console.error(error)
+					console.error(`Could not create new version with ${record.id} from server ${this.selectedServer.value.label}`)
+
+					this.modalVersion.title = 'Creating a new version failed!'
+					this.modalVersion.message = 'Could not create a new version. Maybe a new version already exists'
+					this.modalVersion.success = false
+					this.modalVersion.show = true
 				})
 		},
 
@@ -358,17 +435,41 @@ export default {
 		},
 
 		getServerUrl() {
-			if (this.selectedServer.value) {
+			if (this.selectedServer.value && this.selectedServer.value.id) {
 				return this.records[this.selectedServer.value.id].server_url
 			}
 			return ''
 		},
 
 		getServerLabel() {
-			if (this.selectedServer.value) {
-				return this.selectedServer.value.label
+			if (!this.selectedServer.value.label) {
+				return 'None'
 			}
-			return 'None'
+			return this.selectedServer.value.label
+		},
+
+		updateServerOptions() {
+			this.selectedServer.options = []
+			Object.keys(this.records).forEach((key) => {
+				this.selectedServer.options.push({
+					id: key,
+					label: this.records[key].server_name,
+				})
+			})
+			if (this.selectedServer.options.length) {
+				// try to find selected server
+				if (this.serverId !== null) {
+					this.selectedServer.value = this.selectedServer.options.find((server) => Number(server.id) === this.serverId)
+				}
+
+				// use first one if no valid server is selected
+				if (!this.selectedServer.value || !this.selectedServer.value.id) {
+					this.selectedServer.value = this.selectedServer.options[0]
+				}
+			} else {
+				this.selectedServer.value = { id: null, label: 'None' }
+			}
+			return this.selectedServer.value.id !== null
 		},
 	},
 }
@@ -446,7 +547,8 @@ export default {
 	&__modal {
 
 		&__download,
-		&__delete {
+		&__delete,
+		&__version {
 			display: flex;
 			flex-direction: column;
 			align-items: center;

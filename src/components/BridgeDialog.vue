@@ -4,13 +4,8 @@
 			<h2>{{ info.heading }}</h2>
 			<p>{{ info.message }}</p>
 			<span class="button-container">
-				<NcButton
-					v-for="button in info.buttons"
-					:key="button.label"
-					:href="button.href"
-					:type="button.type"
-					:area-label="button.label"
-					@click="button.callback">
+				<NcButton v-for="button in info.buttons" :key="button.label" :href="button.href" :type="button.type"
+					:area-label="button.label" @click="button.callback">
 					{{ button.label }}
 				</NcButton>
 			</span>
@@ -19,50 +14,23 @@
 	<NcModal v-else-if="showDialog" id="bridgedial" name="">
 		<div class="modal__content">
 			<h2>Upload data to B2SHARE</h2>
-			<NcSelect
-				v-bind="modeprops"
-				v-model="modeprops.value"
-				required
-				:class="{ selecterror: modeprops.error }"
+			<NcSelect v-bind="modeprops" v-model="modeprops.value" required :class="{ selecterror: modeprops.error }"
 				@update:model-value="onChangeMode" />
-			<NcTextField
-				v-if="!modeprops.value || modeprops.value.id === 'create'"
-				v-model="title.text"
-				label="Title"
-				placeholder="Please enter a title"
-				:disabled="!modeprops.value"
-				:error="title.error"
-				:success="title.success"
-				minlength="3"
-				maxlength="128"
-				:helper-text="title.helpertext"
+			<NcTextField v-if="!modeprops.value || modeprops.value.id === 'create'" v-model="title.text" label="Title"
+				placeholder="Please enter a title" :disabled="!modeprops.value" :error="title.error"
+				:success="title.success" minlength="3" maxlength="128" :helper-text="title.helpertext"
 				@update:model-value="validate">
 				<PencilIcon :size="20" />
 			</NcTextField>
-			<NcSelect
-				v-bind="serverprops"
-				v-model="serverprops.value"
-				required
-				:class="{ selecterror: serverprops.error }"
-				@update:model-value="onChangeServer" />
-			<NcSelect
-				v-if="modeprops.value && modeprops.value.id === 'attach'"
-				v-bind="depositselectprops"
-				v-model="depositselectprops.value"
-				required
-				:class="{ selecterror: depositselectprops.error }"
+			<NcSelect v-bind="serverprops" v-model="serverprops.value" required
+				:class="{ selecterror: serverprops.error }" @update:model-value="onChangeServer" />
+			<NcSelect v-if="modeprops.value && modeprops.value.id === 'attach'" v-bind="depositselectprops"
+				v-model="depositselectprops.value" required :class="{ selecterror: depositselectprops.error }"
 				@update:model-value="validate" />
-			<NcSelect
-				v-if="!modeprops.value || modeprops.value.id === 'create'"
-				v-bind="communityprops"
-				v-model="communityprops.value"
-				:disabled="!modeprops.value"
-				required
-				:class="{ selecterror: communityprops.error }"
-				@update:model-value="validate" />
-			<NcCheckboxRadioSwitch
-				v-if="!modeprops.value || modeprops.value.id === 'create'"
-				v-model="openAccess"
+			<NcSelect v-if="!modeprops.value || modeprops.value.id === 'create'" v-bind="communityprops"
+				v-model="communityprops.value" :disabled="!modeprops.value" required
+				:class="{ selecterror: communityprops.error }" @update:model-value="validate" />
+			<NcCheckboxRadioSwitch v-if="!modeprops.value || modeprops.value.id === 'create'" v-model="openAccess"
 				:disabled="!modeprops.value">
 				Open Access
 			</NcCheckboxRadioSwitch>
@@ -70,10 +38,7 @@
 				<NcButton aria-label="close" @click="closeModal">
 					Cancel
 				</NcButton>
-				<NcButton
-					:disabled="publish.disabled || publish.publishing"
-					type="primary"
-					aria-label="publish"
+				<NcButton :disabled="publish.disabled || publish.publishing" type="primary" aria-label="publish"
 					@click="createDeposit">
 					{{ getPublishLabel() }}
 				</NcButton>
@@ -250,7 +215,7 @@ export default {
 		async loadServers() {
 			const urlPath
 				= '/apps/b2sharebridge/servers?requesttoken='
-					+ encodeURIComponent(OC.requestToken)
+				+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(urlPath))
@@ -269,7 +234,7 @@ export default {
 		async loadCommunities() {
 			const urlPath
 				= '/apps/b2sharebridge/gettabviewcontent?requesttoken='
-					+ encodeURIComponent(OC.requestToken)
+				+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(urlPath))
@@ -288,7 +253,7 @@ export default {
 		async loadTokens() {
 			const urlPath
 				= '/apps/b2sharebridge/apitoken?requesttoken='
-					+ encodeURIComponent(OC.requestToken)
+				+ encodeURIComponent(OC.requestToken)
 
 			return axios
 				.get(generateUrl(urlPath))
@@ -309,19 +274,18 @@ export default {
 		},
 
 		updateDespositList() {
-			if (!this.depositselectprops.deposits || !this.serverprops.value) {
-				return
+			if (this.depositselectprops?.deposits && this.serverprops?.value
+				&& this.depositselectprops.deposits[this.serverprops.value.id] && this.depositselectprops.deposits[this.serverprops.value.id].hasOwnProperty('hits')) {
+				this.depositselectprops.options = []
+				const deposits = this.depositselectprops.deposits[this.serverprops.value.id].hits
+				deposits.forEach((deposit) => {
+					const depositOption = {
+						id: deposit.id,
+						label: deposit.metadata.titles[0].title,
+					}
+					this.depositselectprops.options.push(depositOption)
+				})
 			}
-
-			this.depositselectprops.options = []
-			const deposits = this.depositselectprops.deposits[this.serverprops.value.id].hits
-			deposits.forEach((deposit) => {
-				const depositOption = {
-					id: deposit.id,
-					label: deposit.metadata.titles[0].title,
-				}
-				this.depositselectprops.options.push(depositOption)
-			})
 		},
 
 		// Events

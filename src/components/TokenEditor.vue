@@ -12,7 +12,7 @@
 				:success="token.length === 60"
 				:helper-text="token.length === 60 ? 'Token saved' : ''"
 				@valid="saveToken"
-				@update:value="saveToken" />
+				@update:model-value="saveToken" />
 			<div class="bridgetoken__fields__buttons">
 				<NcButton type="error" aria-label="Delete Token" @click="deleteToken">
 					Delete Token

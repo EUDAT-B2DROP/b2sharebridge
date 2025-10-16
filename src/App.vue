@@ -103,7 +103,7 @@
 						<p>Please set a valid API token</p>
 						<NcButton
 							label="Set API Token"
-							:href="generateUrl('/settings/user/b2sharebridge')"
+							:href="getSettingsUrl()"
 							type="Primary"
 							area-label="Set API Token"
 							@click="redirect('/settings/user/b2sharebridge')">
@@ -278,7 +278,7 @@ export default {
 				.get(generateUrl(urlArr.join('')))
 				.then((response) => {
 					console.debug('Publication data:')
-					console.debug(response.data)
+					console.debug(this.Publications)
 					this.Publications = response.data
 					this.loadedPublications = true
 					// TODO maybe change layout of data
@@ -441,6 +441,10 @@ export default {
 		serverUpdate(serverId) {
 			console.debug('server id updated:' + serverId)
 			this.serverId = serverId
+		},
+
+		getSettingsUrl() {
+			return generateUrl('/settings/user/b2sharebridge')
 		},
 	},
 }

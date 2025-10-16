@@ -2,6 +2,7 @@
 /**
  * @author Joas Schilling <nickvergessen@owncloud.com>
  * @author Jörn Friedrich Dreyer <jfd@butonic.de>
+ * @author Marvin Winkens <m.winkens@fz-juelich.de>
  *
  * @copyright Copyright (c) 2016, ownCloud, Inc.
  * @license   AGPL-3.0
@@ -23,18 +24,15 @@ if (!defined('PHPUNIT_RUN')) {
 }
 
 if (!getenv('NEXTCLOUD_ROOT')) {
-    include_once __DIR__ . '/../../../lib/base.php';
+    require_once __DIR__ . '/../../../lib/base.php';
 } else {
-    include_once getenv('NEXTCLOUD_ROOT') . '/lib/base.php';
+    require_once getenv('NEXTCLOUD_ROOT') . '/lib/base.php';
 }
 
-// Fix for "Autoload path not allowed: .../tests/lib/testcase.php"
-\OC::$loader->addValidRoot(OC::$SERVERROOT . '/tests');
+//require_once __DIR__ . '/../../../tests/autoload.php';
 
-\OC_App::loadApp('b2sharebridge');
+\OCP\Server::get(\OCP\App\IAppManager::class)->loadApp('b2sharebridge');
 
 if (!class_exists('\PHPUnit\Framework\TestCase')) {
-    include_once 'PHPUnit/Autoload.php';
+	require_once('PHPUnit/Autoload.php');
 }
-
-OC_Hook::clear();

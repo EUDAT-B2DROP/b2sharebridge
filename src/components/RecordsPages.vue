@@ -6,26 +6,15 @@
 
 			<div class="rp__selectors__select">
 				<p>B2SHARE instance:</p>
-				<NcSelect
-					v-bind="selectedServer"
-					v-model="selectedServer.value"
-					:label-outside="true"
-					:options="selectedServer.options"
-					@update:model-value="updateServer" />
+				<NcSelect v-bind="selectedServer" v-model="selectedServer.value" :label-outside="true"
+					:options="selectedServer.options" @update:model-value="updateServer" />
 			</div>
 			<div class="rp__selectors__select">
 				<p>Page Size:</p>
-				<NcSelect
-					v-bind="selectPageSize"
-					v-model="selectPageSize.value"
-					:label-outside="true"
-					:options="selectPageSize.options"
-					@update:model-value="updatePageSize" />
+				<NcSelect v-bind="selectPageSize" v-model="selectPageSize.value" :label-outside="true"
+					:options="selectPageSize.options" @update:model-value="updatePageSize" />
 			</div>
-			<PageButtons
-				class="rp__selectors__pagebuttons"
-				:page="page"
-				:num-pages="getNumPages()"
+			<PageButtons class="rp__selectors__pagebuttons" :page="page" :num-pages="getNumPages()"
 				@page-update="updatePage" />
 		</div>
 		<!-- Listed Records: -->
@@ -39,40 +28,27 @@
 						</div>
 					</a>
 					<div class="rp__records__record__buttons">
-						<NcButton
-							v-if="!draft"
-							class="rp__records__record__buttons__next"
-							aria-label="Create a new Version"
-							target="_blank"
-							@click="nextVersion(record)">
+						<NcButton v-if="!draft" class="rp__records__record__buttons__next"
+							aria-label="Create a new Version" target="_blank" @click="nextVersion(record)">
 							<template #icon>
 								<Plus :size="30" />
 							</template>
 							New Version
 						</NcButton>
-						<NcButton
-							v-if="draft"
-							class="rp__records__record__buttons__publish"
-							aria-label="publish draft to B2SHARE"
-							:href="getLink(record)"
-							target="_blank">
+						<NcButton v-if="draft" class="rp__records__record__buttons__publish"
+							aria-label="publish draft to B2SHARE" :href="getLink(record)" target="_blank">
 							<template #icon>
 								<EarthArrowUp :size="30" />
 							</template>
 							Publish
 						</NcButton>
-						<NcButton
-							class="rp__records__record__buttons__download"
-							aria-label="Download B2SHARE contents to B2DROP"
-							@click="downloadRecord(record)">
+						<NcButton class="rp__records__record__buttons__download"
+							aria-label="Download B2SHARE contents to B2DROP" @click="downloadRecord(record)">
 							<template #icon>
 								<CloudDownload :size="30" />
 							</template>
 						</NcButton>
-						<NcButton
-							v-if="draft"
-							class="rp__records__record__buttons__delete"
-							aria-label="Delete Draft"
+						<NcButton v-if="draft" class="rp__records__record__buttons__delete" aria-label="Delete Draft"
 							@click="showDeleteModal(record)">
 							<template #icon>
 								<TrashCan :size="30" />
@@ -97,10 +73,7 @@
 		<!-- Bottom of Listing, with less selectors: -->
 		<div class="rp__selectors__bottom">
 			<p>{{ getResultsOverview() }}</p>
-			<PageButtons
-				class="rp__selectors__pagebuttons"
-				:page="page"
-				:num-pages="getNumPages()"
+			<PageButtons class="rp__selectors__pagebuttons" :page="page" :num-pages="getNumPages()"
 				@page-update="updatePage" />
 		</div>
 		<!-- Modals -->
@@ -139,18 +112,11 @@
 					<NcButton v-if="modalVersion.success" aria-label="Cancel" @click="closeModals">
 						Cancel
 					</NcButton>
-					<NcButton
-						v-if="modalVersion.success"
-						type="primary"
-						aria-label="Yes"
+					<NcButton v-if="modalVersion.success" type="primary" aria-label="Yes"
 						@click="changeStatus('draft')">
 						Ok
 					</NcButton>
-					<NcButton
-						v-else
-						type="primary"
-						aria-label="Yes"
-						@click="closeModals">
+					<NcButton v-else type="primary" aria-label="Yes" @click="closeModals">
 						Ok
 					</NcButton>
 				</span>
@@ -276,14 +242,14 @@ export default {
 
 		getRecords() {
 			if (this.selectedServer.value && this.selectedServer.value.id) {
-				return this.records[this.selectedServer.value.id].hits
+				return this.records[this.selectedServer.value.id].records.hits
 			}
 			return []
 		},
 
 		getNumRecords() {
 			if (this.selectedServer.value && this.selectedServer.value.id) {
-				return this.records[this.selectedServer.value.id].total
+				return this.records[this.selectedServer.value.id].records.total
 			}
 			return 0
 		},
@@ -311,7 +277,10 @@ export default {
 		},
 
 		getTitle(record) {
-			return record.metadata.titles[0].title
+			const title = record?.metadata?.titles?.[0]?.title
+				?? record?.metadata?.title
+				?? "ERROR: no title";
+			return title;
 		},
 
 		getDate(record) {
@@ -450,6 +419,7 @@ export default {
 
 		updateServerOptions() {
 			this.selectedServer.options = []
+			console.debug("Keys: " + Object.keys(this.records))
 			Object.keys(this.records).forEach((key) => {
 				this.selectedServer.options.push({
 					id: key,

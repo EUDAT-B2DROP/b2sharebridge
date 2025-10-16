@@ -16,6 +16,7 @@ use OCA\B2shareBridge\Model\DepositStatus;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
+use OCA\B2shareBridge\Publish\B2ShareFactory;
 use OCP\Files\IRootFolder;
 use OCP\IConfig;
 use OCP\IRequest;
@@ -75,6 +76,10 @@ class ViewControllerTest extends TestCase
 
         $urlGenerator = $this->getMockBuilder(IURLGenerator::class)
             ->getMock();
+        
+        $b2shareFactory = $this->getMockBuilder(B2ShareFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->data = [
             $this->createDepositStatus($this->userId, 0, "dep1", 1),//published
@@ -103,6 +108,7 @@ class ViewControllerTest extends TestCase
             $storage,
             $manager,
             $urlGenerator,
+            $b2shareFactory,
             $logger,
             $this->userId
         );

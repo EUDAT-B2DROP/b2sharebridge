@@ -185,8 +185,8 @@ class Curl
     {
         $info = $this->getInfo();
         $errors = $this->getError();
-        $this->logger->debug("CURL INFO: " . print_r($info, true), ['app' => Application::APP_ID]);
-        $this->logger->debug("CURL ERROR: " . print_r($errors, true), ['app' => Application::APP_ID]);
+        $this->logger->warning("CURL INFO: " . print_r($info, true), ['app' => Application::APP_ID]);
+        $this->logger->warning("CURL ERROR: " . print_r($errors, true), ['app' => Application::APP_ID]);
     }
 
     /**

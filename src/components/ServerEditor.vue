@@ -54,12 +54,14 @@
 			</NcTextField>
 			<div class="bridgeserver__row bridgeserver__input__div">
 				<p>B2SHARE API-version:</p>
+				<p v-if="mutable_version.id === 3">
+					(experimental!)
+				</p>
 				<NcSelect
 					v-bind="version_options"
 					v-model="mutable_version"
 					class="bridgeserver__input__div__select"
 					:label-outside="true"
-					:disabled="true"
 					@update:model-value="updateVersion" />
 			</div>
 		</div>
@@ -239,7 +241,7 @@ export default {
 			margin-top: 6px;
 
 			p {
-				margin-right: auto;
+				margin-inline-end: auto;
 			}
 
 			&__select {
@@ -259,7 +261,7 @@ export default {
 		margin-bottom: 10px;
 
 		#save {
-			margin-left: auto;
+			margin-inline-start: auto;
 		}
 	}
 }

@@ -20,9 +20,8 @@ use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\DepositStatusMapper;
 use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
-use OCA\B2shareBridge\Publish\B2ShareV2;
-use OCA\B2shareBridge\Publish\B2ShareV3;
 use OCA\B2shareBridge\Publish\B2ShareAPI;
+use OCA\B2shareBridge\Publish\B2ShareFactory;
 use OCA\B2shareBridge\Util\Helper;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -52,20 +51,22 @@ class TransferHandler extends QueuedJob
     private ServerMapper $_smapper;
     private CommunityMapper $_cmapper;
     protected IManager $notManager;
+    private B2ShareFactory $_b2shareFactory;
     protected LoggerInterface $logger;
     private IRootFolder $_rootFolder;
 
     /**
      * Create the database mapper
      *
-     * @param ITimeFactory|null        $time       Time
-     * @param DepositStatusMapper|null $mapper     the database mapper for transfers
-     * @param DepositFileMapper|null   $dfmapper   ORM for DepositFile
-     * @param ServerMapper|null        $smapper    Server Mapper
-     * @param CommunityMapper|null     $cmapper    Community Mapper
-     * @param IManager|null            $notManager Manager
-     * @param LoggerInterface|null     $logger     LoggerInterface
-     * @param IRootFolder|null         $rootFolder RootFolder
+     * @param ITimeFactory|null        $time           Time
+     * @param DepositStatusMapper|null $mapper         The database mapper for transfers
+     * @param DepositFileMapper|null   $dfmapper       ORM for DepositFile
+     * @param ServerMapper|null        $smapper        Server Mapper
+     * @param CommunityMapper|null     $cmapper        Community Mapper
+     * @param IManager|null            $notManager     Manager
+     * @param B2ShareFactory|null      $b2shareFactory B2Share API factory
+     * @param LoggerInterface|null     $logger         LoggerInterface
+     * @param IRootFolder|null         $rootFolder     RootFolder
      */
     public function __construct(
         ITimeFactory $time = null,
@@ -74,12 +75,14 @@ class TransferHandler extends QueuedJob
         ServerMapper $smapper = null,
         Communitymapper $cmapper = null,
         IManager $notManager = null,
+        B2ShareFactory $b2shareFactory = null,
         LoggerInterface $logger = null,
         IRootFolder $rootFolder = null,
     ) {
         parent::__construct($time);
-        if ($dfmapper === null or $mapper === null or $smapper === null or $cmapper === null
-            or $logger === null or $notManager === null or $rootFolder === null
+        if (
+            $dfmapper === null or $mapper === null or $smapper === null or $cmapper === null
+            or $logger === null or $notManager === null or $rootFolder === null or $b2shareFactory === null
         ) {
             $this->fixTransferForCron();
         } else {
@@ -87,6 +90,7 @@ class TransferHandler extends QueuedJob
             $this->_dfmapper = $dfmapper;
             $this->_smapper = $smapper;
             $this->_cmapper = $cmapper;
+            $this->_b2shareFactory = $b2shareFactory;
             $this->logger = $logger;
             $this->notManager = $notManager;
             $this->_rootFolder = $rootFolder;
@@ -107,6 +111,7 @@ class TransferHandler extends QueuedJob
         $this->_smapper = $application->getContainer()->get(ServerMapper::class);
         $this->_cmapper = $application->getContainer()->get(CommunityMapper::class);
         $this->notManager = $application->getContainer()->get(IManager::class);
+        $this->_b2shareFactory = $application->getContainer()->get(B2ShareFactory::class);
         $this->logger = $application->getContainer()->get(LoggerInterface::class);
         $this->_rootFolder = $application->getContainer()->get(IRootFolder::class);
     }
@@ -161,7 +166,7 @@ class TransferHandler extends QueuedJob
             $notification->setUser($user);
             $server = $this->_smapper->find($serverId);
 
-            $publisher = $server->getPublisher();
+            $publisher = $this->_b2shareFactory->get($server->getVersion());
             $publisher->setCheckSSL($server->getCheckSsl());
 
             // create draft or get file upload link
@@ -175,7 +180,7 @@ class TransferHandler extends QueuedJob
                     );
                     $fcStatus->setErrorMessage("No upload result, please check your drafts, as it may be created anyway!");
                     $fcStatus->setStatus(3);
-                    throw new UploadNotificationException('no_upload_result', ['url' => $server->getPublishUrl()]);    
+                    throw new UploadNotificationException('no_upload_result', ['url' => $server->getPublishUrl()]);
                 }
 
                 $draftId = $createResult[0];
@@ -272,7 +277,8 @@ class TransferHandler extends QueuedJob
         }
 
         $mode = $args['mode'];
-        if ((!Helper::arrayKeysExist(['title', 'community', 'open_access'], $args) && $mode == 'create')
+        if (
+            (!Helper::arrayKeysExist(['title', 'community', 'open_access'], $args) && $mode == 'create')
             || (!Helper::arrayKeysExist(['draftId'], $args) && $mode == 'attach')
         ) {
             $message = 'Missing parameters for mode';

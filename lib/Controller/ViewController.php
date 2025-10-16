@@ -20,6 +20,7 @@ use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\Server;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
+use OCA\B2shareBridge\Publish\B2ShareFactory;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -63,23 +64,25 @@ class ViewController extends Controller
     private LoggerInterface $_logger;
     private IRootFolder $_storage;
     private IURLGenerator $_urlGenerator;
+    private B2ShareFactory $_b2shareFactory;
 
     /**
      * Creates the AppFramwork Controller
      *
-     * @param string              $appName      Name of the app
-     * @param IRequest            $request      Request
-     * @param IConfig             $config       Config
-     * @param DepositStatusMapper $mapper       Deposit Status Mapper
-     * @param DepositFileMapper   $fdmapper     ORM for DepositFile
-     * @param CommunityMapper     $cMapper      Community mapper
-     * @param ServerMapper        $smapper      Server Mapper
-     * @param StatusCodes         $statusCodes  Status Code Mapper
-     * @param IRootFolder         $storage      Storage Interface for file creation
-     * @param IManager            $manager      IManager for Notifications
-     * @param IURLGenerator       $urlGenerator Url Generator
-     * @param LoggerInterface     $logger       Logger
-     * @param string              $userId       User ID
+     * @param string              $appName        Name of the app
+     * @param IRequest            $request        Request
+     * @param IConfig             $config         Config
+     * @param DepositStatusMapper $mapper         Deposit Status Mapper
+     * @param DepositFileMapper   $fdmapper       ORM for DepositFile
+     * @param CommunityMapper     $cMapper        Community mapper
+     * @param ServerMapper        $smapper        Server Mapper
+     * @param StatusCodes         $statusCodes    Status Code Mapper
+     * @param IRootFolder         $storage        Storage Interface for file creation
+     * @param IManager            $manager        IManager for Notifications
+     * @param IURLGenerator       $urlGenerator   Url Generator
+     * @param B2ShareFactory      $b2shareFactory B2share API factory
+     * @param LoggerInterface     $logger         Logger
+     * @param string              $userId         User ID
      */
     public function __construct(
         $appName,
@@ -93,6 +96,7 @@ class ViewController extends Controller
         IRootFolder $storage,
         IManager $manager,
         IURLGenerator $urlGenerator,
+        B2ShareFactory $b2shareFactory,
         LoggerInterface $logger,
         string $userId,
     ) {
@@ -108,6 +112,7 @@ class ViewController extends Controller
         $this->notManager = $manager;
         $this->_urlGenerator = $urlGenerator;
         $this->_logger = $logger;
+        $this->_b2shareFactory = $b2shareFactory;
     }
 
     /**
@@ -216,13 +221,18 @@ class ViewController extends Controller
         $serverResponses = [];
         $servers = $this->smapper->findAll();
         foreach ($servers as $server) {
-            $records = $this->_getUserRecords($server, $draft, $page, $size);
             $serverId = $server->getId();
-            if ($records) {
-                $serverResponses[$serverId] = $records;
-                $serverResponses[$serverId]["server_url"] = $server->getPublishUrl();
-                $serverResponses[$serverId]["server_version"] = $server->getVersion();
-                $serverResponses[$serverId]["server_name"] = $server->getName();
+            $serverResponses[$serverId] = [
+                'records' => [],
+                'server_url' => $server->getPublishUrl(),
+                'server_version' => $server->getVersion(),
+                'server_name' => $server->getName()
+            ];
+
+            if($server->getVersion() == 3) {
+                $publisher = $this->_b2shareFactory->get($server->getVersion());
+                $records = $publisher->getUserRecords($server, $this->userId, $draft, $page, $size);
+                $serverResponses[$serverId]['records'] = $records;
             }
         }
         return new JSONResponse($serverResponses);
@@ -328,7 +338,7 @@ class ViewController extends Controller
         //TODO catch errors and return HTTP 500
         $servers = $this->smapper->findAll();
         foreach ($servers as $server) {
-            $publisher = $server->getPublisher();
+            $publisher = $this->_b2shareFactory->get($server->getVersion());
             $token = $publisher->getAccessToken($server, $this->userId);
             $serverId = $server->getId();
             $ret[$serverId] = $token ?? "";
@@ -361,7 +371,7 @@ class ViewController extends Controller
     public function deleteRecord($serverId, $recordId)
     {
         $server = $this->smapper->find($serverId);
-        $publisher = $server->getPublisher();
+        $publisher = $this->_b2shareFactory->get($server->getVersion());
         $token = $publisher->getAccessToken($server, $this->userId);
         if (!$token) {
             return new JSONResponse([], Http::STATUS_BAD_REQUEST);
@@ -428,14 +438,14 @@ class ViewController extends Controller
         }
 
         $server = $this->smapper->find($serverId);
-        $publisher = $server->getPublisher();
+        $publisher = $this->_b2shareFactory->get($server->getVersion());
         $accessToken = $publisher->getAccessToken($server, $this->userId);
 
         // do a recovery if necessary
         if (!array_key_exists("files", $record["links"])) {
             $selfPath = $record["links"]["self"] . "?access_token=$accessToken";
             $content = $publisher->request($server, $selfPath);
-            
+
             if ($content) {
                 $selfRecord = json_decode($content, true);
                 $record["links"]["files"] = $selfRecord["links"]["files"];
@@ -493,7 +503,8 @@ class ViewController extends Controller
         $requiredSize = 4; // start directory
         foreach ($files as $file) {
             // validate file
-            if (!array_key_exists("links", $file)
+            if (
+                !array_key_exists("links", $file)
                 || !array_key_exists("size", $file)
                 || !array_key_exists("key", $file)
                 || !array_key_exists("self", $file["links"])
@@ -585,56 +596,6 @@ class ViewController extends Controller
             ],
             Http::STATUS_OK
         );
-    }
-
-    /**
-     * Gets user records for a single server
-     * 
-     * @param Server $server Server object
-     * @param bool   $draft  true for (only) draft records, else false
-     * @param int    $page   page number, you are limited to 50 records by B2SHARE Api
-     * @param int    $size   page size, number of records per page
-     * 
-     * @return array
-     */
-    private function _getUserRecords($server, $draft, $page, $size): array
-    {
-        $publisher = $server->getPublisher();
-        $token = $publisher->getAccessToken($server, $this->userId);
-        if (!$token) {
-            return [];
-        }
-
-        $params = [
-            'page' => $page,
-            'size' => $size,
-            'sort' => 'mostrecent'
-        ];
-        if ($draft) {
-            // https://doc.eudat.eu/b2share/httpapi/#search-drafts
-            $params = ["drafts" => 1, "access_token" => $token] + $params;
-        } else {
-            $userId = $publisher->getB2shareUserId($server, $token);
-            $params["q"] = "owners:$userId";
-        }
-        $httpParams = http_build_query($params);
-        $serverUrl = $server->getPublishUrl();
-        $urlPath = "$serverUrl/api/records/?$httpParams";
-
-        $output = $publisher->request($server, $urlPath);
-
-        if (!$output) {
-            return [];
-        }
-        $outputRecords = json_decode($output, true);
-        if (array_key_exists("hits", $outputRecords)) {
-            $records = $outputRecords["hits"];
-
-            if (array_key_exists("hits", $records)) {
-                return $records;
-            }
-        }
-        return [];
     }
 
     /**

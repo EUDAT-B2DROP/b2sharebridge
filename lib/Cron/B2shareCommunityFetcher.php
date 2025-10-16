@@ -76,7 +76,7 @@ class B2shareCommunityFetcher extends TimedJob
         $communityMapper = new CommunityMapper($this->_dbconnection);
         $servers = $serverMapper->findAll();
         foreach ($servers as $server) {
-            $publisher = $server->getPublisher();
+            $publisher = $this->_b2shareFactory->get($server->getVersion());
             $json = $publisher->fetchCommunities($server);
             if (!$json) {
                 $this->_logger->error(

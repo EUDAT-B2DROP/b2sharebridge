@@ -27,6 +27,7 @@ use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Util\Helper;
+use OCA\B2shareBridge\Publish\B2ShareFactory;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
@@ -64,24 +65,26 @@ class PublishController extends Controller
     private CommunityMapper $_cmapper;
     private IJobList $_jobList;
     private IRootFolder $_rootFolder;
+    private B2ShareFactory $_b2shareFactory;
 
     /**
      * Creates the AppFramwork Controller
      *
-     * @param string              $appName     name of the app
-     * @param IRequest            $request     request object
-     * @param IConfig             $config      config object
-     * @param DepositStatusMapper $mapper      Deposit Status Mapper
-     * @param DepositFileMapper   $dfmapper    ORM for DepositFile objects
-     * @param StatusCodes         $statusCodes Status Code Mapper
-     * @param ITimeFactory        $time        Time
-     * @param ServerMapper        $smapper     Server Mapper
-     * @param CommunityMapper     $cmapper     Community Mapper
-     * @param IManager            $notManager  Manager
-     * @param LoggerInterface     $logger      Logger
-     * @param IJobList            $jobList     NC job interface
-     * @param IRootFolder         $rootFolder  Nextcloud filesystem interface
-     * @param string              $userId      userid
+     * @param string              $appName        name of the app
+     * @param IRequest            $request        request object
+     * @param IConfig             $config         config object
+     * @param DepositStatusMapper $mapper         Deposit Status Mapper
+     * @param DepositFileMapper   $dfmapper       ORM for DepositFile objects
+     * @param StatusCodes         $statusCodes    Status Code Mapper
+     * @param ITimeFactory        $time           Time
+     * @param ServerMapper        $smapper        Server Mapper
+     * @param CommunityMapper     $cmapper        Community Mapper
+     * @param IManager            $notManager     Manager
+     * @param LoggerInterface     $logger         Logger
+     * @param IJobList            $jobList        NC job interface
+     * @param IRootFolder         $rootFolder     Nextcloud filesystem interface
+     * @param B2ShareFactory      $b2shareFactory B2share API factory
+     * @param string              $userId         userid
      */
     public function __construct(
         $appName,
@@ -97,6 +100,7 @@ class PublishController extends Controller
         LoggerInterface $logger,
         IJobList $jobList,
         IRootFolder $rootFolder,
+        B2ShareFactory $b2shareFactory,
         string $userId
     ) {
         parent::__construct($appName, $request);
@@ -112,6 +116,7 @@ class PublishController extends Controller
         $this->_jobList = $jobList;
         $this->_rootFolder = $rootFolder;
         $this->notManager = $notManager;
+        $this->_b2shareFactory = $b2shareFactory;
     }
 
     /**
@@ -195,7 +200,7 @@ class PublishController extends Controller
             $token = $this->config->getUserValue($this->userId, $this->appName, "token_$serverId");
             $serverUrl = $server->getPublishUrl();
             $recordId = $param['recordId'];
-            $publisher = $server->getPublisher();
+            $publisher = $this->_b2shareFactory->get($server->getVersion());
             $content = $publisher->nextVersion($server, $recordId, $token);
             if (!$content) {
                 throw new ControllerValidationException("error on upstream server $serverUrl", Http::STATUS_BAD_GATEWAY);

@@ -24,6 +24,7 @@ use OCA\B2shareBridge\Model\DepositFileMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
 use OCA\B2shareBridge\Model\StatusCodes;
 use OCA\B2shareBridge\Notification\Notifier;
+use OCA\B2shareBridge\Publish\B2ShareFactory;
 use OCA\B2shareBridge\Publish\B2ShareV2;
 use OCA\B2shareBridge\Publish\B2ShareV3;
 use OCA\B2shareBridge\Util\Curl;
@@ -164,7 +165,7 @@ class Application extends App implements IBootstrap
 
         $context->registerService(
             B2ShareV2::class,
-            function (ContainerInterface $c): B2shareV2 {
+            function (ContainerInterface $c): B2ShareV2 {
                 return new B2ShareV2(
                     $c->get('appName'),
                     $c->get(IConfig::class),
@@ -176,12 +177,22 @@ class Application extends App implements IBootstrap
 
         $context->registerService(
             B2ShareV3::class,
-            function (ContainerInterface $c): B2shareV3 {
+            function (ContainerInterface $c): B2ShareV3 {
                 return new B2ShareV3(
                     $c->get('appName'),
                     $c->get(IConfig::class),
                     $c->get(LoggerInterface::class),
                     $c->get(Curl::class)
+                );
+            }
+        );
+
+        $context->registerService(
+            B2ShareFactory::class,
+            function (ContainerInterface $c): B2ShareFactory {
+                return new B2ShareFactory(
+                    $c->get(B2ShareV2::class),
+                    $c->get(B2ShareV3::class),
                 );
             }
         );
@@ -240,6 +251,7 @@ class Application extends App implements IBootstrap
                     $c->get(LoggerInterface::class),
                     $c->get(IJobList::class),
                     $c->get(IRootFolder::class),
+                    $c->get(B2ShareFactory::class),
                     $c->get("userId")
                 );
             }
@@ -260,6 +272,7 @@ class Application extends App implements IBootstrap
                     $c->get(IRootFolder::class),
                     $c->get(IManager::class),
                     $c->get(IURLGenerator::class),
+                    $c->get(B2ShareFactory::class),
                     $c->get(LoggerInterface::class),
                     $c->get("userId")
                 );

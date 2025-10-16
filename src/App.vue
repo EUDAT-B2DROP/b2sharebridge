@@ -87,10 +87,10 @@
 			</div>
 			<div v-else-if="!loadedPublications">
 				<h2 v-if="currentState === BridgeState.RECORDS_PUBLISHED" style="text-align: center;">
-					{{ t('b2sharebridge', 'Loading publications ...') }}
+					{{ t('b2sharebridge', 'Loading publications …') }}
 				</h2>
 				<h2 v-if="currentState === BridgeState.RECORDS_DRAFT" style="text-align: center;">
-					{{ t('b2sharebridge', 'Loading drafts ...') }}
+					{{ t('b2sharebridge', 'Loading drafts …') }}
 				</h2>
 			</div>
 			<div v-else-if="Publications.length === 0">

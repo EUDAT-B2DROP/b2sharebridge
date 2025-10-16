@@ -2,7 +2,12 @@ import { FileAction, FileType, Permission } from '@nextcloud/files'
 import { spawnDialog } from '@nextcloud/vue/functions/dialog'
 import BridgeDialog from '../components/BridgeDialog.vue'
 
-const filepicker = async (nodes) => {
+/**
+ * Spawn nextcloud dialog for b2sharebridge
+ *
+ * @param {[Node]} nodes File Nodes, each node is for one file
+ */
+async function filepicker(nodes) {
 	const FileIds = nodes.map((node) => node.fileid)
 	console.debug(FileIds)
 	spawnDialog(BridgeDialog, { selectedFiles: FileIds })

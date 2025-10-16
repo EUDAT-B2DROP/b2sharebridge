@@ -8,7 +8,7 @@
 							{{ field.name }}
 							<span class="sortbuttons">
 								<NcButton
-									type="secondary"
+									variant="secondary"
 									aria-label="Ascending Sort"
 									class="sorttop"
 									:disabled="sortBy === field.label && sortDir === 'asc'"
@@ -18,7 +18,7 @@
 									</template>
 								</NcButton>
 								<NcButton
-									type="secondary"
+									variant="secondary"
 									aria-label="Descending Sort"
 									class="sortbottom"
 									:disabled="sortBy === field.label && sortDir === 'desc'"
@@ -114,7 +114,7 @@ export default {
 .sortable-table th,
 .sortable-table td {
 	padding: 4px;
-	border-right: 1px solid;
+	border-inline-end: 1px solid;
 	border-color: var(--color-border);
 }
 

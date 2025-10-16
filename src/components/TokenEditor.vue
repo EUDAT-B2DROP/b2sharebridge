@@ -14,7 +14,7 @@
 				@valid="saveToken"
 				@update:model-value="saveToken" />
 			<div class="bridgetoken__fields__buttons">
-				<NcButton type="error" aria-label="Delete Token" @click="deleteToken">
+				<NcButton variant="error" aria-label="Delete Token" @click="deleteToken">
 					Delete Token
 				</NcButton>
 			</div>

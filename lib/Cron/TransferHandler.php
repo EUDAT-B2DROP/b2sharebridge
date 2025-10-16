@@ -80,8 +80,7 @@ class TransferHandler extends QueuedJob
         IRootFolder $rootFolder = null,
     ) {
         parent::__construct($time);
-        if (
-            $dfmapper === null or $mapper === null or $smapper === null or $cmapper === null
+        if ($dfmapper === null or $mapper === null or $smapper === null or $cmapper === null
             or $logger === null or $notManager === null or $rootFolder === null or $b2shareFactory === null
         ) {
             $this->fixTransferForCron();
@@ -277,8 +276,7 @@ class TransferHandler extends QueuedJob
         }
 
         $mode = $args['mode'];
-        if (
-            (!Helper::arrayKeysExist(['title', 'community', 'open_access'], $args) && $mode == 'create')
+        if ((!Helper::arrayKeysExist(['title', 'community', 'open_access'], $args) && $mode == 'create')
             || (!Helper::arrayKeysExist(['draftId'], $args) && $mode == 'attach')
         ) {
             $message = 'Missing parameters for mode';

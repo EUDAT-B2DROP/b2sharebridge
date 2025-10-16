@@ -18,7 +18,7 @@ use OCA\B2shareBridge\Publish\B2ShareV2;
 use OCA\B2shareBridge\Publish\B2ShareV3;
 
 /**
- * get A b2share API by version
+ * Get a B2Share API by version
  *
  * @category Owncloud
  * @package  B2shareBridge
@@ -28,14 +28,14 @@ use OCA\B2shareBridge\Publish\B2ShareV3;
  */
 class B2ShareFactory
 {
-    protected B2ShareV2 $_v2;
-    protected B2ShareV3 $_v3;
+    private B2ShareV2 $_v2;
+    private B2ShareV3 $_v3;
 
     /**
      * Create object for B2Share API creation
      *
-     * @param B2ShareV2 v2
-     * @param B2ShareV3 v3
+     * @param B2ShareV2 $v2 B2Share API v2
+     * @param B2ShareV3 $v3 B2Share API v3
      */
     public function __construct(B2ShareV2 $v2, B2ShareV3 $v3)
     {
@@ -45,7 +45,9 @@ class B2ShareFactory
 
     /**
      * Get B2Share API instance 
-     * @param int $version
+     *
+     * @param int $version Version as integer, e.g. 2/3
+     * 
      * @return B2ShareV2|B2ShareV3|null
      */
     public function get(int $version): B2ShareAPI|null

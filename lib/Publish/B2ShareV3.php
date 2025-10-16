@@ -164,15 +164,15 @@ class B2ShareV3 extends B2ShareAPI
         return "{$server->getPublishUrl()}/uploads/{$draftId}";
     }
 
-        /**
-         * Delete a draft by ID
-         * 
-         * @param \OCA\B2shareBridge\Model\Server $server  Server to delete draft from
-         * @param string                          $draftId Draft ID
-         * @param mixed                           $token   B2share token
-         * 
-         * @return bool|string Server answer
-         */
+    /**
+     * Delete a draft by ID
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server  Server to delete draft from
+     * @param string                          $draftId Draft ID
+     * @param mixed                           $token   B2share token
+     * 
+     * @return bool|string Server answer
+     */
     public function deleteDraft(Server $server, string $draftId, $token)
     {
         $serverUrl = $server->getPublishUrl();
@@ -296,8 +296,7 @@ class B2ShareV3 extends B2ShareAPI
                 return $records;
                 //return [1 => "test"];
             }
-        }
-        else {
+        } else {
             $this->logger->error("Array key hits does not exist");
             $this->logger->error(var_dump($outputRecords));
         }

@@ -229,11 +229,9 @@ class ViewController extends Controller
                 'server_name' => $server->getName()
             ];
 
-            if($server->getVersion() == 3) {
-                $publisher = $this->_b2shareFactory->get($server->getVersion());
-                $records = $publisher->getUserRecords($server, $this->userId, $draft, $page, $size);
-                $serverResponses[$serverId]['records'] = $records;
-            }
+            $publisher = $this->_b2shareFactory->get($server->getVersion());
+            $records = $publisher->getUserRecords($server, $this->userId, $draft, $page, $size);
+            $serverResponses[$serverId]['records'] = $records;
         }
         return new JSONResponse($serverResponses);
     }
@@ -503,8 +501,7 @@ class ViewController extends Controller
         $requiredSize = 4; // start directory
         foreach ($files as $file) {
             // validate file
-            if (
-                !array_key_exists("links", $file)
+            if (!array_key_exists("links", $file)
                 || !array_key_exists("size", $file)
                 || !array_key_exists("key", $file)
                 || !array_key_exists("self", $file["links"])

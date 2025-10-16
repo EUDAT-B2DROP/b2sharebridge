@@ -248,4 +248,59 @@ class B2ShareV3 extends B2ShareAPI
         $createNextVersionUrl = "{$server->getPublishUrl()}/api/records/$recordId/draft?access_token=$token";
         return $this->curl->post($createNextVersionUrl, '');
     }
+
+    /**
+     * Gets user records for a single server
+     * 
+     * @param Server $server Server object
+     * @param string $userId User id
+     * @param bool   $draft  True for (only) draft records, else false
+     * @param int    $page   Page number, you are limited to 50 records by B2SHARE Api
+     * @param int    $size   Page size, number of records per page
+     * 
+     * @return array
+     */
+    public function getUserRecords($server, $userId, $draft, $page, $size): array
+    {
+        $token = $this->getAccessToken($server, $userId);
+        if (!$token) {
+            return [];
+        }
+
+        $params = [
+            'page' => $page,
+            'size' => $size,
+            'sort' => 'newest'
+        ];
+        if ($draft) {
+            // https://doc.eudat.eu/b2share/httpapi/#search-drafts
+            $params = ["drafts" => 1, "access_token" => $token] + $params;
+        } else {
+            $userId = $this->getB2shareUserId($server, $token);
+            $params["q"] = "owners:$userId";
+        }
+        $httpParams = http_build_query($params);
+        $serverUrl = $server->getPublishUrl();
+        $urlPath = "$serverUrl/api/records?$httpParams";
+
+        $output = $this->request($server, $urlPath);
+
+        if (is_bool($output) && $output === false) {
+            return [];
+        }
+        $outputRecords = json_decode($output, true);
+        if (array_key_exists("hits", $outputRecords)) {
+            $records = $outputRecords["hits"];
+
+            if (array_key_exists("hits", $records)) {
+                return $records;
+                //return [1 => "test"];
+            }
+        }
+        else {
+            $this->logger->error("Array key hits does not exist");
+            $this->logger->error(var_dump($outputRecords));
+        }
+        return [];
+    }
 }

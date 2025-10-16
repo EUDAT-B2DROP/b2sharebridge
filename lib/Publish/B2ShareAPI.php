@@ -137,6 +137,7 @@ abstract class B2ShareAPI
     public function request(Server $server, string $filesUrl): bool|string
     {
         if (!str_starts_with($filesUrl, $server->getPublishUrl())) {
+            $this->logger->error("Invalid sites call detected. $filesUrl");
             return false;
         }
         return $this->curl->request($filesUrl);
@@ -182,4 +183,17 @@ abstract class B2ShareAPI
      * @return void
      */
     abstract public function nextVersion(Server $server, string $recordId, string $token): string|bool;
+
+        /**
+     * Gets user records for a single server
+     * 
+     * @param Server $server Server object
+     * @param string $userId User id
+     * @param bool   $draft  True for (only) draft records, else false
+     * @param int    $page   Page number, you are limited to 50 records by B2SHARE Api
+     * @param int    $size   Page size, number of records per page
+     * 
+     * @return array
+     */
+    abstract public function getUserRecords(Server $server, string $userId, bool $draft, int $page, int $size): array;
 }

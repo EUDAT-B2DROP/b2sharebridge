@@ -18,6 +18,7 @@ use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Model\Community;
 use OCA\B2shareBridge\Model\CommunityMapper;
 use OCA\B2shareBridge\Model\ServerMapper;
+use OCA\B2shareBridge\Publish\B2ShareFactory;
 use OCP\DB\Exception;
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
@@ -41,6 +42,7 @@ class B2shareCommunityFetcher extends TimedJob
     private IConfig $_config;
     private LoggerInterface $_logger;
     private IDBConnection $_dbconnection;
+    private B2ShareFactory $_b2shareFactory;
 
     /**
      * Create cron that is fetching the b2share communities api
@@ -51,12 +53,13 @@ class B2shareCommunityFetcher extends TimedJob
      * @param \OCP\IDBConnection                     $dbconnection connection
      * @param \OCP\AppFramework\Utility\ITimeFactory $time 
      */
-    public function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $dbconnection, ITimeFactory $time)
+    public function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $dbconnection, ITimeFactory $time, B2ShareFactory $b2shareFactory)
     {
         parent::__construct($time);
         $this->_config = $config;
         $this->_logger = $logger;
         $this->_dbconnection = $dbconnection;
+        $this->_b2shareFactory = $b2shareFactory;
         // Run once an hour
         $this->setInterval(3600);
     }

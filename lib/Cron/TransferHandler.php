@@ -69,15 +69,15 @@ class TransferHandler extends QueuedJob
      * @param IRootFolder|null         $rootFolder     RootFolder
      */
     public function __construct(
-        ITimeFactory $time = null,
-        DepositStatusMapper $mapper = null,
-        DepositFileMapper $dfmapper = null,
-        ServerMapper $smapper = null,
-        Communitymapper $cmapper = null,
-        IManager $notManager = null,
-        B2ShareFactory $b2shareFactory = null,
-        LoggerInterface $logger = null,
-        IRootFolder $rootFolder = null,
+        ITimeFactory|null $time = null,
+        DepositStatusMapper|null $mapper = null,
+        DepositFileMapper|null $dfmapper = null,
+        ServerMapper|null $smapper = null,
+        Communitymapper|null $cmapper = null,
+        IManager|null $notManager = null,
+        B2ShareFactory|null $b2shareFactory = null,
+        LoggerInterface|null $logger = null,
+        IRootFolder|null $rootFolder = null,
     ) {
         parent::__construct($time);
         if ($dfmapper === null or $mapper === null or $smapper === null or $cmapper === null
@@ -276,7 +276,8 @@ class TransferHandler extends QueuedJob
         }
 
         $mode = $args['mode'];
-        if ((!Helper::arrayKeysExist(['title', 'community', 'open_access'], $args) && $mode == 'create')
+        if (
+            (!Helper::arrayKeysExist(['title', 'community', 'open_access'], $args) && $mode == 'create')
             || (!Helper::arrayKeysExist(['draftId'], $args) && $mode == 'attach')
         ) {
             $message = 'Missing parameters for mode';

@@ -421,6 +421,7 @@ class PublishController extends Controller
             $this->_smapper,
             $this->_cmapper,
             $this->notManager,
+            $this->_b2shareFactory,
             $this->logger,
             $this->_rootFolder
         );

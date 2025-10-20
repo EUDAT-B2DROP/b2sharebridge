@@ -17,6 +17,7 @@ namespace OCA\B2shareBridge\Util;
 use CurlHandle;
 use OCA\B2shareBridge\AppInfo\Application;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 
 /**
  * Curl, but object orientated
@@ -30,7 +31,7 @@ use Psr\Log\LoggerInterface;
  */
 class Curl
 {
-    private CurlHandle $_ch;
+    private bool $_ssl;
     protected LoggerInterface $logger;
 
     /**
@@ -41,30 +42,52 @@ class Curl
      */
     public function __construct(LoggerInterface $logger, bool $ssl = true)
     {
-        $this->_ch = curl_init();
+        $this->logger = $logger;
+        $this->_ssl = $ssl;
+    }
+
+    /**
+     * Setup curl
+     * @param array $header List of headers
+     * 
+     * @throws RuntimeException
+     * 
+     * @return CurlHandle|resource
+     */
+    private function setup(array $header = []): CurlHandle
+    {
+        $ch = curl_init();
+        if (is_bool($ch)) {
+            throw new RuntimeException("Failed to initialize curl");
+        }
+        $json_header = [
+            'Accept:application/json',
+        ];
         $defaults = [
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,
             CURLOPT_HEADER => 0,
-            CURLOPT_HTTPHEADER => [
-                'Accept:application/json',
-            ],
+            CURLOPT_HTTPHEADER => array_merge($header, $json_header),
         ];
-        curl_setopt_array($this->_ch, $defaults);
-        $this->setSSL($ssl);
-        $this->logger = $logger;
+        curl_setopt_array($ch, $defaults);
+        $this->setSSLRequest($ch);
+        return $ch;
     }
 
     /**
-     * Summary of __destruct
+     * Tears down curl connection
+     * 
+     * @param CurlHandle $ch
+     * 
+     * @return void
      */
-    public function __destruct()
+    private function tearDown(CurlHandle $ch)
     {
-        curl_close($this->_ch);
+        curl_close($ch);
     }
 
     /**
-     * Activate/Deactivate SSL
+     * Activate/Deactivate SSL in a curl request
      * 
      * @param bool $ssl False/true
      * 
@@ -72,15 +95,27 @@ class Curl
      */
     public function setSSL(bool $ssl)
     {
+        $this->_ssl = $ssl;
+    }
+
+    /**
+     * Activate/Deactivate SSL in a curl request
+     * 
+     * @param bool $ssl False/true
+     * 
+     * @return void
+     */
+    private function setSSLRequest(CurlHandle $ch)
+    {
         $defaults = [];
-        if ($ssl) {
+        if ($this->_ssl) {
             $defaults[CURLOPT_SSL_VERIFYHOST] = 2;
             $defaults[CURLOPT_SSL_VERIFYPEER] = 1;
         } else {
             $defaults[CURLOPT_SSL_VERIFYHOST] = 0;
             $defaults[CURLOPT_SSL_VERIFYPEER] = 0;
         }
-        curl_setopt_array($this->_ch, $defaults);
+        curl_setopt_array($ch, $defaults);
     }
 
     /**
@@ -88,20 +123,30 @@ class Curl
      *
      * @param string $urlPath URL
      * @param string $type    REST type, e.g. GET, DELETE, PUT, ...
+     * @param array  $header  List of headers, e.g. ["Authorization: Bearer <Token>"]
      * 
      * @return bool|string
      */
-    public function request($urlPath, $type = 'GET'): bool|string
+    public function request(string $urlPath, string $type = 'GET', array $header = []): bool|string
     {
-        curl_setopt($this->_ch, CURLOPT_URL, $urlPath);
+        $ch = $this->setup($header);
+        curl_setopt($ch, CURLOPT_URL, $urlPath);
+
         if ($type != 'GET') {
-            curl_setopt($this->_ch, CURLOPT_CUSTOMREQUEST, $type);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type);
         }
-        curl_setopt($this->_ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($this->_ch);
+
+        if ($header) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+        }
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $output = curl_exec($ch);
         if (!$output) {
-            $this->_logErrors();
+            $this->_logErrors($ch);
         }
+
+        $this->tearDown($ch);
         return $output;
     }
 
@@ -116,6 +161,7 @@ class Curl
      */
     public function upload(string $file_upload_url, mixed $filehandle, string $filesize): bool
     {
+        $ch = $this->setup();
         $config = [
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_URL => $file_upload_url,
@@ -134,14 +180,16 @@ class Curl
                 'Content-Type: application/octet-stream'
             ]
         ];
-        curl_setopt_array($this->_ch, $config);
+        curl_setopt_array($ch, $config);
 
-        $response = curl_exec($this->_ch);
-        curl_close($this->_ch);
+        $response = curl_exec($ch);
+        curl_close($ch);
         if (!$response) {
-            $this->_logErrors();
+            $this->_logErrors($ch);
+            $this->tearDown($ch);
             return false;
         } else {
+            $this->tearDown($ch);
             return true;
         }
     }
@@ -156,7 +204,7 @@ class Curl
      */
     public function post($post_url, $data)
     {
-
+        $ch = $this->setup();
         $config = [
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_POSTREDIR => 3,
@@ -167,24 +215,27 @@ class Curl
                 'Content-Type: application/json',
                 'Content-Length: ' . strlen($data)
             ]
-            ];
-        curl_setopt_array($this->_ch, $config);
-        $response = curl_exec($this->_ch);
+        ];
+        curl_setopt_array($ch, $config);
+        $response = curl_exec($ch);
         if (!$response) {
-            $this->_logErrors();
+            $this->_logErrors($ch);
         }
+        $this->tearDown($ch);
         return $response;
     }
 
     /**
      * Summary of _logErrors
+     * 
+     * @param CurlHandle Curl handle
      *
      * @return void
      */
-    private function _logErrors()
+    private function _logErrors(CurlHandle $ch)
     {
-        $info = $this->getInfo();
-        $errors = $this->getError();
+        $info = $this->getInfo($ch);
+        $errors = $this->getError($ch);
         $this->logger->warning("CURL INFO: " . print_r($info, true), ['app' => Application::APP_ID]);
         $this->logger->warning("CURL ERROR: " . print_r($errors, true), ['app' => Application::APP_ID]);
     }
@@ -192,20 +243,24 @@ class Curl
     /**
      * Summary of getInfo
      * 
+     * @param CurlHandle Curl handle
+     *
      * @return mixed Info
      */
-    public function getInfo(): mixed
+    public function getInfo(CurlHandle $ch): mixed
     {
-        return curl_getinfo($this->_ch, CURLINFO_HEADER_SIZE);
+        return curl_getinfo($ch, CURLINFO_HEADER_SIZE);
     }
 
     /**
      * Summary of getError
+     * 
+     * @param CurlHandle Curl handle
      *
      * @return string Error Text
      */
-    public function getError()
+    public function getError(CurlHandle $ch)
     {
-        return curl_error($this->_ch);
+        return curl_error($ch);
     }
 }

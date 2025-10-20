@@ -115,7 +115,8 @@ class B2ShareV3 extends B2ShareAPI
         $body_encoded = mb_convert_encoding($response, 'UTF-8', mb_list_encodings());
         $results = json_decode($body_encoded, false);
 
-        if (!property_exists($results, 'links')
+        if (
+            !property_exists($results, 'links')
             || !property_exists($results->links, 'self')
             || !property_exists($results->links, 'files')
         ) {
@@ -144,10 +145,8 @@ class B2ShareV3 extends B2ShareAPI
     public function getDraft(Server $server, string $draftId, string $token): mixed
     {
         // TODO this URL might be incorrect
-        $url = "{$server->getPublishUrl()}/api/records/{$draftId}/draft?access_token={$token}";
-        $res = $this->curl->request($url);
-        $this->logger->debug($url);
-        $this->logger->debug($res);
+        $header = $this->getTokenHeader($token);
+        $res = $this->requestInternal($server, "/api/records/{$draftId}/draft", $header);
         return json_decode($res, true);
     }
 
@@ -177,8 +176,9 @@ class B2ShareV3 extends B2ShareAPI
     {
         $serverUrl = $server->getPublishUrl();
         // TODO this URL might be incorrect
-        $urlPath = "$serverUrl/api/records/$draftId/draft?access_token=$token";
-        $output = $this->curl->request($urlPath, "DELETE");
+        $urlPath = "$serverUrl/api/records/$draftId/draft";
+        $header = $this->getTokenHeader($token);
+        $output = $this->curl->request($urlPath, "DELETE", $header);
         return $output;
     }
 
@@ -207,8 +207,8 @@ class B2ShareV3 extends B2ShareAPI
     public function getB2ShareUserId(Server $server, string $token): string|null
     {
         // TODO this URL might be incorrect
-        $serverUrl = $server->getPublishUrl();
-        $response = $this->curl->request("$serverUrl/api/user/?access_token=$token");
+        $header = $this->getTokenHeader($token);
+        $response = $this->requestInternal($server, "/api/user", $header);
         if (!$response) {
             return null;
         }
@@ -228,8 +228,7 @@ class B2ShareV3 extends B2ShareAPI
      */
     public function fetchCommunities(Server $server): string|bool
     {
-        $b2share_communities_url = "{$server->getPublishUrl()}/api/communities";
-        return $this->curl->request($b2share_communities_url);
+        return $this->requestInternal($server, "/api/communities");
     }
 
 
@@ -262,28 +261,28 @@ class B2ShareV3 extends B2ShareAPI
      */
     public function getUserRecords($server, $userId, $draft, $page, $size): array
     {
+        /**
+         * curl -X GET \
+         * "https://<fqdn>/api/user/records?is_published=false&page=1&size=10&sort=newest" \
+         * -H "Authorization: Bearer <ACCESS_TOKEN>"
+         */
         $token = $this->getAccessToken($server, $userId);
         if (!$token) {
             return [];
         }
 
         $params = [
+            'is_published' => $draft ? "false" : "true",
             'page' => $page,
             'size' => $size,
             'sort' => 'newest'
         ];
-        if ($draft) {
-            // https://doc.eudat.eu/b2share/httpapi/#search-drafts
-            $params = ["drafts" => 1, "access_token" => $token] + $params;
-        } else {
-            $userId = $this->getB2shareUserId($server, $token);
-            $params["q"] = "owners:$userId";
-        }
+
         $httpParams = http_build_query($params);
         $serverUrl = $server->getPublishUrl();
-        $urlPath = "$serverUrl/api/records?$httpParams";
+        $urlPath = "$serverUrl/api/user/records?$httpParams";
 
-        $output = $this->request($server, $urlPath);
+        $output = $this->request($server, $urlPath, $token);
 
         if (is_bool($output) && $output === false) {
             return [];
@@ -294,12 +293,41 @@ class B2ShareV3 extends B2ShareAPI
 
             if (array_key_exists("hits", $records)) {
                 return $records;
-                //return [1 => "test"];
             }
         } else {
             $this->logger->error("Array key hits does not exist");
-            $this->logger->error(var_dump($outputRecords));
+            $this->logger->error(print_r($outputRecords, true));
+            $this->logger->error("Path: $urlPath");
         }
         return [];
+    }
+
+    /**
+     * Generates the token header for requests
+     * 
+     * @param mixed $accessToken AccessToken
+     * 
+     * @return string[]
+     */
+    private function getTokenHeader($accessToken): array
+    {
+        return [
+            "Authorization: Bearer $accessToken",
+        ];
+    }
+
+        /**
+     * Download a file from b2share and return it's content
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server      Server
+     * @param string                          $filesUrl    Relative URL of the file
+     * @param string                          $accessToken AccessToken
+     * 
+     * @return string
+     */
+    public function request(Server $server, string $filesUrl, string $accessToken): string
+    {
+        $header = $this->getTokenHeader($accessToken);
+        return $this->requestInternal($server, $filesUrl, $header);
     }
 }

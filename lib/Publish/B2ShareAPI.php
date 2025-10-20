@@ -54,7 +54,6 @@ abstract class B2ShareAPI
         $this->appName = $appName;
     }
 
-
     /**
      * Set SSL parameters
      *
@@ -131,17 +130,34 @@ abstract class B2ShareAPI
      * 
      * @param \OCA\B2shareBridge\Model\Server $server   Server to check and request from
      * @param string                          $filesUrl url to request
+     * @param array                           $header   Optional additional headers for the request
      * 
      * @return bool|string False or the result of the request
      */
-    public function request(Server $server, string $filesUrl): bool|string
+    protected function requestInternal(Server $server, string $filesUrl, array $header = []): bool|string
     {
-        if (!str_starts_with($filesUrl, $server->getPublishUrl())) {
-            $this->logger->error("Invalid sites call detected. $filesUrl");
-            return false;
+        $serverUrl = $server->getPublishUrl();
+
+        if (str_starts_with($filesUrl, $serverUrl)) {
+            return $this->curl->request($filesUrl, 'GET', $header);
         }
-        return $this->curl->request($filesUrl);
+
+        if (!str_starts_with($filesUrl, "/")) {
+            $filesUrl = "/$filesUrl";
+        }
+        return $this->curl->request("$serverUrl$filesUrl", 'GET', $header);
     }
+
+    /**
+     * Download a file from b2share and return it's content
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server      Server
+     * @param string                          $filesUrl    Relative URL of the file
+     * @param string                          $accessToken AccessToken
+     * 
+     * @return string
+     */
+    abstract public function request(Server $server, string $filesUrl, string $accessToken): string;
 
     /**
      * Get the B2Share API token
@@ -184,16 +200,16 @@ abstract class B2ShareAPI
      */
     abstract public function nextVersion(Server $server, string $recordId, string $token): string|bool;
 
-        /**
-         * Gets user records for a single server
-         * 
-         * @param Server $server Server object
-         * @param string $userId User id
-         * @param bool   $draft  True for (only) draft records, else false
-         * @param int    $page   Page number, you are limited to 50 records by B2SHARE Api
-         * @param int    $size   Page size, number of records per page
-         * 
-         * @return array
-         */
+    /**
+     * Gets user records for a single server
+     * 
+     * @param Server $server Server object
+     * @param string $userId User id
+     * @param bool   $draft  True for (only) draft records, else false
+     * @param int    $page   Page number, you are limited to 50 records by B2SHARE Api
+     * @param int    $size   Page size, number of records per page
+     * 
+     * @return array
+     */
     abstract public function getUserRecords(Server $server, string $userId, bool $draft, int $page, int $size): array;
 }

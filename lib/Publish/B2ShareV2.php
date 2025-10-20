@@ -14,7 +14,6 @@
 
 namespace OCA\B2shareBridge\Publish;
 
-use OCA\B2shareBridge\Exceptions\UploadNotificationException;
 use OCA\B2shareBridge\Model\Server;
 use OCA\B2shareBridge\Util\Curl;
 use OCP\IConfig;
@@ -104,7 +103,8 @@ class B2ShareV2 extends B2ShareAPI
         $body_encoded = mb_convert_encoding($response, 'UTF-8', mb_list_encodings());
         $results = json_decode($body_encoded, false);
 
-        if (!property_exists($results, 'links')
+        if (
+            !property_exists($results, 'links')
             || !property_exists($results->links, 'self')
             || !property_exists($results->links, 'files')
         ) {
@@ -192,8 +192,7 @@ class B2ShareV2 extends B2ShareAPI
      */
     public function getB2ShareUserId(Server $server, string $token): string|null
     {
-        $serverUrl = $server->getPublishUrl();
-        $response = $this->curl->request("$serverUrl/api/user/?access_token=$token");
+        $response = $this->requestInternal($server, "/api/user/?access_token=$token");
         if (!$response) {
             return null;
         }
@@ -213,8 +212,7 @@ class B2ShareV2 extends B2ShareAPI
      */
     public function fetchCommunities(Server $server): string|bool
     {
-        $b2share_communities_url = "{$server->getPublishUrl()}/api/communities/";
-        return $this->curl->request($b2share_communities_url);
+        return $this->requestInternal($server, "/api/communities");
     }
 
 
@@ -231,7 +229,6 @@ class B2ShareV2 extends B2ShareAPI
     {
         $createNextVersionUrl = "{$server->getPublishUrl()}/api/records/$recordId/draft?access_token=$token";
         $ret = $this->curl->post($createNextVersionUrl, '');
-        $this->logger->debug(print_r($this->curl->getError(), true));
         return $ret;
     }
 
@@ -266,10 +263,9 @@ class B2ShareV2 extends B2ShareAPI
             $params["q"] = "owners:$userId";
         }
         $httpParams = http_build_query($params);
-        $serverUrl = $server->getPublishUrl();
-        $urlPath = "$serverUrl/api/records/?$httpParams";
+        $urlPath = "/api/records/?$httpParams";
 
-        $output = $this->request($server, $urlPath);
+        $output = $this->requestInternal($server, $urlPath);
 
         if (!$output) {
             return [];
@@ -283,5 +279,20 @@ class B2ShareV2 extends B2ShareAPI
             }
         }
         return [];
+    }
+
+    /**
+     * Download a file from b2share and return it's content
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server      Server
+     * @param string                          $filesUrl    Relative URL of the file
+     * @param string                          $accessToken AccessToken
+     * 
+     * @return string
+     */
+    public function request(Server $server, string $filesUrl, string $accessToken): string
+    {
+        $selfPath = "$filesUrl?access_token=$accessToken";
+        return $this->requestInternal($server, $selfPath);
     }
 }

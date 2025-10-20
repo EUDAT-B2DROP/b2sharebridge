@@ -441,8 +441,7 @@ class ViewController extends Controller
 
         // do a recovery if necessary
         if (!array_key_exists("files", $record["links"])) {
-            $selfPath = $record["links"]["self"] . "?access_token=$accessToken";
-            $content = $publisher->request($server, $selfPath);
+            $content = $publisher->request($server, $record["links"]["self"], $accessToken);
 
             if ($content) {
                 $selfRecord = json_decode($content, true);
@@ -467,8 +466,7 @@ class ViewController extends Controller
 
         $userFolder = $this->_storage->getUserFolder($this->userId);
         $title = $record["metadata"]["titles"][0]["title"];
-        $filesUrl = $record["links"]["files"] . "?access_token=$accessToken";
-        $outputRaw = $publisher->request($server, $filesUrl);
+        $outputRaw = $publisher->request($server, $record["links"]["files"], $accessToken);
 
         // check file sizes and user space
         if (!$outputRaw) {
@@ -552,8 +550,7 @@ class ViewController extends Controller
         try {
             $folder = $userFolder->newFolder($title);
             foreach ($files as $file) {
-                $urlFilePath = $file["links"]["self"] . "?access_token=$accessToken";
-                $content = $publisher->request($server, $urlFilePath);
+                $content = $publisher->request($server, $file["links"]["self"], $accessToken);
                 $folder->newFile($file["key"], $content);
             }
         } catch (\OCP\Files\NotPermittedException $e) {

@@ -308,8 +308,8 @@ export default {
 				})
 		},
 
-		updateDespositList() {
-			if (this.serverprops?.value?.id && this.depositselectprops?.deposits[this.serverprops.value.id]?.hits) {
+		updateDepositList() {
+			if (this.serverprops?.value?.id && this.depositselectprops?.deposits?.[this.serverprops.value.id]?.hits) {
 				this.depositselectprops.options = []
 				const deposits = this.depositselectprops.deposits[this.serverprops.value.id].hits
 				deposits.forEach((deposit) => {
@@ -347,7 +347,7 @@ export default {
 				})
 
 				// update deposit list in attach mode
-				this.updateDespositList()
+				this.updateDepositList()
 			}
 			this.validate()
 		},
@@ -427,7 +427,7 @@ export default {
 			this.depositselectprops.deposits = depositData
 
 			// update deposit list
-			this.updateDespositList()
+			this.updateDepositList()
 		},
 
 		hasValidTokens() {

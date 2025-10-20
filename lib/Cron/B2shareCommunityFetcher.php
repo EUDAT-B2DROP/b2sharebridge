@@ -48,10 +48,11 @@ class B2shareCommunityFetcher extends TimedJob
      * Create cron that is fetching the b2share communities api
      * with dependency injection
      * 
-     * @param \Psr\Log\LoggerInterface               $logger       logger
-     * @param \OCP\IConfig                           $config       config
-     * @param \OCP\IDBConnection                     $dbconnection connection
-     * @param \OCP\AppFramework\Utility\ITimeFactory $time 
+     * @param \Psr\Log\LoggerInterface               $logger         Logger
+     * @param \OCP\IConfig                           $config         Config
+     * @param \OCP\IDBConnection                     $dbconnection   Connection
+     * @param \OCP\AppFramework\Utility\ITimeFactory $time           Time
+     * @param B2ShareFactory                         $b2shareFactory B2Share API factory
      */
     public function __construct(LoggerInterface $logger, IConfig $config, IDBConnection $dbconnection, ITimeFactory $time, B2ShareFactory $b2shareFactory)
     {

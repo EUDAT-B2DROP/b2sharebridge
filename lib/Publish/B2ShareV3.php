@@ -115,8 +115,7 @@ class B2ShareV3 extends B2ShareAPI
         $body_encoded = mb_convert_encoding($response, 'UTF-8', mb_list_encodings());
         $results = json_decode($body_encoded, false);
 
-        if (
-            !property_exists($results, 'links')
+        if (!property_exists($results, 'links')
             || !property_exists($results->links, 'self')
             || !property_exists($results->links, 'files')
         ) {
@@ -145,7 +144,7 @@ class B2ShareV3 extends B2ShareAPI
     public function getDraft(Server $server, string $draftId, string $token): mixed
     {
         // TODO this URL might be incorrect
-        $header = $this->getTokenHeader($token);
+        $header = $this->_getTokenHeader($token);
         $res = $this->requestInternal($server, "/api/records/{$draftId}/draft", $header);
         return json_decode($res, true);
     }
@@ -177,7 +176,7 @@ class B2ShareV3 extends B2ShareAPI
         $serverUrl = $server->getPublishUrl();
         // TODO this URL might be incorrect
         $urlPath = "$serverUrl/api/records/$draftId/draft";
-        $header = $this->getTokenHeader($token);
+        $header = $this->_getTokenHeader($token);
         $output = $this->curl->request($urlPath, "DELETE", $header);
         return $output;
     }
@@ -207,7 +206,7 @@ class B2ShareV3 extends B2ShareAPI
     public function getB2ShareUserId(Server $server, string $token): string|null
     {
         // TODO this URL might be incorrect
-        $header = $this->getTokenHeader($token);
+        $header = $this->_getTokenHeader($token);
         $response = $this->requestInternal($server, "/api/user", $header);
         if (!$response) {
             return null;
@@ -261,11 +260,6 @@ class B2ShareV3 extends B2ShareAPI
      */
     public function getUserRecords($server, $userId, $draft, $page, $size): array
     {
-        /**
-         * curl -X GET \
-         * "https://<fqdn>/api/user/records?is_published=false&page=1&size=10&sort=newest" \
-         * -H "Authorization: Bearer <ACCESS_TOKEN>"
-         */
         $token = $this->getAccessToken($server, $userId);
         if (!$token) {
             return [];
@@ -309,7 +303,7 @@ class B2ShareV3 extends B2ShareAPI
      * 
      * @return string[]
      */
-    private function getTokenHeader($accessToken): array
+    private function _getTokenHeader($accessToken): array
     {
         return [
             "Authorization: Bearer $accessToken",
@@ -317,17 +311,17 @@ class B2ShareV3 extends B2ShareAPI
     }
 
         /**
-     * Download a file from b2share and return it's content
-     * 
-     * @param \OCA\B2shareBridge\Model\Server $server      Server
-     * @param string                          $filesUrl    Relative URL of the file
-     * @param string                          $accessToken AccessToken
-     * 
-     * @return string
-     */
+         * Download a file from b2share and return it's content
+         * 
+         * @param \OCA\B2shareBridge\Model\Server $server      Server
+         * @param string                          $filesUrl    Relative URL of the file
+         * @param string                          $accessToken AccessToken
+         * 
+         * @return string
+         */
     public function request(Server $server, string $filesUrl, string $accessToken): string
     {
-        $header = $this->getTokenHeader($accessToken);
+        $header = $this->_getTokenHeader($accessToken);
         return $this->requestInternal($server, $filesUrl, $header);
     }
 }

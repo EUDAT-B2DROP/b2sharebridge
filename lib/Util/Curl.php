@@ -48,13 +48,14 @@ class Curl
 
     /**
      * Setup curl
+     *
      * @param array $header List of headers
      * 
      * @throws RuntimeException
      * 
      * @return CurlHandle|resource
      */
-    private function setup(array $header = []): CurlHandle
+    private function _setup(array $header = []): CurlHandle
     {
         $ch = curl_init();
         if (is_bool($ch)) {
@@ -70,18 +71,18 @@ class Curl
             CURLOPT_HTTPHEADER => array_merge($header, $json_header),
         ];
         curl_setopt_array($ch, $defaults);
-        $this->setSSLRequest($ch);
+        $this->_setSSLRequest($ch);
         return $ch;
     }
 
     /**
      * Tears down curl connection
      * 
-     * @param CurlHandle $ch
+     * @param CurlHandle $ch CurlHandle
      * 
      * @return void
      */
-    private function tearDown(CurlHandle $ch)
+    private function _tearDown(CurlHandle $ch)
     {
         curl_close($ch);
     }
@@ -101,11 +102,11 @@ class Curl
     /**
      * Activate/Deactivate SSL in a curl request
      * 
-     * @param bool $ssl False/true
+     * @param CurlHandle $ch CurlHandle
      * 
      * @return void
      */
-    private function setSSLRequest(CurlHandle $ch)
+    private function _setSSLRequest(CurlHandle $ch)
     {
         $defaults = [];
         if ($this->_ssl) {
@@ -129,7 +130,7 @@ class Curl
      */
     public function request(string $urlPath, string $type = 'GET', array $header = []): bool|string
     {
-        $ch = $this->setup($header);
+        $ch = $this->_setup($header);
         curl_setopt($ch, CURLOPT_URL, $urlPath);
 
         if ($type != 'GET') {
@@ -146,7 +147,7 @@ class Curl
             $this->_logErrors($ch);
         }
 
-        $this->tearDown($ch);
+        $this->_tearDown($ch);
         return $output;
     }
 
@@ -161,7 +162,7 @@ class Curl
      */
     public function upload(string $file_upload_url, mixed $filehandle, string $filesize): bool
     {
-        $ch = $this->setup();
+        $ch = $this->_setup();
         $config = [
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_URL => $file_upload_url,
@@ -186,10 +187,10 @@ class Curl
         curl_close($ch);
         if (!$response) {
             $this->_logErrors($ch);
-            $this->tearDown($ch);
+            $this->_tearDown($ch);
             return false;
         } else {
-            $this->tearDown($ch);
+            $this->_tearDown($ch);
             return true;
         }
     }
@@ -204,7 +205,7 @@ class Curl
      */
     public function post($post_url, $data)
     {
-        $ch = $this->setup();
+        $ch = $this->_setup();
         $config = [
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_POSTREDIR => 3,
@@ -221,14 +222,14 @@ class Curl
         if (!$response) {
             $this->_logErrors($ch);
         }
-        $this->tearDown($ch);
+        $this->_tearDown($ch);
         return $response;
     }
 
     /**
      * Summary of _logErrors
      * 
-     * @param CurlHandle Curl handle
+     * @param CurlHandle $ch CurlHandle
      *
      * @return void
      */
@@ -243,7 +244,7 @@ class Curl
     /**
      * Summary of getInfo
      * 
-     * @param CurlHandle Curl handle
+     * @param CurlHandle $ch CurlHandle
      *
      * @return mixed Info
      */
@@ -255,7 +256,7 @@ class Curl
     /**
      * Summary of getError
      * 
-     * @param CurlHandle Curl handle
+     * @param CurlHandle $ch CurlHandle
      *
      * @return string Error Text
      */

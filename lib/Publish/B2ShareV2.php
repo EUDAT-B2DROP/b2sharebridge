@@ -103,8 +103,7 @@ class B2ShareV2 extends B2ShareAPI
         $body_encoded = mb_convert_encoding($response, 'UTF-8', mb_list_encodings());
         $results = json_decode($body_encoded, false);
 
-        if (
-            !property_exists($results, 'links')
+        if (!property_exists($results, 'links')
             || !property_exists($results->links, 'self')
             || !property_exists($results->links, 'files')
         ) {

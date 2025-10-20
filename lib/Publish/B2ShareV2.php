@@ -211,7 +211,7 @@ class B2ShareV2 extends B2ShareAPI
      */
     public function fetchCommunities(Server $server): string|bool
     {
-        return $this->requestInternal($server, "/api/communities");
+        return $this->requestInternal($server, "/api/communities/");
     }
 
 

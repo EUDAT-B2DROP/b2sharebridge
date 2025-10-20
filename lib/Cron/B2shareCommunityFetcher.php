@@ -90,24 +90,20 @@ class B2shareCommunityFetcher extends TimedJob
                 );
                 continue;
             }
-            $communities_fetched = json_decode($json, true)['hits']['hits'];
-            if ($communities_fetched === null) {
+            $decode_result = json_decode($json, true);
+            
+            if (!$decode_result || !array_key_exists('hits', $decode_result) || !array_key_exists('hits', $decode_result['hits'])) {
                 $this->_logger->error(
                     'Fetching the B2SHARE communities API at ' . $server->getPublishUrl() .
-                    ' did not return a valid JSON.',
+                    ' did not return a valid JSON. :' . print_r($json, true),
                     ['app' => Application::APP_ID]
                 );
                 continue;
             }
 
+            $communities_fetched = $decode_result['hits']['hits'];
             $communities_b2share = [];
             foreach ($communities_fetched as $community) {
-                $this->_logger->debug(
-                    'Fetched community with id: ' . $community['id'] .
-                    ' and name: ' . $community['name'] . ' fetched' .
-                    ' and restricted_submission: ' . $community['restricted_submission'] . ' from server ' . $server->getName(),
-                    ['app' => Application::APP_ID]
-                );
                 if ($server->getVersion() == 2) {
                     if ($community['restricted_submission'] !== true) {
                         $communities_b2share[$community['id']] = $community['name'];
@@ -115,13 +111,27 @@ class B2shareCommunityFetcher extends TimedJob
                         $communities_b2share[$community['id']] = $community['name'] . ' ' .
                             "\u{0001F512}";
                     }
+
+                    $this->_logger->debug(
+                        'Fetched community with id: ' . $community['id'] .
+                        ' and name: ' . $community['name'] . ' fetched' .
+                        ' and restricted_submission: ' . $community['restricted_submission'] . ' from server ' . $server->getName(),
+                        ['app' => Application::APP_ID]
+                    );
                 } else {
-                    if ($community['access']['record_policy'] !== 'open') {
+                    if ($community['access']['record_submission_policy'] !== 'open') {
                         $communities_b2share[$community['id']] = $community['metadata']['title'];
                     } else {
                         $communities_b2share[$community['id']] = $community['metadata']['title'] . ' ' .
                             "\u{0001F512}";
                     }
+
+                    $this->_logger->debug(
+                        'Fetched community with id: ' . $community['id'] .
+                        ' and name: ' . $community['metadata']['title'] . ' fetched' .
+                        ' and restricted_submission: ' . $community['access']['record_submission_policy'] . ' from server ' . $server->getName(),
+                        ['app' => Application::APP_ID]
+                    );
                 }
             }
 

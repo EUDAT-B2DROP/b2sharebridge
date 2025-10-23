@@ -31,7 +31,6 @@ use OCP\Notification\IManager;
 use OCP\Files\IRootFolder;
 use OCP\DB\Exception;
 use OCP\Notification\INotification;
-use PhpParser\Node\NullableType;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -195,7 +194,7 @@ class TransferHandler extends QueuedJob
             $files = $this->_dfmapper->findAllForDeposit($fcStatus->getId());
             $uploadSuccess = true;
 
-            $this->logger->warning("#upload files" . count($files), ['app' => Application::APP_ID]);
+            $this->logger->debug("#upload files" . count($files), ['app' => Application::APP_ID]);
 
             foreach ($files as $file) {
                 $fileid = $file->getFileid();
@@ -341,10 +340,10 @@ class TransferHandler extends QueuedJob
     /**
      * Uploads a single file to the publisher
      *
-     * @param \OCP\Files\Node $fileNode         file Node
-     * @param mixed           $fcStatus         deposit status object
-     * @param mixed           $file_upload_link (api) upload url for files
-     * @param mixed           $token            b2share token of the
+     * @param \OCP\Files\Node $fileNode         File Node
+     * @param mixed           $fcStatus         Deposit status object
+     * @param mixed           $file_upload_link (Api) Upload url for files
+     * @param mixed           $token            B2share token of the
      * @param B2ShareAPI      $publisher        B2ShareAPI object
      * 
      * @throws UploadNotificationException
@@ -375,13 +374,13 @@ class TransferHandler extends QueuedJob
         $handle = $fileNode->fopen('rb');
         $size = $fileNode->getSize();
 
-        $filenameEncoded = rawurlencode($filename);
-        $upload_url = "$file_upload_link/$filenameEncoded?access_token=$token";
-        $this->logger->debug("File upload URL: $upload_url", ['app' => Application::APP_ID]);
+        $this->logger->debug("File upload URL: $file_upload_link", ['app' => Application::APP_ID]);
         return $publisher->upload(
-            $upload_url,
+            $file_upload_link,
+            $filename,
             $handle,
-            $size
+            $size,
+            $token
         );
     }
 }

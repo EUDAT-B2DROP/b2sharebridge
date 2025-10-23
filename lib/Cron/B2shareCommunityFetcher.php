@@ -178,7 +178,8 @@ class B2shareCommunityFetcher extends TimedJob
             }
             if (!$found) {
                 $this->_logger->info(
-                    'Removing orphan community with id: ' . $community->getId()
+                    'Removing orphan community with id: ' . $community->getId(),
+                    ['app' => Application::APP_ID]
                 );
                 $communityMapper->delete($community);
             }

@@ -49,28 +49,36 @@ class Curl
     /**
      * Setup curl
      *
-     * @param array $header List of headers
+     * @param array $config curl config
      * 
      * @throws RuntimeException
      * 
      * @return CurlHandle|resource
      */
-    private function _setup(array $header = []): CurlHandle
+    private function _setup(array $config): CurlHandle
     {
         $ch = curl_init();
         if (is_bool($ch)) {
             throw new RuntimeException("Failed to initialize curl");
         }
-        $json_header = [
+        $header = [
             'Accept:application/json',
         ];
+
+        if (array_key_exists(CURLOPT_HTTPHEADER, $config)) {
+            $header = array_merge($config[CURLOPT_HTTPHEADER], $header);
+        }
+
         $defaults = [
             CURLOPT_RETURNTRANSFER => 1,
             CURLOPT_TIMEOUT => 4,
             CURLOPT_HEADER => 0,
-            CURLOPT_HTTPHEADER => array_merge($header, $json_header),
         ];
-        curl_setopt_array($ch, $defaults);
+
+        $merged_configs = array_replace($defaults, $config);
+        $merged_configs[CURLOPT_HTTPHEADER] = $header;
+
+        curl_setopt_array($ch, $merged_configs);
         $this->_setSSLRequest($ch);
         return $ch;
     }
@@ -130,21 +138,22 @@ class Curl
      */
     public function request(string $urlPath, string $type = 'GET', array $header = []): bool|string
     {
-        $ch = $this->_setup($header);
-        curl_setopt($ch, CURLOPT_URL, $urlPath);
+        $config = [
+            CURLOPT_URL => $urlPath,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_HTTPHEADER => $header,
+        ];
 
         if ($type != 'GET') {
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $type);
+            $config[CURLOPT_CUSTOMREQUEST] = $type;
         }
 
-        if ($header) {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
-        }
+        $ch = $this->_setup($config);
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
         if (!$output) {
             $this->_logErrors($ch);
+            return false;
         }
 
         $this->_tearDown($ch);
@@ -157,12 +166,16 @@ class Curl
      * @param string $file_upload_url the upload_url for the files bucket
      * @param mixed  $filehandle      file handle
      * @param string $filesize        local filename of file that should be submitted
+     * @param array  $header          Header for example for authentification
      *
      * @return bool
      */
-    public function upload(string $file_upload_url, mixed $filehandle, string $filesize): bool
+    public function upload(string $file_upload_url, mixed $filehandle, string $filesize, array $header = []): bool
     {
-        $ch = $this->_setup();
+        $upload_header = [
+            'Accept:application/json',
+            'Content-Type: application/octet-stream'
+        ];
         $config = [
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_URL => $file_upload_url,
@@ -176,12 +189,10 @@ class Curl
             CURLOPT_LOW_SPEED_LIMIT => 30,
             CURLOPT_HEADER => true,
             CURLINFO_HEADER_OUT => true,
-            CURLOPT_HTTPHEADER => [
-                'Accept:application/json',
-                'Content-Type: application/octet-stream'
-            ]
+            CURLOPT_HTTPHEADER => array_merge($upload_header, $header)
         ];
-        curl_setopt_array($ch, $config);
+
+        $ch = $this->_setup($config);
 
         $response = curl_exec($ch);
         curl_close($ch);
@@ -198,26 +209,29 @@ class Curl
     /**
      * Summary of post
      *
-     * @param mixed $post_url URL
-     * @param mixed $data     DATA
+     * @param string $post_url URL
+     * @param string $data     Data in json format
+     * @param array  $header   Header for example for authentification
      * 
      * @return bool|string     response
      */
-    public function post($post_url, $data)
+    public function post(string $post_url, string $data, array $header = [])
     {
-        $ch = $this->_setup();
+        $post_header = [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($data)
+        ];
         $config = [
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_POSTREDIR => 3,
             CURLOPT_URL => $post_url,
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_POSTFIELDS => $data,
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'Content-Length: ' . strlen($data)
-            ]
+            CURLOPT_HTTPHEADER => array_merge($post_header, $header)
         ];
-        curl_setopt_array($ch, $config);
+
+        $ch = $this->_setup($config);
+
         $response = curl_exec($ch);
         if (!$response) {
             $this->_logErrors($ch);

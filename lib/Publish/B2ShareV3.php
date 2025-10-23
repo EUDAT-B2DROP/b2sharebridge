@@ -14,6 +14,7 @@
 
 namespace OCA\B2shareBridge\Publish;
 
+use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Model\Server;
 use OCA\B2shareBridge\Util\Curl;
 use OCP\IConfig;
@@ -91,21 +92,37 @@ class B2ShareV3 extends B2ShareAPI
     ): array|bool {
 
         $b_open_access = $open_access === "true";
+
+        // TODO data is missing the community / org
         $data = json_encode(
             [
-                'community' => $community,
-                'titles' => [
-                    [
-                        'title' => $title
-                    ]
+                "access" => [
+                    "record" => $b_open_access ? "public" : "closed",
+                    "files" => $b_open_access ? "public" : "closed",
                 ],
-                'open_access' => $b_open_access
+                "files" => [
+                    "enabled" => true
+                ],
+                "metadata" => [
+                    "title" => $title,
+                    "creators" => [
+                        "person_or_org" => [
+                            "name" => $community,
+                            "type" => "organizational"
+                        ],
+                        "affiliations" => [
+                            "name" => $community
+                        ]
+                    ],
+                ],
+                "type" => "community-submission",
+                "publication_date" => date("Y-m-d"),
             ]
         );
 
-        $post_url = "{$server->getPublishUrl()}/api/records?access_token={$token}";
-
-        $response = $this->curl->post($post_url, $data);
+        $post_url = "{$server->getPublishUrl()}/api/records";
+        $header = $this->_getTokenHeader($token);
+        $response = $this->curl->post($post_url, $data, $header);
 
         // check response
         if (!$response) {
@@ -289,9 +306,9 @@ class B2ShareV3 extends B2ShareAPI
                 return $records;
             }
         } else {
-            $this->logger->error("Array key hits does not exist");
-            $this->logger->error(print_r($outputRecords, true));
-            $this->logger->error("Path: $urlPath");
+            $this->logger->error("Array key hits does not exist", ['app' => Application::APP_ID]);
+            $this->logger->error(print_r($outputRecords, true), ['app' => Application::APP_ID]);
+            $this->logger->error("Path: $urlPath", ['app' => Application::APP_ID]);
         }
         return [];
     }
@@ -310,18 +327,68 @@ class B2ShareV3 extends B2ShareAPI
         ];
     }
 
-        /**
-         * Download a file from b2share and return it's content
-         * 
-         * @param \OCA\B2shareBridge\Model\Server $server      Server
-         * @param string                          $filesUrl    Relative URL of the file
-         * @param string                          $accessToken AccessToken
-         * 
-         * @return string
-         */
+    /**
+     * Download a file from b2share and return it's content
+     * 
+     * @param \OCA\B2shareBridge\Model\Server $server      Server
+     * @param string                          $filesUrl    Relative URL of the file
+     * @param string                          $accessToken AccessToken
+     * 
+     * @return string
+     */
     public function request(Server $server, string $filesUrl, string $accessToken): string
     {
         $header = $this->_getTokenHeader($accessToken);
         return $this->requestInternal($server, $filesUrl, $header);
+    }
+
+    /**
+     * Placeholder for upload
+     *
+     * @param string $file_upload_url Url invenio files bucket URL
+     * @param string $filename        Filename
+     * @param mixed  $filehandle      Filehandle for upload
+     * @param string $filesize        Local filename of file that should be submitted
+     * @param string $token           Users access token
+     *
+     * @return bool success of the upload
+     */
+    public function upload(string $file_upload_url, string $filename, mixed $filehandle, string $filesize, string $token): bool
+    {
+        $header = $this->_getTokenHeader($token);
+
+        // Step 1 start draft file upload(s)
+        $data = [
+            [
+                "key" => $filename
+            ]
+        ];
+        $filenameEncoded = rawurlencode($filename);
+        $response = $this->curl->post($file_upload_url, json_encode($data), $header);
+        $this->logger->debug("Step1: " . print_r($response, true), ['app' => Application::APP_ID]);
+        // $json_response = json_decode($response, true);
+        if (!$response) {
+            $this->logger->error("Creating resource for file $filename failed", ['app' => Application::APP_ID]);
+            return false;
+        }
+
+        // Step 2 Upload file content
+        $response = $this->curl->upload("$file_upload_url/$filenameEncoded/content", $filehandle, $filesize, $header);
+        $this->logger->debug("Step2: " . print_r($response, true), ['app' => Application::APP_ID]);
+        // $json_response = json_decode($response, true);
+        if (!$response) {
+            $this->logger->error("Creating file upload for file $filename failed", ['app' => Application::APP_ID]);
+            return false;
+        }
+
+        // Step 3 complete a drift file upload
+        $response = $this->curl->post("$file_upload_url/$filenameEncoded/commit", '', $header);
+        $this->logger->debug("Step3: " . print_r($response, true), ['app' => Application::APP_ID]);
+        // $json_response = json_decode($response, true);
+        if (!$response) {
+            $this->logger->error("Creating commit for file $filename failed", ['app' => Application::APP_ID]);
+            return false;
+        }
+        return true;
     }
 }

@@ -14,6 +14,7 @@
 
 namespace OCA\B2shareBridge\Publish;
 
+use OCA\B2shareBridge\AppInfo\Application;
 use OCA\B2shareBridge\Model\Server;
 use OCA\B2shareBridge\Util\Curl;
 use OCP\IConfig;
@@ -133,8 +134,8 @@ class B2ShareV2 extends B2ShareAPI
     {
         $url = "{$server->getPublishUrl()}/api/records/{$draftId}/draft?access_token={$token}";
         $res = $this->curl->request($url);
-        $this->logger->debug($url);
-        $this->logger->debug($res);
+        $this->logger->debug($url, ['app' => Application::APP_ID]);
+        $this->logger->debug($res, ['app' => Application::APP_ID]);
         return json_decode($res, true);
     }
 
@@ -293,5 +294,24 @@ class B2ShareV2 extends B2ShareAPI
     {
         $selfPath = "$filesUrl?access_token=$accessToken";
         return $this->requestInternal($server, $selfPath);
+    }
+
+    /**
+     * Placeholder for upload
+     *
+     * @param string $file_upload_url Url invenio files bucket URL
+     * @param string $filename        Filename
+     * @param mixed  $filehandle      Filehandle for upload
+     * @param string $filesize        Local filename of file that should be submitted
+     * @param string $token           Users access token
+     *
+     * @return bool success of the upload
+     */
+    public function upload(string $file_upload_url, string $filename, mixed $filehandle, string $filesize, string $token): bool
+    {
+        $filename = rawurlencode($filename);
+        $file_upload_url .= "/$filename";
+        $file_upload_url .= "?access_token=$token";
+        return $this->curl->upload($file_upload_url, $filehandle, $filesize);
     }
 }

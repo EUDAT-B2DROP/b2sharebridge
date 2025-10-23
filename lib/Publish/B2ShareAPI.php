@@ -82,16 +82,15 @@ abstract class B2ShareAPI
     /**
      * Placeholder for upload
      *
-     * @param string $file_upload_url url invenio files bucket URL
-     * @param mixed  $filehandle      users access token
-     * @param string $filesize        local filename of file that should be submitted
+     * @param string $file_upload_url Url invenio files bucket URL
+     * @param string $filename        Filename
+     * @param mixed  $filehandle      Filehandle for upload
+     * @param string $filesize        Local filename of file that should be submitted
+     * @param string $token           Users access token
      *
      * @return bool success of the upload
      */
-    public function upload(string $file_upload_url, mixed $filehandle, string $filesize): bool
-    {
-        return $this->curl->upload($file_upload_url, $filehandle, $filesize);
-    }
+    abstract public function upload(string $file_upload_url, string $filename, mixed $filehandle, string $filesize, string $token): bool;
 
     /**
      * Fetch a draft fully

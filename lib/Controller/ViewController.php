@@ -417,25 +417,34 @@ class ViewController extends Controller
                 break;
             }
         }
+
+        $server = $this->smapper->find($serverId);
+
         if (!$error) {
             if (!array_key_exists("files", $record["links"])) {
                 if (!array_key_exists("self", $record["links"])) {
                     $errorKey = "[links][files] or [links][self]";
                     $error = true;
                 }
-            } elseif (!array_key_exists("titles", $record["metadata"])) {
-                $errorKey = "[metadata][titles]";
-                $error = true;
-            } elseif (count($record["metadata"]["titles"]) == 0) {
-                $errorKey = "[metadata][titles][0]";
-                $error = true;
-            } elseif (!array_key_exists("title", $record["metadata"]["titles"][0])) {
-                $errorKey = "[metadata][titles][0][title]";
-                $error = true;
+            } elseif ($server->getVersion() === 2) {
+                if (!array_key_exists("titles", $record["metadata"])) {
+                    $errorKey = "[metadata][titles]";
+                    $error = true;
+                } elseif (count($record["metadata"]["titles"]) == 0) {
+                    $errorKey = "[metadata][titles][0]";
+                    $error = true;
+                } elseif (!array_key_exists("title", $record["metadata"]["titles"][0])) {
+                    $errorKey = "[metadata][titles][0][title]";
+                    $error = true;
+                }
+            } elseif ($server->getVersion() === 3) {
+                if (!array_key_exists("title", $record["metadata"])) {
+                    $errorKey = "[metadata][title]";
+                    $error = true;
+                }
             }
         }
 
-        $server = $this->smapper->find($serverId);
         $publisher = $this->_b2shareFactory->get($server->getVersion());
         $accessToken = $publisher->getAccessToken($server, $this->userId);
 
@@ -456,7 +465,7 @@ class ViewController extends Controller
             $this->_notifiyUser("error_download_record", ["code" => "2"]);
             return new JSONResponse(
                 [
-                    "message" => "Missing key in record: $errorKey",
+                    "message" => "Missing key in record: $errorKey\n" . print_r($record, true),
                     "status" => "error",
                     "code" => "2",
                 ],
@@ -465,7 +474,7 @@ class ViewController extends Controller
         }
 
         $userFolder = $this->_storage->getUserFolder($this->userId);
-        $title = $record["metadata"]["titles"][0]["title"];
+        $title = $server->getVersion() === 2 ? $record["metadata"]["titles"][0]["title"] : $record["metadata"]["title"];
         $outputRaw = $publisher->request($server, $record["links"]["files"], $accessToken);
 
         // check file sizes and user space
@@ -483,11 +492,21 @@ class ViewController extends Controller
 
         $output = json_decode($outputRaw, true);
 
-        if (!array_key_exists("contents", $output)) {
+        if ($server->getVersion() === 2 && !array_key_exists("contents", $output)) {
             $this->_notifiyUser("error_download_downstream", ["code" => "4", "url" => $server->getPublishUrl()]);
             return new JSONResponse(
                 [
-                    "message" => "Bad response from " . $server->getPublishUrl(),
+                    "message" => "Bad response from " . $server->getPublishUrl() . "\n" . print_r($output, true),
+                    "status" => "error",
+                    "code" => "4",
+                ],
+                Http::STATUS_BAD_GATEWAY
+            );
+        } else if ($server->getVersion() === 3 && !array_key_exists("entries", $output)) {
+            $this->_notifiyUser("error_download_downstream", ["code" => "4", "url" => $server->getPublishUrl()]);
+            return new JSONResponse(
+                [
+                    "message" => "Bad response from " . $server->getPublishUrl() . "\n" . print_r($output, true),
                     "status" => "error",
                     "code" => "4",
                 ],
@@ -495,7 +514,7 @@ class ViewController extends Controller
             );
         }
 
-        $files = $output["contents"];
+        $files = $server->getVersion() === 2 ? $output["contents"] : $output["entries"];
         $requiredSize = 4; // start directory
         foreach ($files as $file) {
             // validate file
@@ -504,7 +523,7 @@ class ViewController extends Controller
                 || !array_key_exists("key", $file)
                 || !array_key_exists("self", $file["links"])
             ) {
-                $this->_logger->debug($file, ["b2sharebridge"]);
+                $this->_logger->debug($file, ['app' => Application::APP_ID]);
                 $this->_notifiyUser("error_download_downstream", ["code" => "5", "url" => $server->getPublishUrl()]);
                 return new JSONResponse(
                     [
@@ -550,7 +569,8 @@ class ViewController extends Controller
         try {
             $folder = $userFolder->newFolder($title);
             foreach ($files as $file) {
-                $content = $publisher->request($server, $file["links"]["self"], $accessToken);
+                $filesUrl = $server->getVersion() === 2 ? $file["links"]["self"] : $file["links"]["content"];
+                $content = $publisher->request($server, $filesUrl, $accessToken);
                 $folder->newFile($file["key"], $content);
             }
         } catch (\OCP\Files\NotPermittedException $e) {

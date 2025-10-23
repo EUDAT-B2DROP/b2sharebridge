@@ -24,7 +24,7 @@
 				v-model="modeprops.value"
 				required
 				:class="{ selecterror: modeprops.error }"
-				@update:model-value="onChangeMode" />
+				@update:model-value="onChangeMode()" />
 			<NcTextField
 				v-if="!modeprops.value || modeprops.value.id === 'create'"
 				v-model="title.text"
@@ -315,7 +315,7 @@ export default {
 				deposits.forEach((deposit) => {
 					const depositOption = {
 						id: deposit.id,
-						label: deposit.metadata.titles[0].title,
+						label: deposit.metadata.titles?.[0]?.title ?? deposit.metadata.title,
 					}
 					this.depositselectprops.options.push(depositOption)
 				})
@@ -395,7 +395,7 @@ export default {
 						totalNumber = total
 					}
 					const serverData = {
-						hits: firstRes.data[server].hits,
+						hits: firstRes.data[server].records.hits,
 						total,
 					}
 					depositData[server] = serverData
@@ -414,7 +414,7 @@ export default {
 					// append missing deposits
 					for (const res of responses) {
 						for (const server of servers) {
-							depositData[server].hits.push(...res.data[server].hits)
+							depositData[server].hits.push(...res.data[server].records.hits)
 						}
 					}
 				}

@@ -228,8 +228,8 @@ class Notifier implements INotifier
             $message .= $l->t("The downstream server $url send a bad response");
             break;
         case 'error_download_space':
-            $sizeFilesHuman = \OC_Helper::humanFileSize($parameters["sizeFiles"]);
-            $freeSpaceHuman = \OC_Helper::humanFileSize($parameters["freeSpace"]);
+            $sizeFilesHuman = \OCP\Util::humanFileSize($parameters["sizeFiles"]);
+            $freeSpaceHuman = \OCP\Util::humanFileSize($parameters["freeSpace"]);
             $sizeFiles = $parameters["sizeFiles"];
             $freeSpace = $parameters["freeSpace"];
             $title = $parameters["title"];

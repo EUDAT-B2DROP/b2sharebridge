@@ -106,7 +106,7 @@ class ServerController extends Controller
         }
 
         // get server entity
-        $server_exists = array_key_exists("id", $server);
+        $server_exists = array_key_exists("id", $server) && $server["id"] >= 0;
         if ($server_exists) {
             $server_entity = $this->_mapper->find($server['id']);
             $update_communities = $server['publishUrl'] !== $server_entity->getPublishUrl();

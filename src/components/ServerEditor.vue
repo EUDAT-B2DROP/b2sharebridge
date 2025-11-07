@@ -54,7 +54,7 @@
 			</NcTextField>
 			<div class="bridgeserver__row bridgeserver__input__div">
 				<p>B2SHARE API-version:</p>
-				<p v-if="mutable_version.id === 3">
+				<p v-if="mutable_version?.id === 3">
 					(experimental!)
 				</p>
 				<NcSelect
@@ -174,7 +174,7 @@ export default {
 				|| this.mutable_maxUploads !== this.maxuploads
 				|| this.mutable_maxUploadFilesize !== this.maxuploadfilesize
 				|| this.mutable_checkSsl !== this.checkssl
-				|| this.mutable_version.id !== this.version.id
+				|| this.mutable_version?.id !== this.version.id
 		},
 
 		saveServer() {
@@ -188,7 +188,7 @@ export default {
 			data.maxUploads = this.mutable_maxUploads
 			data.maxUploadFilesize = this.mutable_maxUploadFilesize
 			data.checkSsl = this.mutable_checkSsl
-			data.version = this.mutable_version.id
+			data.version = this.mutable_version?.id ?? 2
 
 			console.debug(JSON.stringify(data))
 
@@ -224,7 +224,9 @@ export default {
 		},
 
 		updateVersion(version) {
-			this.mutable_version = version
+			if(typeof version?.id !== 'undefined') {
+				this.mutable_version = version
+			}
 		},
 	},
 }

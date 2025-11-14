@@ -82,10 +82,10 @@ class ViewController extends Controller
      * @param IURLGenerator       $urlGenerator   Url Generator
      * @param B2ShareFactory      $b2shareFactory B2share API factory
      * @param LoggerInterface     $logger         Logger
-     * @param string              $userId         User ID
+     * @param string|null         $userId         User ID
      */
     public function __construct(
-        $appName,
+        string $appName,
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,
@@ -98,7 +98,7 @@ class ViewController extends Controller
         IURLGenerator $urlGenerator,
         B2ShareFactory $b2shareFactory,
         LoggerInterface $logger,
-        string $userId,
+        string|null $userId,
     ) {
         parent::__construct($appName, $request);
         $this->userId = $userId;
@@ -160,6 +160,9 @@ class ViewController extends Controller
     #[NoAdminRequired]
     public function depositList(): JSONResponse
     {
+        if (!$this->userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
         $param = $this->request->getParams();
 
         //check filter param
@@ -245,6 +248,9 @@ class ViewController extends Controller
     #[NoAdminRequired]
     public function setToken(): JSONResponse
     {
+        if (!$this->userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
         $param = $this->request->getParams();
         $error = false;
         if (!array_key_exists('token', $param) || !array_key_exists('serverid', $param)) {
@@ -296,6 +302,9 @@ class ViewController extends Controller
     #[NoAdminRequired]
     public function deleteToken($id): JSONResponse
     {
+        if (!$this->userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
         $this->_logger->info(
             'Deleting API token',
             ['app' => Application::APP_ID]
@@ -332,6 +341,9 @@ class ViewController extends Controller
     #[NoAdminRequired]
     public function getTokens(): JSONResponse
     {
+        if (!$this->userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
         $ret = [];
         //TODO catch errors and return HTTP 500
         $servers = $this->smapper->findAll();
@@ -354,6 +366,9 @@ class ViewController extends Controller
     #[NoAdminRequired]
     public function getTabViewContent(): JSONResponse
     {
+        if (!$this->userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
         return new JSONResponse($this->cMapper->getCommunityList());
     }
 
@@ -366,8 +381,11 @@ class ViewController extends Controller
      * @return JSONResponse
      */
     #[NoAdminRequired]
-    public function deleteRecord($serverId, $recordId)
+    public function deleteRecord($serverId, $recordId): JSONResponse
     {
+        if (!$this->userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
         $server = $this->smapper->find($serverId);
         $publisher = $this->_b2shareFactory->get($server->getVersion());
         $token = $publisher->getAccessToken($server, $this->userId);
@@ -388,8 +406,12 @@ class ViewController extends Controller
      */
     #[UserRateLimit(limit: 5, period: 120)]
     #[NoAdminRequired]
-    public function downloadRecordFiles($serverId)
+    public function downloadRecordFiles($serverId): JSONResponse
     {
+        if (!$this->userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
+
         // check parameter
         $param = $this->request->getParams();
         if (!array_key_exists("record", $param)) {

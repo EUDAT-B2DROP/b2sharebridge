@@ -40,7 +40,7 @@ use Psr\Log\LoggerInterface;
  */
 class ServerController extends Controller
 {
-    private string $_userId;
+    private string|null $_userId;
     private ServerMapper $_mapper;
     private IJobList $_joblist;
     private LoggerInterface $_logger;
@@ -53,15 +53,15 @@ class ServerController extends Controller
      * @param ServerMapper    $mapper  Server Mapper
      * @param IJobList        $jobList Nextcloud Server Job List interface
      * @param LoggerInterface $logger  Logger
-     * @param string          $userId  User ID
+     * @param string|null     $userId  User ID
      */
     public function __construct(
-        $appName,
+        string $appName,
         IRequest $request,
         ServerMapper $mapper,
         IJobList $jobList,
         LoggerInterface $logger,
-        $userId
+        string|null $userId
     ) {
         parent::__construct($appName, $request);
         $this->_mapper = $mapper;
@@ -80,6 +80,9 @@ class ServerController extends Controller
     #[NoAdminRequired]
     public function listServers(): JSONResponse
     {
+        if (!$this->_userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
         return new JSONResponse($this->_mapper->findAll());
     }
 
@@ -96,6 +99,10 @@ class ServerController extends Controller
      */
     public function saveServer($server): JSONResponse
     {
+        if (!$this->_userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
+
         if (!$this->_checkServer($server)) {
             return new JSONResponse(
                 [
@@ -170,6 +177,10 @@ class ServerController extends Controller
      */
     public function saveServers($servers): array
     {
+        if (!$this->_userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
+
         foreach ($servers as $server) {
             if (array_key_exists('id', $server)) {
                 $old = $this->_mapper->find($server['id']);
@@ -202,6 +213,10 @@ class ServerController extends Controller
      */
     public function deleteServer($id): JSONResponse
     {
+        if (!$this->_userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
+
         try {
             $this->_mapper->delete($this->_mapper->find($id));
         } catch (DoesNotExistException) {

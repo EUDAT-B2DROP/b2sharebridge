@@ -57,7 +57,7 @@ class PublishController extends Controller
     protected DepositStatusMapper $mapper;
     protected DepositFileMapper $dfmapper;
     protected StatusCodes $statusCodes;
-    protected string $userId;
+    protected string|null $userId;
     protected IManager $notManager;
     protected LoggerInterface $logger;
     private ITimeFactory $_time;
@@ -84,10 +84,10 @@ class PublishController extends Controller
      * @param IJobList            $jobList        NC job interface
      * @param IRootFolder         $rootFolder     Nextcloud filesystem interface
      * @param B2ShareFactory      $b2shareFactory B2share API factory
-     * @param string              $userId         userid
+     * @param string|null         $userId         userid
      */
     public function __construct(
-        $appName,
+        string $appName,
         IRequest $request,
         IConfig $config,
         DepositStatusMapper $mapper,
@@ -101,7 +101,7 @@ class PublishController extends Controller
         IJobList $jobList,
         IRootFolder $rootFolder,
         B2ShareFactory $b2shareFactory,
-        string $userId
+        string|null $userId
     ) {
         parent::__construct($appName, $request);
         $this->userId = $userId;
@@ -130,6 +130,10 @@ class PublishController extends Controller
     #[NoAdminRequired]
     public function publish(): JSONResponse
     {
+        if (!$this->userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
+
         $param = $this->request->getParams();
 
         // check params
@@ -158,6 +162,10 @@ class PublishController extends Controller
     #[NoAdminRequired]
     public function attach(): JSONResponse
     {
+        if (!$this->userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
+
         $param = $this->request->getParams();
 
         // check params
@@ -185,6 +193,10 @@ class PublishController extends Controller
     #[NoAdminRequired]
     public function nextVersion(): JSONResponse
     {
+        if (!$this->_userId) {
+            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+        }
+
         $param = $this->request->getParams();
         try {
             if (!Helper::arrayKeysExist(['server_id', 'recordId'], $param)) {

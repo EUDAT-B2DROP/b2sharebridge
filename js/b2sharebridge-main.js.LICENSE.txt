@@ -77,12 +77,6 @@
  */
 
 /*!
- * vue-router v4.6.3
- * (c) 2025 Eduardo San Martin Morote
- * @license MIT
- */
-
-/*!
 * focus-trap 7.6.6
 * @license MIT, https://github.com/focus-trap/focus-trap/blob/master/LICENSE
 */
@@ -97,19 +91,19 @@
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
 
 /**
-* @vue/reactivity v3.5.23
+* @vue/reactivity v3.5.24
 * (c) 2018-present Yuxi (Evan) You and Vue contributors
 * @license MIT
 **/
 
 /**
-* @vue/runtime-dom v3.5.23
+* @vue/runtime-dom v3.5.24
 * (c) 2018-present Yuxi (Evan) You and Vue contributors
 * @license MIT
 **/
 
 /**
-* @vue/shared v3.5.23
+* @vue/shared v3.5.24
 * (c) 2018-present Yuxi (Evan) You and Vue contributors
 * @license MIT
 **/

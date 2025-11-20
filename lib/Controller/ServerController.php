@@ -178,7 +178,7 @@ class ServerController extends Controller
     public function saveServers($servers): array
     {
         if (!$this->_userId) {
-            return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
+            return [];
         }
 
         foreach ($servers as $server) {

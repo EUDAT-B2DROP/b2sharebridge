@@ -224,7 +224,7 @@ export default {
 		},
 
 		updateVersion(version) {
-			if(typeof version?.id !== 'undefined') {
+			if (typeof version?.id !== 'undefined') {
 				this.mutable_version = version
 			}
 		},

@@ -82,7 +82,7 @@
 				</div>
 			</template>
 			<!-- No records default text: -->
-			<div v-if="!getNumRecords()" class="rp__records__none">
+			<div v-if="!getNumRecords() && getHasToken()" class="rp__records__none">
 				<h3 v-if="draft">
 					You don't have any drafts at <a :href="getServerUrl()">{{ getServerLabel() }}</a>
 				</h3>
@@ -92,6 +92,23 @@
 				<h3>
 					You can upload files from B2DROP by selecting them and pressing the <b>B2SHARE</b> button &#128640;
 				</h3>
+			</div>
+			<!-- No token default text: -->
+			<div v-if="!getHasToken()" class="rp__records__none">
+				<h3>
+					You don't have any (or any valid) token for <a :href="getServerUrl()">{{ getServerLabel() }}</a>
+				</h3>
+				<div>
+					<p>Please set a valid API token</p>
+					<NcButton
+						label="Set API Token"
+						:href="getSettingsUrl()"
+						type="Primary"
+						area-label="Set API Token"
+						@click="redirect('/settings/user/b2sharebridge')">
+						"Set API Token"
+					</NcButton>
+				</div>
 			</div>
 		</div>
 		<!-- Bottom of Listing, with less selectors: -->
@@ -288,6 +305,13 @@ export default {
 			return 0
 		},
 
+		getHasToken() {
+			if (this.selectedServer.value && this.selectedServer.value.id) {
+				return this.records[this.selectedServer.value.id].has_token
+			}
+			return false
+		},
+
 		getNumPages() {
 			const numRecords = this.getNumRecords()
 			if (!numRecords) {
@@ -474,6 +498,10 @@ export default {
 				this.selectedServer.value = { id: null, label: 'None' }
 			}
 			return this.selectedServer.value.id !== null
+		},
+
+		getSettingsUrl() {
+			return generateUrl('/settings/user/b2sharebridge')
 		},
 	},
 }

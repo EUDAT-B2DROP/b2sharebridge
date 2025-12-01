@@ -9,8 +9,8 @@
 				placeholder="Token"
 				:minlength="60"
 				:maxlength="60"
-				:success="token.length === 60"
-				:helper-text="token.length === 60 ? 'Token saved' : ''"
+				:success="mutable_token.length === 60"
+				:helper-text="mutable_token.length === 60 ? 'Token saved' : (mutable_token.length === 0 ? 'Copy your token from b2share' : 'A token has 60 characters')"
 				@valid="saveToken"
 				@update:model-value="saveToken" />
 			<div class="bridgetoken__fields__buttons">

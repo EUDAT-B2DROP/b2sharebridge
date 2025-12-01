@@ -229,12 +229,16 @@ class ViewController extends Controller
                 'records' => [],
                 'server_url' => $server->getPublishUrl(),
                 'server_version' => $server->getVersion(),
-                'server_name' => $server->getName()
+                'server_name' => $server->getName(),
+                'has_token' => false
             ];
 
             $publisher = $this->_b2shareFactory->get($server->getVersion());
             $records = $publisher->getUserRecords($server, $this->userId, $draft, $page, $size);
-            $serverResponses[$serverId]['records'] = $records;
+            if ($records != null) {
+                $serverResponses[$serverId]['has_token'] = true;
+                $serverResponses[$serverId]['records'] = $records;
+            }
         }
         return new JSONResponse($serverResponses);
     }
@@ -261,9 +265,6 @@ class ViewController extends Controller
 
         if (!is_string($token)) {
             $error = 'Problems while parsing fileid or publishToken';
-        }
-        if (strlen($this->userId) <= 0) {
-            $error = 'No user configured for session';
         }
         if ($error) {
             $this->_logger->error($error, ['app' => Application::APP_ID]);
@@ -345,7 +346,6 @@ class ViewController extends Controller
             return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
         }
         $ret = [];
-        //TODO catch errors and return HTTP 500
         $servers = $this->smapper->findAll();
         foreach ($servers as $server) {
             $publisher = $this->_b2shareFactory->get($server->getVersion());

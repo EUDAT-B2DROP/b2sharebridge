@@ -261,7 +261,12 @@ class ViewController extends Controller
             $error = 'Parameters gotten from UI are no array or they are missing';
         }
         $token = $param['token'];
-        $server_id = $param['serverid'];
+        $serverId = $param['serverid'];
+        try {
+            $server = $this->smapper->find($serverId);
+        } catch (DoesNotExistException $e) {
+            $error = 'Server with this Id does not exist';
+        }
 
         if (!is_string($token)) {
             $error = 'Problems while parsing fileid or publishToken';
@@ -277,12 +282,23 @@ class ViewController extends Controller
             );
         }
 
+        $publisher = $this->_b2shareFactory->get($server->getVersion());
+        if(!$publisher->checkTokenIsValid($server, $token)) {
+            return new JSONResponse(
+                [
+                    'message' => 'Internal server error, contact the EUDAT helpdesk',
+                    'status' => 'error'
+                ],
+                Http::STATUS_FORBIDDEN
+            );
+        }
 
-        $this->_logger->info(
+        $this->_logger->debug(
             'saving API token',
             ['app' => Application::APP_ID]
         );
-        $this->config->setUserValue($this->userId, $this->appName, "token_" . $server_id, $token);
+        $this->config->setUserValue($this->userId, $this->appName, "token_" . $serverId, $token);
+
         return new JSONResponse(
             [
                 "data" => ["message" => "Saved"],

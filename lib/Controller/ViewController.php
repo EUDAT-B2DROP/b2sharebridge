@@ -322,23 +322,11 @@ class ViewController extends Controller
         if (!$this->userId) {
             return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
         }
-        $this->_logger->info(
+        $this->_logger->debug(
             'Deleting API token',
             ['app' => Application::APP_ID]
         );
-        if (strlen($this->userId) <= 0) {
-            $this->_logger->info(
-                'No user configured for session',
-                ['app' => Application::APP_ID]
-            );
-            return new JSONResponse(
-                [
-                    'message' => 'Internal server error, contact the EUDAT helpdesk',
-                    'status' => 'error'
-                ],
-                Http::STATUS_BAD_REQUEST
-            );
-        }
+
         $this->config->setUserValue($this->userId, $this->appName, 'token_' . $id, '');
         return new JSONResponse(
             [

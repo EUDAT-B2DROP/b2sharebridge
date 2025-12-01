@@ -193,7 +193,7 @@ class PublishController extends Controller
     #[NoAdminRequired]
     public function nextVersion(): JSONResponse
     {
-        if (!$this->_userId) {
+        if (!$this->userId) {
             return new JSONResponse(["message" => "missing user id"], Http::STATUS_BAD_REQUEST);
         }
 

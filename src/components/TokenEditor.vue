@@ -9,8 +9,9 @@
 				placeholder="Token"
 				:minlength="60"
 				:maxlength="60"
-				:success="mutable_token.length === 60"
-				:helper-text="mutable_token.length === 60 ? 'Token saved' : (mutable_token.length === 0 ? 'Copy your token from b2share' : 'A token has 60 characters')"
+				:success="getSuccess()"
+				:error="getError()"
+				:helper-text="getHelperText()"
 				@valid="saveToken"
 				@update:model-value="saveToken" />
 			<div class="bridgetoken__fields__buttons">
@@ -47,6 +48,28 @@ export default {
 		return {
 			mutable_token: this.token,
 			helpertext: '',
+			token_validated: null,
+		}
+	},
+
+	async mounted() {
+		if (this.mutable_token.length === 60) {
+			const data = {
+				requesttoken: OC.requesttoken,
+				token: this.mutable_token,
+				serverid: this.id,
+			}
+			axios.post(generateUrl('/apps/b2sharebridge/apitoken'), data)
+				.then(() => {
+					console.info('Saved token!')
+					this.$emit('token-change', this.id)
+					this.token_validated = true
+				})
+				.catch((error) => {
+					console.error('Could not save token')
+					console.debug(error)
+					this.token_validated = false
+				})
 		}
 	},
 
@@ -68,11 +91,33 @@ export default {
 				.then(() => {
 					console.info('Saved token!')
 					this.$emit('token-change', this.id)
+					this.token_validated = true
 				})
 				.catch((error) => {
 					console.error('Could not save token')
 					console.debug(error)
+					this.token_validated = false
 				})
+		},
+
+		getHelperText() {
+			if (this.mutable_token.length === 60) {
+				if (!this.token_validated) {
+					return 'Server token validation failed! Please create a new token!'
+				}
+				return 'Token saved and validated'
+			} else if (this.mutable_token.length === 0) {
+				return 'Copy your token from b2share'
+			}
+			return 'A token has 60 characters'
+		},
+
+		getSuccess() {
+			return this.mutable_token.length === 60 && this.token_validated
+		},
+
+		getError() {
+			return this.mutable_token.length !== 0 && !this.token_validated
 		},
 
 		deleteToken() {
@@ -80,6 +125,7 @@ export default {
 				.then(() => {
 					console.info('Deleted token!')
 					this.mutable_token = ''
+					this.token_validated = null
 					this.$emit('token-change', this.id)
 				})
 				.catch((error) => {

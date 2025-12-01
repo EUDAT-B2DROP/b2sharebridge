@@ -177,9 +177,13 @@ class B2ShareV2 extends B2ShareAPI
      * 
      * @return string B2Share API token
      */
-    public function getAccessToken(Server $server, string $userId): string
+    public function getAccessToken(Server $server, string $userId): string|null
     {
-        return $this->config->getUserValue($userId, $this->appName, 'token_' . $server->getId(), null);
+        $token = $this->config->getUserValue($userId, $this->appName, 'token_' . $server->getId(), null);
+        if ($this->checkTokenIsValid($server, $token)) {
+            return $token;
+        }
+        return null;
     }
 
     /**
@@ -241,13 +245,13 @@ class B2ShareV2 extends B2ShareAPI
      * @param int    $page   Page number, you are limited to 50 records by B2SHARE Api
      * @param int    $size   Page size, number of records per page
      * 
-     * @return array
+     * @return array|null returns null, if no token is set
      */
-    public function getUserRecords($server, $userId, $draft, $page, $size): array
+    public function getUserRecords($server, $userId, $draft, $page, $size): array|null
     {
         $token = $this->getAccessToken($server, $userId);
         if (!$token) {
-            return [];
+            return null;
         }
 
         $params = [
@@ -313,5 +317,18 @@ class B2ShareV2 extends B2ShareAPI
         $file_upload_url .= "/$filename";
         $file_upload_url .= "?access_token=$token";
         return $this->curl->upload($file_upload_url, $filehandle, $filesize);
+    }
+
+    /**
+     * Check, if a token is valid
+     * 
+     * @param Server      $server Server object
+     * @param string|null $token  Token to check
+     * 
+     * @return bool
+     */
+    public function checkTokenIsValid(Server $server, string|null $token): bool
+    {
+        return $token != null; // TODO do an actual check, we have no idea here
     }
 }

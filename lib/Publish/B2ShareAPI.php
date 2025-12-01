@@ -130,21 +130,22 @@ abstract class B2ShareAPI
      * @param \OCA\B2shareBridge\Model\Server $server   Server to check and request from
      * @param string                          $filesUrl url to request
      * @param array                           $header   Optional additional headers for the request
+     * @param string                          $type     Optional rest type, e.g. 'GET', 'PUT', ...
      * 
      * @return bool|string False or the result of the request
      */
-    protected function requestInternal(Server $server, string $filesUrl, array $header = []): bool|string
+    protected function requestInternal(Server $server, string $filesUrl, array $header = [], string $type = 'GET'): bool|string
     {
         $serverUrl = $server->getPublishUrl();
 
         if (str_starts_with($filesUrl, $serverUrl)) {
-            return $this->curl->request($filesUrl, 'GET', $header);
+            return $this->curl->request($filesUrl, $type, $header);
         }
 
         if (!str_starts_with($filesUrl, "/")) {
             $filesUrl = "/$filesUrl";
         }
-        return $this->curl->request("$serverUrl$filesUrl", 'GET', $header);
+        return $this->curl->request("$serverUrl$filesUrl", $type, $header);
     }
 
     /**
@@ -164,9 +165,9 @@ abstract class B2ShareAPI
      * @param Server $server Server obj
      * @param string $userId User id
      * 
-     * @return string B2Share API token
+     * @return string|null B2Share API token
      */
-    abstract public function getAccessToken(Server $server, string $userId): string;
+    abstract public function getAccessToken(Server $server, string $userId): string|null;
 
     /**
      * Gets the B2Share user id
@@ -208,7 +209,17 @@ abstract class B2ShareAPI
      * @param int    $page   Page number, you are limited to 50 records by B2SHARE Api
      * @param int    $size   Page size, number of records per page
      * 
-     * @return array
+     * @return array|null Returns null, if no token is set
      */
-    abstract public function getUserRecords(Server $server, string $userId, bool $draft, int $page, int $size): array;
+    abstract public function getUserRecords(Server $server, string $userId, bool $draft, int $page, int $size): array|null;
+
+    /**
+     * Check, if a token is valid
+     * 
+     * @param Server      $server Server object
+     * @param string|null $token  Token to check
+     * 
+     * @return bool
+     */
+    abstract public function checkTokenIsValid(Server $server, string|null $token): bool;
 }

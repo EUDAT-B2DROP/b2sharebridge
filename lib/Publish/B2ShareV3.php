@@ -206,10 +206,13 @@ class B2ShareV3 extends B2ShareAPI
      * 
      * @return string B2Share API token
      */
-    public function getAccessToken($server, $userId): string
+    public function getAccessToken($server, $userId): string|null
     {
-        // TODO this might change in the future
-        return $this->config->getUserValue($userId, $this->appName, 'token_' . $server->getId(), null);
+        $token = $this->config->getUserValue($userId, $this->appName, 'token_' . $server->getId(), null);
+        if (!$this->checkTokenIsValid($server, $token)) {
+            return null;
+        }
+        return $token;
     }
 
     /**
@@ -273,13 +276,13 @@ class B2ShareV3 extends B2ShareAPI
      * @param int    $page   Page number, you are limited to 50 records by B2SHARE Api
      * @param int    $size   Page size, number of records per page
      * 
-     * @return array
+     * @return array|null Returns null, if no token is set
      */
-    public function getUserRecords($server, $userId, $draft, $page, $size): array
+    public function getUserRecords($server, $userId, $draft, $page, $size): array|null
     {
         $token = $this->getAccessToken($server, $userId);
         if (!$token) {
-            return [];
+            return null;
         }
 
         $params = [
@@ -390,5 +393,41 @@ class B2ShareV3 extends B2ShareAPI
             return false;
         }
         return true;
+    }
+
+    /**
+     * Check, if a token is valid
+     * 
+     * @param Server      $server Server object
+     * @param string|null $token  Token to check
+     * 
+     * @return bool
+     */
+    public function checkTokenIsValid(Server $server, string|null $token): bool
+    {
+        if ($token == "" || $token == null) {
+            return false;
+        }
+
+        $header = $this->_getTokenHeader($token);
+        $response = $this->requestInternal($server, '/api/user/communities', $header, 'GET');
+        if (!$response) {
+            return false;
+        }
+
+        $response = json_decode($response, true);
+
+        if (array_key_exists('status', $response)) {
+            if ($response['status'] == 200) {
+                return true;
+            } elseif ($response['status'] == 403) {
+                return false;
+            }
+
+            $this->logger->error("Invalid response on token request from $server, response $response");
+        } elseif (array_key_exists('hits', $response)) { // I don't understand, why this doesn't contain a status
+            return true;
+        }
+        return false;
     }
 }

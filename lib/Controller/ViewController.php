@@ -283,7 +283,7 @@ class ViewController extends Controller
         }
 
         $publisher = $this->_b2shareFactory->get($server->getVersion());
-        if(!$publisher->checkTokenIsValid($server, $token)) {
+        if (!$publisher->checkTokenIsValid($server, $token)) {
             return new JSONResponse(
                 [
                     'message' => 'Internal server error, contact the EUDAT helpdesk',

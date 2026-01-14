@@ -106,12 +106,14 @@ class B2ShareV3 extends B2ShareAPI
                 "metadata" => [
                     "title" => $title,
                     "creators" => [
-                        "person_or_org" => [
-                            "name" => $community,
-                            "type" => "organizational"
-                        ],
-                        "affiliations" => [
-                            "name" => $community
+                        [
+                            "person_or_org" => [
+                                "name" => $community,
+                                "type" => "organizational"
+                            ],
+                            "affiliations" => [
+                                "name" => $community
+                            ]
                         ]
                     ],
                 ],
@@ -132,7 +134,8 @@ class B2ShareV3 extends B2ShareAPI
         $body_encoded = mb_convert_encoding($response, 'UTF-8', mb_list_encodings());
         $results = json_decode($body_encoded, false);
 
-        if (!property_exists($results, 'links')
+        if (
+            !property_exists($results, 'links')
             || !property_exists($results->links, 'self')
             || !property_exists($results->links, 'files')
         ) {

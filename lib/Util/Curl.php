@@ -148,6 +148,10 @@ class Curl
             $config[CURLOPT_CUSTOMREQUEST] = $type;
         }
 
+        if ($type == 'HEAD') {
+            $config[CURLOPT_NOBODY] = 1;
+        }
+
         $ch = $this->_setup($config);
 
         $output = curl_exec($ch);

@@ -16,11 +16,12 @@
 namespace OCA\B2shareBridge\Settings;
 
 use OCA\B2shareBridge\AppInfo\Application;
+use OCA\B2shareBridge\Model\ServerMapper;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
-use OCA\B2shareBridge\Model\ServerMapper;
+use OCP\Util;
 
 /**
  * Creates the personal settings for b2sharebirdge.
@@ -59,7 +60,8 @@ class Personal implements ISettings
      */
     public function getForm(): TemplateResponse
     {
-        \OCP\Util::addScript('b2sharebridge', 'b2sharebridge-settingspersonal');
+        Util::addScript(Application::APP_ID, 'b2sharebridge-vendors');
+        Util::addScript(Application::APP_ID, 'b2sharebridge-settingspersonal');
         return new TemplateResponse(Application::APP_ID, 'settings-personal');
     }
 

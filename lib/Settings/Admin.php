@@ -16,12 +16,13 @@
 namespace OCA\B2shareBridge\Settings;
 
 use OCA\B2shareBridge\AppInfo\Application;
+use OCA\B2shareBridge\Model\ServerMapper;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\DB\Exception;
 use OCP\IConfig;
 use OCP\Settings\ISettings;
-use OCA\B2shareBridge\Model\ServerMapper;
+use OCP\Util;
 
 /**
  * Creates the admin settings for b2sharebirdge.
@@ -71,7 +72,8 @@ class Admin implements ISettings
             ),
             'servers' => $this->mapper->findAll()
         ];*/
-        \OCP\Util::addScript('b2sharebridge', 'b2sharebridge-settingsadmin');
+        Util::addScript(Application::APP_ID, 'b2sharebridge-vendors');
+        Util::addScript(Application::APP_ID, 'b2sharebridge-settingsadmin');
         return new TemplateResponse(Application::APP_ID, 'settings-admin');
     }
 

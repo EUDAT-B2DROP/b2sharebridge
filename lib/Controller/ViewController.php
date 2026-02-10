@@ -129,6 +129,7 @@ class ViewController extends Controller
     public function index(): TemplateResponse
     {
         Util::addStyle(Application::APP_ID, 'style');
+        Util::addScript(Application::APP_ID, 'b2sharebridge-vendors');
         Util::addScript(Application::APP_ID, 'b2sharebridge-main');
 
         $params = [

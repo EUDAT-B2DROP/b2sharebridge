@@ -80,7 +80,9 @@ class Application extends App implements IBootstrap
         $dispatcher->addListener(
             LoadAdditionalScriptsEvent::class,
             function () {
+                Util::addScript(self::APP_ID, 'b2sharebridge-vendors');
                 Util::addScript(self::APP_ID, 'b2sharebridge-filetabmain');
+                Util::addScript(self::APP_ID, 'b2sharebridge-main');
             }
         );
     }
@@ -94,10 +96,7 @@ class Application extends App implements IBootstrap
      */
     public static function loadScripts()
     {
-        /* Removed and moved to listener
-        Util::addScript(self::APP_ID, "b2sharebridge-settingsadmin");
-        Util::addScript(self::APP_ID, "b2sharebridge-settingspersonal");
-        */
+        /* Removed and moved to listener */
     }
 
     /**

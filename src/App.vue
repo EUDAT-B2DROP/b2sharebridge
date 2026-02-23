@@ -1,47 +1,47 @@
 <template>
-	<NcContent id="bridgecontent" app-name="b2sharebridge" class="app-b2sharebridge">
+	<NcContent id="bridgecontent" appName="b2sharebridge" class="app-b2sharebridge">
 		<NcAppNavigation>
 			<NcAppNavigationNew
 				v-if="!loading"
 				:text="t('b2sharebridge', 'Publications')"
 				:disabled="currentState === BridgeState.RECORDS_PUBLISHED"
-				button-id="records-published"
-				button-class="icon-add"
+				buttonId="records-published"
+				buttonClass="icon-add"
 				@click="showRecordsPublished" />
 			<NcAppNavigationNew
 				v-if="!loading"
 				:text="t('b2sharebridge', 'Drafts')"
 				:disabled="currentState === BridgeState.RECORDS_DRAFT"
-				button-id="records-published"
-				button-class="icon-add"
+				buttonId="records-published"
+				buttonClass="icon-add"
 				@click="showRecordsDrafted" />
 			<NcAppNavigationNew
 				v-if="!loading"
 				:text="t('b2sharebridge', 'All Uploads')"
 				:disabled="currentState === BridgeState.UPLOAD_ALL"
-				button-id="upload-all-button"
-				button-class="icon-add"
+				buttonId="upload-all-button"
+				buttonClass="icon-add"
 				@click="showAllUploads" />
 			<NcAppNavigationNew
 				v-if="!loading"
 				:text="t('b2sharebridge', 'Pending Uploads')"
 				:disabled="currentState === BridgeState.UPLOAD_PENDING"
-				button-id="upload-pending-button"
-				button-class="icon-add"
+				buttonId="upload-pending-button"
+				buttonClass="icon-add"
 				@click="showPendingUploads" />
 			<NcAppNavigationNew
 				v-if="!loading"
 				:text="t('b2sharebridge', 'Published Uploads')"
 				:disabled="currentState === BridgeState.UPLOAD_PUBLISHED"
-				button-id="upload-published-button"
-				button-class="icon-add"
+				buttonId="upload-published-button"
+				buttonClass="icon-add"
 				@click="showPublishedUploads" />
 			<NcAppNavigationNew
 				v-if="!loading"
 				:text="t('b2sharebridge', 'Failed Uploads')"
 				:disabled="currentState === BridgeState.UPLOAD_FAILED"
-				button-id="upload-failed-button"
-				button-class="icon-add"
+				buttonId="upload-failed-button"
+				buttonClass="icon-add"
 				@click="showFailedUploads" />
 		</NcAppNavigation>
 		<NcAppContent>
@@ -82,8 +82,8 @@
 					hover
 					:rows="Uploads"
 					:fields="fields"
-					sort-by="createdAt"
-					sort-dir="desc" />
+					sortBy="createdAt"
+					sortDir="desc" />
 			</div>
 			<div v-else-if="!loadedPublications">
 				<h2 v-if="currentState === BridgeState.RECORDS_PUBLISHED" style="text-align: center;">
@@ -105,7 +105,7 @@
 							label="Set API Token"
 							:href="getSettingsUrl()"
 							type="Primary"
-							area-label="Set API Token"
+							areaLabel="Set API Token"
 							@click="redirect('/settings/user/b2sharebridge')">
 							"Set API Token"
 						</NcButton>
@@ -122,13 +122,13 @@
 					:records="Publications"
 					:draft="currentState === BridgeState.RECORDS_DRAFT"
 					:page="page"
-					:page-size="pageSize"
-					:server-id="serverId"
-					@page-update="updatePage"
-					@page-size-update="updatePageSize"
+					:pageSize="pageSize"
+					:serverId="serverId"
+					@pageUpdate="updatePage"
+					@pageSizeUpdate="updatePageSize"
 					@refresh="refreshRecords"
 					@status="setBridgeState"
-					@server-update="serverUpdate" />
+					@serverUpdate="serverUpdate" />
 			</div>
 		</NcAppContent>
 	</NcContent>
@@ -391,7 +391,7 @@ export default {
 		},
 
 		getExtraClass(fieldName) {
-			let extraClass = 'columnWidthInt'
+			let extraClass
 			switch (fieldName) {
 				case 'url':
 					extraClass = 'bridgelink'

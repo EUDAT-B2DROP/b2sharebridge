@@ -1,7 +1,7 @@
+import { n, t } from '@nextcloud/l10n'
 import { generateFilePath } from '@nextcloud/router'
 import { createApp } from 'vue'
 import PersonalSettings from './components/PersonalSettings.vue'
-import { t, n } from '@nextcloud/l10n'
 
 __webpack_nonce__ = btoa(OC.requestToken)
 // eslint-disable-next-line

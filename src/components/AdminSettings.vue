@@ -11,7 +11,7 @@
 				:maxuploadfilesize="dummy_server.maxUploadFilesize"
 				:checkssl="dummy_server.checkSsl"
 				:version="dummy_server.version"
-				@server-change="loadServers" />
+				@serverChange="loadServers" />
 		</div>
 		<div v-if="loaded && servers.length">
 			<h3>Servers:</h3>
@@ -25,7 +25,7 @@
 						:maxuploadfilesize="server.maxUploadFilesize"
 						:checkssl="server.checkSsl === 1"
 						:version="{ id: server.version, label: `API-Version ${server.version}` }"
-						@server-change="loadServers" />
+						@serverChange="loadServers" />
 				</li>
 			</ul>
 		</div>

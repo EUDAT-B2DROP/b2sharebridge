@@ -9,7 +9,7 @@
 						:name="server.name"
 						:url="server.publishUrl"
 						:token="getToken(server.id)"
-						@token-change="updateTokens" />
+						@tokenChange="updateTokens" />
 				</li>
 			</ul>
 		</div>

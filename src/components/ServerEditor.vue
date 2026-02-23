@@ -5,11 +5,11 @@
 			<NcTextField
 				v-model="mutable_maxUploads"
 				label="# of uploads per user at the same time"
-				trailing-cutton-icon="close"
-				:show-trailing-button="true"
+				trailingCuttonIcon="close"
+				:showTrailingButton="true"
 				:success="parseInt(mutable_maxUploads) > 0"
 				:error="isNaN(parseInt(mutable_maxUploads))"
-				@trailing-button-click="mutable_maxUploads = 5">
+				@trailingButtonClick="mutable_maxUploads = 5">
 				<template #icon>
 					<UploadMultiple :size="20" />
 				</template>
@@ -17,11 +17,11 @@
 			<NcTextField
 				v-model="mutable_maxUploadFilesize"
 				label="MB, maximum filesize per upload"
-				trailing-cutton-icon="close"
-				:show-trailing-button="true"
+				trailingCuttonIcon="close"
+				:showTrailingButton="true"
 				:success="parseInt(mutable_maxUploadFilesize) > 0"
 				:error="isNaN(parseInt(mutable_maxUploadFilesize))"
-				@trailing-button-click="mutable_maxUploadFilesize = 512">
+				@trailingButtonClick="mutable_maxUploadFilesize = 512">
 				<template #icon>
 					<FileUploadOutline :size="20" />
 				</template>
@@ -32,11 +32,11 @@
 			<NcTextField
 				v-model="mutable_publishUrl"
 				label="Publish URL"
-				trailing-cutton-icon="close"
-				:show-trailing-button="true"
+				trailingCuttonIcon="close"
+				:showTrailingButton="true"
 				:success="String(mutable_publishUrl).trim().startsWith('https://') && !String(mutable_publishUrl).trim().endsWith('/')"
 				:error="String(mutable_publishUrl).length > 0 && (!String(mutable_publishUrl).trim().startsWith('https://') || String(mutable_publishUrl).trim().endsWith('/'))"
-				@trailing-button-click="mutable_publishUrl = ''">
+				@trailingButtonClick="mutable_publishUrl = ''">
 				<template #icon>
 					<Web :size="20" />
 				</template>
@@ -44,10 +44,10 @@
 			<NcTextField
 				v-model="mutable_name"
 				label="Your Server Name"
-				trailing-cutton-icon="close"
-				:show-trailing-button="true"
+				trailingCuttonIcon="close"
+				:showTrailingButton="true"
 				:success="String(mutable_name).length > 0"
-				@trailing-button-click="mutable_name = ''">
+				@trailingButtonClick="mutable_name = ''">
 				<template #icon>
 					<TagEditOutline :size="20" />
 				</template>
@@ -61,8 +61,8 @@
 					v-bind="version_options"
 					v-model="mutable_version"
 					class="bridgeserver__input__div__select"
-					:label-outside="true"
-					@update:model-value="updateVersion" />
+					:labelOutside="true"
+					@update:modelValue="updateVersion" />
 			</div>
 		</div>
 		<div class="bridgeserver__buttons bridgeserver__row">
@@ -124,7 +124,7 @@ export default {
 		},
 	},
 
-	emits: ['server-change'],
+	emits: ['serverChange'],
 
 	data() {
 		return {
@@ -194,7 +194,7 @@ export default {
 
 			axios.post(generateUrl('/apps/b2sharebridge/server'), { server: data })
 				.then(() => {
-					this.$emit('server-change', this.id === -1 ? 0 : this.id)
+					this.$emit('serverChange', this.id === -1 ? 0 : this.id)
 				})
 				.catch((error) => {
 					console.error('Could not save server')
@@ -207,7 +207,7 @@ export default {
 				axios.delete(generateUrl('/apps/b2sharebridge/servers/' + this.id))
 					.then(() => {
 						console.debug("Deleted server '" + this.name + "'")
-						this.$emit('server-change', this.id)
+						this.$emit('serverChange', this.id)
 					})
 					.catch((error) => {
 						console.error('Could not delete server')

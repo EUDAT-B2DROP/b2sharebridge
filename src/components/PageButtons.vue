@@ -67,7 +67,7 @@ export default {
 		},
 	},
 
-	emits: ['page-update'],
+	emits: ['pageUpdate'],
 
 	computed: {
 		isLastPage() {
@@ -98,7 +98,7 @@ export default {
 			} else if (pageString === 'last') {
 				page = lastPage
 			}
-			this.$emit('page-update', page)
+			this.$emit('pageUpdate', page)
 		},
 
 		updatePageIncrement() {

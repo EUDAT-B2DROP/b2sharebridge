@@ -9,7 +9,7 @@
 					:key="button.label"
 					:href="button.href"
 					:type="button.type"
-					:area-label="button.label"
+					:areaLabel="button.label"
 					@click="button.callback">
 					{{ button.label }}
 				</NcButton>
@@ -24,7 +24,7 @@
 				v-model="modeprops.value"
 				required
 				:class="{ selecterror: modeprops.error }"
-				@update:model-value="onChangeMode()" />
+				@update:modelValue="onChangeMode()" />
 			<NcTextField
 				v-if="!modeprops.value || modeprops.value.id === 'create'"
 				v-model="title.text"
@@ -35,8 +35,8 @@
 				:success="title.success"
 				minlength="3"
 				maxlength="128"
-				:helper-text="title.helpertext"
-				@update:model-value="validate">
+				:helperText="title.helpertext"
+				@update:modelValue="validate">
 				<PencilIcon :size="20" />
 			</NcTextField>
 			<NcSelect
@@ -44,14 +44,14 @@
 				v-model="serverprops.value"
 				required
 				:class="{ selecterror: serverprops.error }"
-				@update:model-value="onChangeServer" />
+				@update:modelValue="onChangeServer" />
 			<NcSelect
 				v-if="modeprops.value && modeprops.value.id === 'attach'"
 				v-bind="depositselectprops"
 				v-model="depositselectprops.value"
 				required
 				:class="{ selecterror: depositselectprops.error }"
-				@update:model-value="validate" />
+				@update:modelValue="validate" />
 			<NcSelect
 				v-if="!modeprops.value || modeprops.value.id === 'create'"
 				v-bind="communityprops"
@@ -59,7 +59,7 @@
 				:disabled="!modeprops.value"
 				required
 				:class="{ selecterror: communityprops.error }"
-				@update:model-value="validate" />
+				@update:modelValue="validate" />
 			<NcCheckboxRadioSwitch
 				v-if="!modeprops.value || modeprops.value.id === 'create'"
 				v-model="openAccess"
@@ -520,8 +520,8 @@ export default {
 			this.publish.publishTime = Date.now()
 			this.publish.publishing = true
 
-			let url = ''
-			let props = {}
+			let url
+			let props
 			if (this.modeprops.value.id === 'attach') {
 				/* const draft = this.getCurrentDraft() */
 				url = '/apps/b2sharebridge/attach'

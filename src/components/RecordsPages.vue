@@ -9,24 +9,24 @@
 				<NcSelect
 					v-bind="selectedServer"
 					v-model="selectedServer.value"
-					:label-outside="true"
+					:labelOutside="true"
 					:options="selectedServer.options"
-					@update:model-value="updateServer" />
+					@update:modelValue="updateServer" />
 			</div>
 			<div class="rp__selectors__select">
 				<p>Page Size:</p>
 				<NcSelect
 					v-bind="selectPageSize"
 					v-model="selectPageSize.value"
-					:label-outside="true"
+					:labelOutside="true"
 					:options="selectPageSize.options"
-					@update:model-value="updatePageSize" />
+					@update:modelValue="updatePageSize" />
 			</div>
 			<PageButtons
 				class="rp__selectors__pagebuttons"
 				:page="page"
-				:num-pages="getNumPages()"
-				@page-update="updatePage" />
+				:numPages="getNumPages()"
+				@pageUpdate="updatePage" />
 		</div>
 		<!-- Listed Records: -->
 		<div class="rp__records">
@@ -104,7 +104,7 @@
 						label="Set API Token"
 						:href="getSettingsUrl()"
 						type="Primary"
-						area-label="Set API Token"
+						areaLabel="Set API Token"
 						@click="redirect('/settings/user/b2sharebridge')">
 						"Set API Token"
 					</NcButton>
@@ -117,8 +117,8 @@
 			<PageButtons
 				class="rp__selectors__pagebuttons"
 				:page="page"
-				:num-pages="getNumPages()"
-				@page-update="updatePage" />
+				:numPages="getNumPages()"
+				@pageUpdate="updatePage" />
 		</div>
 		<!-- Modals -->
 		<NcModal v-if="modalDelete.show" name="DeleteModal" @close="closeModals">
@@ -227,7 +227,7 @@ export default {
 		},
 	},
 
-	emits: ['page-size-update', 'page-update', 'server-update', 'refresh', 'status'],
+	emits: ['pageSizeUpdate', 'pageUpdate', 'serverUpdate', 'refresh', 'status'],
 
 	data() {
 		return {
@@ -322,16 +322,16 @@ export default {
 
 		updateServer(serverValue) {
 			// this.selectedServer.value = this.selectedServer.options.find((server) => server.id == serverValue)
-			this.$emit('server-update', Number(serverValue.id))
+			this.$emit('serverUpdate', Number(serverValue.id))
 		},
 
 		updatePageSize(size) {
 			this.selectPageSize.value = size
-			this.$emit('page-size-update', Number(size))
+			this.$emit('pageSizeUpdate', Number(size))
 		},
 
 		updatePage(page) {
-			this.$emit('page-update', Number(page))
+			this.$emit('pageUpdate', Number(page))
 		},
 
 		getTitle(record) {

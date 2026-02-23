@@ -11,9 +11,9 @@
 				:maxlength="60"
 				:success="getSuccess()"
 				:error="getError()"
-				:helper-text="getHelperText()"
+				:helperText="getHelperText()"
 				@valid="saveToken"
-				@update:model-value="saveToken" />
+				@update:modelValue="saveToken" />
 			<div class="bridgetoken__fields__buttons">
 				<NcButton variant="error" aria-label="Delete Token" @click="deleteToken">
 					Delete Token
@@ -42,7 +42,7 @@ export default {
 		token: { default: '', type: String },
 	},
 
-	emits: ['token-change'],
+	emits: ['tokenChange'],
 
 	data() {
 		return {
@@ -62,7 +62,7 @@ export default {
 			axios.post(generateUrl('/apps/b2sharebridge/apitoken'), data)
 				.then(() => {
 					console.info('Saved token!')
-					this.$emit('token-change', this.id)
+					this.$emit('tokenChange', this.id)
 					this.token_validated = true
 				})
 				.catch((error) => {
@@ -90,7 +90,7 @@ export default {
 			axios.post(generateUrl('/apps/b2sharebridge/apitoken'), data)
 				.then(() => {
 					console.info('Saved token!')
-					this.$emit('token-change', this.id)
+					this.$emit('tokenChange', this.id)
 					this.token_validated = true
 				})
 				.catch((error) => {
@@ -126,7 +126,7 @@ export default {
 					console.info('Deleted token!')
 					this.mutable_token = ''
 					this.token_validated = null
-					this.$emit('token-change', this.id)
+					this.$emit('tokenChange', this.id)
 				})
 				.catch((error) => {
 					console.error('Could not delete token')

@@ -36,6 +36,9 @@ class Helper
      */
     public static function arrayKeysExist($keys, $array)
     {
+        if ($array === null) {
+            return false;
+        }
         foreach ($keys as $key) {
             if (!array_key_exists($key, $array)) {
                 return false;

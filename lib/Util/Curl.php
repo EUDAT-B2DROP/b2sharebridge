@@ -32,6 +32,16 @@ use RuntimeException;
 class Curl
 {
     private bool $_ssl;
+    
+    /**
+     * Get the SSL setting
+     * 
+     * @return bool SSL setting
+     */
+    public function getSsl(): bool
+    {
+        return $this->_ssl;
+    }
     protected LoggerInterface $logger;
 
     /**

@@ -28,7 +28,7 @@
     "@nextcloud/axios": "^2",
     "@nextcloud/browserslist-config": "^3",
     "@nextcloud/dialogs": "^7",
-    "@nextcloud/files": "^4",
+    "@nextcloud/files": "^3.12.2",
     "@nextcloud/logger": "^3",
     "@nextcloud/router": "^3",
     "@nextcloud/vue": "^9",

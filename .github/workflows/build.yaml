@@ -52,8 +52,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: [ 8.1, 8.2, 8.3, 8.4 ]
-        nextcloud-version-branch: [ stable31, stable32 ]  # see https://github.com/nextcloud/server/branches
+        php-version: [ 8.2, 8.3, 8.4, 8.5 ]
+        nextcloud-version-branch: [ stable33 ]  # see https://github.com/nextcloud/server/branches
         exclude:
           - php-version: 8.4
             nextcloud-version-branch: stable30

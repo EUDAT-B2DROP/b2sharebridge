@@ -1,6 +1,6 @@
 <template>
 	<NcContent id="bridgecontent" appName="b2sharebridge" class="app-b2sharebridge">
-		<NcAppNavigation>
+		<NcAppNavigation ariaLabel="b2sharebridge-navigation">
 			<NcAppNavigationNew
 				v-if="!loading"
 				:text="t('b2sharebridge', 'Publications')"

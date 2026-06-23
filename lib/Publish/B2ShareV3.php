@@ -291,7 +291,8 @@ class B2ShareV3 extends B2ShareAPI
             'is_published' => $draft ? "false" : "true",
             'page' => $page,
             'size' => $size,
-            'sort' => 'newest'
+            'sort' => 'newest',
+            'shared_with_me' => 'false'
         ];
 
         $httpParams = http_build_query($params);

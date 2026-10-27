@@ -101,6 +101,9 @@ export default {
 		},
 
 		getHelperText() {
+			if (this.isOidc()) {
+				return 'Your Nextcloud login token (OIDC) is used for this server. You can still enter a manual API token as a fallback.'
+			}
 			if (this.mutable_token.length === 60) {
 				if (!this.token_validated) {
 					return 'Server token validation failed! Please create a new token!'
@@ -113,11 +116,15 @@ export default {
 		},
 
 		getSuccess() {
-			return this.mutable_token.length === 60 && this.token_validated
+			return this.isOidc() || (this.mutable_token.length === 60 && this.token_validated)
 		},
 
 		getError() {
-			return this.mutable_token.length !== 0 && !this.token_validated
+			return !this.isOidc() && this.mutable_token.length !== 0 && !this.token_validated
+		},
+
+		isOidc() {
+			return this.mutable_token === 'oidc'
 		},
 
 		deleteToken() {

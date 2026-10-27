@@ -170,6 +170,22 @@ abstract class B2ShareAPI
     abstract public function getAccessToken(Server $server, string $userId): string|null;
 
     /**
+     * Get a displayable representation of the access token for the frontend.
+     *
+     * Never expose secrets: implementations may replace real tokens with a
+     * non-secret marker.
+     *
+     * @param Server $server Server obj
+     * @param string $userId User id
+     *
+     * @return string Displayable token representation, empty string if none
+     */
+    public function getAccessTokenDisplay(Server $server, string $userId): string
+    {
+        return $this->getAccessToken($server, $userId) ?? '';
+    }
+
+    /**
      * Gets the B2Share user id
      * 
      * @param \OCA\B2shareBridge\Model\Server $server Server obj

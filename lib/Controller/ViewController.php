@@ -354,9 +354,9 @@ class ViewController extends Controller
         $servers = $this->smapper->findAll();
         foreach ($servers as $server) {
             $publisher = $this->_b2shareFactory->get($server->getVersion());
-            $token = $publisher->getAccessToken($server, $this->userId);
             $serverId = $server->getId();
-            $ret[$serverId] = $token ?? "";
+            // display representation only, never leak secret tokens to the client
+            $ret[$serverId] = $publisher->getAccessTokenDisplay($server, $this->userId);
         }
         return new JSONResponse($ret);
     }

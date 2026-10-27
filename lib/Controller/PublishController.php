@@ -209,10 +209,13 @@ class PublishController extends Controller
                 throw new ControllerValidationException('Invalid server id', Http::STATUS_BAD_REQUEST, $e);
             }
 
-            $token = $this->config->getUserValue($this->userId, $this->appName, "token_$serverId");
             $serverUrl = $server->getPublishUrl();
             $recordId = $param['recordId'];
             $publisher = $this->_b2shareFactory->get($server->getVersion());
+            $token = $publisher->getAccessToken($server, $this->userId);
+            if (!is_string($token)) {
+                throw new ControllerValidationException('Could not find a valid token for user', Http::STATUS_UNAUTHORIZED);
+            }
             $content = $publisher->nextVersion($server, $recordId, $token);
             if (!$content) {
                 throw new ControllerValidationException("error on upstream server $serverUrl", Http::STATUS_BAD_GATEWAY);

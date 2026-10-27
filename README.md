@@ -6,7 +6,8 @@
 
 1. [Plugin Description - What the plugin does provide](#module-description)
 2. [Install - How to install the B2SHAREBRIDGE](#install)
-3. [Development - Guide for contributing to the plugin](#development)
+3. [OIDC Login Tokens - Publishing without a manual API token](#oidc-login-tokens)
+4. [Development - Guide for contributing to the plugin](#development)
     1. [Frontend development - Guide for frontend building](#frontend-development)
     2. [Testing - Instructions to test the code](#testing)
     3. [Styling - Instructions to check the code quality](#style-and-style-fix)
@@ -45,6 +46,54 @@ sudo -u <www-data/your webserver user> php occ app:enable b2sharebridge
 ```
 
 - configure a B2SHARE endpoint in the B2DROP owncloud/nextcloud **admin** menu
+
+## OIDC Login Tokens
+
+Instead of copying a B2SHARE API token into the personal settings, users that log into Nextcloud via OpenID Connect
+([user_oidc](https://github.com/nextcloud/user_oidc)) can publish with an OIDC token directly. If a valid OIDC token
+is available, it is used against the B2SHARE (InvenioRDM) API and no manual token is required. Manually configured
+API tokens keep working as a fallback and are used whenever no (valid) OIDC token is available.
+
+Two token sources are supported (in this order):
+
+1. **Internal token** (recommended): a fresh token minted by the Nextcloud
+   [OIDC Identity Provider app](https://apps.nextcloud.com/apps/oidc) ("oidc", >= 1.4.0, with Nextcloud acting as the
+   OpenID Connect provider) for a target audience. This does **not** require user_oidc's `store_login_token` setting.
+2. **External login token**: the login token of the external OpenID Connect provider that was used to log into
+   Nextcloud, stored and refreshed by user_oidc.
+
+### Prerequisites
+
+- The `user_oidc` app is installed
+- **For internal tokens:** the "oidc" identity provider app is installed and enabled, a client is created for the
+  B2SHARE audience, and the audience (client id) is configured for this app:
+
+  ```console
+  sudo -u <www-data/your webserver user> php occ config:app:set b2sharebridge oidc_audience --value=<client-id>
+  ```
+
+- **For external login tokens:** users log into Nextcloud via an OpenID Connect provider configured in user_oidc, and
+  user_oidc must store the login token:
+
+  ```console
+  sudo -u <www-data/your webserver user> php occ config:app:set user_oidc store_login_token --value=1
+  ```
+
+- The B2SHARE server (version **3** / InvenioRDM endpoints) must accept those access tokens. By default InvenioRDM
+  only accepts its own tokens, so it has to be configured to validate the JWTs of the corresponding issuer (the
+  Nextcloud "oidc" app for internal tokens, or the external provider for login tokens), e.g. via a custom
+  `OAUTH2SERVER_JWT_VERIFICATION_FACTORY` that verifies against the issuer's JWKS. The token `sub` claim must map to
+  an existing B2SHARE account.
+
+### Limitations
+
+- OIDC tokens are only available within logged-in web requests (external login tokens are stored in the user session,
+  internal tokens require an authenticated user). Background jobs cannot obtain or refresh them: uploads above
+  250 MB are queued with a snapshot of the token and may
+  fail if it expires before the job runs. Simply retry the upload in that case.
+- OIDC login tokens are only used for servers configured as version 3 (InvenioRDM). Legacy version 2 servers keep
+  using manually configured API tokens (long JWTs are not usable as URL query parameters).
+- The app has no hard dependency on user_oidc; without it (or without `store_login_token`) it behaves exactly as before.
 
 ## Development
 

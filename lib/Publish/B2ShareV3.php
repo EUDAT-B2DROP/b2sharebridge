@@ -31,22 +31,35 @@ use Psr\Log\LoggerInterface;
  */
 class B2ShareV3 extends B2ShareAPI
 {
+    /**
+     * Marker returned by getAccessTokenDisplay() when the users OIDC login
+     * token is used, so the (secret) token never reaches the frontend
+     */
+    public const OIDC_TOKEN_MARKER = 'oidc';
 
     protected string $file_upload_url;
     protected string $error_message;
+    protected ?OidcTokenProvider $oidcTokenProvider;
 
 
     /**
      * Create object for actual upload
      *
-     * @param string          $appName AppName
-     * @param IConfig         $_config Config
-     * @param LoggerInterface $logger  Logger
-     * @param Curl            $curl    Curl
+     * @param string            $appName           AppName
+     * @param IConfig           $_config           Config
+     * @param LoggerInterface   $logger            Logger
+     * @param Curl              $curl              Curl
+     * @param OidcTokenProvider $oidcTokenProvider Optional provider for OIDC login tokens
      */
-    public function __construct(string $appName, IConfig $_config, LoggerInterface $logger, Curl $curl)
-    {
+    public function __construct(
+        string $appName,
+        IConfig $_config,
+        LoggerInterface $logger,
+        Curl $curl,
+        ?OidcTokenProvider $oidcTokenProvider = null
+    ) {
         parent::__construct($appName, $_config, $logger, $curl);
+        $this->oidcTokenProvider = $oidcTokenProvider;
     }
 
     /**
@@ -202,19 +215,47 @@ class B2ShareV3 extends B2ShareAPI
 
     /**
      * Get the B2Share API token
-     * 
+     *
+     * Prefers a valid OIDC login token of the user (if the user_oidc app is
+     * set up and the token is accepted by the server), falls back to a
+     * manually configured B2Share API token.
+     *
      * @param Server $server Server obj
      * @param string $userId User id
-     * 
+     *
      * @return string B2Share API token
      */
     public function getAccessToken($server, $userId): string|null
     {
+        $oidcToken = $this->oidcTokenProvider?->getOidcAccessToken();
+        if ($oidcToken !== null && $this->checkTokenIsValid($server, $oidcToken)) {
+            return $oidcToken;
+        }
+
         $token = $this->config->getUserValue($userId, $this->appName, 'token_' . $server->getId(), null);
         if (!$this->checkTokenIsValid($server, $token)) {
             return null;
         }
         return $token;
+    }
+
+    /**
+     * Get a displayable representation of the access token.
+     *
+     * Returns a non-secret marker instead of the users OIDC login token.
+     *
+     * @param Server $server Server obj
+     * @param string $userId User id
+     *
+     * @return string Displayable token representation, empty string if none
+     */
+    public function getAccessTokenDisplay(Server $server, string $userId): string
+    {
+        $oidcToken = $this->oidcTokenProvider?->getOidcAccessToken();
+        if ($oidcToken !== null && $this->checkTokenIsValid($server, $oidcToken)) {
+            return self::OIDC_TOKEN_MARKER;
+        }
+        return parent::getAccessTokenDisplay($server, $userId);
     }
 
     /**
@@ -264,9 +305,9 @@ class B2ShareV3 extends B2ShareAPI
      */
     public function nextVersion(Server $server, string $recordId, string $token): string|bool
     {
-        // TODO URL might be wrong
-        $createNextVersionUrl = "{$server->getPublishUrl()}/api/records/$recordId/draft?access_token=$token";
-        return $this->curl->post($createNextVersionUrl, '');
+        $createNextVersionUrl = "{$server->getPublishUrl()}/api/records/$recordId/draft";
+        $header = $this->_getTokenHeader($token);
+        return $this->curl->post($createNextVersionUrl, '', $header);
     }
 
     /**

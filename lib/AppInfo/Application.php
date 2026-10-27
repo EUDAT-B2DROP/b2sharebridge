@@ -27,6 +27,7 @@ use OCA\B2shareBridge\Notification\Notifier;
 use OCA\B2shareBridge\Publish\B2ShareFactory;
 use OCA\B2shareBridge\Publish\B2ShareV2;
 use OCA\B2shareBridge\Publish\B2ShareV3;
+use OCA\B2shareBridge\Publish\OidcTokenProvider;
 use OCA\B2shareBridge\Util\Curl;
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
 use OCP\AppFramework\App;
@@ -37,6 +38,7 @@ use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\BackgroundJob\IJobList;
 use OCP\EventDispatcher\IEventDispatcher;
 use OCP\Files\IRootFolder;
+use OCP\IAppConfig;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\IRequest;
@@ -163,6 +165,17 @@ class Application extends App implements IBootstrap
         );
 
         $context->registerService(
+            OidcTokenProvider::class,
+            function (ContainerInterface $c): OidcTokenProvider {
+                return new OidcTokenProvider(
+                    $c->get(IEventDispatcher::class),
+                    $c->get(IAppConfig::class),
+                    $c->get(LoggerInterface::class)
+                );
+            }
+        );
+
+        $context->registerService(
             B2ShareV2::class,
             function (ContainerInterface $c): B2ShareV2 {
                 return new B2ShareV2(
@@ -181,7 +194,8 @@ class Application extends App implements IBootstrap
                     $c->get('appName'),
                     $c->get(IConfig::class),
                     $c->get(LoggerInterface::class),
-                    $c->get(Curl::class)
+                    $c->get(Curl::class),
+                    $c->get(OidcTokenProvider::class)
                 );
             }
         );
